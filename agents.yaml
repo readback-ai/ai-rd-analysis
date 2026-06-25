@@ -54,8 +54,9 @@ agents:
     detection: commit_search
     author_logins: []                       # NOT a PR-author bot; all variants returned 0
     commit_committer: ["chatgpt-codex-connector[bot]"]   # cloud agent (GitHub App)
-    commit_author_email: ["noreply@openai.com"]          # CLI; author name "Codex"/"OpenAI"
-    counts: { commit_committer: 556, commit_author_email: 4589 }
+    commit_author_email: ["codex@openai.com", "noreply@openai.com"]  # opt-in CLI identity
+    counts: { codex_at_openai_email: 118685, noreply_openai_email: 4589, commit_committer: 556 }
+    visibility_note: "see artifacts/codex_visibility.md -- ~120k visible, ~3% of likely true volume"
     status: confirmed_handle_changed
     detection_gap: severe   # local CLI usage is structurally unobservable
     notes: >
