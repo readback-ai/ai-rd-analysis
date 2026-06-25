@@ -1,0 +1,97 @@
+# Agent identities for the agentic-PR collection (Phase 0.1 deliverable).
+# Verified live against the GitHub API on 2026-06-24 (account: rbodkin).
+#
+# Two detection paths exist; the spec's author-only model misses two agents:
+#   author_search  -> GET /search/issues?q=is:pr+author:<handle>   (PR creator IS the bot)
+#   commit_search  -> GET /search/commits?q=<committer|author-email> (PR creator is the
+#                     HUMAN; the agent appears only in commit metadata / co-author trailer)
+# Both Search APIs share the same hard limits: 1000 results/query, 30 req/min.
+# Counts below are GLOBAL (all of GitHub), pre AI-R&D filtering, for sanity only.
+
+meta:
+  verified_at: "2026-06-24"
+  verified_by: rbodkin
+  notes: >
+    botcommits.dev uses commit-trailer methodology only, so it sees Codex/Claude/Devin
+    but NOT Copilot/Cursor (which leave no commit markers and are found by author search).
+    The two methodologies are complementary; use both.
+
+agents:
+  - name: Devin
+    detection: author_search
+    author_logins: ["devin-ai-integration[bot]"]
+    also_commit_committer: ["devin-ai-integration[bot]"]   # backup / cross-check
+    counts: { pr_author: 176998, commit_committer: 202499 }
+    status: confirmed
+    notes: >
+      Newer activity also attributed as "devin-ai" per botcommits.dev (Nov 2025+).
+      PR-author search is the primary path; cover the committer trailer as backup.
+
+  - name: GitHub Copilot
+    detection: author_search
+    author_logins: ["copilot-swe-agent[bot]"]
+    counts: { pr_author: 1963540 }
+    status: confirmed
+    notes: Surfaces as "Copilot". No commit-level attribution marker; author search only.
+
+  - name: Cursor
+    detection: author_search
+    author_logins: ["cursor[bot]"]
+    counts: { pr_author: 50760 }
+    status: confirmed
+    notes: >
+      Spec's secondary handle "cursoragent"/"cursoragent[bot]" returns 0 PRs and 0 commits
+      as of 2026-06-24 -- DROP it. No commit-level marker; author search only.
+
+  - name: Google Jules
+    detection: author_search
+    author_logins: ["google-labs-jules[bot]"]
+    counts: { pr_author: 303077 }
+    status: confirmed
+    notes: Postdates the AIDev 2025-08 snapshot; new to this collection.
+
+  - name: OpenAI Codex
+    detection: commit_search
+    author_logins: []                       # NOT a PR-author bot; all variants returned 0
+    commit_committer: ["chatgpt-codex-connector[bot]"]   # cloud agent (GitHub App)
+    commit_author_email: ["noreply@openai.com"]          # CLI; author name "Codex"/"OpenAI"
+    counts: { commit_committer: 556, commit_author_email: 4589 }
+    status: confirmed_handle_changed
+    detection_gap: severe   # local CLI usage is structurally unobservable
+    notes: >
+      "Least stable" per spec, now confirmed: Codex CLOUD commits via the GitHub App
+      (committer chatgpt-codex-connector[bot]) but the PR is opened by the human, so
+      author search finds nothing. Enumerate via Search Commits, then map commit -> PR.
+      The codex/ head-branch convention is NOT reliable (matches human branches too).
+      EMPIRICAL TEST (chain-ml/agent-reputation, 2026-06-24): a repo where the owner
+      used Codex CLI for several PRs (#1,#3,#5,#8,#11 'codex-*' branches) yielded ZERO
+      Codex-attributable commits -- no bot committer, no noreply@openai.com email, no
+      trailer. Codex commits were indistinguishable from human commits. The only Codex
+      traces were human-typed branch names and prose ("Address Codex review feedback").
+      Conclusion: the 556/4589 global counts capture only CLOUD Codex (+ CLI configured
+      to attribute); locally-run Codex CLI is invisible to all metadata methods. Codex
+      coverage will be a worse undercount than Claude Code. Report it as such; do not
+      attempt the codex/ branch heuristic.
+
+  - name: Claude Code
+    detection: commit_search
+    author_logins: []                       # commits as the HUMAN author
+    commit_author_email: ["noreply@anthropic.com"]   # co-author trailer, indexed by commit search
+    coauthor_trailer: "Co-Authored-By: Claude <noreply@anthropic.com>"
+    counts: { commit_author_email_global: 6324505 }   # cf. AIDev's 5137 -- huge undercount
+    status: confirmed
+    notes: >
+      KEY FINDING: the Search Commits API indexes co-author emails as authors, so
+      author-email:noreply@anthropic.com surfaces ~6.3M commits globally -- a far better
+      recovery path than AIDev's author-only count of 5137. GraphQL commit.authors also
+      exposes the trailer at hydration (observed names e.g. "Claude Opus 4.8 (1M context)",
+      "Claude Sonnet 4.6"), confirming PR-level recovery. Report recovery rate openly.
+      EMPIRICAL TEST (chain-ml/agent-reputation, 2026-06-24): 21/21 Claude-assisted
+      commits correctly detected via the noreply@anthropic.com trailer (observed name
+      "Claude Opus 4.6"). Trailer is written by default, so recovery is reliable --
+      unlike Codex CLI in the same repo, which left no marker at all.
+
+# Stage 0 implication: run TWO seed loops, both date-windowed with the 1000/30-min
+# limits -- (1) /search/issues author: for the four bot-author agents, and
+# (2) /search/commits committer:/author-email: for Codex + Claude Code, then resolve
+# each matched commit to its PR. Decide commit->PR mapping cost in 0.5.

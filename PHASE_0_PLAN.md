@@ -37,27 +37,31 @@ exit criteria hold.
 
 ---
 
-## 0.0 Prerequisites (a few hours)
-
-- [ ] Confirm `gh auth status` works and `gh api rate_limit` shows the search +
-      core budgets. (Search: 30/min; core: 5000/hr.)
+## 0.0 Prerequisites (a few hours) — DONE 2026-06-24
+- [x] `gh auth status` OK (keyring, rbodkin); `gh api rate_limit` confirms
+      search 30/min, core 5000/hr, graphql 5000/hr.
+- [x] Create artifact dirs: `data/gold/`, `data/sample/`, `src/`, `artifacts/`.
 - [ ] Scaffold the Python env with `uv` (deps: `httpx`/`requests`, `pyyaml`,
-      `anthropic` for the LLM tier; `duckdb` deferred to Phase 1).
-- [ ] Create artifact dirs: `data/gold/`, `data/sample/`, `src/`, `artifacts/`.
-- [ ] Add a thin GitHub client wrapper: search-window iterator with 30/min
-      throttle + `Retry-After` handling, and a `gh api graphql` helper. Read-only.
-- Deliverable: runnable env + `rate_limit` confirmed.
+      `anthropic` for the LLM tier; `duckdb` deferred to Phase 1). — deferred until
+      0.2 needs scripted collection; 0.1 done via `gh api` directly.
+- [ ] Thin GitHub client wrapper (search-window iterator w/ 30/min throttle +
+      `Retry-After`; `gh api graphql` helper). — build alongside 0.2.
 
-## 0.1 Confirm agent identities (½ day)
-- [ ] For each agent in `PIPELINE_SPEC.md` table, run
-      `GET /search/issues?q=is:pr+author:<handle>`, inspect 10–20 real PRs.
-- [ ] Resolve the unstable two: OpenAI **Codex** connector login and current
-      **Copilot** coding-agent login. Cross-check `botcommits.dev`.
-- [ ] Probe **Claude Code**: 3–5 known repos, fetch recent PR commits via GraphQL,
-      confirm `Co-Authored-By: Claude` appears in `commit.authors`. Decide whether
-      trailer-scanning earns its cost (Open Q3).
-- Deliverable: **`agents.yaml`** — confirmed handles, detection method per agent,
-  Claude Code undercount note.
+## 0.1 Confirm agent identities (½ day) — DONE 2026-06-24
+- [x] Probed every handle against live search. Confirmed PR-author bots:
+      `devin-ai-integration[bot]` (177k), `copilot-swe-agent[bot]` (1.96M),
+      `cursor[bot]` (51k), `google-labs-jules[bot]` (303k). `cursoragent` is dead.
+- [x] **Codex resolved**: NOT a PR-author bot. Cloud = committer
+      `chatgpt-codex-connector[bot]`; CLI = `author-email:noreply@openai.com`.
+      Found only via Search Commits, then map commit→PR.
+- [x] **Claude Code resolved**: Search Commits indexes the co-author email, so
+      `author-email:noreply@anthropic.com` ≈ 6.3M commits globally (vs AIDev's
+      5,137). GraphQL `commit.authors` confirms recovery at hydration.
+- [x] Cross-checked `botcommits.dev` (trailer-only method; complementary to author search).
+- Deliverable: **`agents.yaml`** ✔ — handles, per-agent detection method, counts,
+  Claude Code recovery note.
+- **Stage 0 consequence**: two seed loops — author-search (4 agents) + commit-search
+  (Codex, Claude Code) — both date-windowed under the 1000/30-min limits.
 
 ## 0.2 Build the labeled gold set (1–2 days) — the heart of Phase 0
 - [ ] Stage 0 mini-sample: one recent month of Codex + Cursor + Devin PRs; extract
@@ -115,7 +119,9 @@ Resolved (Ron, 2026-06-24):
 
 Still open (defaults proposed; confirm during execution):
 2. Gold sample size & double-labeling (default: ~180 repos, double-label ~30).
-5. Claude Code trailer-scanning: scan now vs accept+label the undercount —
-   decide in 0.1 after the GraphQL probe shows recovery rate.
+5. ~~Claude Code trailer-scanning~~ — RESOLVED in 0.1: no full repo scan needed.
+   Search Commits indexes the co-author email (~6.3M commits), so Claude Code (and
+   Codex) are enumerable directly via a commit-search seed loop. Recover and report
+   the rate openly. Cost of commit→PR mapping to be sized in 0.5.
 6. Pinned LLM model id for the classifier tier (default: current Claude model with
    structured output; pin in 0.4).
