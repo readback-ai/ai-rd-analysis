@@ -33,8 +33,8 @@ raw/
 # live under data/ — un-ignore as needed, e.g.:
 # !data/gold/gold_repos.csv
 
-# --- Worktrees ---
-.worktrees/
+# Worktrees live OUTSIDE this repo, under ~/devel/<repo>-worktrees/, so no
+# in-repo ignore is needed for them.
 
 # --- OS / editor ---
 .DS_Store
