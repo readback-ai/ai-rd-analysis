@@ -63,17 +63,23 @@ exit criteria hold.
 - **Stage 0 consequence**: two seed loops — author-search (4 agents) + commit-search
   (Codex, Claude Code) — both date-windowed under the 1000/30-min limits.
 
-## 0.2 Build the labeled gold set (1–2 days) — the heart of Phase 0
-- [ ] Stage 0 mini-sample: one recent month of Codex + Cursor + Devin PRs; extract
-      unique repos (expect a few thousand). Save to `data/sample/`.
-- [ ] Hand-label a **stratified ~150–200** repos BUILDS_AI / USES_AI / NOT_AI.
-      Strata to force coverage of edge cases: LLM-wrapper apps, ML tutorials,
-      infra/devtools used by ML, datasets, notebooks, **and dual-signal repos
-      (torch + openai)**.
-- [ ] Log every boundary call while labeling — these become the rubric.
-- [ ] Double-label ~30 for an agreement number (see review note 3).
-- Deliverable: **`data/gold/gold_repos.csv`** (`repo_id, full_name, human_label,
-  note`) + first-draft **`RUBRIC.md`**.
+## 0.2 Build the labeled gold set (1–2 days) — the heart of Phase 0  [IN PROGRESS]
+- [x] Stage 0 mini-sample (May 2026, all 6 agents incl. commit-search) → 2016 unique
+      repos (`data/sample/repo_sample.csv`). `src/seed_sample.py`.
+- [x] Batch metadata via GraphQL (`src/fetch_meta.py`): web-app skewed, 16.5% have
+      any topic, 51% have no description.
+- [x] Stratified **180** candidates over 5 strata, over-sampling positives
+      (`src/stratify.py`). 7 dual-signal cases.
+- [x] Evidence (README head + manifests, dep-based BUILDS/USES) →
+      `data/gold/gold_repos.csv` (`src/build_worksheet.py`).
+- [x] Claude proposed all 180 labels w/ confidence + audit flags
+      (`src/apply_labels.py`): BUILDS 37 / USES 35 / NOT 108; 66 flagged.
+      **Cheap-rule anchor agreed with judgment only 47%** → rules alone inadequate.
+- [x] First-draft **`RUBRIC.md` v0** with boundary rules from the labeling.
+- [ ] **Ron audits** the 66 flagged rows (+ spot-check) → fills `human_label`;
+      finalize RUBRIC.  ← NEXT, BLOCKING
+- [ ] Double-label ~30 for an agreement number (review note 3).
+- Deliverable: `data/gold/gold_repos.csv` + `RUBRIC.md` (both started; await audit).
 
 ## 0.3 Characterize signals vs the gold set (1 day)
 Measure each cheap signal's precision/recall against the human labels:
