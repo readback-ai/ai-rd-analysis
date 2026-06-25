@@ -118,10 +118,18 @@ Measure each cheap signal's precision/recall against the human labels:
 Resolved (Ron, 2026-06-24):
 1. **Quality bar: precision ≥0.90 AND recall ≥0.70** on gold BUILDS_AI. Tune in 0.4
    until both hold; re-audit.
-3. **Dual-signal repos (torch/transformers + openai/anthropic) → BUILDS_AI** by
-   rule. Training/serving stack wins; client SDK is incidental. Encode in `RUBRIC.md`.
-4. **Retain USES_AI as a labeled comparison cohort** (not dropped), for Phase 3
-   BUILDS-vs-USES contrasts.
+3. **Dual-signal repos → BUILDS_AI** by rule, REFINED in 0.2: only a genuine
+   training/serving stack counts; embeddings/RAG libs (sentence-transformers,
+   chromadb) do not — consumer RAG apps stay USES_AI.
+4. **Retain USES_AI as a labeled comparison cohort** (not dropped).
+
+Resolved (Ron, 2026-06-25 gold-set audit):
+7. **4-class scheme**: BUILDS_AI / USES_AI / **AI_INFRA** / NOT_AI. AI_INFRA is a
+   separate cohort for AI/agent-specific tooling/infra (MCP servers, context/memory
+   utils, vector infra, plugins, scaffolding, task hubs). Retain it labeled too.
+8. **All agent systems = BUILDS_AI** — autonomous-agent products count, not just
+   frameworks.
+9. **Applied ML in a domain product = USES_AI** (the ML is a means, not the purpose).
 
 Still open (defaults proposed; confirm during execution):
 2. Gold sample size & double-labeling (default: ~180 repos, double-label ~30).

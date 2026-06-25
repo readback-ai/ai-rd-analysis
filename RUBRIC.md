@@ -1,91 +1,87 @@
 # RUBRIC: what counts as an AI R&D repository
 
-Version: v0 (draft from Phase 0.2 gold-set labeling, 2026-06-25). Status: pending
-Ron's audit of the gold set. This file is versioned; every trend claim ships with it.
+Version: v1 (Phase 0.2, 2026-06-25). Decisions resolved by Ron's gold-set audit.
+Versioned; ships with every dataset/trend claim. Proposed gold labels applied;
+human audit of flagged rows still finalizes `human_label`.
 
 ## Definition
 
-A repository qualifies as **AI R&D** if its *primary purpose* is building, training,
-serving, evaluating, or researching machine-learning models or autonomous agent
-systems. A repository that merely *consumes* an AI API (an app that calls an LLM)
-does not qualify.
+A repository is **AI R&D** if its *primary purpose* is building, training, serving,
+evaluating, or researching machine-learning models or autonomous agent systems.
+Merely *consuming* an AI API does not qualify.
 
-Three labels:
-- **BUILDS_AI** (target): training frameworks, inference/serving engines, eval
-  harnesses, agent *frameworks*, model repos, ML research/experiment code, and
-  AI-specific infrastructure that provides core model/agent capability.
-- **USES_AI**: products/apps that wrap a model API — chatbots, AI-powered web/mobile
-  apps, RAG question-answering apps, assistants, AI features bolted onto a domain app.
-- **NOT_AI**: no meaningful AI building or use — websites, portfolios, generic web
-  apps, games, domain CRUD, dev utilities, dotfiles, docs.
+## Four labels
 
-The unit is the **repository's primary purpose**, judged from description + topics +
-README (+ dependency manifest). Marketing tags and incidental dependencies do not
-decide it.
+- **BUILDS_AI** (primary target): training/fine-tuning, inference/serving engines,
+  eval harnesses, datasets/data-prep for training, original ML research/experiments,
+  model repos, **AND all autonomous agent systems** — agent frameworks/runtimes/
+  protocols *and* finished autonomous-agent products (Ron's call: "all agent systems
+  = BUILDS").
+- **AI_INFRA** (separate cohort): AI/agent-specific *tooling and infrastructure* that
+  supports building/running AI but is not itself a model, training/serving engine,
+  eval harness, or an autonomous agent. E.g. MCP servers/toolboxes, context/memory/
+  retrieval utilities, vector/embeddings infra, RAG chunking libs, coding-agent
+  scaffolding/plugins/skills/harnesses, agent task hubs, agent sandboxes, agent
+  management UIs, LLM-data infra.
+- **USES_AI**: products/apps that *consume* a model/agent — chatbots, AI features in
+  a domain app, RAG Q&A apps, single-shot LLM utilities, **domain apps that train/run
+  their own ML model** (applied ML is USES, not BUILDS — Ron's call).
+- **NOT_AI**: no meaningful AI building or use — websites, portfolios, generic apps,
+  games, domain CRUD, dev utilities, dotfiles, docs.
 
-## Decision rules (in priority order)
+Keep-set for Stage 3 hydration: **BUILDS_AI** (primary). Retain **USES_AI** and
+**AI_INFRA** as labeled comparison cohorts (do not drop).
 
-1. **Primary purpose governs.** Label by what the repo *is*, not by keywords it
-   mentions. `ai`/`ai-agents`/`llm` topics frequently sit on apps and devtools
-   (measured: the topic rule agreed with human labels <50% of the time) — never
-   accept on a topic alone.
+## Decision rules (priority order)
 
-2. **BUILDS_AI — model work.** Training, fine-tuning, inference/serving, evaluation,
-   quantization, datasets/data-prep for training, embeddings/vector infrastructure,
-   or original ML research/experiments. Examples (gold): OCR/LSTM engine, LLM serving
-   (KVCache), diffusion LoRA dataset prep, modulation-recognition DL research,
-   LLM-as-compressor research, ONNX inference engine, decentralized fine-tuning,
-   eval control-plane.
+1. **Primary purpose governs**, judged from description + topics + README (+ manifest).
+   Marketing tags and incidental deps never decide it. (Measured: the cheap rule
+   anchor agreed with human judgment only ~46% of the time — rules alone are
+   insufficient; the LLM tier is required.)
 
-3. **BUILDS_AI — agent systems.** *Frameworks, runtimes, protocols, and SDKs for
-   building autonomous agents* (e.g. crewAI, mastra, PraisonAI, LangChain agent
-   loops, A2A protocols, agent-memory infrastructure libraries). The thing being
-   built is reusable agent capability.
+2. **BUILDS_AI — model work**: train/fine-tune/serve/evaluate/quantize, datasets &
+   data-prep for training, embeddings/vector work done as research, original ML
+   experiments, model repos. (gold: OCR/LSTM engine, KVCache LLM serving, diffusion
+   LoRA dataset prep, modulation-recognition DL, LLM-as-compressor research, ONNX
+   inference engine, decentralized fine-tuning, eval control-plane.)
 
-4. **USES_AI — agent/LLM products.** A *specific assistant or app* built on top of
-   models/agents (a coding-agent product, a personal-assistant app, an AI Chrome
-   extension, a RAG Q&A app, a domain dashboard with AI features). It consumes
-   capability rather than providing it.
+3. **BUILDS_AI — agent systems** (frameworks AND products): anything whose purpose is
+   an autonomous agent — crewAI/mastra/PraisonAI/LangChain loops/A2A protocols, and
+   also autonomous-agent *products* (a coding-agent tool, an autonomous assistant, an
+   autonomous pentester). The distinction "framework vs product" does NOT change the
+   label; both are BUILDS.
 
-5. **The framework-vs-product line** (rules 3 vs 4) is the main BUILDS/USES boundary.
-   Heuristic: *would another developer import this to build their own agent?* → BUILDS.
-   *Is this a finished thing an end-user runs?* → USES. When genuinely both
-   (a framework that is also a product), favor BUILDS if the reusable library is the
-   point; flag for audit.
+4. **AI_INFRA vs BUILDS agent systems**: if the repo *is* an agent (it plans/acts),
+   or a framework to build agents → BUILDS. If it *supports* agents/AI without being
+   one (memory/context utils, MCP servers, vector stores, scaffolding, plugins, task
+   hubs, sandboxes, mgmt UIs) → AI_INFRA.
 
-6. **Dual-signal deps (BUILDS dep + client SDK) → BUILDS_AI** *by Ron's decision*,
-   BUT with a refinement found during labeling: **embeddings/RAG client libs
-   (`sentence-transformers`, `chromadb`) are NOT a training/serving stack.** A
-   consumer RAG app that pulls `sentence-transformers` + `openai` is **USES_AI**, not
-   BUILDS. Reserve the auto-BUILDS dual rule for genuine training/serving deps
-   (`torch`/`transformers`/`jax`/`vllm`/`deepspeed`/...). (gold ex: `Murs2024/RAG-
-   reglament` is USES despite tripping the naive dual rule.)
+5. **USES_AI** = consumes capability: a finished app/feature calling a model, a RAG
+   Q&A app, a single-shot LLM utility, OR a domain product that trains/runs its own
+   ML (applied ML = USES). Trivial "uses an LLM agent" apps are USES, not BUILDS.
 
-7. **AI devtools/infra that is NOT core model/agent capability → NOT_AI.** Task
-   trackers, context/prompt utilities, code-search helpers, MCP/skill configs,
-   scrapers, dotfiles, plugins, and personal harnesses are NOT_AI even when "for
-   agents." They tool *around* AI; they don't build it. (gold ex: claw-task-hub,
-   context-engine, project-tiny-context-harness, MCP toolboxes, Claude Code plugins.)
+6. **Dual-signal deps**: a real training/serving stack (`torch`/`transformers`/`jax`/
+   `vllm`/`deepspeed`/...) + a client SDK → BUILDS_AI. BUT embeddings/RAG client libs
+   (`sentence-transformers`, `chromadb`) are NOT a training stack — a consumer RAG app
+   pulling them + `openai` is **USES_AI** (gold: `Murs2024/RAG-reglament`).
 
-8. **"Training" disambiguation.** Human training (LMS, fitness/triathlon apps, flight
-   simulators) is NOT_AI. Only *model* training counts.
+7. **"Training" disambiguation**: human training (LMS, fitness apps, flight sims) is
+   NOT_AI. Only *model* training counts.
 
-9. **Incidental / marketing AI → ignore.** A lone `openai` dep that the README never
-   uses, or an `ai` topic on a workout tracker, does not move the label.
+8. **Incidental / marketing AI → ignore** (lone unused `openai` dep, `ai` topic on a
+   workout tracker). **Vapor/empty repos** → judge by actual content; usually USES_AI
+   if it calls an LLM, else NOT_AI, low confidence, flagged.
 
-10. **Vapor / empty repos.** Grandiose claims with no substantiating content →
-    judge by what's actually there (usually USES_AI if it calls an LLM, else NOT_AI).
-    Empty/near-empty READMEs → NOT_AI, low confidence, flagged.
+## Gold set notes
+- 4-class proposed distribution (180): BUILDS 38 / USES 25 / AI_INFRA 21 / NOT 96.
+  70 flagged for audit (all L + boundary M). Confidence H/M/L per row.
+- Over-samples positives (not base-rate); the wild is heavily NOT_AI. Report
+  base-rate-reweighted precision, not raw gold precision.
+- Per-stratum: `uses_desc` and `generic` strata are ~95% NOT_AI; `ai_topic` holds
+  most BUILDS/AI_INFRA. The topic signal has poor precision AND recall.
 
-## Notes on the gold set
-- Labels carry a confidence (H/M/L) and `flag_audit`; 66/180 are flagged (all L plus
-  boundary M) for Ron's focused review. Flagged clusters: agent-framework-vs-product,
-  AI-devtool-vs-BUILDS, dual-signal deps, and vapor/empty repos.
-- The gold set over-samples positives (not base-rate); base rates in the wild are
-  heavily NOT_AI. Report base-rate-reweighted precision, not raw gold precision.
-
-## Open boundary questions for Ron
-- Agent *frameworks* = BUILDS but agent *products* = USES — confirm the line (rule 5).
-- AI devtools/infra (rule 7): confirm NOT_AI, or carve a separate "AI-INFRA" cohort?
-- Dual-signal refinement (rule 6): confirm embeddings-only ≠ BUILDS.
-- ML applied in a domain app (energy forecasting, credit scorecard): BUILDS or USES?
+## Residual judgment calls still flagged for Ron
+- Vapor/grandiose solo repos (USES vs NOT_AI).
+- A few agent-product-vs-AI_INFRA edges (e.g. agent-hosting IDE apps, mgmt panels).
+- "Agentic newsroom/platform" repos: product (USES) vs autonomous agent (BUILDS).
+- Empty-README repos defaulted to NOT_AI.
