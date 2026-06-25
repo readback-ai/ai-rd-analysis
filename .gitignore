@@ -23,8 +23,9 @@ env/
 # --- Data store (DuckDB + Parquet + raw API cache) ---
 # Tracked: code, specs, rubric, small gold-set CSVs, manifests.
 # Ignored: bulk collected data and caches (regenerable / large / license-sensitive).
+# Curated, hand-labeled gold set IS tracked (small, important); bulk sample is not.
 data/**
-!data/gold/          # curated, hand-labeled gold set IS tracked (small, important)
+!data/gold/
 !data/gold/**
 raw/
 *.duckdb
