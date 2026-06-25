@@ -23,15 +23,13 @@ env/
 # --- Data store (DuckDB + Parquet + raw API cache) ---
 # Tracked: code, specs, rubric, small gold-set CSVs, manifests.
 # Ignored: bulk collected data and caches (regenerable / large / license-sensitive).
-data/
+data/**
+!data/gold/          # curated, hand-labeled gold set IS tracked (small, important)
+!data/gold/**
 raw/
 *.duckdb
 *.duckdb.wal
 *.parquet
-
-# Explicitly keep curated, hand-authored Phase 0 artifacts even though they may
-# live under data/ — un-ignore as needed, e.g.:
-# !data/gold/gold_repos.csv
 
 # Worktrees live OUTSIDE this repo, under ~/devel/<repo>-worktrees/, so no
 # in-repo ignore is needed for them.

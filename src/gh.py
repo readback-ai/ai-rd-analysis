@@ -46,6 +46,27 @@ def gh_api(path: str, throttle: bool = True, retries: int = 4) -> dict:
     raise RuntimeError(f"gh api {path}: exhausted {retries} retries")
 
 
+def gql(query: str, retries: int = 4) -> dict:
+    """Run a GraphQL query via `gh api graphql`. Returns the parsed `data` object."""
+    for attempt in range(retries):
+        proc = subprocess.run(
+            ["gh", "api", "graphql", "-f", f"query={query}"],
+            capture_output=True, text=True,
+        )
+        if proc.returncode == 0:
+            payload = json.loads(proc.stdout)
+            return payload.get("data", {})
+        err = (proc.stderr or "").strip()
+        low = err.lower()
+        if "rate limit" in low or "secondary" in low or "http 403" in low:
+            backoff = 30 * (attempt + 1)
+            print(f"    gql rate-limited, sleeping {backoff}s", file=sys.stderr)
+            time.sleep(backoff)
+            continue
+        raise RuntimeError(f"gh api graphql failed: {err[:300]}")
+    raise RuntimeError("gh api graphql: exhausted retries")
+
+
 def search(kind: str, q: str, per_page: int = 100, max_pages: int = 10,
            sort: str | None = None, order: str = "desc"):
     """Paginate a Search endpoint (kind: 'issues' or 'commits') up to the 1000 cap.
