@@ -103,10 +103,19 @@ Measure each cheap signal's precision/recall against the human labels:
 - [ ] Classifier precision on gold ≥ target (and recall ≥ floor).
 - [ ] Full-run cost understood and acceptable.
 
-## Open decisions (owner: Ron — needed to finalize, defaults in parens)
-1. Target precision & **recall floor** (0.90 precision / 0.70 recall?).
-2. Gold sample size & whether to double-label a subset (180 / yes-30?).
-3. Treatment of dual-signal repos (torch+openai → BUILDS_AI by default?).
-4. Retain USES_AI as a comparison cohort or drop it? (retain, labeled — recommended).
-5. Claude Code trailer-scanning: scan now or accept+label the undercount?
-6. Pinned LLM model id for the classifier tier.
+## Decisions
+
+Resolved (Ron, 2026-06-24):
+1. **Quality bar: precision ≥0.90 AND recall ≥0.70** on gold BUILDS_AI. Tune in 0.4
+   until both hold; re-audit.
+3. **Dual-signal repos (torch/transformers + openai/anthropic) → BUILDS_AI** by
+   rule. Training/serving stack wins; client SDK is incidental. Encode in `RUBRIC.md`.
+4. **Retain USES_AI as a labeled comparison cohort** (not dropped), for Phase 3
+   BUILDS-vs-USES contrasts.
+
+Still open (defaults proposed; confirm during execution):
+2. Gold sample size & double-labeling (default: ~180 repos, double-label ~30).
+5. Claude Code trailer-scanning: scan now vs accept+label the undercount —
+   decide in 0.1 after the GraphQL probe shows recovery rate.
+6. Pinned LLM model id for the classifier tier (default: current Claude model with
+   structured output; pin in 0.4).
