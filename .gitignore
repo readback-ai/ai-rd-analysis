@@ -1,0 +1,43 @@
+# --- Secrets / credentials ---
+.env
+.env.*
+*.pat
+*token*
+secrets.*
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# --- Data store (DuckDB + Parquet + raw API cache) ---
+# Tracked: code, specs, rubric, small gold-set CSVs, manifests.
+# Ignored: bulk collected data and caches (regenerable / large / license-sensitive).
+data/
+raw/
+*.duckdb
+*.duckdb.wal
+*.parquet
+
+# Explicitly keep curated, hand-authored Phase 0 artifacts even though they may
+# live under data/ — un-ignore as needed, e.g.:
+# !data/gold/gold_repos.csv
+
+# --- Worktrees ---
+.worktrees/
+
+# --- OS / editor ---
+.DS_Store
+*.swp
+.idea/
+.vscode/
