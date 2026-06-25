@@ -41,3 +41,6 @@ raw/
 *.swp
 .idea/
 .vscode/
+
+# uv / Phase 0 env
+.venv/
