@@ -81,7 +81,7 @@ exit criteria hold.
 - [ ] Double-label ~30 for an agreement number (review note 3).
 - Deliverable: `data/gold/gold_repos.csv` + `RUBRIC.md` (both started; await audit).
 
-## 0.3 Characterize signals vs the gold set (1 day)
+## 0.3 Characterize signals vs the gold set (1 day)  [DONE]
 Measure each cheap signal's precision/recall against the human labels:
 - [ ] **Topics** — recall of the topic-accept rule on gold BUILDS_AI (expect mediocre).
 - [ ] **Org owner** — build allowlist from gold owners, check leakage/precision.
