@@ -72,6 +72,13 @@ agents:
       to attribute); locally-run Codex CLI is invisible to all metadata methods. Codex
       coverage will be a worse undercount than Claude Code. Report it as such; do not
       attempt the codex/ branch heuristic.
+      SOURCE CONFIRMATION (openai/codex discussion #9449, Jan 2026): an OpenAI
+      maintainer states "Codex itself doesn't create commits, it only generates code.
+      The actual commit (author, email, message, trailers) is entirely controlled by
+      the user's Git setup." No Co-Authored-By is added by default; users must opt in
+      (e.g. instruct via AGENTS.md). This makes the undercount STRUCTURAL, not a handle
+      drift -- there is no reliable global signal for default Codex usage.
+    source_url: https://github.com/openai/codex/discussions/9449
 
   - name: Claude Code
     detection: commit_search
