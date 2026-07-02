@@ -265,13 +265,15 @@ Full audit of the post-pivot implementation. Ordered by severity.
 15. Detection floor for local tools (Windsurf/Codex-CLI) — structural, documented.
 
 ## Remediation plan (proposed order)
-- [ ] **R1. Commit everything now**; milestone commits thereafter. (P0.1 — needs Ron's OK)
-- [ ] **R2. Codify the pipeline** into `src/` as idempotent, checkpointed scripts:
-      `scan_orgs.py` (AI-evidence scan), `enum_repos.py`, `census.py` (rate-limit-aware,
-      array-validated — port the fixes learned from the corruption bug), `analyze.py`
-      (weighted metrics + bootstrap CIs). Raw JSON → `~/devel/ai-rd-analysis-data/raw/`
-      (durable, gitignored, per CLAUDE.md shared-store convention); derived tables →
-      committed CSVs. (P0.2, P0.3)
+- [x] **R1. Committed** (f793e2f, 2026-07-02): all pivot work — 36 files. Milestone
+      commits from here on. (P0.1)
+- [x] **R2. Pipeline codified** (2026-07-02): `src/pipeline/{ghx,scan_orgs,enum_repos,
+      census,analyze}.py` + README — idempotent, checkpointed, rate-limit-aware,
+      shape-validated cells; durable raw store at `$AIRD_DATA_DIR`
+      (default `~/devel/ai-rd-analysis-data`). Smoke-tested end-to-end on fw-ai
+      (reproduced session numbers exactly: cookbook=73 AI commits). analyze already
+      implements the R3 ai_review/other_bot_review decomposition and bootstrap CIs,
+      and marker sets are versioned v1/v2 for R4. (P0.2, P0.3)
 - [ ] **R3. Re-state the automated-review finding**: decompose Bot reviewers by login into
       AI-reviewers vs CI/other; recompute the 1%→33% split into "AI review" and "other
       automation". (P1.4 — highest-value single analysis fix)
