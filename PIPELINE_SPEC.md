@@ -22,6 +22,13 @@ Volume has grown by an order of magnitude since the cutoff, so any current claim
 needs fresh collection. AIDev's value to us is its method, not its data.
 
 ## Scope decision that gates everything: the AI R&D definition
+> **SUPERSEDED 2026-06-26 by org-provenance scoping** (see `PROJECT_PLAN.md` §Guiding
+> principle and `ai_labs.yaml`). Scope is now "repos owned by a curated allowlist of
+> leading AI orgs + $100M+ funded AI startups." Stage 2 becomes an **org-provenance
+> gate** (owner ∈ allowlist), and Stage 0 seeds by **enumerating org repos**, not by
+> classifying global agent-PR results. The domain definition below is retained only for
+> the optional wild-cohort comparison; the layered LLM classifier is no longer primary.
+
 This is the single most important design choice. Write it down before building.
 
 Operational definition (recommended default, refine in Phase 0):
@@ -136,7 +143,12 @@ parse in Stage 2.
 
 ## Stage 2: Classify (AI R&D relevance, layered, cached)
 
-Goal: label each repo BUILDS_AI / USES_AI / NOT_AI with a reason, cheaply.
+> **PRIMARY PATH (2026-06-26): org-provenance gate.** In-scope iff the repo owner is in
+> `ai_labs.yaml` (Tier-1 whole-org; Tier-2 via the curated repo allowlist). Provenance
+> IS the label — no LLM call. The layered classifier below runs ONLY for the optional
+> wild cohort. Layer 1 ("Org allowlist") is effectively promoted to the whole gate.
+
+Goal (wild cohort only): label each repo BUILDS_AI / USES_AI / NOT_AI with a reason, cheaply.
 
 Run cheap rules first to auto-decide the clear cases, send only the ambiguous
 residual to an LLM. Cache every decision keyed by `repo_id` so re-runs never

@@ -27,6 +27,11 @@ env/
 data/**
 !data/gold/
 !data/gold/**
+# small curated/derived tables from the org-provenance pivot ARE tracked:
+!data/ai_evidence_repos.csv
+!data/repo_contributors.csv
+!data/resume_state/
+!data/resume_state/**
 raw/
 *.duckdb
 *.duckdb.wal

@@ -1,9 +1,12 @@
 # Working in this repo
 
-Project: a fresh, queryable dataset of autonomous-coding-agent pull requests
-scoped to AI research & development repositories. See `PROJECT_PLAN.md` (phasing)
-and `PIPELINE_SPEC.md` (architecture). Phase 0 — defining "AI R&D repo" as a
-tested classifier — gates all collection work.
+Project: a fresh, queryable dataset of **AI-assisted development practices at leading
+AI organizations** — how top AI labs and well-funded AI startups use autonomous coding
+agents / AI assistance in their public repos. See `PROJECT_PLAN.md` (phasing) and
+`PIPELINE_SPEC.md` (architecture). **Pivoted 2026-06-26** from per-repo "AI R&D"
+classification to **org-provenance scoping** (`ai_labs.yaml`): scope = curated top-AI-org
+repos; detection methodology = `agents.yaml` + `artifacts/agent_detection_cues.md`. The
+classifier/gold/`RUBRIC.md` track is retained only as an optional wild-cohort comparison.
 
 ## Parallel work via git worktrees
 

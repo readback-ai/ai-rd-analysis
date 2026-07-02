@@ -1,103 +1,121 @@
-# Project plan: agentic PRs in AI R&D repositories
+# Project plan: AI-assisted development practices at leading AI organizations
 
 ## Goal
-Produce a fresh, queryable dataset of autonomous-coding-agent pull requests scoped
-to AI research and development repositories, current through collection date, and
-the analysis marts to support trend claims about agents contributing to AI codebases.
+Produce a fresh, queryable dataset of how **leading AI organizations** use
+autonomous coding agents and AI assistance in their **public** development, and the
+analysis marts to support trend claims about agent/AI adoption among top AI builders.
 
-## Guiding principle
-The bottleneck is not ETL. It is the operational definition of "AI R&D repository."
-Phase 0 exists to nail that definition empirically against the live GitHub API
-before committing to a full collection run. Build the classifier on evidence, not
-on a guess about what topics or owners imply.
+## Guiding principle (PIVOTED 2026-06-26)
+Scope by **org provenance, not domain classification.** The original plan tried to
+classify arbitrary GitHub repos as "AI R&D" via a layered LLM classifier — a fuzzy,
+low-precision, judgment-heavy task (the gold audit showed even humans disagree on
+core-vs-auxiliary; see RUBRIC.md boundary cases). We replace that with a curated
+allowlist of top AI organizations (`ai_labs.yaml`): frontier/research labs, and
+well-funded ($100M+) AI startups. Any repo under an allowlisted org is in-scope by
+construction (precision ~1.0, no classifier). This deliberately targets the
+practices of **top AI developers** and excludes hobbyist / low-signal repos, which
+are not the object of study. The bottleneck is no longer "what is an AI repo" but
+**reliable detection of agent / AI-assistance activity inside a known org set**
+(see `agents.yaml`, `artifacts/agent_detection_cues.md`).
 
 ## Success criteria
-- A versioned `RUBRIC.md` defining AI R&D, with a measured classifier precision
-  on a hand-audited sample (target >= 0.90).
-- A reproducible pipeline (per `PIPELINE_SPEC.md`) that runs end to end and
-  resumes from any stage.
+- A versioned, verified `ai_labs.yaml` org allowlist (tiered: whole-org pure-plays
+  vs sub-org-curated big-tech) covering the leading labs + $100M+ funded startups.
+- A versioned `agents.yaml` detection methodology with measured recall per signal
+  (bot-author PRs, commit co-author trailers, config-file adoption).
+- A reproducible pipeline (per `PIPELINE_SPEC.md`) that enumerates org repos and
+  scans each for agent/AI signals, end to end and resumable.
 - A dataset with a self-documenting coverage window, so recency is never overstated.
-- At least one validated trend chart that the AIDev snapshot cannot produce
-  (post-2025-08 activity in AI R&D repos).
+- At least one validated finding: **agent/AI-assistance adoption by org and by tool**
+  across top AI orgs (e.g. HuggingFace→Claude Code, OpenBMB→Cursor), incl. usage
+  invisible to naive author-search.
+
+## Retained as optional secondary cohort (was the primary plan)
+The domain classifier / gold set / `RUBRIC.md` work is **deprioritized, not deleted**.
+The hand-labeled gold set may serve as a small "AI repos in the wild" comparison
+cohort to contrast against the top-org cohort. It is no longer on the critical path
+and its precision target no longer gates collection.
 
 ---
 
-## Phase 0: API experimentation and definition (the critical phase)
+## Phase 0: define the org set and the detection methodology (the critical phase)
 
-Objective: turn "AI R&D project" from a phrase into a tested classifier. Everything
-here is cheap, read-only, and runs against live GitHub. Do not start full
-collection until Phase 0 exit criteria are met.
+Objective: lock down **which orgs** are in scope and **how to detect** agent/AI
+activity in their repos. Everything here is cheap, read-only, live GitHub. Do not
+start full collection until exit criteria are met.
 
-### 0.1 Confirm agent identities (half a day)
-- For each agent, run a small `GET /search/issues?q=is:pr+author:<handle>` and
-  inspect 10-20 real PRs to confirm the handle is live and correct.
-- Resolve the two unstable ones: OpenAI Codex connector login and the current
-  Copilot coding-agent login. Cross-check against `botcommits.dev`.
-- Probe Claude Code: pick 3-5 repos known to use it, fetch recent PR commits via
-  GraphQL, and confirm the `Co-Authored-By: Claude` trailer appears in
-  `commit.authors`. Decide whether trailer-scanning is worth the cost.
-- Deliverable: `agents.yaml` with confirmed handles, detection method per agent,
-  and a known-undercount note for Claude Code.
+### 0.1 Confirm agent identities — DONE
+- `agents.yaml`: confirmed bot-author handles (Devin, Copilot, Cursor[bot], Jules)
+  + commit-search agents (Codex, Claude Code). Plus 2026-06-26 additions: Cursor
+  **commit co-author trailer** `cursoragent@cursor.com`, `claude[bot]` PR app, and
+  Codegen / Amazon Q / Factory Droid.
+- **Key correction**: detect co-author trailers via **bare-term** commit search, NOT
+  the `author-email:` qualifier (which misses them org-scoped). Evidence:
+  `artifacts/agent_detection_cues.md`.
 
-### 0.2 Build a labeled gold set of repositories (1-2 days)
-This is the heart of Phase 0. You cannot measure a classifier without ground truth.
-- Pull the unique repo list from a small Stage 0 sample (for example, one recent
-  month of Codex + Cursor + Devin PRs). Expect a few thousand unique repos.
-- Hand-label a stratified sample of ~150-200 repos as BUILDS_AI / USES_AI / NOT_AI,
-  using the repo page, description, topics, and README. Stratify so you capture
-  edge cases: LLM wrapper apps, ML tutorials, infra/devtools used by ML, datasets,
-  notebooks.
-- This labeling is where the real definition gets decided. As you label, write down
-  every boundary call you make. Those rules become `RUBRIC.md`.
-- Deliverable: `gold_repos.csv` (repo_id, full_name, human_label, note) and a
-  first draft `RUBRIC.md`.
+### 0.2 Build the org allowlist (the new heart of Phase 0) — IN PROGRESS
+- `ai_labs.yaml`: ~70 lab/infra orgs (frontier, China, regional, academic, infra/
+  framework) + ~35 $100M+ funded startups with public code. All handle-verified via
+  `gh api`. Tiered: Tier-1 whole-org pure-plays vs Tier-2 big-tech (sub-org/repo
+  curation). Funded-but-no-OSS raisers documented as a deliberate excluded list.
+- Remaining: (a) finish Tier-2 big-tech repo allowlists (`microsoft/DeepSpeed` etc.)
+  with verification; (b) decide the long-tail boundary; (c) decide
+  **member-vs-external-contributor** handling (the org's own staff practices vs
+  outside contributors using agents on its repos).
 
-### 0.3 Characterize the signals against the gold set (1 day)
-Measure, do not assume, how well each cheap signal predicts the human label.
-- Topics: what fraction of gold BUILDS_AI repos actually carry an AI topic?
-  (Estimate recall of the topic rule. Expect it to be mediocre.)
-- Org owner: how precise is an org allowlist? Build the allowlist from the gold set
-  owners, then check leakage.
-- Dependencies: pull manifests for the gold repos, test whether the
-  torch/transformers vs openai-sdk split separates BUILDS from USES cleanly.
-- Stars/language: are they useful as weak priors or just noise?
-- Deliverable: `signal_analysis.md` with precision/recall per signal, and a decision
-  on which signals become auto-accept/reject rules vs which defer to the LLM.
+### 0.3 Characterize detection signals against the org set (was: vs gold) — PARTIAL
+Measure recall of each detection signal inside the org set, not classifier precision.
+- Bot-author PRs (per agent), commit co-author trailers (Claude/Cursor/aider),
+  committed config files (CLAUDE.md / AGENTS.md / .cursorrules / copilot-instructions).
+- Cross-tab adoption by org × tool (started: HuggingFace→Claude Code, OpenBMB→Cursor,
+  vLLM/pytorch→external-contributor agent PRs).
+- Deliverable: extend `artifacts/agent_detection_cues.md` into a measured signal table.
 
-### 0.4 Prototype and measure the layered classifier (1 day)
-- Implement the Stage 2 layered classifier (rules then LLM on residual).
-- Run it on the gold set. Report confusion matrix, precision, recall per label.
-- Tune the rubric and rule thresholds until precision clears target. Re-audit.
-- Deliverable: classifier code + a measured precision number + final `RUBRIC.md` v1.
+### 0.4 (Optional / deprioritized) Domain classifier comparison cohort
+- The gold set + `RUBRIC.md` are retained but OFF the critical path. If a "wild AI
+  repos" contrast is wanted later, finish the gold audit and measure the classifier.
+  No precision target gates collection anymore.
 
 ### 0.5 Estimate full-run cost (half a day)
-- Extrapolate from the sample: unique AI R&D repos expected, PRs to hydrate,
-  GraphQL points and wall-clock at 5000/hr, LLM tokens for classification + task_type.
-- Decide PAT vs GitHub App based on the search-volume estimate.
-- Deliverable: `cost_estimate.md` and a go/no-go on collection window
-  (how far back to collect, what end date).
+- Org-first enumeration is far cheaper than global agent-PR search: ~100 orgs × repos
+  via list-org-repos (core API, 5000/hr) + per-repo agent scans. Extrapolate repos to
+  enumerate, commits/PRs to hydrate, GraphQL points, wall-clock.
+- Decide PAT vs GitHub App. Deliverable: `cost_estimate.md` + collection-window go/no-go.
 
-### Phase 0 exit criteria
-- `agents.yaml`, `RUBRIC.md` v1, `gold_repos.csv`, `signal_analysis.md`,
-  `cost_estimate.md` all exist.
-- Classifier precision on the gold set >= target.
-- Full-run cost is understood and acceptable.
-Do not proceed to Phase 1 until all five hold.
+### Phase 0 exit criteria (REVISED)
+- `agents.yaml` (detection methodology, with bare-term correction) and `ai_labs.yaml`
+  (verified org allowlist) finalized; member-vs-contributor decision made.
+- Per-signal detection recall characterized inside the org set.
+- Full-run (org-enumeration) cost understood and acceptable.
+Do not proceed to Phase 1 until these hold. (Classifier precision is no longer a gate.)
 
 ---
 
 ## Phase 1: Build the pipeline (per PIPELINE_SPEC.md)
 
+> **REVISED by the 2026-07-02 implementation review** (`PHASE_0_PLAN.md` §"Implementation
+> review"). Phase 0's analysis previews produced strong findings but as ad-hoc, unversioned
+> pulls into volatile storage — none of it is reproducible from the repo, and the raw cells
+> are already partially lost. Phase 1 is therefore **codification + one defensible v2
+> re-run**, per the remediation plan R1–R8: commit everything; port the pullers (with the
+> rate-limit/corruption fixes already learned) into checkpointed `src/` scripts writing to
+> a durable raw store; decompose the bot-review headline into AI-review vs CI; extend
+> AI-code markers beyond Claude+Cursor; then run the v2 census (215 orgs, full quarters,
+> bootstrap CIs) as the publishable dataset. The bullets below are subsumed by R2/R5.
+
 - Stand up the DuckDB + Parquet store and the `checkpoint` / `run_manifest` tables.
-- Implement Stage 0 seed with date-window bisection and the 30/min throttle.
+- Implement Stage 0 seed = **enumerate repos under `ai_labs.yaml` orgs** (list-org-repos,
+  core API; Tier-2 orgs use the curated repo allowlist). Optional secondary seed:
+  global agent-PR search for the deprioritized wild cohort.
 - Implement Stage 1 repo metadata with ETag conditional requests.
-- Wire Stage 2 to the Phase 0 classifier.
+- Stage 2 = **org-provenance gate** (in-scope iff owner is allowlisted) — provenance
+  is the label; the LLM classifier is optional and only runs for the wild cohort.
+- Per-repo **agent/AI scan**: bot-author PRs + bare-term commit-trailer search
+  (Claude/Cursor/aider) + config-file presence, per `agents.yaml`.
 - Implement Stage 3 GraphQL hydration with inner-connection pagination and raw
-  response caching.
-- Implement Stage 4 marts.
-- Build the validation gates as automated checks, not manual steps.
-- Test on a single-month, single-agent slice end to end before scaling.
-Deliverable: pipeline that processes a slice and passes all validation gates.
+  response caching. Implement Stage 4 marts.
+- Build the validation gates as automated checks. Test on a few orgs end to end first.
+Deliverable: pipeline that processes a few orgs and passes all validation gates.
 
 ## Phase 2: Full collection run
 
@@ -112,35 +130,53 @@ Deliverable: v1 dataset with documented coverage.
 
 ## Phase 3: Analysis and trend marts
 
+> **Preliminary findings (2026-06-26, from Phase-0 analysis previews — see `artifacts/`):**
+> - **Adoption curve**: AI-written-code commits (Claude/Cursor trailers) rose **<1% → ~10%
+>   of all commits** across 33 leading-AI orgs, Q3-2025→Q2-2026, **inflection Q1-2026**.
+>   Claude ≈ 84% of the signal; Cursor org-specific. Genuine rate leader fw-ai 37%.
+> - **Normalize** by total commits and filter bot committers / single-author repos — raw
+>   counts are dominated by single-actor spikes (anthropics `claudes-c-compiler`,
+>   character-ai `larch`).
+> - **Review**: PRs containing AI-written code get *less* human review and more often go
+>   unreviewed than non-AI PRs (lean more on bot reviewers); faster human review when
+>   reviewed. (Indicative; needs scaling + member filter.)
+> These validate the org-provenance design; the bullets below are the full-run versions.
+
+- **Adoption by org × tool**: which top orgs use which agents/assistance, in the open,
+  and the trend over time (incl. signal invisible to author-search — config files,
+  co-author trailers). This is the headline the org cohort uniquely enables.
 - Reproduce AIDev's headline analyses (merge rate, turnaround, language, task type)
-  on the AI R&D subset, and contrast with their whole-GitHub numbers.
-- Build the trend lines that require post-cutoff data: agent adoption curve inside
-  AI R&D repos, merge-acceptance trend, Jules and other post-snapshot agents.
-- If retained, contrast BUILDS_AI vs USES_AI cohorts.
-- Write the selection-bias statement: this is AI R&D repos that already adopted
-  agents, a self-selected slice, valid for "how agents are used within AI R&D" and
-  not generalizable to AI development at large. Ship it with every chart.
+  on the top-org cohort, and contrast with AIDev's whole-GitHub numbers.
+- **Staff vs external contributors**: separate the org's own AI-assisted development
+  from outside contributors using agents on its repos (member filter).
+- Optional: contrast the top-org cohort against the deprioritized wild cohort.
+- Write the selection statement: this is **prominence-selected top AI orgs**, valid for
+  "how leading AI builders develop in the open," NOT a representative sample of AI
+  development at large, and limited to *public* repos. Ship it with every chart.
 Deliverable: analysis notebook + figures + caveats.
 
 ---
 
 ## Risks and mitigations
-- Definition drift: the AI R&D boundary is subjective. Mitigation: versioned rubric,
-  measured precision, audit sample shipped with the data.
-- Classifier precision below target: cheap rules may not separate BUILDS from USES.
-  Mitigation: lean harder on dependency signals and LLM tier, accept lower recall to
-  hold precision.
-- Claude Code undercount: structural, not fixable by author-search. Mitigation:
-  decide trailer-scanning in Phase 0, report the recovery rate openly.
-- Rate-limit stalls on search: 30/min is the binding constraint at scale.
-  Mitigation: date-window bisection, GitHub App for higher installation ceiling.
-- Codex/Copilot handle changes: agent identities drift. Mitigation: `agents.yaml`
-  re-validated at the start of every run.
-- Scope creep into full-GitHub collection: tempting given AIDev's code. Mitigation:
-  the AI R&D filter is the point, hold the line on it.
+- Org-list completeness/selection: the allowlist defines the universe, so omissions =
+  blind spots and inclusion choices are editorial. Mitigation: versioned, tiered,
+  criteria-documented `ai_labs.yaml`; the funded-but-no-OSS exclusions are listed
+  explicitly; revisit the long tail openly.
+- Not representative: top orgs ≠ AI development at large. Mitigation: state the
+  prominence-selection caveat on every chart; optional wild-cohort contrast.
+- Invisible local tooling undercount: Cursor IDE / Windsurf / Codex CLI leave no
+  public marker. Mitigation: use every available signal (bot PRs, bare-term commit
+  trailers, config files); report what is structurally undetectable.
+- `author-email:` mis-recall: it misses co-authored commits org-scoped. Mitigation:
+  bare-term commit search (already corrected in `agents.yaml`).
+- Public-only bias: labs do much work in private repos. Mitigation: state it; the
+  claim is about *public* practices only.
+- Staff vs external contributor conflation: a bot PR on an org repo may be an outsider.
+  Mitigation: member filter for "own practices" questions.
+- Agent handle drift: Mitigation: `agents.yaml` re-validated at the start of every run.
 
 ## Sequencing summary
-Phase 0 (4-6 days, read-only experimentation) gates everything. Phases 1-3 only
-begin once the definition is tested and the cost is known. The expensive work
-(hydration, full run) happens last, on a repo set you have already proven you can
-classify well.
+Phase 0 (now mostly DONE: org list + detection methodology built) gates everything.
+Phases 1-3 begin once the org set and detection are finalized and cost is known. The
+pivot to org provenance removes the classifier bottleneck and shrinks the collection
+to a bounded, high-signal set of leading-AI-org repos.

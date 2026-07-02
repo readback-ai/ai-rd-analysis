@@ -35,13 +35,21 @@ agents:
     notes: Surfaces as "Copilot". No commit-level attribution marker; author search only.
 
   - name: Cursor
-    detection: author_search
-    author_logins: ["cursor[bot]"]
-    counts: { pr_author: 50760 }
+    detection: author_search + commit_search   # CORRECTED 2026-06-26
+    author_logins: ["cursor[bot]"]             # cloud Background Agent only
+    commit_coauthor_email: ["cursoragent@cursor.com"]   # Cursor Agent co-author trailer
+    coauthor_trailer: "Co-authored-by: Cursor <cursoragent@cursor.com>"
+    counts: { pr_author: 50760, coauthor_trailer_examples: "OpenBMB 799, QwenLM 7, mistralai 6" }
     status: confirmed
     notes: >
-      Spec's secondary handle "cursoragent"/"cursoragent[bot]" returns 0 PRs and 0 commits
-      as of 2026-06-24 -- DROP it. No commit-level marker; author search only.
+      CORRECTION (2026-06-26): the 2026-06-24 note that "cursoragent returns 0" was
+      testing it as a PR-AUTHOR handle. Cursor's Agent does NOT author PRs but DOES
+      write a commit co-author trailer `Co-authored-by: Cursor <cursoragent@cursor.com>`
+      (human stays author/committer). This is a real, high-volume detection path missed
+      by author search -- OpenBMB alone has 799 such commits while showing ~0 cursor[bot]
+      PRs. The Cursor *IDE* (local, no agent) still leaves no marker. Find the trailer via
+      BARE-TERM commit search (`cursoragent@cursor.com`), NOT `author-email:` (see Claude
+      Code note + artifacts/agent_detection_cues.md).
 
   - name: Google Jules
     detection: author_search
@@ -82,11 +90,15 @@ agents:
     source_url: https://github.com/openai/codex/discussions/9449
 
   - name: Claude Code
-    detection: commit_search
-    author_logins: []                       # commits as the HUMAN author
-    commit_author_email: ["noreply@anthropic.com"]   # co-author trailer, indexed by commit search
+    detection: commit_search                  # also: claude[bot] PR-author app (see below)
+    author_logins: ["claude[bot]"]            # NEW 2026-06-26: Claude GitHub app/Action PRs (~18.7k global; CONFIRM it's Anthropic's)
+    commit_coauthor_email: ["noreply@anthropic.com"]   # co-author trailer
+    commit_footer_text: "Generated with [Claude Code]"  # most reliable text marker
     coauthor_trailer: "Co-Authored-By: Claude <noreply@anthropic.com>"
-    counts: { commit_author_email_global: 6324505 }   # cf. AIDev's 5137 -- huge undercount
+    counts:
+      author_email_qualifier_global: 5311788   # author-email:noreply@anthropic.com (primary-author only)
+      bare_term_global: 15715349               # bare noreply@anthropic.com (superset incl. co-authors)
+    query_method: BARE_TERM    # CRITICAL: do NOT use the author-email: qualifier for org-scoped recall
     status: confirmed
     notes: >
       KEY FINDING: the Search Commits API indexes co-author emails as authors, so
@@ -98,8 +110,31 @@ agents:
       commits correctly detected via the noreply@anthropic.com trailer (observed name
       "Claude Opus 4.6"). Trailer is written by default, so recovery is reliable --
       unlike Codex CLI in the same repo, which left no marker at all.
+      CORRECTION (2026-06-26): the `author-email:noreply@anthropic.com` QUALIFIER is
+      unreliable for co-authored commits. Org-scoped it returned 0 for QwenLM/deepseek-ai/
+      SakanaAI, while BARE-TERM `noreply@anthropic.com` returned 251/5/33 respectively and
+      the footer text `Generated with [Claude Code]` returned 26/5/11. The qualifier
+      matches the PRIMARY author field only; Claude is a CO-author (human authors), so it
+      slips through. Globally the qualifier still returns 5.3M (commits where the bot email
+      IS primary), but bare-term returns 15.7M. => Stage 0 MUST use bare-term email + footer
+      search, not the qualifier. The "6.3M via author-email" basis was over-optimistic for
+      org/repo-scoped recall. Full evidence: artifacts/agent_detection_cues.md.
 
-# Stage 0 implication: run TWO seed loops, both date-windowed with the 1000/30-min
-# limits -- (1) /search/issues author: for the four bot-author agents, and
-# (2) /search/commits committer:/author-email: for Codex + Claude Code, then resolve
+  # Additional PR-authoring agents discovered 2026-06-26 (global is:pr author counts).
+  # Adding these barely moved the AI-lab cross-tab, so the six above + claude[bot]
+  # capture nearly all DETECTABLE agent PRs; included for completeness/coverage.
+  - { name: Codegen,        detection: author_search, author_logins: ["codegen-sh[bot]"],        counts: { pr_author: 9564 }, status: confirmed }
+  - { name: Amazon Q Dev,   detection: author_search, author_logins: ["amazon-q-developer[bot]"], counts: { pr_author: 2240 }, status: confirmed }
+  - { name: Factory Droid,  detection: author_search, author_logins: ["factory-droid[bot]"],      counts: { pr_author: 670 },  status: confirmed }
+  # Probed and INVISIBLE (no PR-author bot, local-only): Windsurf/Cascade, Tabnine,
+  # Augment, Zencoder, Cosine, Blackbox, OpenHands(resolver), Sweep, Gemini Code Assist.
+  # `aider` leaves a small co-author trailer (detectable via bare-term, low volume).
+
+# Stage 0 implication (REVISED 2026-06-26): run TWO seed loops, date-windowed under the
+# 1000/30-min limits -- (1) /search/issues author: for the bot-author agents (Devin,
+# Copilot, Cursor[bot], Jules, Codegen, Amazon Q, Factory Droid, claude[bot]); and
+# (2) /search/commits BARE-TERM (NOT author-email: qualifier -- it misses co-authored
+# commits org-scoped, see Claude Code note) for: Claude Code (`noreply@anthropic.com` +
+# footer `Generated with [Claude Code]`), Cursor Agent (`cursoragent@cursor.com`), Codex
+# (`chatgpt-codex-connector[bot]` committer + `codex@openai.com`), aider. Then resolve
 # each matched commit to its PR. Decide commit->PR mapping cost in 0.5.

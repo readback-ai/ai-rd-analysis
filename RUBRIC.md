@@ -49,12 +49,27 @@ Keep-set for Stage 3 hydration: **BUILDS_AI** (primary). Retain **USES_AI** and
    an autonomous agent — crewAI/mastra/PraisonAI/LangChain loops/A2A protocols, and
    also autonomous-agent *products* (a coding-agent tool, an autonomous assistant, an
    autonomous pentester). The distinction "framework vs product" does NOT change the
-   label; both are BUILDS.
+   label; both are BUILDS. This **includes agentic orchestration / self-evolution
+   engines and platforms** that plan+act over multi-step reasoning loops (gold:
+   `EXboys/skilllite` self-evolution agent loop; `alex-place/lantern-os` convergence-
+   orchestration platform). "Agents are everywhere" — when a repo *is* or *runs* an
+   agent, it is BUILDS, even if branded as a platform/OS/engine.
 
-4. **AI_INFRA vs BUILDS agent systems**: if the repo *is* an agent (it plans/acts),
-   or a framework to build agents → BUILDS. If it *supports* agents/AI without being
-   one (memory/context utils, MCP servers, vector stores, scaffolding, plugins, task
-   hubs, sandboxes, mgmt UIs) → AI_INFRA.
+4. **AI_INFRA vs BUILDS agent systems** (narrow line — Ron's call 2026-06-25): the
+   test is **does the repo itself plan/act?** If it *is* an agent, a framework to build
+   agents, or an orchestration/self-evolution engine that plans+acts → BUILDS. If it is
+   a **passive component consumed BY agents** and does not itself act (memory/context
+   utils, vector/embeddings stores, RAG/chunking libs, MCP tool servers, coding-agent
+   scaffolding/linters/plugins/skills, task hubs, sandboxes, mgmt UIs, installers) →
+   AI_INFRA. "Supports agents" alone is not enough for BUILDS; it must act.
+   - *Signal trap 1*: an "OS"/platform branded with systems-ops topics (dual-boot,
+     windows, powershell) is NOT automatically NOT_AI. If it is an app-level platform
+     orchestrating reasoning / multi-step cognitive work, it's **BUILDS** — the systems
+     framing is surface noise (gold: `alex-place/lantern-os`, which the LLM tier
+     mislabeled NOT_AI on the "OS + boot" framing).
+   - *Signal trap 2*: "sandbox/engine" branding can hide an agent. `EXboys/skilllite`
+     reads as a sandbox (→ would be AI_INFRA) but the README ships a full agent loop +
+     swarm → **BUILDS**. Read past the one-liner before calling sandbox/engine repos.
 
 5. **USES_AI** = consumes capability: a finished app/feature calling a model, a RAG
    Q&A app, a single-shot LLM utility, OR a domain product that trains/runs its own
