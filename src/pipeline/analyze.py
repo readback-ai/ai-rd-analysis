@@ -17,7 +17,6 @@ import argparse
 import csv
 import json
 import random
-import statistics
 from collections import defaultdict
 from pathlib import Path
 

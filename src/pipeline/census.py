@@ -15,7 +15,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import csv
 import json
 import time
 from datetime import date, timedelta
@@ -36,16 +35,20 @@ query($q:String!){ search(query:$q, type:ISSUE, first:50){
 
 
 def subwindows(rng: str, k: int) -> list[str]:
+    """Split an inclusive date range into <=k contiguous sub-ranges that cover
+    it exactly once (no gaps, no overlap, no inverted ranges). Integer
+    boundaries — float `round()` (banker's rounding) produced inverted and
+    duplicated windows on ranges shorter than k days."""
     s, e = (date.fromisoformat(x) for x in rng.split(".."))
     days = (e - s).days + 1
-    step = days / k
+    k = max(1, min(k, days))
+    bounds = [s + timedelta(days=(i * days) // k) for i in range(k)]
+    bounds.append(e + timedelta(days=1))
     out = []
-    for i in range(k):
-        a = s + timedelta(days=round(i * step))
-        b = min(s + timedelta(days=round((i + 1) * step) - 1), e)
-        if a > e:
-            break
-        out.append(f"{a}..{b}")
+    for a, nxt in zip(bounds, bounds[1:]):
+        b = nxt - timedelta(days=1)
+        if a <= b:
+            out.append(f"{a}..{b}")
     return out
 
 

@@ -274,6 +274,20 @@ Full audit of the post-pivot implementation. Ordered by severity.
       (reproduced session numbers exactly: cookbook=73 AI commits). analyze already
       implements the R3 ai_review/other_bot_review decomposition and bootstrap CIs,
       and marker sets are versioned v1/v2 for R4. (P0.2, P0.3)
+- [x] **R2.1 Test suite + lint** (2026-07-02): 45 pytest tests over the pipeline core
+      (tests/), ruff clean. Caught & fixed a REAL bug: census.subwindows used float
+      round() (banker's rounding) -> inverted/overlapping windows on ranges shorter
+      than k days (historical 90-day/k=10 pulls divided evenly, so past data
+      unaffected). Tests lock in: cell shape-validation (the rate-limit corruption
+      class), never-checkpoint-a-lie semantics, bare-term query form, exact-cover
+      window math, AI-vs-CI reviewer decomposition, marker v1/v2, weighting/CI math.
+- [x] **R2.1 Test suite + lint** (2026-07-02): 45 pytest tests over the pipeline core
+      (`tests/`), ruff clean. Caught & fixed a REAL bug: `census.subwindows` used float
+      round() (banker's rounding) → inverted/overlapping windows on ranges shorter than
+      k days (historical 90-day/k=10 pulls divided evenly, so past data unaffected).
+      Tests lock in: cell shape-validation (the rate-limit corruption class), never-
+      checkpoint-a-lie semantics, bare-term query form, exact-cover window math,
+      AI-vs-CI reviewer decomposition, marker v1/v2 behavior, weighting/CI math.
 - [ ] **R3. Re-state the automated-review finding**: decompose Bot reviewers by login into
       AI-reviewers vs CI/other; recompute the 1%→33% split into "AI review" and "other
       automation". (P1.4 — highest-value single analysis fix)

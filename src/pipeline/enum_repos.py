@@ -36,7 +36,7 @@ def _paginate_repos(query: str, retries: int = 3) -> list[str] | None:
                  "--jq", ".items[].repository.full_name"],
                 capture_output=True, text=True, timeout=300)
             if r.returncode == 0:
-                return [l for l in r.stdout.splitlines() if l.strip()]
+                return [ln for ln in r.stdout.splitlines() if ln.strip()]
         except subprocess.TimeoutExpired:
             pass
         time.sleep(25)
@@ -70,7 +70,7 @@ def main() -> None:
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
     markers = MARKERS_V1 if a.markers == "v1" else MARKERS_V2
-    orgs = [l.strip() for l in Path(a.orgs).read_text().splitlines() if l.strip()]
+    orgs = [ln.strip() for ln in Path(a.orgs).read_text().splitlines() if ln.strip()]
     sink = open(a.out, "w", newline="") if a.out else sys.stdout
     w = csv.writer(sink, delimiter="\t")
     w.writerow(["repo", "ai_commits"] + list(markers))
