@@ -1,0 +1,7 @@
+nohup: setsid: No such file or directory
+WARN microsoft: enumeration failed — re-run to retry
+WARN mlflow/claude: search cap hit (1000 returned, 2890 total) — repo tallies truncated; narrow the window to recover the tail
+WARN mozilla: enumeration failed — re-run to retry
+WARN NVIDIA/claude: search cap hit (1000 returned, 2731 total) — repo tallies truncated; narrow the window to recover the tail
+WARN onyx-dot-app/claude: search cap hit (1000 returned, 1021 total) — repo tallies truncated; narrow the window to recover the tail
+WARN tenstorrent/claude: search cap hit (1000 returned, 1339 total) — repo tallies truncated; narrow the window to recover the tail
