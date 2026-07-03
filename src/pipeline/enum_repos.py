@@ -32,7 +32,7 @@ RATE_KEEP = 0.001                       # 0.1% of PRs (keep-rule OR-branch)
 SEARCH_CAP = 1000                       # GitHub search hard cap per query
 
 
-def _paginate_repos(query: str, retries: int = 3) -> list[str] | None:
+def _paginate_repos(query: str, retries: int = 6) -> list[str] | None:
     """repository.full_name for every commit-search hit (<=1000/query)."""
     for _ in range(retries):
         try:
@@ -45,7 +45,7 @@ def _paginate_repos(query: str, retries: int = 3) -> list[str] | None:
                 return [ln for ln in r.stdout.splitlines() if ln.strip()]
         except subprocess.TimeoutExpired:
             pass
-        time.sleep(25)
+        time.sleep(45)
     return None
 
 
