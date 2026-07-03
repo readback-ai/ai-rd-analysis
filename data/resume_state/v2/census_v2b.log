@@ -1,0 +1,409 @@
+FAIL zilliztech/zilliz-skillzilliztech/zilliz-plugin Q1-2024
+FAIL zilliztech/zilliz-skillzilliztech/zilliz-plugin Q4-2025
+FAIL zilliztech/zilliz-skillzilliztech/zilliz-plugin Q1-2026
+FAIL zilliztech/zilliz-skillzilliztech/zilliz-plugin Q2-2026
+ok   zilliztech/zilliz-launchpad Q1-2024: 0 PRs
+ok   zilliztech/zilliz-launchpad Q4-2025: 0 PRs
+ok   zilliztech/zilliz-launchpad Q1-2026: 0 PRs
+ok   zilliztech/zilliz-launchpad Q2-2026: 16 PRs
+ok   zilliztech/zilliz-cloud-onboarding Q1-2024: 0 PRs
+ok   zilliztech/zilliz-cloud-onboarding Q4-2025: 0 PRs
+ok   zilliztech/zilliz-cloud-onboarding Q1-2026: 0 PRs
+ok   zilliztech/zilliz-cloud-onboarding Q2-2026: 0 PRs
+ok   zilliztech/zilliz-cli Q1-2024: 0 PRs
+ok   zilliztech/zilliz-cli Q4-2025: 0 PRs
+ok   zilliztech/zilliz-cli Q1-2026: 0 PRs
+ok   zilliztech/zilliz-cli Q2-2026: 0 PRs
+ok   zilliztech/zdoc_cn Q1-2024: 8 PRs
+ok   zilliztech/zdoc_cn Q4-2025: 0 PRs
+ok   zilliztech/zdoc_cn Q1-2026: 1 PRs
+ok   zilliztech/zdoc_cn Q2-2026: 6 PRs
+ok   zilliztech/zdoc Q1-2024: 23 PRs
+ok   zilliztech/zdoc Q4-2025: 1 PRs
+ok   zilliztech/zdoc Q1-2026: 2 PRs
+ok   zilliztech/zdoc Q2-2026: 31 PRs
+ok   zilliztech/woodpecker Q1-2024: 0 PRs
+ok   zilliztech/woodpecker Q4-2025: 9 PRs
+ok   zilliztech/woodpecker Q1-2026: 38 PRs
+ok   zilliztech/woodpecker Q2-2026: 43 PRs
+ok   zilliztech/vts Q1-2024: 0 PRs
+ok   zilliztech/vts Q4-2025: 6 PRs
+ok   zilliztech/vts Q1-2026: 9 PRs
+ok   zilliztech/vts Q2-2026: 12 PRs
+ok   zilliztech/vector-graph-rag Q1-2024: 0 PRs
+ok   zilliztech/vector-graph-rag Q4-2025: 0 PRs
+ok   zilliztech/vector-graph-rag Q1-2026: 21 PRs
+ok   zilliztech/vector-graph-rag Q2-2026: 10 PRs
+ok   zilliztech/terraform-provider-zillizcloud Q1-2024: 5 PRs
+ok   zilliztech/terraform-provider-zillizcloud Q4-2025: 18 PRs
+ok   zilliztech/terraform-provider-zillizcloud Q1-2026: 23 PRs
+ok   zilliztech/terraform-provider-zillizcloud Q2-2026: 25 PRs
+ok   zilliztech/spark-milvus Q1-2024: 9 PRs
+ok   zilliztech/spark-milvus Q4-2025: 13 PRs
+ok   zilliztech/spark-milvus Q1-2026: 12 PRs
+ok   zilliztech/spark-milvus Q2-2026: 25 PRs
+ok   zilliztech/milvus_cli Q1-2024: 4 PRs
+ok   zilliztech/milvus_cli Q4-2025: 0 PRs
+ok   zilliztech/milvus_cli Q1-2026: 13 PRs
+ok   zilliztech/milvus_cli Q2-2026: 4 PRs
+ok   zilliztech/milvus-skill Q1-2024: 0 PRs
+ok   zilliztech/milvus-skill Q4-2025: 0 PRs
+ok   zilliztech/milvus-skill Q1-2026: 1 PRs
+ok   zilliztech/milvus-skill Q2-2026: 0 PRs
+ok   zilliztech/milvus-operator Q1-2024: 34 PRs
+ok   zilliztech/milvus-operator Q4-2025: 39 PRs
+ok   zilliztech/milvus-operator Q1-2026: 24 PRs
+ok   zilliztech/milvus-operator Q2-2026: 6 PRs
+ok   zilliztech/milvus-marketplace Q1-2024: 0 PRs
+ok   zilliztech/milvus-marketplace Q4-2025: 0 PRs
+ok   zilliztech/milvus-marketplace Q1-2026: 10 PRs
+ok   zilliztech/milvus-marketplace Q2-2026: 0 PRs
+ok   zilliztech/milvus-helm Q1-2024: 29 PRs
+ok   zilliztech/milvus-helm Q4-2025: 13 PRs
+ok   zilliztech/milvus-helm Q1-2026: 6 PRs
+ok   zilliztech/milvus-helm Q2-2026: 15 PRs
+ok   zilliztech/milvus-common Q1-2024: 0 PRs
+ok   zilliztech/milvus-common Q4-2025: 11 PRs
+ok   zilliztech/milvus-common Q1-2026: 23 PRs
+ok   zilliztech/milvus-common Q2-2026: 23 PRs
+ok   zilliztech/milvus-catalog Q1-2024: 0 PRs
+ok   zilliztech/milvus-catalog Q4-2025: 0 PRs
+ok   zilliztech/milvus-catalog Q1-2026: 0 PRs
+ok   zilliztech/milvus-catalog Q2-2026: 2 PRs
+ok   zilliztech/milvus-backup Q1-2024: 24 PRs
+ok   zilliztech/milvus-backup Q4-2025: 70 PRs
+FAIL zilliztech/milvus-backup Q1-2026
+FAIL zilliztech/milvus-backup Q2-2026
+FAIL zilliztech/memsearch Q1-2024
+FAIL zilliztech/memsearch Q4-2025
+FAIL zilliztech/memsearch Q1-2026
+FAIL zilliztech/memsearch Q2-2026
+FAIL zilliztech/mcp-server-milvus Q1-2024
+FAIL zilliztech/mcp-server-milvus Q4-2025
+FAIL zilliztech/mcp-server-milvus Q1-2026
+FAIL zilliztech/mcp-server-milvus Q2-2026
+FAIL zilliztech/knowhere Q1-2024
+FAIL zilliztech/knowhere Q4-2025
+FAIL zilliztech/knowhere Q1-2026
+FAIL zilliztech/knowhere Q2-2026
+FAIL zilliztech/gemini-cli-extension Q1-2024
+FAIL zilliztech/gemini-cli-extension Q4-2025
+FAIL zilliztech/gemini-cli-extension Q1-2026
+FAIL zilliztech/gemini-cli-extension Q2-2026
+FAIL zilliztech/VectorDBBench Q1-2024
+FAIL zilliztech/VectorDBBench Q4-2025
+FAIL zilliztech/VectorDBBench Q1-2026
+FAIL zilliztech/VectorDBBench Q2-2026
+FAIL zenml-io/zenml-io-v2 Q1-2024
+FAIL zenml-io/zenml-io-v2 Q4-2025
+FAIL zenml-io/zenml-io-v2 Q1-2026
+FAIL zenml-io/zenml-io-v2 Q2-2026
+FAIL zenml-io/zenml-enterprise-mlops Q1-2024
+FAIL zenml-io/zenml-enterprise-mlops Q4-2025
+FAIL zenml-io/zenml-enterprise-mlops Q1-2026
+FAIL zenml-io/zenml-enterprise-mlops Q2-2026
+FAIL zenml-io/zenml-dashboard Q1-2024
+FAIL zenml-io/zenml-dashboard Q4-2025
+ok   zenml-io/zenml-dashboard Q1-2026: 38 PRs
+ok   zenml-io/zenml-dashboard Q2-2026: 50 PRs
+WARN zenml-io/zenml Q1-2024: collected 302/309 PRs (sub-window saturation) — raise --subwindows to recover
+ok   zenml-io/zenml Q1-2024: 302 PRs
+WARN zenml-io/zenml Q4-2025: collected 242/244 PRs (sub-window saturation) — raise --subwindows to recover
+ok   zenml-io/zenml Q4-2025: 242 PRs
+ok   zenml-io/zenml Q1-2026: 210 PRs
+ok   zenml-io/zenml Q2-2026: 268 PRs
+ok   zenml-io/vscode-zenml Q1-2024: 6 PRs
+ok   zenml-io/vscode-zenml Q4-2025: 8 PRs
+ok   zenml-io/vscode-zenml Q1-2026: 53 PRs
+ok   zenml-io/vscode-zenml Q2-2026: 29 PRs
+ok   zenml-io/panagent Q1-2024: 0 PRs
+ok   zenml-io/panagent Q4-2025: 0 PRs
+ok   zenml-io/panagent Q1-2026: 0 PRs
+ok   zenml-io/panagent Q2-2026: 0 PRs
+ok   zenml-io/mcp-zenml Q1-2024: 0 PRs
+ok   zenml-io/mcp-zenml Q4-2025: 0 PRs
+ok   zenml-io/mcp-zenml Q1-2026: 26 PRs
+ok   zenml-io/mcp-zenml Q2-2026: 9 PRs
+ok   zenml-io/kitaru-workshop Q1-2024: 0 PRs
+ok   zenml-io/kitaru-workshop Q4-2025: 0 PRs
+ok   zenml-io/kitaru-workshop Q1-2026: 0 PRs
+ok   zenml-io/kitaru-workshop Q2-2026: 0 PRs
+ok   zenml-io/kitaru Q1-2024: 0 PRs
+ok   zenml-io/kitaru Q4-2025: 0 PRs
+ok   zenml-io/kitaru Q1-2026: 69 PRs
+WARN zenml-io/kitaru Q2-2026: collected 274/286 PRs (sub-window saturation) — raise --subwindows to recover
+ok   zenml-io/kitaru Q2-2026: 274 PRs
+ok   zai-org/Vision2Web Q1-2024: 0 PRs
+ok   zai-org/Vision2Web Q4-2025: 0 PRs
+ok   zai-org/Vision2Web Q1-2026: 0 PRs
+ok   zai-org/Vision2Web Q2-2026: 1 PRs
+ok   zai-org/SCAIL-Pose Q1-2024: 0 PRs
+ok   zai-org/SCAIL-Pose Q4-2025: 2 PRs
+ok   zai-org/SCAIL-Pose Q1-2026: 0 PRs
+ok   zai-org/SCAIL-Pose Q2-2026: 0 PRs
+ok   zai-org/SCAIL-2 Q1-2024: 0 PRs
+ok   zai-org/SCAIL-2 Q4-2025: 0 PRs
+ok   zai-org/SCAIL-2 Q1-2026: 0 PRs
+ok   zai-org/SCAIL-2 Q2-2026: 0 PRs
+ok   zai-org/Open-AutoGLM Q1-2024: 0 PRs
+ok   zai-org/Open-AutoGLM Q4-2025: 97 PRs
+ok   zai-org/Open-AutoGLM Q1-2026: 28 PRs
+ok   zai-org/Open-AutoGLM Q2-2026: 9 PRs
+ok   writer/writer-node Q1-2024: 0 PRs
+ok   writer/writer-node Q4-2025: 4 PRs
+ok   writer/writer-node Q1-2026: 0 PRs
+ok   writer/writer-node Q2-2026: 8 PRs
+ok   writer/writer-framework Q1-2024: 123 PRs
+ok   writer/writer-framework Q4-2025: 115 PRs
+ok   writer/writer-framework Q1-2026: 25 PRs
+ok   writer/writer-framework Q2-2026: 8 PRs
+ok   writer/skills Q1-2024: 0 PRs
+ok   writer/skills Q4-2025: 0 PRs
+ok   writer/skills Q1-2026: 4 PRs
+ok   writer/skills Q2-2026: 0 PRs
+ok   writer/cerebro Q1-2024: 0 PRs
+ok   writer/cerebro Q4-2025: 0 PRs
+WARN writer/cerebro Q1-2026: collected 140/180 PRs (sub-window saturation) — raise --subwindows to recover
+ok   writer/cerebro Q1-2026: 140 PRs
+WARN writer/cerebro Q2-2026: collected 433/1199 PRs (sub-window saturation) — raise --subwindows to recover
+ok   writer/cerebro Q2-2026: 433 PRs
+ok   writer/bootstrap-agentic Q1-2024: 0 PRs
+ok   writer/bootstrap-agentic Q4-2025: 0 PRs
+ok   writer/bootstrap-agentic Q1-2026: 0 PRs
+ok   writer/bootstrap-agentic Q2-2026: 5 PRs
+ok   weaviate/weaviate-test-reporter Q1-2024: 0 PRs
+ok   weaviate/weaviate-test-reporter Q4-2025: 0 PRs
+ok   weaviate/weaviate-test-reporter Q1-2026: 0 PRs
+ok   weaviate/weaviate-test-reporter Q2-2026: 14 PRs
+WARN weaviate/weaviate-python-client Q1-2024: collected 235/236 PRs (sub-window saturation) — raise --subwindows to recover
+ok   weaviate/weaviate-python-client Q1-2024: 235 PRs
+ok   weaviate/weaviate-python-client Q4-2025: 67 PRs
+ok   weaviate/weaviate-python-client Q1-2026: 64 PRs
+ok   weaviate/weaviate-python-client Q2-2026: 65 PRs
+ok   weaviate/weaviate-local-k8s Q1-2024: 0 PRs
+ok   weaviate/weaviate-local-k8s Q4-2025: 9 PRs
+ok   weaviate/weaviate-local-k8s Q1-2026: 7 PRs
+ok   weaviate/weaviate-local-k8s Q2-2026: 8 PRs
+WARN weaviate/weaviate-io Q1-2024: collected 338/340 PRs (sub-window saturation) — raise --subwindows to recover
+ok   weaviate/weaviate-io Q1-2024: 338 PRs
+ok   weaviate/weaviate-io Q4-2025: 93 PRs
+ok   weaviate/weaviate-io Q1-2026: 57 PRs
+ok   weaviate/weaviate-io Q2-2026: 55 PRs
+ok   weaviate/weaviate-helm Q1-2024: 15 PRs
+ok   weaviate/weaviate-helm Q4-2025: 3 PRs
+ok   weaviate/weaviate-helm Q1-2026: 3 PRs
+ok   weaviate/weaviate-helm Q2-2026: 9 PRs
+ok   weaviate/weaviate-go-client Q1-2024: 7 PRs
+ok   weaviate/weaviate-go-client Q4-2025: 12 PRs
+ok   weaviate/weaviate-go-client Q1-2026: 42 PRs
+ok   weaviate/weaviate-go-client Q2-2026: 58 PRs
+ok   weaviate/weaviate-cli Q1-2024: 0 PRs
+ok   weaviate/weaviate-cli Q4-2025: 8 PRs
+ok   weaviate/weaviate-cli Q1-2026: 15 PRs
+ok   weaviate/weaviate-cli Q2-2026: 3 PRs
+ok   weaviate/weaviate-chaos-engineering Q1-2024: 33 PRs
+ok   weaviate/weaviate-chaos-engineering Q4-2025: 28 PRs
+ok   weaviate/weaviate-chaos-engineering Q1-2026: 24 PRs
+ok   weaviate/weaviate-chaos-engineering Q2-2026: 16 PRs
+WARN weaviate/weaviate Q1-2024: collected 434/498 PRs (sub-window saturation) — raise --subwindows to recover
+ok   weaviate/weaviate Q1-2024: 434 PRs
+WARN weaviate/weaviate Q4-2025: collected 463/716 PRs (sub-window saturation) — raise --subwindows to recover
+ok   weaviate/weaviate Q4-2025: 463 PRs
+WARN weaviate/weaviate Q1-2026: collected 500/761 PRs (sub-window saturation) — raise --subwindows to recover
+ok   weaviate/weaviate Q1-2026: 500 PRs
+WARN weaviate/weaviate Q2-2026: collected 500/903 PRs (sub-window saturation) — raise --subwindows to recover
+ok   weaviate/weaviate Q2-2026: 500 PRs
+ok   weaviate/typescript-client Q1-2024: 7 PRs
+ok   weaviate/typescript-client Q4-2025: 19 PRs
+ok   weaviate/typescript-client Q1-2026: 21 PRs
+ok   weaviate/typescript-client Q2-2026: 26 PRs
+ok   weaviate/t2v-model2vec-models Q1-2024: 0 PRs
+ok   weaviate/t2v-model2vec-models Q4-2025: 0 PRs
+ok   weaviate/t2v-model2vec-models Q1-2026: 1 PRs
+ok   weaviate/t2v-model2vec-models Q2-2026: 4 PRs
+ok   weaviate/mcp-server-weaviate Q1-2024: 0 PRs
+ok   weaviate/mcp-server-weaviate Q4-2025: 1 PRs
+ok   weaviate/mcp-server-weaviate Q1-2026: 1 PRs
+ok   weaviate/mcp-server-weaviate Q2-2026: 1 PRs
+ok   weaviate/java-client Q1-2024: 13 PRs
+ok   weaviate/java-client Q4-2025: 43 PRs
+ok   weaviate/java-client Q1-2026: 21 PRs
+ok   weaviate/java-client Q2-2026: 27 PRs
+ok   weaviate/github-common-actions Q1-2024: 0 PRs
+ok   weaviate/github-common-actions Q4-2025: 0 PRs
+ok   weaviate/github-common-actions Q1-2026: 1 PRs
+ok   weaviate/github-common-actions Q2-2026: 2 PRs
+ok   weaviate/engram-python-sdk Q1-2024: 0 PRs
+ok   weaviate/engram-python-sdk Q4-2025: 0 PRs
+ok   weaviate/engram-python-sdk Q1-2026: 12 PRs
+ok   weaviate/engram-python-sdk Q2-2026: 5 PRs
+ok   weaviate/docs Q1-2024: 0 PRs
+ok   weaviate/docs Q4-2025: 116 PRs
+FAIL weaviate/docs Q1-2026
+FAIL weaviate/docs Q2-2026
+FAIL weaviate/csharp-client-managed Q1-2024
+FAIL weaviate/csharp-client-managed Q4-2025
+FAIL weaviate/csharp-client-managed Q1-2026
+FAIL weaviate/csharp-client-managed Q2-2026
+FAIL weaviate/csharp-client Q1-2024
+FAIL weaviate/csharp-client Q4-2025
+FAIL weaviate/csharp-client Q1-2026
+FAIL weaviate/csharp-client Q2-2026
+FAIL weaviate/Verba Q1-2024
+FAIL weaviate/Verba Q4-2025
+FAIL weaviate/Verba Q1-2026
+FAIL weaviate/Verba Q2-2026
+FAIL vllm-project/vllm-xpu-kernels Q1-2024
+FAIL vllm-project/vllm-xpu-kernels Q4-2025
+FAIL vllm-project/vllm-xpu-kernels Q1-2026
+FAIL vllm-project/vllm-xpu-kernels Q2-2026
+FAIL vllm-project/vllm-project.github.io Q1-2024
+FAIL vllm-project/vllm-project.github.io Q4-2025
+FAIL vllm-project/vllm-project.github.io Q1-2026
+FAIL vllm-project/vllm-project.github.io Q2-2026
+FAIL vllm-project/vllm-omni Q1-2024
+FAIL vllm-project/vllm-omni Q4-2025
+FAIL vllm-project/vllm-omni Q1-2026
+FAIL vllm-project/vllm-omni Q2-2026
+FAIL vllm-project/vllm-metal Q1-2024
+FAIL vllm-project/vllm-metal Q4-2025
+FAIL vllm-project/vllm-metal Q1-2026
+FAIL vllm-project/vllm-metal Q2-2026
+FAIL vllm-project/vllm-gaudi Q1-2024
+FAIL vllm-project/vllm-gaudi Q4-2025
+FAIL vllm-project/vllm-gaudi Q1-2026
+FAIL vllm-project/vllm-gaudi Q2-2026
+FAIL vllm-project/vllm-dashboard Q1-2024
+FAIL vllm-project/vllm-dashboard Q4-2025
+FAIL vllm-project/vllm-dashboard Q1-2026
+FAIL vllm-project/vllm-dashboard Q2-2026
+FAIL vllm-project/vllm-bench Q1-2024
+FAIL vllm-project/vllm-bench Q4-2025
+FAIL vllm-project/vllm-bench Q1-2026
+FAIL vllm-project/vllm-bench Q2-2026
+FAIL vllm-project/vllm-ascend Q1-2024
+FAIL vllm-project/vllm-ascend Q4-2025
+FAIL vllm-project/vllm-ascend Q1-2026
+FAIL vllm-project/vllm-ascend Q2-2026
+FAIL vllm-project/vllm Q1-2024
+FAIL vllm-project/vllm Q4-2025
+FAIL vllm-project/vllm Q1-2026
+FAIL vllm-project/vllm Q2-2026
+FAIL vllm-project/vime Q1-2024
+FAIL vllm-project/vime Q4-2025
+FAIL vllm-project/vime Q1-2026
+FAIL vllm-project/vime Q2-2026
+FAIL vllm-project/speculators Q1-2024
+FAIL vllm-project/speculators Q4-2025
+FAIL vllm-project/speculators Q1-2026
+FAIL vllm-project/speculators Q2-2026
+FAIL vllm-project/semantic-router Q1-2024
+FAIL vllm-project/semantic-router Q4-2025
+FAIL vllm-project/semantic-router Q1-2026
+FAIL vllm-project/semantic-router Q2-2026
+FAIL vllm-project/router Q1-2024
+FAIL vllm-project/router Q4-2025
+FAIL vllm-project/router Q1-2026
+FAIL vllm-project/router Q2-2026
+FAIL vllm-project/recipes Q1-2024
+FAIL vllm-project/recipes Q4-2025
+FAIL vllm-project/recipes Q1-2026
+FAIL vllm-project/recipes Q2-2026
+FAIL vllm-project/production-stack Q1-2024
+FAIL vllm-project/production-stack Q4-2025
+ok   vllm-project/production-stack Q1-2026: 87 PRs
+ok   vllm-project/production-stack Q2-2026: 61 PRs
+ok   vllm-project/perf-eval Q1-2024: 0 PRs
+ok   vllm-project/perf-eval Q4-2025: 0 PRs
+ok   vllm-project/perf-eval Q1-2026: 0 PRs
+ok   vllm-project/perf-eval Q2-2026: 31 PRs
+ok   vllm-project/llm-compressor Q1-2024: 0 PRs
+ok   vllm-project/llm-compressor Q4-2025: 175 PRs
+ok   vllm-project/llm-compressor Q1-2026: 265 PRs
+ok   vllm-project/llm-compressor Q2-2026: 259 PRs
+ok   vllm-project/guidellm Q1-2024: 0 PRs
+ok   vllm-project/guidellm Q4-2025: 97 PRs
+ok   vllm-project/guidellm Q1-2026: 93 PRs
+WARN vllm-project/guidellm Q2-2026: collected 183/186 PRs (sub-window saturation) — raise --subwindows to recover
+ok   vllm-project/guidellm Q2-2026: 183 PRs
+ok   vllm-project/dllm-plugin Q1-2024: 0 PRs
+ok   vllm-project/dllm-plugin Q4-2025: 0 PRs
+ok   vllm-project/dllm-plugin Q1-2026: 4 PRs
+ok   vllm-project/dllm-plugin Q2-2026: 12 PRs
+ok   vllm-project/compressed-tensors Q1-2024: 0 PRs
+ok   vllm-project/compressed-tensors Q4-2025: 53 PRs
+ok   vllm-project/compressed-tensors Q1-2026: 103 PRs
+ok   vllm-project/compressed-tensors Q2-2026: 87 PRs
+ok   vllm-project/ci-infra Q1-2024: 0 PRs
+ok   vllm-project/ci-infra Q4-2025: 74 PRs
+ok   vllm-project/ci-infra Q1-2026: 67 PRs
+ok   vllm-project/ci-infra Q2-2026: 74 PRs
+ok   vllm-project/bart-plugin Q1-2024: 0 PRs
+ok   vllm-project/bart-plugin Q4-2025: 0 PRs
+ok   vllm-project/bart-plugin Q1-2026: 15 PRs
+ok   vllm-project/bart-plugin Q2-2026: 8 PRs
+ok   vllm-project/aibrix Q1-2024: 0 PRs
+ok   vllm-project/aibrix Q4-2025: 135 PRs
+ok   vllm-project/aibrix Q1-2026: 129 PRs
+ok   vllm-project/aibrix Q2-2026: 258 PRs
+ok   vllm-project/agentic-api Q1-2024: 0 PRs
+ok   vllm-project/agentic-api Q4-2025: 0 PRs
+ok   vllm-project/agentic-api Q1-2026: 14 PRs
+ok   vllm-project/agentic-api Q2-2026: 49 PRs
+ok   visgl/react-google-maps Q1-2024: 78 PRs
+ok   visgl/react-google-maps Q4-2025: 40 PRs
+ok   visgl/react-google-maps Q1-2026: 61 PRs
+ok   visgl/react-google-maps Q2-2026: 56 PRs
+ok   visgl/luma.gl Q1-2024: 150 PRs
+ok   visgl/luma.gl Q4-2025: 24 PRs
+ok   visgl/luma.gl Q1-2026: 93 PRs
+ok   visgl/luma.gl Q2-2026: 116 PRs
+ok   visgl/deck.gl-community Q1-2024: 6 PRs
+WARN visgl/deck.gl-community Q4-2025: collected 137/174 PRs (sub-window saturation) — raise --subwindows to recover
+ok   visgl/deck.gl-community Q4-2025: 137 PRs
+ok   visgl/deck.gl-community Q1-2026: 98 PRs
+ok   visgl/deck.gl-community Q2-2026: 89 PRs
+ok   visgl/deck.gl Q1-2024: 206 PRs
+ok   visgl/deck.gl Q4-2025: 71 PRs
+ok   visgl/deck.gl Q1-2026: 177 PRs
+ok   visgl/deck.gl Q2-2026: 209 PRs
+ok   vibrantlabsai/ragas Q1-2024: 169 PRs
+ok   vibrantlabsai/ragas Q4-2025: 156 PRs
+ok   vibrantlabsai/ragas Q1-2026: 66 PRs
+ok   vibrantlabsai/ragas Q2-2026: 103 PRs
+ok   vibrantlabsai/enterprise-ops-gym Q1-2024: 0 PRs
+ok   vibrantlabsai/enterprise-ops-gym Q4-2025: 0 PRs
+ok   vibrantlabsai/enterprise-ops-gym Q1-2026: 0 PRs
+ok   vibrantlabsai/enterprise-ops-gym Q2-2026: 0 PRs
+ok   vibrantlabsai/MTOps Q1-2024: 0 PRs
+ok   vibrantlabsai/MTOps Q4-2025: 0 PRs
+ok   vibrantlabsai/MTOps Q1-2026: 0 PRs
+ok   vibrantlabsai/MTOps Q2-2026: 8 PRs
+ok   vespa-engine/vespa-search Q1-2024: 2 PRs
+ok   vespa-engine/vespa-search Q4-2025: 1 PRs
+ok   vespa-engine/vespa-search Q1-2026: 3 PRs
+ok   vespa-engine/vespa-search Q2-2026: 5 PRs
+WARN vespa-engine/vespa Q1-2024: collected 500/968 PRs (sub-window saturation) — raise --subwindows to recover
+ok   vespa-engine/vespa Q1-2024: 500 PRs
+FAIL vespa-engine/vespa Q4-2025
+FAIL vespa-engine/vespa Q1-2026
+FAIL vespa-engine/vespa Q2-2026
+FAIL vespa-engine/system-test Q1-2024
+FAIL vespa-engine/system-test Q4-2025
+FAIL vespa-engine/system-test Q1-2026
+FAIL vespa-engine/system-test Q2-2026
+FAIL vespa-engine/sample-apps Q1-2024
+FAIL vespa-engine/sample-apps Q4-2025
+FAIL vespa-engine/sample-apps Q1-2026
+FAIL vespa-engine/sample-apps Q2-2026
+FAIL vespa-engine/pyvespa Q1-2024
+FAIL vespa-engine/pyvespa Q4-2025
+FAIL vespa-engine/pyvespa Q1-2026
+FAIL vespa-engine/pyvespa Q2-2026
+FAIL vespa-engine/documentation Q1-2024
+FAIL vespa-engine/documentation Q4-2025
+FAIL vespa-engine/documentation Q1-2026
+FAIL vespa-engine/documentation Q2-2026
+FAIL upstash/workflow-py Q1-2024
+FAIL upstash/workflow-py Q4-2025
+FAIL upstash/workflow-py Q1-2026

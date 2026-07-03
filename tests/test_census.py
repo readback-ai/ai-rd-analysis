@@ -121,3 +121,16 @@ def test_census_warns_on_undercount(monkeypatch, capsys):
 def test_census_denominator_failure_propagates(monkeypatch):
     monkeypatch.setattr(census, "rest_count", lambda *a, **k: None)
     assert census_repo_period("o/r", "Q1-2026", 10) is None
+
+
+def test_census_uses_precount_cache_over_rest(monkeypatch):
+    """Denominators come from the batch precount when available — no REST
+    search call, no pacing sleep."""
+    import json as _json
+    from pipeline.precount import precount_path
+    precount_path("o/r", "Q1-2026").write_text(_json.dumps({"total": 30}))
+    def boom(*a, **k):
+        raise AssertionError("REST denominator must not be called when precounted")
+    monkeypatch.setattr(census, "rest_count", boom)
+    monkeypatch.setattr(census, "pull_cell", lambda repo, rng: ([{}] * 30, False))
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 30

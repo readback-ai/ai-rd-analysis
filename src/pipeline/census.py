@@ -25,6 +25,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from pipeline.ghx import cell_path, graphql_nodes, read_cell, rest_count
+from pipeline.precount import get_precount
 from pipeline.scan_orgs import QUARTER_RANGES
 
 PAGE_SIZE = 50   # per-call PR fetch; the census cap per cell (single page, no pagination)
@@ -80,8 +81,10 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
     cached = read_cell(cell_path("census", repo, rng), list)
     if cached is not None:
         return len(cached)
-    total = rest_count(f"repo:{repo} is:pr created:{rng}", endpoint="search/issues")
-    time.sleep(2)
+    total = get_precount(repo, period)          # batch-precounted (GraphQL)
+    if total is None:                            # fall back to REST search
+        total = rest_count(f"repo:{repo} is:pr created:{rng}", endpoint="search/issues")
+        time.sleep(2)
     if total is None:
         return None
     ranges = [rng] if total <= PAGE_SIZE else subwindows(rng, k)

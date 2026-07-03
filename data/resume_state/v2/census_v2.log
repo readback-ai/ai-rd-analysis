@@ -1,0 +1,704 @@
+ok   AIDotNet/ClaudeCodeProxy Q1-2024: 0 PRs
+ok   AIDotNet/ClaudeCodeProxy Q4-2025: 0 PRs
+ok   AIDotNet/ClaudeCodeProxy Q1-2026: 0 PRs
+ok   AIDotNet/ClaudeCodeProxy Q2-2026: 0 PRs
+ok   AIDotNet/CodexSwitch Q1-2024: 0 PRs
+ok   AIDotNet/CodexSwitch Q4-2025: 0 PRs
+ok   AIDotNet/CodexSwitch Q1-2026: 0 PRs
+ok   AIDotNet/CodexSwitch Q2-2026: 1 PRs
+ok   AIDotNet/MarkAgents Q1-2024: 0 PRs
+ok   AIDotNet/MarkAgents Q4-2025: 0 PRs
+ok   AIDotNet/MarkAgents Q1-2026: 0 PRs
+ok   AIDotNet/MarkAgents Q2-2026: 0 PRs
+ok   AIDotNet/OpenCowork Q1-2024: 0 PRs
+ok   AIDotNet/OpenCowork Q4-2025: 0 PRs
+ok   AIDotNet/OpenCowork Q1-2026: 6 PRs
+ok   AIDotNet/OpenCowork Q2-2026: 12 PRs
+ok   AIDotNet/OpenDeepWiki Q1-2024: 0 PRs
+ok   AIDotNet/OpenDeepWiki Q4-2025: 11 PRs
+ok   AIDotNet/OpenDeepWiki Q1-2026: 31 PRs
+ok   AIDotNet/OpenDeepWiki Q2-2026: 12 PRs
+ok   AIDotNet/Thor Q1-2024: 0 PRs
+ok   AIDotNet/Thor Q4-2025: 0 PRs
+ok   AIDotNet/Thor Q1-2026: 0 PRs
+ok   AIDotNet/Thor Q2-2026: 0 PRs
+ok   Aleph-Alpha/pharia-telemetry Q1-2024: 0 PRs
+ok   Aleph-Alpha/pharia-telemetry Q4-2025: 1 PRs
+ok   Aleph-Alpha/pharia-telemetry Q1-2026: 7 PRs
+ok   Aleph-Alpha/pharia-telemetry Q2-2026: 0 PRs
+ok   Aleph-Alpha/terraform-provider-langfuse Q1-2024: 0 PRs
+ok   Aleph-Alpha/terraform-provider-langfuse Q4-2025: 0 PRs
+ok   Aleph-Alpha/terraform-provider-langfuse Q1-2026: 0 PRs
+ok   Aleph-Alpha/terraform-provider-langfuse Q2-2026: 3 PRs
+ok   Arize-ai/arize-claude-code-plugin Q1-2024: 0 PRs
+ok   Arize-ai/arize-claude-code-plugin Q4-2025: 0 PRs
+ok   Arize-ai/arize-claude-code-plugin Q1-2026: 17 PRs
+ok   Arize-ai/arize-claude-code-plugin Q2-2026: 4 PRs
+ok   Arize-ai/coding-harness-tracing Q1-2024: 0 PRs
+ok   Arize-ai/coding-harness-tracing Q4-2025: 0 PRs
+ok   Arize-ai/coding-harness-tracing Q1-2026: 1 PRs
+ok   Arize-ai/coding-harness-tracing Q2-2026: 62 PRs
+ok   Arize-ai/context-graphs Q1-2024: 0 PRs
+ok   Arize-ai/context-graphs Q4-2025: 0 PRs
+ok   Arize-ai/context-graphs Q1-2026: 0 PRs
+ok   Arize-ai/context-graphs Q2-2026: 0 PRs
+ok   Arize-ai/msft-copilot-integration Q1-2024: 0 PRs
+ok   Arize-ai/msft-copilot-integration Q4-2025: 0 PRs
+ok   Arize-ai/msft-copilot-integration Q1-2026: 0 PRs
+ok   Arize-ai/msft-copilot-integration Q2-2026: 0 PRs
+WARN Arize-ai/openinference Q1-2024: collected 232/238 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Arize-ai/openinference Q1-2024: 232 PRs
+ok   Arize-ai/openinference Q4-2025: 222 PRs
+WARN Arize-ai/openinference Q1-2026: collected 264/267 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Arize-ai/openinference Q1-2026: 264 PRs
+ok   Arize-ai/openinference Q2-2026: 310 PRs
+WARN Arize-ai/phoenix Q1-2024: collected 291/300 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Arize-ai/phoenix Q1-2024: 291 PRs
+WARN Arize-ai/phoenix Q4-2025: collected 462/598 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Arize-ai/phoenix Q4-2025: 462 PRs
+WARN Arize-ai/phoenix Q1-2026: collected 500/1074 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Arize-ai/phoenix Q1-2026: 500 PRs
+WARN Arize-ai/phoenix Q2-2026: collected 500/1041 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Arize-ai/phoenix Q2-2026: 500 PRs
+ok   Arize-ai/project-rosetta-stone Q1-2024: 0 PRs
+ok   Arize-ai/project-rosetta-stone Q4-2025: 0 PRs
+ok   Arize-ai/project-rosetta-stone Q1-2026: 1 PRs
+ok   Arize-ai/project-rosetta-stone Q2-2026: 45 PRs
+ok   Arize-ai/text-to-graphql-mcp Q1-2024: 0 PRs
+ok   Arize-ai/text-to-graphql-mcp Q4-2025: 0 PRs
+ok   Arize-ai/text-to-graphql-mcp Q1-2026: 1 PRs
+ok   Arize-ai/text-to-graphql-mcp Q2-2026: 0 PRs
+ok   Arize-ai/twitter-to-newsletter Q1-2024: 0 PRs
+ok   Arize-ai/twitter-to-newsletter Q4-2025: 0 PRs
+ok   Arize-ai/twitter-to-newsletter Q1-2026: 0 PRs
+ok   Arize-ai/twitter-to-newsletter Q2-2026: 0 PRs
+WARN BerriAI/litellm Q1-2024: collected 459/575 PRs (sub-window saturation) — raise --subwindows to recover
+ok   BerriAI/litellm Q1-2024: 459 PRs
+WARN BerriAI/litellm Q4-2025: collected 500/1988 PRs (sub-window saturation) — raise --subwindows to recover
+ok   BerriAI/litellm Q4-2025: 500 PRs
+WARN BerriAI/litellm Q1-2026: collected 500/4469 PRs (sub-window saturation) — raise --subwindows to recover
+ok   BerriAI/litellm Q1-2026: 500 PRs
+WARN BerriAI/litellm Q2-2026: collected 500/5315 PRs (sub-window saturation) — raise --subwindows to recover
+ok   BerriAI/litellm Q2-2026: 500 PRs
+ok   BerriAI/litellm-agent-platform-docs Q1-2024: 0 PRs
+ok   BerriAI/litellm-agent-platform-docs Q4-2025: 0 PRs
+ok   BerriAI/litellm-agent-platform-docs Q1-2026: 0 PRs
+ok   BerriAI/litellm-agent-platform-docs Q2-2026: 8 PRs
+ok   BerriAI/litellm-agent-sdk Q1-2024: 0 PRs
+ok   BerriAI/litellm-agent-sdk Q4-2025: 0 PRs
+ok   BerriAI/litellm-agent-sdk Q1-2026: 0 PRs
+ok   BerriAI/litellm-agent-sdk Q2-2026: 3 PRs
+ok   BerriAI/litellm-docs Q1-2024: 0 PRs
+ok   BerriAI/litellm-docs Q4-2025: 0 PRs
+ok   BerriAI/litellm-docs Q1-2026: 0 PRs
+WARN BerriAI/litellm-docs Q2-2026: collected 362/444 PRs (sub-window saturation) — raise --subwindows to recover
+ok   BerriAI/litellm-docs Q2-2026: 362 PRs
+ok   BerriAI/litellm-observatory Q1-2024: 0 PRs
+ok   BerriAI/litellm-observatory Q4-2025: 0 PRs
+ok   BerriAI/litellm-observatory Q1-2026: 4 PRs
+ok   BerriAI/litellm-observatory Q2-2026: 0 PRs
+ok   BerriAI/oss-pr-review-agent Q1-2024: 0 PRs
+ok   BerriAI/oss-pr-review-agent Q4-2025: 0 PRs
+ok   BerriAI/oss-pr-review-agent Q1-2026: 0 PRs
+ok   BerriAI/oss-pr-review-agent Q2-2026: 14 PRs
+ok   BerriAI/pr-babysitter Q1-2024: 0 PRs
+ok   BerriAI/pr-babysitter Q4-2025: 0 PRs
+ok   BerriAI/pr-babysitter Q1-2026: 0 PRs
+ok   BerriAI/pr-babysitter Q2-2026: 2 PRs
+ok   BerriAI/shin-pr-review-agent Q1-2024: 0 PRs
+ok   BerriAI/shin-pr-review-agent Q4-2025: 0 PRs
+ok   BerriAI/shin-pr-review-agent Q1-2026: 0 PRs
+ok   BerriAI/shin-pr-review-agent Q2-2026: 10 PRs
+ok   Biohub/esm Q1-2024: 0 PRs
+ok   Biohub/esm Q4-2025: 5 PRs
+ok   Biohub/esm Q1-2026: 5 PRs
+ok   Biohub/esm Q2-2026: 20 PRs
+ok   Biohub/transformers Q1-2024: 0 PRs
+ok   Biohub/transformers Q4-2025: 0 PRs
+ok   Biohub/transformers Q1-2026: 0 PRs
+ok   Biohub/transformers Q2-2026: 3 PRs
+ok   ByteDance-Seed/Cola-DLM Q1-2024: 0 PRs
+ok   ByteDance-Seed/Cola-DLM Q4-2025: 0 PRs
+ok   ByteDance-Seed/Cola-DLM Q1-2026: 0 PRs
+ok   ByteDance-Seed/Cola-DLM Q2-2026: 3 PRs
+ok   ByteDance-Seed/JoltQC Q1-2024: 0 PRs
+ok   ByteDance-Seed/JoltQC Q4-2025: 6 PRs
+ok   ByteDance-Seed/JoltQC Q1-2026: 1 PRs
+ok   ByteDance-Seed/JoltQC Q2-2026: 0 PRs
+ok   ByteDance-Seed/VeOmni Q1-2024: 0 PRs
+ok   ByteDance-Seed/VeOmni Q4-2025: 177 PRs
+ok   ByteDance-Seed/VeOmni Q1-2026: 221 PRs
+ok   ByteDance-Seed/VeOmni Q2-2026: 222 PRs
+ok   CaviraOSS/OpenMemory Q1-2024: 0 PRs
+ok   CaviraOSS/OpenMemory Q4-2025: 57 PRs
+ok   CaviraOSS/OpenMemory Q1-2026: 19 PRs
+ok   CaviraOSS/OpenMemory Q2-2026: 25 PRs
+ok   CaviraOSS/PageLM Q1-2024: 0 PRs
+ok   CaviraOSS/PageLM Q4-2025: 38 PRs
+ok   CaviraOSS/PageLM Q1-2026: 5 PRs
+ok   CaviraOSS/PageLM Q2-2026: 5 PRs
+ok   ComposioHQ/.github Q1-2024: 0 PRs
+ok   ComposioHQ/.github Q4-2025: 1 PRs
+ok   ComposioHQ/.github Q1-2026: 6 PRs
+ok   ComposioHQ/.github Q2-2026: 1 PRs
+ok   ComposioHQ/awesome-claude-plugins Q1-2024: 0 PRs
+ok   ComposioHQ/awesome-claude-plugins Q4-2025: 0 PRs
+ok   ComposioHQ/awesome-claude-plugins Q1-2026: 86 PRs
+ok   ComposioHQ/awesome-claude-plugins Q2-2026: 182 PRs
+ok   ComposioHQ/composio Q1-2024: 9 PRs
+ok   ComposioHQ/composio Q4-2025: 201 PRs
+WARN ComposioHQ/composio Q1-2026: collected 476/663 PRs (sub-window saturation) — raise --subwindows to recover
+ok   ComposioHQ/composio Q1-2026: 476 PRs
+WARN ComposioHQ/composio Q2-2026: collected 416/491 PRs (sub-window saturation) — raise --subwindows to recover
+ok   ComposioHQ/composio Q2-2026: 416 PRs
+ok   ComposioHQ/helm-charts Q1-2024: 0 PRs
+ok   ComposioHQ/helm-charts Q4-2025: 54 PRs
+ok   ComposioHQ/helm-charts Q1-2026: 97 PRs
+ok   ComposioHQ/helm-charts Q2-2026: 135 PRs
+ok   ComposioHQ/logo-cdn Q1-2024: 0 PRs
+ok   ComposioHQ/logo-cdn Q4-2025: 1 PRs
+WARN ComposioHQ/logo-cdn Q1-2026: collected 192/809 PRs (sub-window saturation) — raise --subwindows to recover
+ok   ComposioHQ/logo-cdn Q1-2026: 192 PRs
+ok   ComposioHQ/logo-cdn Q2-2026: 110 PRs
+ok   ComposioHQ/open-chatgpt-atlas Q1-2024: 0 PRs
+ok   ComposioHQ/open-chatgpt-atlas Q4-2025: 8 PRs
+ok   ComposioHQ/open-chatgpt-atlas Q1-2026: 3 PRs
+ok   ComposioHQ/open-chatgpt-atlas Q2-2026: 5 PRs
+ok   ComposioHQ/openclaw-composio Q1-2024: 0 PRs
+ok   ComposioHQ/openclaw-composio Q4-2025: 0 PRs
+ok   ComposioHQ/openclaw-composio Q1-2026: 3 PRs
+ok   ComposioHQ/openclaw-composio Q2-2026: 2 PRs
+ok   ComposioHQ/openclaw-composio-plugin Q1-2024: 0 PRs
+ok   ComposioHQ/openclaw-composio-plugin Q4-2025: 0 PRs
+ok   ComposioHQ/openclaw-composio-plugin Q1-2026: 1 PRs
+ok   ComposioHQ/openclaw-composio-plugin Q2-2026: 3 PRs
+ok   ComposioHQ/skills Q1-2024: 0 PRs
+ok   ComposioHQ/skills Q4-2025: 0 PRs
+ok   ComposioHQ/skills Q1-2026: 16 PRs
+ok   ComposioHQ/skills Q2-2026: 1 PRs
+ok   ComposioHQ/trustclaw Q1-2024: 0 PRs
+ok   ComposioHQ/trustclaw Q4-2025: 0 PRs
+ok   ComposioHQ/trustclaw Q1-2026: 0 PRs
+ok   ComposioHQ/trustclaw Q2-2026: 30 PRs
+ok   ContextualAI/openclaw_hackday Q1-2024: 0 PRs
+ok   ContextualAI/openclaw_hackday Q4-2025: 0 PRs
+ok   ContextualAI/openclaw_hackday Q1-2026: 0 PRs
+ok   ContextualAI/openclaw_hackday Q2-2026: 0 PRs
+ok   ContextualAI/oryx Q1-2024: 0 PRs
+ok   ContextualAI/oryx Q4-2025: 1 PRs
+ok   ContextualAI/oryx Q1-2026: 4 PRs
+ok   ContextualAI/oryx Q2-2026: 0 PRs
+ok   EleutherAI/bergson Q1-2024: 0 PRs
+ok   EleutherAI/bergson Q4-2025: 53 PRs
+ok   EleutherAI/bergson Q1-2026: 103 PRs
+ok   EleutherAI/bergson Q2-2026: 68 PRs
+ok   EleutherAI/deep-ignorance Q1-2024: 0 PRs
+ok   EleutherAI/deep-ignorance Q4-2025: 0 PRs
+ok   EleutherAI/deep-ignorance Q1-2026: 0 PRs
+ok   EleutherAI/deep-ignorance Q2-2026: 0 PRs
+ok   EleutherAI/lm-evaluation-harness Q1-2024: 199 PRs
+ok   EleutherAI/lm-evaluation-harness Q4-2025: 86 PRs
+ok   EleutherAI/lm-evaluation-harness Q1-2026: 124 PRs
+ok   EleutherAI/lm-evaluation-harness Q2-2026: 204 PRs
+ok   EleutherAI/rh-indicators Q1-2024: 0 PRs
+ok   EleutherAI/rh-indicators Q4-2025: 0 PRs
+ok   EleutherAI/rh-indicators Q1-2026: 0 PRs
+ok   EleutherAI/rh-indicators Q2-2026: 0 PRs
+ok   EleutherAI/unlearn Q1-2024: 0 PRs
+ok   EleutherAI/unlearn Q4-2025: 0 PRs
+ok   EleutherAI/unlearn Q1-2026: 0 PRs
+ok   EleutherAI/unlearn Q2-2026: 1 PRs
+ok   EleutherAI/website Q1-2024: 10 PRs
+ok   EleutherAI/website Q4-2025: 2 PRs
+ok   EleutherAI/website Q1-2026: 0 PRs
+ok   EleutherAI/website Q2-2026: 3 PRs
+ok   Eventual-Inc/Daft Q1-2024: 163 PRs
+WARN Eventual-Inc/Daft Q4-2025: collected 427/460 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Eventual-Inc/Daft Q4-2025: 427 PRs
+WARN Eventual-Inc/Daft Q1-2026: collected 429/547 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Eventual-Inc/Daft Q1-2026: 429 PRs
+WARN Eventual-Inc/Daft Q2-2026: collected 415/496 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Eventual-Inc/Daft Q2-2026: 415 PRs
+ok   FlowiseAI/Flowise Q1-2024: 198 PRs
+ok   FlowiseAI/Flowise Q4-2025: 139 PRs
+WARN FlowiseAI/Flowise Q1-2026: collected 323/340 PRs (sub-window saturation) — raise --subwindows to recover
+ok   FlowiseAI/Flowise Q1-2026: 323 PRs
+WARN FlowiseAI/Flowise Q2-2026: collected 332/334 PRs (sub-window saturation) — raise --subwindows to recover
+ok   FlowiseAI/Flowise Q2-2026: 332 PRs
+ok   FlowiseAI/FlowiseDocs Q1-2024: 15 PRs
+ok   FlowiseAI/FlowiseDocs Q4-2025: 9 PRs
+ok   FlowiseAI/FlowiseDocs Q1-2026: 11 PRs
+ok   FlowiseAI/FlowiseDocs Q2-2026: 12 PRs
+ok   Giskard-AI/giskard-docs Q1-2024: 0 PRs
+ok   Giskard-AI/giskard-docs Q4-2025: 12 PRs
+ok   Giskard-AI/giskard-docs Q1-2026: 28 PRs
+ok   Giskard-AI/giskard-docs Q2-2026: 99 PRs
+ok   Giskard-AI/giskard-hub-python Q1-2024: 0 PRs
+ok   Giskard-AI/giskard-hub-python Q4-2025: 2 PRs
+ok   Giskard-AI/giskard-hub-python Q1-2026: 62 PRs
+ok   Giskard-AI/giskard-hub-python Q2-2026: 36 PRs
+FAIL Giskard-AI/giskard-oss Q1-2024
+FAIL Giskard-AI/giskard-oss Q4-2025
+FAIL Giskard-AI/giskard-oss Q1-2026
+FAIL Giskard-AI/giskard-oss Q2-2026
+FAIL Giskard-AI/relais Q1-2024
+FAIL Giskard-AI/relais Q4-2025
+FAIL Giskard-AI/relais Q1-2026
+FAIL Giskard-AI/relais Q2-2026
+FAIL GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK Q1-2024
+FAIL GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK Q4-2025
+FAIL GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK Q1-2026
+FAIL GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK Q2-2026
+FAIL GoogleCloudPlatform/gke-mcp Q1-2024
+FAIL GoogleCloudPlatform/gke-mcp Q4-2025
+FAIL GoogleCloudPlatform/gke-mcp Q1-2026
+FAIL GoogleCloudPlatform/gke-mcp Q2-2026
+FAIL GoogleCloudPlatform/knowledge-catalog Q1-2024
+FAIL GoogleCloudPlatform/knowledge-catalog Q4-2025
+FAIL GoogleCloudPlatform/knowledge-catalog Q1-2026
+FAIL GoogleCloudPlatform/knowledge-catalog Q2-2026
+FAIL GoogleCloudPlatform/scion Q1-2024
+FAIL GoogleCloudPlatform/scion Q4-2025
+FAIL GoogleCloudPlatform/scion Q1-2026
+FAIL GoogleCloudPlatform/scion Q2-2026
+FAIL GoogleCloudPlatform/specialized-training-content Q1-2024
+FAIL GoogleCloudPlatform/specialized-training-content Q4-2025
+FAIL GoogleCloudPlatform/specialized-training-content Q1-2026
+FAIL GoogleCloudPlatform/specialized-training-content Q2-2026
+FAIL GoogleCloudPlatform/vertex-ai-samples Q1-2024
+FAIL GoogleCloudPlatform/vertex-ai-samples Q4-2025
+FAIL GoogleCloudPlatform/vertex-ai-samples Q1-2026
+FAIL GoogleCloudPlatform/vertex-ai-samples Q2-2026
+ok   HKUDS/AgentSpace Q1-2024: 0 PRs
+ok   HKUDS/AgentSpace Q4-2025: 0 PRs
+ok   HKUDS/AgentSpace Q1-2026: 0 PRs
+ok   HKUDS/AgentSpace Q2-2026: 9 PRs
+ok   HKUDS/CLI-Anything Q1-2024: 0 PRs
+ok   HKUDS/CLI-Anything Q4-2025: 0 PRs
+ok   HKUDS/CLI-Anything Q1-2026: 119 PRs
+ok   HKUDS/CLI-Anything Q2-2026: 140 PRs
+ok   HKUDS/ClawTeam Q1-2024: 0 PRs
+ok   HKUDS/ClawTeam Q4-2025: 0 PRs
+ok   HKUDS/ClawTeam Q1-2026: 74 PRs
+ok   HKUDS/ClawTeam Q2-2026: 25 PRs
+ok   HKUDS/ClawWork Q1-2024: 0 PRs
+ok   HKUDS/ClawWork Q4-2025: 0 PRs
+ok   HKUDS/ClawWork Q1-2026: 24 PRs
+ok   HKUDS/ClawWork Q2-2026: 7 PRs
+ok   HKUDS/DeepTutor Q1-2024: 0 PRs
+ok   HKUDS/DeepTutor Q4-2025: 7 PRs
+ok   HKUDS/DeepTutor Q1-2026: 129 PRs
+ok   HKUDS/DeepTutor Q2-2026: 205 PRs
+ok   HKUDS/FastCode Q1-2024: 0 PRs
+ok   HKUDS/FastCode Q4-2025: 0 PRs
+ok   HKUDS/FastCode Q1-2026: 11 PRs
+ok   HKUDS/FastCode Q2-2026: 1 PRs
+ok   HKUDS/LightRAG Q1-2024: 0 PRs
+ok   HKUDS/LightRAG Q4-2025: 211 PRs
+ok   HKUDS/LightRAG Q1-2026: 191 PRs
+WARN HKUDS/LightRAG Q2-2026: collected 383/391 PRs (sub-window saturation) — raise --subwindows to recover
+ok   HKUDS/LightRAG Q2-2026: 383 PRs
+ok   HKUDS/Litewrite Q1-2024: 0 PRs
+ok   HKUDS/Litewrite Q4-2025: 0 PRs
+ok   HKUDS/Litewrite Q1-2026: 8 PRs
+ok   HKUDS/Litewrite Q2-2026: 0 PRs
+ok   HKUDS/OpenHarness Q1-2024: 0 PRs
+ok   HKUDS/OpenHarness Q4-2025: 0 PRs
+ok   HKUDS/OpenHarness Q1-2026: 0 PRs
+ok   HKUDS/OpenHarness Q2-2026: 167 PRs
+ok   HKUDS/OpenPhone Q1-2024: 0 PRs
+ok   HKUDS/OpenPhone Q4-2025: 1 PRs
+ok   HKUDS/OpenPhone Q1-2026: 0 PRs
+ok   HKUDS/OpenPhone Q2-2026: 0 PRs
+ok   HKUDS/RAG-Anything Q1-2024: 0 PRs
+ok   HKUDS/RAG-Anything Q4-2025: 16 PRs
+ok   HKUDS/RAG-Anything Q1-2026: 33 PRs
+FAIL HKUDS/RAG-Anything Q2-2026
+ok   HKUDS/ViMax Q1-2024: 0 PRs
+ok   HKUDS/ViMax Q4-2025: 6 PRs
+ok   HKUDS/ViMax Q1-2026: 5 PRs
+ok   HKUDS/ViMax Q2-2026: 17 PRs
+ok   HKUDS/Vibe-Trading Q1-2024: 0 PRs
+ok   HKUDS/Vibe-Trading Q4-2025: 0 PRs
+ok   HKUDS/Vibe-Trading Q1-2026: 0 PRs
+WARN HKUDS/Vibe-Trading Q2-2026: collected 209/216 PRs (sub-window saturation) — raise --subwindows to recover
+ok   HKUDS/Vibe-Trading Q2-2026: 209 PRs
+ok   HKUDS/nanobot Q1-2024: 0 PRs
+ok   HKUDS/nanobot Q4-2025: 0 PRs
+WARN HKUDS/nanobot Q1-2026: collected 350/1738 PRs (sub-window saturation) — raise --subwindows to recover
+ok   HKUDS/nanobot Q1-2026: 350 PRs
+WARN HKUDS/nanobot Q2-2026: collected 500/1327 PRs (sub-window saturation) — raise --subwindows to recover
+ok   HKUDS/nanobot Q2-2026: 500 PRs
+ok   HazyResearch/HipKittens Q1-2024: 0 PRs
+ok   HazyResearch/HipKittens Q4-2025: 16 PRs
+ok   HazyResearch/HipKittens Q1-2026: 14 PRs
+ok   HazyResearch/HipKittens Q2-2026: 14 PRs
+ok   HazyResearch/intelligence-per-watt Q1-2024: 0 PRs
+ok   HazyResearch/intelligence-per-watt Q4-2025: 9 PRs
+ok   HazyResearch/intelligence-per-watt Q1-2026: 15 PRs
+ok   HazyResearch/intelligence-per-watt Q2-2026: 7 PRs
+ok   HazyResearch/minions Q1-2024: 0 PRs
+ok   HazyResearch/minions Q4-2025: 5 PRs
+ok   HazyResearch/minions Q1-2026: 3 PRs
+ok   HazyResearch/minions Q2-2026: 1 PRs
+WARN Helicone/helicone Q1-2024: collected 301/311 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Helicone/helicone Q1-2024: 301 PRs
+WARN Helicone/helicone Q4-2025: collected 419/522 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Helicone/helicone Q4-2025: 419 PRs
+ok   Helicone/helicone Q1-2026: 160 PRs
+ok   Helicone/helicone Q2-2026: 40 PRs
+ok   Helicone/helicone-helm-v3 Q1-2024: 0 PRs
+ok   Helicone/helicone-helm-v3 Q4-2025: 0 PRs
+ok   Helicone/helicone-helm-v3 Q1-2026: 0 PRs
+ok   Helicone/helicone-helm-v3 Q2-2026: 0 PRs
+ok   InsForge/CLI Q1-2024: 0 PRs
+ok   InsForge/CLI Q4-2025: 0 PRs
+ok   InsForge/CLI Q1-2026: 40 PRs
+ok   InsForge/CLI Q2-2026: 129 PRs
+ok   InsForge/InsForge Q1-2024: 0 PRs
+WARN InsForge/InsForge Q4-2025: collected 236/263 PRs (sub-window saturation) — raise --subwindows to recover
+ok   InsForge/InsForge Q4-2025: 236 PRs
+WARN InsForge/InsForge Q1-2026: collected 247/288 PRs (sub-window saturation) — raise --subwindows to recover
+ok   InsForge/InsForge Q1-2026: 247 PRs
+WARN InsForge/InsForge Q2-2026: collected 388/425 PRs (sub-window saturation) — raise --subwindows to recover
+ok   InsForge/InsForge Q2-2026: 388 PRs
+ok   InsForge/InsForge-sdk-js Q1-2024: 0 PRs
+ok   InsForge/InsForge-sdk-js Q4-2025: 13 PRs
+ok   InsForge/InsForge-sdk-js Q1-2026: 31 PRs
+ok   InsForge/InsForge-sdk-js Q2-2026: 24 PRs
+ok   InsForge/deploy-provider Q1-2024: 0 PRs
+ok   InsForge/deploy-provider Q4-2025: 0 PRs
+ok   InsForge/deploy-provider Q1-2026: 0 PRs
+ok   InsForge/deploy-provider Q2-2026: 1 PRs
+ok   InsForge/insforge-db Q1-2024: 0 PRs
+ok   InsForge/insforge-db Q4-2025: 1 PRs
+ok   InsForge/insforge-db Q1-2026: 0 PRs
+ok   InsForge/insforge-db Q2-2026: 2 PRs
+ok   InsForge/insforge-flutter Q1-2024: 0 PRs
+ok   InsForge/insforge-flutter Q4-2025: 0 PRs
+ok   InsForge/insforge-flutter Q1-2026: 0 PRs
+ok   InsForge/insforge-flutter Q2-2026: 3 PRs
+ok   InsForge/insforge-install Q1-2024: 0 PRs
+ok   InsForge/insforge-install Q4-2025: 1 PRs
+ok   InsForge/insforge-install Q1-2026: 1 PRs
+ok   InsForge/insforge-install Q2-2026: 0 PRs
+ok   InsForge/insforge-integration Q1-2024: 0 PRs
+ok   InsForge/insforge-integration Q4-2025: 0 PRs
+ok   InsForge/insforge-integration Q1-2026: 0 PRs
+ok   InsForge/insforge-integration Q2-2026: 4 PRs
+ok   InsForge/insforge-kotlin Q1-2024: 0 PRs
+ok   InsForge/insforge-kotlin Q4-2025: 0 PRs
+ok   InsForge/insforge-kotlin Q1-2026: 8 PRs
+ok   InsForge/insforge-kotlin Q2-2026: 0 PRs
+ok   InsForge/insforge-mcp Q1-2024: 0 PRs
+ok   InsForge/insforge-mcp Q4-2025: 12 PRs
+ok   InsForge/insforge-mcp Q1-2026: 18 PRs
+ok   InsForge/insforge-mcp Q2-2026: 15 PRs
+ok   InsForge/insforge-oauth-example Q1-2024: 0 PRs
+ok   InsForge/insforge-oauth-example Q4-2025: 1 PRs
+ok   InsForge/insforge-oauth-example Q1-2026: 0 PRs
+ok   InsForge/insforge-oauth-example Q2-2026: 2 PRs
+ok   InsForge/insforge-python Q1-2024: 0 PRs
+ok   InsForge/insforge-python Q4-2025: 0 PRs
+ok   InsForge/insforge-python Q1-2026: 2 PRs
+ok   InsForge/insforge-python Q2-2026: 0 PRs
+ok   InsForge/insforge-standalone Q1-2024: 0 PRs
+ok   InsForge/insforge-standalone Q4-2025: 28 PRs
+ok   InsForge/insforge-standalone Q1-2026: 14 PRs
+ok   InsForge/insforge-standalone Q2-2026: 39 PRs
+ok   InsForge/insforge-swift Q1-2024: 0 PRs
+ok   InsForge/insforge-swift Q4-2025: 0 PRs
+ok   InsForge/insforge-swift Q1-2026: 13 PRs
+ok   InsForge/insforge-swift Q2-2026: 0 PRs
+ok   InsForge/insforge-vscode-extension Q1-2024: 0 PRs
+ok   InsForge/insforge-vscode-extension Q4-2025: 0 PRs
+ok   InsForge/insforge-vscode-extension Q1-2026: 12 PRs
+ok   InsForge/insforge-vscode-extension Q2-2026: 14 PRs
+ok   InsForge/supabase-to-insforge Q1-2024: 0 PRs
+ok   InsForge/supabase-to-insforge Q4-2025: 0 PRs
+ok   InsForge/supabase-to-insforge Q1-2026: 0 PRs
+ok   InsForge/supabase-to-insforge Q2-2026: 1 PRs
+ok   InternLM/OVO-S-Bench Q1-2024: 0 PRs
+ok   InternLM/OVO-S-Bench Q4-2025: 0 PRs
+ok   InternLM/OVO-S-Bench Q1-2026: 0 PRs
+ok   InternLM/OVO-S-Bench Q2-2026: 0 PRs
+ok   InternLM/WildClawBench Q1-2024: 0 PRs
+ok   InternLM/WildClawBench Q4-2025: 0 PRs
+ok   InternLM/WildClawBench Q1-2026: 0 PRs
+ok   InternLM/WildClawBench Q2-2026: 5 PRs
+ok   InternLM/lmdeploy Q1-2024: 273 PRs
+FAIL InternLM/lmdeploy Q4-2025
+FAIL InternLM/lmdeploy Q1-2026
+FAIL InternLM/lmdeploy Q2-2026
+FAIL InternLM/xtuner Q1-2024
+FAIL InternLM/xtuner Q4-2025
+FAIL InternLM/xtuner Q1-2026
+FAIL InternLM/xtuner Q2-2026
+FAIL Kiln-AI/Kiln Q1-2024
+FAIL Kiln-AI/Kiln Q4-2025
+FAIL Kiln-AI/Kiln Q1-2026
+FAIL Kiln-AI/Kiln Q2-2026
+FAIL Kiln-AI/docs Q1-2024
+FAIL Kiln-AI/docs Q4-2025
+FAIL Kiln-AI/docs Q1-2026
+FAIL Kiln-AI/docs Q2-2026
+FAIL LAION-AI/Admin_Bud-E Q1-2024
+FAIL LAION-AI/Admin_Bud-E Q4-2025
+FAIL LAION-AI/Admin_Bud-E Q1-2026
+FAIL LAION-AI/Admin_Bud-E Q2-2026
+FAIL LAION-AI/Dream-E Q1-2024
+FAIL LAION-AI/Dream-E Q4-2025
+FAIL LAION-AI/Dream-E Q1-2026
+FAIL LAION-AI/Dream-E Q2-2026
+FAIL LAION-AI/Voice-Acting-Pipeline Q1-2024
+FAIL LAION-AI/Voice-Acting-Pipeline Q4-2025
+FAIL LAION-AI/Voice-Acting-Pipeline Q1-2026
+FAIL LAION-AI/Voice-Acting-Pipeline Q2-2026
+FAIL LAION-AI/school-bud-e-frontend Q1-2024
+FAIL LAION-AI/school-bud-e-frontend Q4-2025
+FAIL LAION-AI/school-bud-e-frontend Q1-2026
+FAIL LAION-AI/school-bud-e-frontend Q2-2026
+FAIL LAION-AI/univeral-audio-annotation-pipeline Q1-2024
+FAIL LAION-AI/univeral-audio-annotation-pipeline Q4-2025
+FAIL LAION-AI/univeral-audio-annotation-pipeline Q1-2026
+FAIL LAION-AI/univeral-audio-annotation-pipeline Q2-2026
+FAIL LambdaLabsML/cognitive-autoresearch Q1-2024
+FAIL LambdaLabsML/cognitive-autoresearch Q4-2025
+FAIL LambdaLabsML/cognitive-autoresearch Q1-2026
+FAIL LambdaLabsML/cognitive-autoresearch Q2-2026
+FAIL LambdaLabsML/roundtable Q1-2024
+FAIL LambdaLabsML/roundtable Q4-2025
+FAIL LambdaLabsML/roundtable Q1-2026
+FAIL LambdaLabsML/roundtable Q2-2026
+FAIL LambdaLabsML/the_lab.api Q1-2024
+FAIL LambdaLabsML/the_lab.api Q4-2025
+FAIL LambdaLabsML/the_lab.api Q1-2026
+FAIL LambdaLabsML/the_lab.api Q2-2026
+FAIL Lightning-AI/LitServe Q1-2024
+FAIL Lightning-AI/LitServe Q4-2025
+FAIL Lightning-AI/LitServe Q1-2026
+FAIL Lightning-AI/LitServe Q2-2026
+FAIL Lightning-AI/litgpt Q1-2024
+FAIL Lightning-AI/litgpt Q4-2025
+FAIL Lightning-AI/litgpt Q1-2026
+FAIL Lightning-AI/litgpt Q2-2026
+FAIL Lightning-AI/pytorch-lightning Q1-2024
+FAIL Lightning-AI/pytorch-lightning Q4-2025
+FAIL Lightning-AI/pytorch-lightning Q1-2026
+FAIL Lightning-AI/pytorch-lightning Q2-2026
+FAIL Lightricks/ComfyUI-LTXVideo Q1-2024
+FAIL Lightricks/ComfyUI-LTXVideo Q4-2025
+FAIL Lightricks/ComfyUI-LTXVideo Q1-2026
+FAIL Lightricks/ComfyUI-LTXVideo Q2-2026
+FAIL Lightricks/LTX-Desktop Q1-2024
+FAIL Lightricks/LTX-Desktop Q4-2025
+FAIL Lightricks/LTX-Desktop Q1-2026
+FAIL Lightricks/LTX-Desktop Q2-2026
+FAIL MariaDB/server Q1-2024
+FAIL MariaDB/server Q4-2025
+FAIL MariaDB/server Q1-2026
+FAIL MariaDB/server Q2-2026
+FAIL MariaDB/skills Q1-2024
+ok   MariaDB/skills Q4-2025: 0 PRs
+ok   MariaDB/skills Q1-2026: 0 PRs
+ok   MariaDB/skills Q2-2026: 4 PRs
+ok   Marker-Inc-Korea/AutoRAG Q1-2024: 126 PRs
+ok   Marker-Inc-Korea/AutoRAG Q4-2025: 17 PRs
+ok   Marker-Inc-Korea/AutoRAG Q1-2026: 9 PRs
+ok   Marker-Inc-Korea/AutoRAG Q2-2026: 72 PRs
+ok   Marker-Inc-Korea/ModuDoc Q1-2024: 0 PRs
+ok   Marker-Inc-Korea/ModuDoc Q4-2025: 0 PRs
+ok   Marker-Inc-Korea/ModuDoc Q1-2026: 0 PRs
+ok   Marker-Inc-Korea/ModuDoc Q2-2026: 0 PRs
+ok   Marker-Inc-Korea/PhoneAgent Q1-2024: 0 PRs
+ok   Marker-Inc-Korea/PhoneAgent Q4-2025: 0 PRs
+ok   Marker-Inc-Korea/PhoneAgent Q1-2026: 0 PRs
+ok   Marker-Inc-Korea/PhoneAgent Q2-2026: 0 PRs
+ok   Marker-Inc-Korea/ko-pii Q1-2024: 0 PRs
+ok   Marker-Inc-Korea/ko-pii Q4-2025: 0 PRs
+ok   Marker-Inc-Korea/ko-pii Q1-2026: 0 PRs
+ok   Marker-Inc-Korea/ko-pii Q2-2026: 0 PRs
+ok   Marker-Inc-Korea/voiStarcraft2 Q1-2024: 0 PRs
+ok   Marker-Inc-Korea/voiStarcraft2 Q4-2025: 0 PRs
+ok   Marker-Inc-Korea/voiStarcraft2 Q1-2026: 0 PRs
+ok   Marker-Inc-Korea/voiStarcraft2 Q2-2026: 44 PRs
+ok   MiniMax-AI/Mini-Agent Q1-2024: 0 PRs
+ok   MiniMax-AI/Mini-Agent Q4-2025: 20 PRs
+ok   MiniMax-AI/Mini-Agent Q1-2026: 18 PRs
+ok   MiniMax-AI/Mini-Agent Q2-2026: 10 PRs
+ok   MiniMax-AI/MiniMax-Provider-Verifier Q1-2024: 0 PRs
+ok   MiniMax-AI/MiniMax-Provider-Verifier Q4-2025: 1 PRs
+ok   MiniMax-AI/MiniMax-Provider-Verifier Q1-2026: 7 PRs
+ok   MiniMax-AI/MiniMax-Provider-Verifier Q2-2026: 21 PRs
+ok   MiniMax-AI/OpenRoom Q1-2024: 0 PRs
+ok   MiniMax-AI/OpenRoom Q4-2025: 0 PRs
+ok   MiniMax-AI/OpenRoom Q1-2026: 20 PRs
+ok   MiniMax-AI/OpenRoom Q2-2026: 16 PRs
+ok   MiniMax-AI/cli Q1-2024: 0 PRs
+ok   MiniMax-AI/cli Q4-2025: 0 PRs
+ok   MiniMax-AI/cli Q1-2026: 11 PRs
+ok   MiniMax-AI/cli Q2-2026: 116 PRs
+ok   MiniMax-AI/skills Q1-2024: 0 PRs
+ok   MiniMax-AI/skills Q4-2025: 0 PRs
+ok   MiniMax-AI/skills Q1-2026: 30 PRs
+ok   MiniMax-AI/skills Q2-2026: 40 PRs
+ok   Mintplex-Labs/anything-llm Q1-2024: 173 PRs
+ok   Mintplex-Labs/anything-llm Q4-2025: 145 PRs
+ok   Mintplex-Labs/anything-llm Q1-2026: 220 PRs
+ok   Mintplex-Labs/anything-llm Q2-2026: 229 PRs
+ok   Mintplex-Labs/anythingllm-embed Q1-2024: 0 PRs
+ok   Mintplex-Labs/anythingllm-embed Q4-2025: 1 PRs
+ok   Mintplex-Labs/anythingllm-embed Q1-2026: 1 PRs
+ok   Mintplex-Labs/anythingllm-embed Q2-2026: 3 PRs
+ok   ModelTC/LightCompress Q1-2024: 1 PRs
+ok   ModelTC/LightCompress Q4-2025: 4 PRs
+ok   ModelTC/LightCompress Q1-2026: 11 PRs
+ok   ModelTC/LightCompress Q2-2026: 3 PRs
+ok   ModelTC/LightLLM Q1-2024: 84 PRs
+ok   ModelTC/LightLLM Q4-2025: 85 PRs
+ok   ModelTC/LightLLM Q1-2026: 82 PRs
+ok   ModelTC/LightLLM Q2-2026: 125 PRs
+ok   ModelTC/LightX2V Q1-2024: 0 PRs
+ok   ModelTC/LightX2V Q4-2025: 266 PRs
+ok   ModelTC/LightX2V Q1-2026: 207 PRs
+ok   ModelTC/LightX2V Q2-2026: 207 PRs
+ok   ModelTC/LightX2V-BLOG Q1-2024: 0 PRs
+ok   ModelTC/LightX2V-BLOG Q4-2025: 0 PRs
+ok   ModelTC/LightX2V-BLOG Q1-2026: 0 PRs
+ok   ModelTC/LightX2V-BLOG Q2-2026: 11 PRs
+ok   ModelTC/lightx2v-plugin-FL Q1-2024: 0 PRs
+ok   ModelTC/lightx2v-plugin-FL Q4-2025: 0 PRs
+ok   ModelTC/lightx2v-plugin-FL Q1-2026: 0 PRs
+ok   ModelTC/lightx2v-plugin-FL Q2-2026: 3 PRs
+ok   MoonshotAI/kimi-agent-sdk Q1-2024: 0 PRs
+ok   MoonshotAI/kimi-agent-sdk Q4-2025: 0 PRs
+ok   MoonshotAI/kimi-agent-sdk Q1-2026: 80 PRs
+ok   MoonshotAI/kimi-agent-sdk Q2-2026: 38 PRs
+ok   MoonshotAI/kimi-cli Q1-2024: 0 PRs
+WARN MoonshotAI/kimi-cli Q4-2025: collected 303/328 PRs (sub-window saturation) — raise --subwindows to recover
+ok   MoonshotAI/kimi-cli Q4-2025: 303 PRs
+WARN MoonshotAI/kimi-cli Q1-2026: collected 428/518 PRs (sub-window saturation) — raise --subwindows to recover
+ok   MoonshotAI/kimi-cli Q1-2026: 428 PRs
+WARN MoonshotAI/kimi-cli Q2-2026: collected 288/346 PRs (sub-window saturation) — raise --subwindows to recover
+ok   MoonshotAI/kimi-cli Q2-2026: 288 PRs
+ok   MoonshotAI/kimi-code Q1-2024: 0 PRs
+ok   MoonshotAI/kimi-code Q4-2025: 0 PRs
+ok   MoonshotAI/kimi-code Q1-2026: 0 PRs
+WARN MoonshotAI/kimi-code Q2-2026: collected 208/859 PRs (sub-window saturation) — raise --subwindows to recover
+ok   MoonshotAI/kimi-code Q2-2026: 208 PRs
+ok   MoonshotAI/kimi-help-center Q1-2024: 0 PRs
+ok   MoonshotAI/kimi-help-center Q4-2025: 0 PRs
+ok   MoonshotAI/kimi-help-center Q1-2026: 0 PRs
+ok   MoonshotAI/kimi-help-center Q2-2026: 4 PRs
+ok   MoonshotAI/kosong Q1-2024: 0 PRs
+ok   MoonshotAI/kosong Q4-2025: 70 PRs
+ok   MoonshotAI/kosong Q1-2026: 0 PRs
+ok   MoonshotAI/kosong Q2-2026: 0 PRs
+ok   NVIDIA-NeMo/Anonymizer Q1-2024: 0 PRs
+ok   NVIDIA-NeMo/Anonymizer Q4-2025: 0 PRs
+ok   NVIDIA-NeMo/Anonymizer Q1-2026: 45 PRs
+ok   NVIDIA-NeMo/Anonymizer Q2-2026: 90 PRs
+ok   NVIDIA-NeMo/Automodel Q1-2024: 0 PRs
+WARN NVIDIA-NeMo/Automodel Q4-2025: collected 306/326 PRs (sub-window saturation) — raise --subwindows to recover
+ok   NVIDIA-NeMo/Automodel Q4-2025: 306 PRs
+WARN NVIDIA-NeMo/Automodel Q1-2026: collected 397/495 PRs (sub-window saturation) — raise --subwindows to recover
+ok   NVIDIA-NeMo/Automodel Q1-2026: 397 PRs
+WARN NVIDIA-NeMo/Automodel Q2-2026: collected 500/1109 PRs (sub-window saturation) — raise --subwindows to recover
+ok   NVIDIA-NeMo/Automodel Q2-2026: 500 PRs
+ok   NVIDIA-NeMo/Curator Q1-2024: 13 PRs
+ok   NVIDIA-NeMo/Curator Q4-2025: 145 PRs
+FAIL NVIDIA-NeMo/Curator Q1-2026
+FAIL NVIDIA-NeMo/Curator Q2-2026
+FAIL NVIDIA-NeMo/DataDesigner Q1-2024
+FAIL NVIDIA-NeMo/DataDesigner Q4-2025
+FAIL NVIDIA-NeMo/DataDesigner Q1-2026
+FAIL NVIDIA-NeMo/DataDesigner Q2-2026
+FAIL NVIDIA-NeMo/DataDesignerPlugins Q1-2024
+FAIL NVIDIA-NeMo/DataDesignerPlugins Q4-2025
+FAIL NVIDIA-NeMo/DataDesignerPlugins Q1-2026
+FAIL NVIDIA-NeMo/DataDesignerPlugins Q2-2026
+FAIL NVIDIA-NeMo/Emerging-Optimizers Q1-2024
+FAIL NVIDIA-NeMo/Emerging-Optimizers Q4-2025
+FAIL NVIDIA-NeMo/Emerging-Optimizers Q1-2026
+FAIL NVIDIA-NeMo/Emerging-Optimizers Q2-2026
+FAIL NVIDIA-NeMo/Evaluator Q1-2024
+FAIL NVIDIA-NeMo/Evaluator Q4-2025
+FAIL NVIDIA-NeMo/Evaluator Q1-2026
+FAIL NVIDIA-NeMo/Evaluator Q2-2026
+FAIL NVIDIA-NeMo/Export-Deploy Q1-2024
+FAIL NVIDIA-NeMo/Export-Deploy Q4-2025
+FAIL NVIDIA-NeMo/Export-Deploy Q1-2026
+FAIL NVIDIA-NeMo/Export-Deploy Q2-2026
+FAIL NVIDIA-NeMo/Guardrails Q1-2024
+FAIL NVIDIA-NeMo/Guardrails Q4-2025
+FAIL NVIDIA-NeMo/Guardrails Q1-2026
+FAIL NVIDIA-NeMo/Guardrails Q2-2026
+FAIL NVIDIA-NeMo/Gym Q1-2024
+FAIL NVIDIA-NeMo/Gym Q4-2025
+FAIL NVIDIA-NeMo/Gym Q1-2026
+FAIL NVIDIA-NeMo/Gym Q2-2026
+FAIL NVIDIA-NeMo/Lens Q1-2024
+FAIL NVIDIA-NeMo/Lens Q4-2025
+FAIL NVIDIA-NeMo/Lens Q1-2026
+FAIL NVIDIA-NeMo/Lens Q2-2026
+FAIL NVIDIA-NeMo/Megatron-Bridge Q1-2024
+FAIL NVIDIA-NeMo/Megatron-Bridge Q4-2025
+FAIL NVIDIA-NeMo/Megatron-Bridge Q1-2026
+FAIL NVIDIA-NeMo/Megatron-Bridge Q2-2026
+FAIL NVIDIA-NeMo/Nemotron Q1-2024
+FAIL NVIDIA-NeMo/Nemotron Q4-2025
+FAIL NVIDIA-NeMo/Nemotron Q1-2026
+FAIL NVIDIA-NeMo/Nemotron Q2-2026
+FAIL NVIDIA-NeMo/ProRL-Agent-Server Q1-2024
+FAIL NVIDIA-NeMo/ProRL-Agent-Server Q4-2025
+FAIL NVIDIA-NeMo/ProRL-Agent-Server Q1-2026
+FAIL NVIDIA-NeMo/ProRL-Agent-Server Q2-2026
+FAIL NVIDIA-NeMo/RL Q1-2024
+FAIL NVIDIA-NeMo/RL Q4-2025
+FAIL NVIDIA-NeMo/RL Q1-2026
+FAIL NVIDIA-NeMo/RL Q2-2026
+FAIL NVIDIA-NeMo/Run Q1-2024
+FAIL NVIDIA-NeMo/Run Q4-2025
+FAIL NVIDIA-NeMo/Run Q1-2026
+FAIL NVIDIA-NeMo/Run Q2-2026
+FAIL NVIDIA-NeMo/SDG-PGMs Q1-2024
+FAIL NVIDIA-NeMo/SDG-PGMs Q4-2025
+FAIL NVIDIA-NeMo/SDG-PGMs Q1-2026
+FAIL NVIDIA-NeMo/SDG-PGMs Q2-2026
+FAIL NVIDIA-NeMo/Safe-Synthesizer Q1-2024
+FAIL NVIDIA-NeMo/Safe-Synthesizer Q4-2025
+FAIL NVIDIA-NeMo/Safe-Synthesizer Q1-2026
+FAIL NVIDIA-NeMo/Safe-Synthesizer Q2-2026
+FAIL NVIDIA-NeMo/Skills Q1-2024
+FAIL NVIDIA-NeMo/Skills Q4-2025
+FAIL NVIDIA-NeMo/Skills Q1-2026
+FAIL NVIDIA-NeMo/Skills Q2-2026
+FAIL NVIDIA-NeMo/Speech Q1-2024
+FAIL NVIDIA-NeMo/Speech Q4-2025
+FAIL NVIDIA-NeMo/Speech Q1-2026
+FAIL NVIDIA-NeMo/Speech Q2-2026
+FAIL NVIDIA-NeMo/nemo-platform Q1-2024
+FAIL NVIDIA-NeMo/nemo-platform Q4-2025
+FAIL NVIDIA-NeMo/nemo-platform Q1-2026
+FAIL NVIDIA-NeMo/nemo-platform Q2-2026
+FAIL NVIDIA/DALI Q1-2024
+FAIL NVIDIA/DALI Q4-2025
+FAIL NVIDIA/DALI Q1-2026
+ok   NVIDIA/DALI Q2-2026: 131 PRs
+ok   NVIDIA/DeepStream Q1-2024: 0 PRs
+ok   NVIDIA/DeepStream Q4-2025: 0 PRs
+ok   NVIDIA/DeepStream Q1-2026: 0 PRs
+ok   NVIDIA/DeepStream Q2-2026: 0 PRs
+WARN NVIDIA/Fuser Q1-2024: collected 331/340 PRs (sub-window saturation) — raise --subwindows to recover
+ok   NVIDIA/Fuser Q1-2024: 331 PRs
+WARN NVIDIA/Fuser Q4-2025: collected 373/385 PRs (sub-window saturation) — raise --subwindows to recover
+ok   NVIDIA/Fuser Q4-2025: 373 PRs
+ok   NVIDIA/Fuser Q1-2026: 289 PRs
+ok   NVIDIA/Fuser Q2-2026: 4 PRs
+ok   NVIDIA/G-Assist Q1-2024: 0 PRs
+ok   NVIDIA/G-Assist Q4-2025: 2 PRs
+ok   NVIDIA/G-Assist Q1-2026: 0 PRs
+ok   NVIDIA/G-Assist Q2-2026: 0 PRs
+ok   NVIDIA/IsaacTeleop Q1-2024: 0 PRs
+ok   NVIDIA/IsaacTeleop Q4-2025: 32 PRs
+ok   NVIDIA/IsaacTeleop Q1-2026: 259 PRs
