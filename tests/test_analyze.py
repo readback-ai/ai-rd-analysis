@@ -104,6 +104,26 @@ def test_load_cells_roundtrips_and_skips_corrupt(tmp_store):
     assert not any(k[0] in ("o/bad", "o/ugly") for k in cells)
 
 
+def test_group_by_period_dedups_overlapping_cell_generations(tmp_store):
+    """Review finding: full-quarter + sub-window cells (or old/new quarter
+    definitions) for the same repo-period double-counted PRs."""
+    import json as _json
+    from pipeline.analyze import group_by_period
+    full = ghx.cell_path("census", "o/r", "2026-01-01..2026-03-31")
+    full.write_text(_json.dumps([{"number": 1}, {"number": 2}]))
+    sub = ghx.cell_path("census", "o/r", "2026-01-01..2026-01-09")
+    sub.write_text(_json.dumps([{"number": 2}, {"number": 3}]))
+    grouped = group_by_period(load_cells(), QUARTER_RANGES)
+    nums = sorted(pr["number"] for pr in grouped[("o/r", "Q1-2026")])
+    assert nums == [1, 2, 3]              # PR 2 counted once, not twice
+
+
+def test_insider_is_a_reported_metric():
+    """Review finding: insider was computed but never reported."""
+    from pipeline.analyze import METRICS
+    assert "insider" in METRICS
+
+
 def test_ai_reviewer_list_covers_observed_reviewers():
     """Reviewers actually seen in the Phase-0 data must be classified as AI."""
     for login in ("gemini-code-assist", "copilot-pull-request-reviewer",

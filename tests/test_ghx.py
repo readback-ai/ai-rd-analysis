@@ -5,12 +5,13 @@ import pytest
 
 from pipeline import ghx
 from pipeline.ghx import (MARKERS_V1, MARKERS_V2, cell_path, cell_valid,
-                          pr_ai_tools)
+                          decode_cell_stem, pr_ai_tools, read_cell)
 
 
 @pytest.fixture(autouse=True)
 def tmp_store(tmp_path, monkeypatch):
     monkeypatch.setenv("AIRD_DATA_DIR", str(tmp_path))
+    ghx._budget.update({"remaining": None, "used_since": 0})   # isolate budget cache
     return tmp_path
 
 
@@ -45,6 +46,23 @@ def test_cell_valid_rejects_garbage(tmp_store, content):
 
 def test_cell_valid_missing_file(tmp_store):
     assert not cell_valid(cell_path("census", "o/r", "nope"), list)
+
+
+def test_read_cell_parses_once_and_decode_roundtrips(tmp_store):
+    p = cell_path("census", "fw-ai/flashinfer", "2026-01-01..2026-03-31")
+    p.write_text('[{"number": 5}]')
+    assert read_cell(p, list) == [{"number": 5}]
+    assert read_cell(p, dict) is None
+    assert decode_cell_stem(p.stem) == ["fw-ai/flashinfer", "2026-01-01..2026-03-31"]
+
+
+def test_budget_wait_caches_rate_limit_polls(monkeypatch):
+    """Review finding: a full rate_limit REST call ran before EVERY query."""
+    polls = []
+    monkeypatch.setattr(ghx, "_gh", lambda *a, **k: polls.append(1) or "4000\t9999999999")
+    for _ in range(10):
+        ghx.graphql_budget_wait(min_remaining=200)
+    assert len(polls) == 1                # 9 subsequent calls served from cache
 
 
 # --------------------------------------------------------------- gh wrappers
@@ -112,6 +130,21 @@ def test_v1_ignores_aider_and_codex_but_v2_detects():
              emails=["codex@openai.com"])
     assert pr_ai_tools(pr, MARKERS_V1) == set()
     assert pr_ai_tools(pr, MARKERS_V2) == {"aider", "codex"}
+
+
+def test_v2_detects_codex_cloud_via_committer():
+    """Review finding: Codex cloud only appears as the COMMITTER; the old
+    query/classifier never saw it."""
+    pr = _pr(messages=["normal"])
+    pr["commits"]["nodes"][0]["commit"]["committer"] = {
+        "email": "", "user": {"login": "chatgpt-codex-connector"}}
+    assert pr_ai_tools(pr, MARKERS_V2) == {"codex"}
+    assert pr_ai_tools(pr, MARKERS_V1) == set()
+
+
+def test_marker_specs_have_search_terms_and_needles():
+    for spec in MARKERS_V2.values():
+        assert spec.search_terms and spec.needles
 
 
 def test_plain_pr_detects_nothing():

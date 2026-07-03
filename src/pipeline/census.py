@@ -1,12 +1,15 @@
 """Stage 3 — PR census for the analysis repo set.
 
 Pulls PR nodes (commits + reviews + authorAssociation + size) per repo x period.
-Sampling: if a repo-period holds <= --cell-cap PRs it is fully censused in one
+Sampling: if a repo-period holds <= PAGE_SIZE PRs it is fully censused in one
 search call; otherwise the period is split into --subwindows uniform date
-sub-windows of --cell-cap each (uniform-over-time, avoids window-tail bias).
+sub-windows of up to PAGE_SIZE each (uniform-over-time, avoids window-tail
+bias). Collected-vs-total is checked and any undercount is WARNed — silent
+truncation is how a census quietly becomes a biased sample.
 
 Every cell is checkpointed to raw/census/ and only counted done if it parses
 as a JSON array (rate-limit error objects are never written — see ghx).
+Cached cells cost no network calls and no sleeps, so resume runs are fast.
 
 Usage:
   python -m pipeline.census --repos repos.tsv \
@@ -16,22 +19,27 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 import time
 from datetime import date, timedelta
 from pathlib import Path
 
-from pipeline.ghx import cell_path, cell_valid, graphql_nodes, rest_count
+from pipeline.ghx import cell_path, graphql_nodes, read_cell, rest_count
 from pipeline.scan_orgs import QUARTER_RANGES
 
+PAGE_SIZE = 50   # per-call PR fetch; the census cap per cell (single page, no pagination)
+
 PR_QUERY = """
-query($q:String!){ search(query:$q, type:ISSUE, first:50){
+query($q:String!){ search(query:$q, type:ISSUE, first:%d){
   nodes{ ... on PullRequest{ number createdAt mergedAt closedAt authorAssociation
     additions deletions changedFiles
     author{login __typename}
-    commits(first:12){ nodes{ commit{ message authors(first:6){ nodes{ email } } } } }
+    commits(first:12){ nodes{ commit{ message
+      authors(first:6){ nodes{ email } }
+      committer{ email user{ login } } } } }
     reviews(first:15){ nodes{ author{login __typename} submittedAt state
                               comments{totalCount} } } } } } }
-"""
+""" % PAGE_SIZE
 
 
 def subwindows(rng: str, k: int) -> list[str]:
@@ -52,32 +60,43 @@ def subwindows(rng: str, k: int) -> list[str]:
     return out
 
 
-def pull_cell(repo: str, rng: str) -> list | None:
+def pull_cell(repo: str, rng: str) -> tuple[list | None, bool]:
+    """-> (nodes, was_cached). Cached hits cost no network and need no pacing."""
     p = cell_path("census", repo, rng)
-    if cell_valid(p, list):
-        return json.loads(p.read_text())
+    cached = read_cell(p, list)
+    if cached is not None:
+        return cached, True
     nodes = graphql_nodes(PR_QUERY, {"q": f"repo:{repo} is:pr created:{rng} sort:created-desc"},
                           ".data.search.nodes", expect=list)
     if nodes is None:
-        return None
+        return None, False
     p.write_text(json.dumps(nodes))
-    return nodes
+    return nodes, False
 
 
-def census_repo_period(repo: str, period: str, cell_cap: int, k: int) -> int | None:
+def census_repo_period(repo: str, period: str, k: int) -> int | None:
     rng = QUARTER_RANGES[period]
+    # fully-cached fast path: a valid full-range cell needs no denominator call
+    cached = read_cell(cell_path("census", repo, rng), list)
+    if cached is not None:
+        return len(cached)
     total = rest_count(f"repo:{repo} is:pr created:{rng}", endpoint="search/issues")
     time.sleep(2)
     if total is None:
         return None
-    ranges = [rng] if total <= cell_cap else subwindows(rng, k)
+    ranges = [rng] if total <= PAGE_SIZE else subwindows(rng, k)
     n = 0
     for r in ranges:
-        nodes = pull_cell(repo, r)
+        nodes, was_cached = pull_cell(repo, r)
         if nodes is None:
             return None
         n += len(nodes)
-        time.sleep(1)
+        if not was_cached:
+            time.sleep(1)
+    if n < total:
+        print(f"WARN {repo} {period}: collected {n}/{total} PRs "
+              f"(sub-window saturation) — raise --subwindows to recover",
+              file=sys.stderr, flush=True)
     return n
 
 
@@ -87,18 +106,17 @@ def main() -> None:
                     help="TSV from enum_repos (col 1 = repo) or plain repo list")
     ap.add_argument("--periods", nargs="+", default=list(QUARTER_RANGES),
                     choices=list(QUARTER_RANGES))
-    ap.add_argument("--cell-cap", type=int, default=50)
     ap.add_argument("--subwindows", type=int, default=10)
     a = ap.parse_args()
     repos = []
     for line in Path(a.repos).read_text().splitlines():
         f = line.split("\t")[0].strip()
-        if f and "/" in f and f != "repo" and not f.endswith("/*"):
+        if f and "/" in f and f != "repo":
             repos.append(f)
     done = failed = 0
     for repo in repos:
         for per in a.periods:
-            n = census_repo_period(repo, per, a.cell_cap, a.subwindows)
+            n = census_repo_period(repo, per, a.subwindows)
             if n is None:
                 failed += 1
                 print(f"FAIL {repo} {per}", flush=True)

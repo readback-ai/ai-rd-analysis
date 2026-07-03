@@ -7,6 +7,10 @@ contributor-weighted averages per period with bootstrap 95% CIs over repos.
 Bot-review is DECOMPOSED (review gap P1.4): reviewers whose login is in
 AI_REVIEWERS count as ai_review; other Bot-typed reviewers as other_bot_review.
 
+PRs are DEDUPED by number within each (repo, period): the durable store can
+hold overlapping cell generations (full-quarter + sub-window cells, or cells
+pulled under an older quarter definition), and summing them double-counted.
+
 Usage:
   python -m pipeline.analyze --contributors data/repo_contributors.csv \
       --markers v1 --bootstrap 2000
@@ -15,12 +19,12 @@ from __future__ import annotations
 
 import argparse
 import csv
-import json
 import random
 from collections import defaultdict
 from pathlib import Path
 
-from pipeline.ghx import MARKERS_V1, MARKERS_V2, pr_ai_tools, raw_dir
+from pipeline.ghx import (MARKERS_V1, MARKERS_V2, decode_cell_stem,
+                          pr_ai_tools, raw_dir, read_cell)
 
 AI_REVIEWERS = {  # dedicated AI code-review bots seen in the data (extend as found)
     "gemini-code-assist", "copilot-pull-request-reviewer", "coderabbitai",
@@ -31,18 +35,16 @@ INSIDER = {"MEMBER", "OWNER", "COLLABORATOR"}
 
 
 def load_cells() -> dict[tuple[str, str], list[dict]]:
-    """(repo, period-or-range) -> PR nodes. Cell name: repo~name@range.json"""
+    """(repo, date-range) -> PR nodes, via ghx's cell-name decoding."""
     cells: dict[tuple[str, str], list[dict]] = defaultdict(list)
     for f in raw_dir("census").glob("*.json"):
-        try:
-            nodes = json.loads(f.read_text())
-        except json.JSONDecodeError:
+        nodes = read_cell(f, list)
+        if nodes is None:
             continue
-        if not isinstance(nodes, list):
+        parts = decode_cell_stem(f.stem)
+        if len(parts) != 2:
             continue
-        stem = f.stem
-        repo_part, _, rng = stem.partition("@")
-        repo = repo_part.replace("~", "/")
+        repo, rng = parts
         cells[(repo, rng)].extend(n for n in nodes if n)
     return cells
 
@@ -53,6 +55,26 @@ def period_of(rng: str, quarters: dict[str, str]) -> str | None:
         if qr.split("..")[0] <= start <= qr.split("..")[1]:
             return q
     return None
+
+
+def group_by_period(cells: dict[tuple[str, str], list[dict]],
+                    quarters: dict[str, str]) -> dict[tuple[str, str], list[dict]]:
+    """(repo, period) -> PRs, deduped by PR number across cell generations."""
+    grouped: dict[tuple[str, str], list[dict]] = defaultdict(list)
+    seen: dict[tuple[str, str], set] = defaultdict(set)
+    for (repo, rng), nodes in cells.items():
+        per = period_of(rng, quarters)
+        if not per:
+            continue
+        key = (repo, per)
+        for pr in nodes:
+            num = pr.get("number")
+            if num is not None:
+                if num in seen[key]:
+                    continue
+                seen[key].add(num)
+            grouped[key].append(pr)
+    return grouped
 
 
 def pr_metrics(pr: dict, markers: dict) -> dict:
@@ -69,11 +91,11 @@ def pr_metrics(pr: dict, markers: dict) -> dict:
         "other_bot_review": bool(len(ai_rev) < len(bots)),
         "no_review": not revs,
         "insider": pr.get("authorAssociation") in INSIDER,
-        "size": (pr.get("additions") or 0) + (pr.get("deletions") or 0),
     }
 
 
-METRICS = ["ai_code", "merged", "human_review", "ai_review", "other_bot_review", "no_review"]
+METRICS = ["ai_code", "merged", "human_review", "ai_review",
+           "other_bot_review", "no_review", "insider"]
 
 
 def weighted_mean(pairs: list[tuple[float, float]]) -> float:
@@ -99,18 +121,14 @@ def main() -> None:
     markers = MARKERS_V1 if a.markers == "v1" else MARKERS_V2
     weights: dict[str, float] = {}
     if Path(a.contributors).is_file():
-        for row in csv.DictReader(open(a.contributors)):
-            try:
-                weights[row["repo"]] = max(float(row["core_contributors"]), 1.0)
-            except (KeyError, ValueError):
-                pass
+        with open(a.contributors) as fh:
+            for row in csv.DictReader(fh):
+                try:
+                    weights[row["repo"]] = max(float(row["core_contributors"]), 1.0)
+                except (KeyError, ValueError):
+                    pass
 
-    # aggregate cells -> (repo, period) PR lists
-    grouped: dict[tuple[str, str], list[dict]] = defaultdict(list)
-    for (repo, rng), nodes in load_cells().items():
-        per = period_of(rng, QUARTER_RANGES)
-        if per:
-            grouped[(repo, per)].extend(nodes)
+    grouped = group_by_period(load_cells(), QUARTER_RANGES)
 
     print(f"{'period':9}{'weighting':16}{'repos':>6}" +
           "".join(f"{m:>18}" for m in METRICS))
