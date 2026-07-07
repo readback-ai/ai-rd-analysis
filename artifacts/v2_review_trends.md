@@ -95,3 +95,13 @@ Findings:
 Caveats: cursor group is tiny/noisy; facebookresearch's signal includes heavy
 external contribution; detectability asymmetry (Claude's footer survives squash;
 Cursor-majority AI-code% likely more undercounted); pooled, not org-weighted.
+
+## Metric reconciliation (added 2026-07-07): pooled vs repo-weighted AI-code rates
+The 15.2% headline (contributor-weighted per-repo mean) and the tool-slice
+tables (pooled PR rates) are different metrics. Q2-2026 pooled population =
+13.4%; Claude-majority orgs 13.6% (96% of PR volume — they ARE the population);
+cursor-majority 12.7%; residual 50 low-AI orgs 5.5%. No hidden high-AI tools.
+Repo-weighted > pooled because SMALL repos are AI-heavier: smallest-quartile
+repos (median 15 PRs) = 19.5% AI-code vs largest-quartile (median 356 PRs) =
+12.2%. AI-written code concentrates in smaller, lower-traffic repos; flagship
+codebases run ~12%. Always state which weighting a number uses.
