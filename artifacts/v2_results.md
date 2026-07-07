@@ -379,3 +379,47 @@ being counted. Corrected to reviewer!=author: aggregates shift <=2.2pp, but the
 key cell strengthens — **self-merged AI-code PRs reviewed by another human,
 Q2-2026: 37.8%** (was 43.2% incl. self-reviews) vs 68.8% in Q1-2026 and ~66%
 for the self-merge lane overall. All §11b conclusions hold or strengthen.
+
+### 11d. Where would the author's own review of AI code show up? Evidence by mode (2026-07-08)
+
+Ron's point: authors likely review AI code BEFORE committing (in the tool
+session) or after committing but before/at PR time — none of which appears in
+the formal review slot. Each mode leaves a measurable residue:
+
+**Mode 1 — pre-commit review; residue = human commits interleaved with AI
+commits** (population-scale, all merged human-authored AI-code PRs):
+| period | N | all-AI commits | mixed human+AI | human fix-up after AI |
+|---|---|---|---|---|
+| Q4-2025 | 1,530 | 46% | 54% | 26% |
+| Q1-2026 | 8,335 | 54% | 46% | 21% |
+| Q2-2026 | 15,289 | **59%** | 41% | **18%** |
+Visible human-touch residue inside AI-code PRs is DECLINING as volume grows 10x.
+
+**Mode 2 — post-commit/pre-PR branch review; residue = pause between last
+commit and PR open**: median ~1 min for every cohort and era, and **0.4-0.5 min
+for self-merged AI-code PRs** — PRs open essentially immediately after the last
+commit. No evidence of a distinct branch-review pause anywhere. (committedDate
+resets on rebase/amend, biasing all cohorts toward 0 — the cross-cohort
+comparison stands: self+AI is the shortest.)
+
+**Mode 3 — post-open/pre-merge self-review; residue = open->merge window**
+(same-repo CI as the natural floor):
+| Q2-2026 cohort | n | median open->merge |
+|---|---|---|
+| self-merged AI-code | 37 | **72 min** (was 178 in Q1) |
+| self-merged non-AI | 120 | 242 min |
+| other-merged non-AI | 83 | 1,072 min |
+Self-merged AI PRs have the SHORTEST post-open window of any cohort — roughly
+CI duration — and it halved quarter-over-quarter. Post-open commits (~54-62%)
+are uniform across cohorts (CI-driven iteration, not review-specific).
+
+**Synthesis:** the one mode we cannot observe (in-session diff review while
+working with the agent) may well be where author review lives — but every
+OBSERVABLE out-of-session review surface for self-merged AI code is small and
+contracting simultaneously: interleaved human commits down, fix-ups down,
+pre-PR pause ~zero, post-open window ~CI-time and halving, second-human review
+38%, comments 6-12%. Honest paper claim: author review of AI code, if it
+happens, has moved entirely inside the tool session; all externally visible
+verification surfaces are thin and shrinking. Caveats: AI cells n=16-37;
+committedDate/rebase bias; CI confound in open->merge (netted via cohort
+contrast).
