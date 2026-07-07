@@ -66,3 +66,43 @@ Raw outputs: `data/resume_state/v2/analysis_v{1,2}.txt`.
 stages checkpointed to $AIRD_DATA_DIR; org/repo sets and analysis outputs in
 `data/resume_state/v2/`; 64 tests. Total collection: ~36h wall (rate-limit
 bound), interrupted repeatedly (laptop sleeps, task kills) with zero data loss.
+
+---
+
+# CORRECTION + per-tool rates with TRUE contributor weights (2026-07-07)
+
+**Weight-coverage bug found while building the per-tool table**: the contributor
+file covered only v1's 174 repos, so prior v2 "contrib-weight" rows silently used
+weight=1.0 for ~91% of repos (≈ equal-weight). Core-contributor counts were pulled
+for all census repos (1,994/1,996; data/resume_state/v2/repo_contributors_v2.csv)
+and everything recomputed. Directional findings unchanged; magnitudes corrected:
+
+| metric (Q2-2026) | published (mislabeled) | TRUE contrib-weight |
+|---|---|---|
+| AI-code PRs | 15.2 | **11.5 [10.4,12.6]** |
+| AI review | 20.7 | **23.5 [20.8,26.6]** |
+| human review | 47.9 | **57.5 [55.0,60.0]** |
+| no review | 41.4 | **33.6** |
+| insider | 33.4 | 34.2 (stable) |
+
+True weighting emphasizes big-team repos, which have LOWER AI-code rates (size
+gradient) and RETAIN more human review (decline 65.9 -> 57.5 = -8.4pp, vs -12pp
+mislabeled). Full table: data/resume_state/v2/analysis_v1_trueweights.txt.
+Equal-weight rows were always correct as labeled.
+
+## Per-tool detection rate, % of PRs, TRUE contributor-weighted [95% CI]
+
+| period | repos | Claude Code | Cursor | aider | Codex | any tool |
+|---|---|---|---|---|---|---|
+| Q1-2024 | 485 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
+| Q4-2025 | 869 | 1.52 [1.22,1.85] | 0.17 [0.09,0.28] | 0.01 | 0.00 | 1.69 [1.37,2.08] |
+| Q1-2026 | 1120 | 7.08 [6.37,7.90] | 0.62 [0.46,0.80] | 0.00 | 0.01 | 7.68 [6.92,8.50] |
+| Q2-2026 | 1286 | 10.35 [9.32,11.39] | 1.20 [0.90,1.56] | 0.00 | 0.15 [0.07,0.26] | 11.60 [10.57,12.75] |
+
+- Claude Code is ~89% of all detected AI-code PRs (10.35 of 11.60 in Q2-2026),
+  growing ~7x in two quarters (1.52 -> 10.35).
+- Cursor is second and accelerating (0.17 -> 1.20; ~7x) but an order of
+  magnitude smaller.
+- Codex appears in Q2-2026 only (0.15%) — real but marginal; aider ~0.
+- Detectability caveat: rates are floors and Claude's footer survives squash
+  better than others' trailers, so non-Claude shares are likely more undercounted.
