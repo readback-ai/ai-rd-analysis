@@ -367,3 +367,15 @@ Findings:
 4. AI review does NOT differentially compensate (flat ~26-30% in both classes).
 Attention polarization mechanism identified: the other-merged lane intensified
 (88-93% reviewed) while the growing, increasingly-AI self-merge lane thinned.
+
+### 11c. Measurement note + self-review correction (2026-07-08)
+"Human review" throughout = formal GitHub PR review objects authored by
+User-typed accounts (census `reviews(first:15)` field). Commits are used only
+for AI-code classification (trailers/footers) and §10's qualitative themes;
+conversation comments are not counted (except §11's explicit engagement
+metric). Probing this surfaced a flaw: reviews authored by the PR AUTHOR
+(self-review-comments; GitHub blocks self-approval but not self-comments) were
+being counted. Corrected to reviewer!=author: aggregates shift <=2.2pp, but the
+key cell strengthens — **self-merged AI-code PRs reviewed by another human,
+Q2-2026: 37.8%** (was 43.2% incl. self-reviews) vs 68.8% in Q1-2026 and ~66%
+for the self-merge lane overall. All §11b conclusions hold or strengthen.
