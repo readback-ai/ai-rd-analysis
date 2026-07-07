@@ -186,3 +186,35 @@ mass (i.e., ~80% of merged-unreviewed code gets no review of any kind).
    (slightly above the 11.5% population AI-code rate) — unreviewed merged code
    is increasingly big, insider, and AI-assisted, with AI review covering only
    a fifth of it.
+
+## 9. SPIKE: what ARE the unreviewed-substantial PRs? (2026-07-07; small-N, pooled)
+
+Sample: merged, human-authored, >100-line, no-human-review PRs — 120 (Q1-2024) +
+200 (Q2-2026), lines-weighted dominant-content classification of file paths.
+Population context (pooled, from cells): this mass grew 5,766 -> 32,717 PRs
+(5.7x); AI-review coverage 0.4% -> 23.9%; AI-written 0 -> 19.6%.
+
+| dominant content | Q1-2024 | Q2-2026 | Q2 insider | Q2 AI-code | Q2 AI-rev |
+|---|---|---|---|---|---|
+| **source code** | **61.7%** | **64.0%** | 71% | 19% | 31% |
+| docs | 15.0% | 18.0% | 69% | 33% | 17% |
+| lock/generated | 5.0% | 5.5% | 82% | 9% | 36% |
+| config/CI | 3.3% | 5.0% | 30% | 20% | 10% |
+| other/data/nb/i18n | 15.0% | 7.5% | — | — | — |
+
+Findings:
+1. **The benign explanation fails**: ~2/3 of merged unreviewed-substantial PRs
+   are dominantly SOURCE CODE in both periods — not lockfiles/docs/config noise.
+   Composition is stable; the 5.7x volume growth means ~6x more real source
+   shipping without human review.
+2. Unreviewed source shifted insider (58% -> 71%) and is now 19% AI-written,
+   with test-line share up 21% -> 30%.
+3. **Substitution evidence is WEAK-TO-MIXED**: AI review is disproportionately
+   present on unreviewed merged source (31%) — but AI-reviewed PRs in this mass
+   merge at the SAME rate as never-reviewed ones (41.3 vs 41.6%), so AI review
+   is not acting as a merge gate; presence likely reflects repo-level bot
+   defaults rather than a review decision.
+Caveats: spike-scale N (120/200), pooled not CW, path heuristics unvalidated
+against manual labels. Next iteration: manual-label ~50 to validate the
+classifier; scale to a stratified 1-2k sample with CW; within-repo 2024-vs-2026
+pairing.
