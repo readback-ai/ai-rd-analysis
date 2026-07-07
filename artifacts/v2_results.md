@@ -143,3 +143,46 @@ interruptions.
   recomputed. Q2-2026 AI-code 15.2→11.5, human review 47.9→57.5, AI review
   20.7→23.5. Added per-tool rates, org thresholds, CW cohort cuts, CW
   tool-majority slice. Directional findings unchanged throughout.
+
+## 8. The no-human-review mass, stratified (added 2026-07-07; human-authored PRs only, bot authors excluded)
+
+Hypothesis tested (Ron): pre-AI no-review mass is mostly insider-trivial; if the
+growing 2026 mass is not, the aggregate drift becomes a strong finding.
+Strata: insider (MEMBER/OWNER/COLLABORATOR) vs external; size trivial (<=10
+changed lines) / mid (11-100) / substantial (>100). CW throughout.
+
+### Composition of no-human-review PRs
+| period | ins-triv | ins-mid | ins-subst | ext-triv | ext-mid | ext-subst | AI-rev covered | AI-code |
+|---|---|---|---|---|---|---|---|---|
+| Q1-2024 | 12.2 | 11.0 | 12.5 | 21.1 | 20.7 | 22.4 | 0.3 | 0.0 |
+| Q4-2025 | 10.6 | 11.2 | 17.3 | 15.7 | 17.5 | 27.6 | 15.4 | 2.6 |
+| Q1-2026 | 9.1 | 10.5 | 17.8 | 13.6 | 19.3 | 29.8 | 20.5 | 9.7 |
+| Q2-2026 | 7.6 | 10.0 | **17.5** | 12.6 | 20.4 | **31.8** | 21.0 | 13.4 |
+
+### P(no human review | stratum)
+| period | insider-trivial | insider-subst | external-trivial | external-subst |
+|---|---|---|---|---|
+| Q1-2024 | 32.9 [28.3,37.7] | 28.0 [24.0,32.3] | 32.7 [28.8,37.0] | 27.7 [24.1,31.5] |
+| Q4-2025 | 32.6 | 28.6 | 30.4 | 31.0 |
+| Q1-2026 | 35.5 | 32.1 | 36.3 | 35.9 |
+| Q2-2026 | 38.5 [34.5,42.8] | 32.7 [29.7,35.7] | 40.4 [37.3,43.8] | **41.1 [38.6,43.7]** |
+
+### Merged without human review (the risk mass)
+Substantial share rose 27.4% -> 40.0%; insider-substantial nearly DOUBLED
+(12.3 -> 23.7%); AI-written share 0 -> 15.0%; AI review covers only ~20% of the
+mass (i.e., ~80% of merged-unreviewed code gets no review of any kind).
+
+### Findings
+1. **The hypothesized insider-trivial pre-AI mass was already a minority**
+   (12.2% in Q1-2024; the 2024 unreviewed mass was ~64% external, size-mixed).
+2. **The directional claim confirms strongly**: unreviewed PRs are getting
+   BIGGER — substantial (>100-line) share of the unreviewed mass grew from
+   ~35% to ~49%; trivial share fell 33% -> 20%.
+3. **No-review rates rose in every stratum, but ~3x faster for
+   external-substantial** (+13.4pp, 27.7 -> 41.1) than insider-substantial
+   (+4.7pp) — large external contributions are the fastest-growing unreviewed
+   class. Bot-author confound excluded (results ~identical with bots dropped).
+4. In the merged risk mass, insider-substantial doubled and 15% is AI-written
+   (slightly above the 11.5% population AI-code rate) — unreviewed merged code
+   is increasingly big, insider, and AI-assisted, with AI review covering only
+   a fifth of it.
