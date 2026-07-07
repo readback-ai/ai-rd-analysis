@@ -59,3 +59,39 @@ Pooled, not repo-weighted — composition shifts across repos can contribute.
   (subst 44.5 -> 46.9 on AI-code; 51.8 -> 57.3 on AI-reviewed).
 - Net narrative: **attention polarization** — human scrutiny is draining from
   ordinary PRs and concentrating on AI-involved ones.
+
+---
+
+# Tool-majority org slice (Q2-2026 majority of detectable AI-code; added 2026-07-07)
+
+Org classified by which tool accounts for the majority of its Q2-2026 AI-code
+PRs (census evidence; >=10 AI-code PRs to qualify). Claude-majority: 147 orgs.
+Cursor-majority: 7 orgs (OpenBMB, Portkey-AI, beclab, facebookresearch, fw-ai,
+pymc-devs, togethercomputer) — small group, treat as indicative.
+
+## Claude-majority (147 orgs; 164k PRs in Q2-2026)
+| period | PRs | AI-code% | AI-review% | human-review% | humRev% on AI-code |
+|---|---|---|---|---|---|
+| Q1-2024 | 58,846 | 0.0 | 0.3 | 65.6 | — |
+| Q4-2025 | 100,664 | 2.5 | 22.9 | 66.2 | 45.7 |
+| Q1-2026 | 134,350 | 9.3 | 25.8 | 59.0 | 48.2 |
+| Q2-2026 | 164,218 | 13.6 | 26.2 | 54.7 | 52.7 |
+
+## Cursor-majority (7 orgs; 2.5k PRs in Q2-2026)
+| period | PRs | AI-code% | AI-review% | human-review% | humRev% on AI-code |
+|---|---|---|---|---|---|
+| Q1-2024 | 356 | 0.0 | 0.0 | 59.8 | — |
+| Q4-2025 | 1,331 | 0.7 | 4.4 | 60.0 | 55.6 |
+| Q1-2026 | 2,273 | 2.7 | 3.3 | 49.7 | 31.1 |
+| Q2-2026 | 2,524 | 12.7 | 11.2 | 47.2 | 42.2 |
+
+Findings:
+- Claude-majority orgs pair AI code with AI REVIEW far more (26.2% vs 11.2%) —
+  an ecosystem-coupling effect; AI-review adoption differs by tool community.
+- Cursor-majority orgs adopted AI-code later but converged by Q2 (12.7 vs 13.6%).
+- Human-review decline is TOOL-AGNOSTIC (-11pp vs -13pp from baseline).
+- In Claude-majority orgs, human review of AI-code PRs rises steadily
+  (45.7 -> 52.7%) — normalization of AI code under human scrutiny.
+Caveats: cursor group is tiny/noisy; facebookresearch's signal includes heavy
+external contribution; detectability asymmetry (Claude's footer survives squash;
+Cursor-majority AI-code% likely more undercounted); pooled, not org-weighted.
