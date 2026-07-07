@@ -1,3 +1,8 @@
+> **SUPERSEDED AS CANONICAL (2026-07-07):** the tables below are POOLED
+> per-PR rates (and the tool-majority slice used pre-correction weights).
+> Contributor-weighted canonical versions of all these cuts now live in
+> `v2_results.md` §4–6; keep this file as the secondary pooled view.
+
 # Human-review trends by cohort — v2 census (2026-07-06)
 
 Pooled over the full v2 census (~370k PRs; dedup'd; per-period cohorts).
