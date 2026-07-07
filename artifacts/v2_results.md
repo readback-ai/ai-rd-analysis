@@ -334,3 +334,36 @@ of GitHub, which is hobbyist-heavy). Note the headline ai_code metric counts
 trailer evidence only and does NOT include bot-authored PRs
 (include_bot_authors=False), so it understates total AI involvement by
 roughly the agent-authored share above plus branch-only Codex.
+
+### 11b. Self-merged PRs: AI usage and review-of-AI trends (2026-07-08)
+
+Fresh sample: 250 merged human-authored PRs per period (unconditioned on review
+status), classified by mergedBy==author. Pooled; small-N cells flagged.
+
+| period | class | n | share of merged | AI-code% | human-rev% | AI-rev% |
+|---|---|---|---|---|---|---|
+| Q1-2024 | SELF-merged | 134 | 54% | 0.0 | 67.9 | 0.0 |
+| | other-merged | 116 | 46% | 0.0 | 83.6 | 0.0 |
+| Q4-2025 | SELF-merged | 140 | 56% | 2.9 | 75.0 | 22.1 |
+| | other-merged | 110 | 44% | 1.8 | 85.5 | 27.3 |
+| Q1-2026 | SELF-merged | 160 | 64% | 10.0 | 70.6 | 30.0 |
+| | other-merged | 90 | 36% | 4.4 | 93.3 | 26.7 |
+| Q2-2026 | SELF-merged | 157 | **63%** | **23.6** | 67.5 | 26.1 |
+| | other-merged | 93 | 37% | 10.8 | **88.2** | 30.1 |
+| Q2-2026 | self+AI-code | 37 | — | — | **43.2** | 27.0 |
+| Q1-2026 | self+AI-code | 16* | — | — | 68.8* | 25.0* |
+
+Findings:
+1. **Self-merging itself rose** 54% -> 63% of merged PRs.
+2. **AI code concentrates in the self-merge lane**: 23.6% of self-merged PRs
+   carry AI code vs 10.8% of other-merged (2.2x) — AI usage flows
+   disproportionately through the lane with the weakest external gate.
+3. **Review of AI code inside the self-merge lane collapsed in Q2-2026**:
+   human review of self-merged AI-code PRs fell ~69% -> 43% in one quarter
+   while non-AI self-merged held ~68% (and other-merged rose to 88-93%).
+   The newest quarter shows AI-code + self-merge decoupling from second-person
+   review specifically. (n=37; ~95% CI 28-60% vs 60-75% for the lane overall —
+   suggestive-to-solid; scale-up would firm it.)
+4. AI review does NOT differentially compensate (flat ~26-30% in both classes).
+Attention polarization mechanism identified: the other-merged lane intensified
+(88-93% reviewed) while the growing, increasingly-AI self-merge lane thinned.
