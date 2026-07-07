@@ -423,3 +423,47 @@ happens, has moved entirely inside the tool session; all externally visible
 verification surfaces are thin and shrinking. Caveats: AI cells n=16-37;
 committedDate/rebase bias; CI confound in open->merge (netted via cohort
 contrast).
+
+### 11e. Inside-session review residue: commit-message evidence in all-AI-commit PRs (2026-07-08)
+
+Ron's Mode-1 probe: even when EVERY commit in a merged PR is AI-authored, the
+commit messages of the 2nd+ commits can reveal whether a human steered the
+agent mid-session. Two-tier read: (a) population-scale keyword pass, (b) a
+110-PR corpus of multi-commit all-AI PRs read in full and hand-classified.
+
+**Population pass (multi-commit all-AI-commit merged PRs):**
+| period | all-AI PRs | multi-commit | human-direction lang | mech self-heal only | neither |
+|---|---|---|---|---|---|
+| Q1-2026 | 4,506 | 1,627 | 41% | 12% | 47% |
+| Q2-2026 | 9,089 | 3,663 | 42% | 10% | 48% |
+
+**Read corpus (110 multi-commit all-AI PRs, Q2-2026), hand-classified by what
+the follow-up commits reveal:**
+- **58% plain feature-progression** — sequential build steps, no visible
+  correction ("Add X", "Add tests for X", "Phase 1..7"). The agent executed a
+  plan; no steering is legible in the messages.
+- **22% explicit EXTERNAL-review residue** — "Address PR #710 review feedback",
+  "address greptile", "Address Copilot CR feedback", "address codex review",
+  "per @bevzzz review". These are AI commits RESPONDING to a review that
+  happened (bot or human) — review did occur, just as follow-up commits rather
+  than in the formal review slot.
+- **11% mechanical self-heal only** — "fix lint", "cargo fmt", "fix CI",
+  "regenerate baselines". Agent reacting to tooling, no human input evident.
+- **9% author in-session direction** — the interesting cases: "revert: make
+  X always-on", "swap --sort-order for --reverse", "instead of broken /v1/models
+  API", "Restore original shutdown ordering", "drop R4". A human changed their
+  mind mid-build and redirected the agent — legible steering.
+
+**Interpretation for Ron's question.** The commit trail DOES carry evidence of
+author review of AI code, but mostly as VISIBLE correction (9% in-session
+redirects + 22% review-response = ~31% show a human reacting to the code). The
+majority (58%) show no legible correction at all — consistent EITHER with clean
+first-try AI output accepted as-is OR with review that happened silently in the
+tool session and left no commit-message trace. We cannot separate those two from
+metadata. What we CAN say: about a third of even the all-AI-commit PRs carry
+explicit textual evidence of a human engaging with and redirecting the AI's
+output — a floor on inside-session/iterative review that the formal review-slot
+metric (§11b-c) entirely misses. This meaningfully softens the "verification has
+vanished" reading: for ~1/3 it demonstrably has not; for the rest it is
+unobservable, not provably absent. Caveats: keyword+read on 110 PRs; "external
+review residue" conflates bot and human reviewers (bot-heavy in this set).
