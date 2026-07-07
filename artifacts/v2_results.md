@@ -257,3 +257,80 @@ GATE substitution.
 Minor measurement note: ~5-10% of "source" is vendored-in-source (e.g., a 96k-
 line miniaudio.h header, vendored curlconverter) — modest overcount of original
 source.
+
+## 11. Accountability test: zero-human vs one-human review (2026-07-08)
+
+Ron's alternative hypothesis to §10's "automated within-PR review": humans ARE
+reviewing AI code — the shift is from "human A develops, human B reviews" to
+"AI develops, human A supervises and approves" (one-person accountability, not
+zero). Test signals: who authored the review-fix commits (AI trailer forensics,
+from cells) and who MERGED (mergedBy vs author — GitHub forbids formal
+self-approval, so mergedBy!=author is tacit second-human review) plus other-
+human comments (engagement without formal review).
+
+Population scale first: the "review-fix commits, no human review" pattern is
+not 12 sample PRs — it is **1,414 merged unreviewed-substantial PRs in Q2-2026**
+(9% of that mass), of which 455 (32%) have AI-authored fix commits and 299
+(21%) are majority-AI-authored.
+
+| cohort (n=samples of populations) | self-merge | other-human merge | other-human comment | **one-person accountability** |
+|---|---|---|---|---|
+| Q1-2024 baseline: merged unreviewed-subst (n=120/3,348) | 76% | 24% | 21% | **67%** |
+| Q2-2026 smoking-gun: +review-fix commits (n=150/1,414) | 88% | 12% | 6% | **84%** |
+| Q2-2026 broad: merged AI-code, no human review (n=150/5,242) | 81% | 19% | 12% | **77%** |
+
+**Verdict: Ron's hypothesis is largely right — with a measured shift.**
+1. The dominant mode is one-HUMAN accountability, not zero: a human author
+   develops with AI, iterates (often via AI reviewer feedback), and personally
+   merges. Zero-human PRs (bot-merged, no human anywhere) are ~0%.
+2. But it IS a shift, not just old culture: one-person accountability rose
+   67% -> 77-84%, and second-human ENGAGEMENT (comments) halved (21% -> 6-12%).
+   Pre-AI, a quarter of self-merged big PRs still had another human watching;
+   now it is one-in-ten or fewer.
+3. §10's "automated review" survives as the LABOR claim: in a third of the
+   smoking-gun mass the review-response commits are AI-authored. Synthesis:
+   **AI performs the review-shaped labor; human A retains (sole) approval** —
+   two-person -> one-person+AI, at 6x the pre-AI volume.
+
+## Methods note: Codex detection and why we rejected AIDev's `head:codex/` for commit attribution — and its PR-level rehabilitation (2026-07-08)
+
+**How the v2 marker set detects Codex** (`src/pipeline/ghx.py`): (1) Codex cloud
+via the GitHub App: `committer:chatgpt-codex-connector[bot]` (564 commits
+globally, consistent with agents.yaml's original 556) — one of the few
+qualifier terms, correct because the tool IS the committer (bare-term is for
+co-author trailers, which qualifiers miss); (2) Codex CLI with opt-in
+attribution: `author-email:codex@openai.com` + classifier needles matched
+against commit messages, author emails, and committer email/login (the census
+GraphQL query was extended to fetch committer{} in the code-review fixes —
+without it Codex-cloud was structurally invisible to the PR classifier).
+
+**Why `head:codex/` was rejected for COMMIT attribution** (agents.yaml, 0.1/0.B):
+false positives (branch names are human-typed strings) and false negatives —
+in the chain-ml/agent-reputation test, Codex-CLI PRs on codex-* branches left
+ZERO attributable commits; an OpenAI maintainer confirmed (openai/codex
+discussion #9449) that "Codex itself doesn't create commits", commit identity
+is entirely the user's git config, and no Co-Authored-By is added by default.
+Default local Codex CLI is structurally undetectable by any metadata method.
+
+**PRarena reconciliation (aavetis/PRarena; probed live 2026-07-08): the
+branch-name signal is real and LARGE at PR level.** `is:pr head:codex/` =
+**5,446,129 PRs globally; 1,676,291 in Q2-2026 alone**; inside our population,
+sample org counts for Q2-2026: vllm-project 368, huggingface 287, microsoft
+226, langchain-ai 106, milvus-io 46. Today's Codex-web flow creates codex/
+branches whose commits carry USER identity — invisible to trailer/committer
+search but visible in the head-branch name. Consequently our Codex figure
+(0.15% of PRs) is a floor specifically for MARKER-ATTRIBUTED Codex; a
+branch-level signal captures far more. Both AIDev/PRarena's count (noisy but
+sensitive) and ours (clean but narrow) are defensible for different purposes;
+the paper should report Codex-branch PR share as a separate, clearly-labeled
+signal. Population-wide codex-branch share by quarter: per-org scan in
+`data/resume_state/v2/codex_branch_scan.tsv` (in progress).
+
+Similarly for agent-AUTHORED PRs (PRarena's Copilot/Jules lines): in OUR
+population these are a small share of census PRs — Q4-2025 1.95%, Q1-2026
+1.84%, Q2-2026 0.84% (Copilot dominant; the decline tracks Copilot's global
+dip) — versus millions globally: scope difference (top-org population vs all
+of GitHub, which is hobbyist-heavy). Note the headline ai_code metric counts
+trailer evidence only and does NOT include bot-authored PRs
+(include_bot_authors=False), so it understates total AI involvement by
+roughly the agent-authored share above plus branch-only Codex.
