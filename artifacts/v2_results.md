@@ -218,3 +218,42 @@ Caveats: spike-scale N (120/200), pooled not CW, path heuristics unvalidated
 against manual labels. Next iteration: manual-label ~50 to validate the
 classifier; scale to a stratified 1-2k sample with CW; within-repo 2024-vs-2026
 pairing.
+
+## 10. Why unreviewed-substantial source PRs happen — qualitative read (2026-07-07)
+
+Read all 203 source-dominant sampled PRs (73 Q1-2024, 130 Q2-2026): titles, file
+paths, and commit messages, plus repo context (active authors/quarter).
+
+**The baseline explanation (both eras): trusted-maintainer self-merge culture,
+not absent reviewers.** Only 3-4% sit in solo-author repos; the typical case is
+a 10-90-author, high-velocity project where core maintainers merge their own
+work with CI as the gate (2024: HF candle CUDA kernels, pytorch NEON kernel,
+litellm/Helicone founders shipping features, bisheng release trains, ggml sync
+PRs). Note: several "external" authors are actually founders/staff with private
+org membership — the §8 external-substantial finding partly reflects
+misclassified insiders (documented caveat).
+
+**What changed by Q2-2026 — three shifts, visible in the commits themselves:**
+1. **The mass moved into AI/agent-product repos at extreme velocity** (imbue,
+   kimi-code, microsoft/amplifier-* and TypeAgent, HKUDS, data-formulator,
+   unsloth Studio): same self-merge lane, far bigger payloads — multi-kloc,
+   multi-phase single-author PRs ("Phase 1..P5", 13-33k lines).
+2. **The review loop moved inside the PR.** 12/130 (9%) of 2026 PRs carry
+   commit trails like "Apply round-1..5 reviewer fixes", "Address Greptile
+   review comments", "self-review fixes" — review-shaped iteration performed by
+   AI reviewers/agents, with the GitHub human-review slot left EMPTY. Zero
+   instances in 2024. (32% of the 2026 sample has AI-review objects; 18%
+   AI-code markers.)
+3. **Agentic process artifacts substitute for review conversation**: plan/
+   blueprint/phase/beads-driven commits (13 vs 0 in 2024), design docs and
+   project logs committed alongside code.
+
+**Synthesis for the paper:** the no-review lane is old (maintainer self-merge);
+what is new is what travels in it — agent-scale changes whose quality control
+has visibly migrated from the human review slot into in-PR loops (AI reviewer
+rounds, self-review commits, planning artifacts). Combined with §9 (AI review
+present but not gating merges), the picture is PROCESS substitution without
+GATE substitution.
+Minor measurement note: ~5-10% of "source" is vendored-in-source (e.g., a 96k-
+line miniaudio.h header, vendored curlconverter) — modest overcount of original
+source.
