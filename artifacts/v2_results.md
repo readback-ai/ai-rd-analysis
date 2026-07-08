@@ -485,3 +485,46 @@ metric (§11b-c) entirely misses. This meaningfully softens the "verification ha
 vanished" reading: for ~1/3 it demonstrably has not; for the rest it is
 unobservable, not provably absent. Caveats: keyword+read on 110 PRs; "external
 review residue" conflates bot and human reviewers (bot-heavy in this set).
+
+## 12. Key results re-estimated with codex-branch detection included (2026-07-08)
+
+Codex-branch PRs were pulled directly (org-stratified sample: 294 org-quarter
+cells, one 50-PR page per cell, org-weighted by population counts; 0 failures).
+Marker overlap measured at 1.7-2.4% — the branch signal is near-disjoint from
+trailer-detected Claude/Cursor, so additive treatment is sound.
+
+**12a. Org adoption thresholds (CW marker rate + org pooled codex share):**
+| threshold | Q1-2026 markers | +codex | Q2-2026 markers | +codex |
+|---|---|---|---|---|
+| >=10% | 48.5% | 52.0% | 66.8% | **79.2%** |
+| >=25% | 19.3% | 22.8% | 31.2% | **35.6%** |
+| >=50% | 5.9% | 6.9% | 6.9% | **8.4%** |
+| >=75% | 2.0% | 2.5% | 2.5% | **3.5%** |
+With Codex included, ~4 in 5 orgs clear the 10% bar and >1 in 3 clear 25%.
+
+**12b. Codex-branch PRs are a distinct, low-review, low-merge lane:**
+| period | humRev% | AIrev% | merged% | noRev of merged | self-merged of merged | one-person of merged |
+|---|---|---|---|---|---|---|
+| Q4-2025 | 22.0 | 33.9 | 63.6 | 73.5 | 88.2 | 70.0 |
+| Q1-2026 | 17.2 | 16.9 | **24.6** | 37.4 | 66.7 | 30.4 |
+| Q2-2026 | 30.3 | 21.6 | **38.0** | 41.7 | 71.5 | 37.7 |
+Baselines Q2-2026: marker-AI PRs merge at 68%, non-AI at 68% — codex-branch at
+38%. The codex-web flow makes PR creation nearly free; the human gate moved
+from line-level review to MERGE TRIAGE: most codex PRs are simply never merged.
+Of those that do merge, ~42% merge with no human review and ~38% are
+one-person (self-merged, no other-human review; comments not collected for
+this sample — §11's comment check suggests +<10pp).
+
+**12c. Blended review-of-AI-code trends (population-weighted; census non-AI
+class corrected for codex PRs hiding inside it):**
+| period | AI humRev% (markers) | AI humRev% (+codex) | non-AI humRev% (corrected) | AI merged-noRev% (markers) | (+codex) |
+|---|---|---|---|---|---|
+| Q1-2024 | — | — | 67.5 | — | — |
+| Q4-2025 | 42.2 | 40.5 | 67.4 | 39.5 | 42.4 |
+| Q1-2026 | 45.2 | 40.9 | 62.4 | 39.9 | 39.5 |
+| Q2-2026 | 48.3 | **44.9** | 56.1 | 37.6 | **38.4** |
+Including codex lowers the AI-code human-review level ~3-4pp in every quarter
+(the rising trend survives, flatter), and holds merged-without-review at ~2 in
+5 AI PRs, flat across quarters. Note humRev here = reviewer!=author (§11c).
+Caveats: codex sample is first-page-per-org-quarter (created-desc; mild
+within-quarter recency bias); one-person metric lacks the comment check.
