@@ -21,13 +21,10 @@ env/
 .mypy_cache/
 
 # --- Data store (DuckDB + Parquet + raw API cache) ---
-# Tracked: code, specs, rubric, small gold-set CSVs, manifests.
+# Tracked: code, docs, small curated/derived tables, resume-state manifests.
 # Ignored: bulk collected data and caches (regenerable / large / license-sensitive).
-# Curated, hand-labeled gold set IS tracked (small, important); bulk sample is not.
 data/**
-!data/gold/
-!data/gold/**
-# small curated/derived tables from the org-provenance pivot ARE tracked:
+# small curated/derived tables from the org-provenance scope ARE tracked:
 !data/ai_evidence_repos.csv
 !data/repo_contributors.csv
 !data/resume_state/

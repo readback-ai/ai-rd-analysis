@@ -4,9 +4,12 @@ Project: a fresh, queryable dataset of **AI-assisted development practices at le
 AI organizations** — how top AI labs and well-funded AI startups use autonomous coding
 agents / AI assistance in their public repos. See `PROJECT_PLAN.md` (phasing) and
 `PIPELINE_SPEC.md` (architecture). **Pivoted 2026-06-26** from per-repo "AI R&D"
-classification to **org-provenance scoping** (`ai_labs.yaml`): scope = curated top-AI-org
-repos; detection methodology = `agents.yaml` + `artifacts/agent_detection_cues.md`. The
-classifier/gold/`RUBRIC.md` track is retained only as an optional wild-cohort comparison.
+classification to **org-provenance scoping**: the tracked population is the org
+enumeration built from third-party lists (`src/pipeline/org_set.py`; LF AI landscape +
+HF top orgs + GitHub topics, quality-gated). Detection methodology = `src/pipeline/detect.py`
++ `agents.yaml` + `artifacts/agent_detection_cues.md`. The classifier/gold/RUBRIC track
+was removed 2026-07-08 (git history preserves it). Canonical docs: `README.md`,
+`docs/METHODS.md`, results in `artifacts/v2_results.md`.
 
 ## Parallel work via git worktrees
 

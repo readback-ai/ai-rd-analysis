@@ -1,17 +1,18 @@
 # Phase 0 plan: API experimentation & the AI R&D definition
 
 Status: planning, 2026-06-24. Branch `phase-0-definition`.
-Source of truth: `PROJECT_PLAN.md` §"Phase 0" and `PIPELINE_SPEC.md` §Stage 0–2.
+Source of truth: `PROJECT_PLAN.md` §"Phase 0" and `docs/METHODS.md`.
 
 > **PIVOT 2026-06-26 — org provenance over domain classification.** The project
 > reframed to **AI-assisted development practices at leading AI organizations**.
 > We scope by a curated org allowlist (`ai_labs.yaml`) instead of classifying
 > arbitrary repos as "AI R&D" (the gold audit showed that's a fuzzy, judgment-heavy
 > task — and hobbyist/low-signal repos aren't the object of study). Provenance =
-> inclusion (precision ~1.0). The classifier/gold/RUBRIC track is retained only as
-> an OPTIONAL wild-cohort comparison, off the critical path. New primary deliverables:
-> `ai_labs.yaml` (org set) + `agents.yaml`/`artifacts/agent_detection_cues.md`
-> (detection). The two workstreams below (0.A, 0.B) supersede the old 0.2–0.4.
+> inclusion (precision ~1.0). **The classifier/gold/RUBRIC track was REMOVED
+> 2026-07-08** (code, rubric, and gold data deleted; see git history before that
+> date if it is ever revived). The org set is built from third-party source
+> lists (`src/pipeline/org_set.py`); detection is documented in
+> `agents.yaml`/`artifacts/agent_detection_cues.md` and `src/pipeline/detect.py`.
 
 Phase 0 is read-only, cheap, and **gates all collection**. Goal (revised): finalize
 the **org set** and the **agent/AI-detection methodology**, and know the full-run
@@ -153,43 +154,17 @@ leaderboard (single-actor repos) + `cost_estimate.md`.
 - **Stage 0 consequence**: two seed loops — author-search (4 agents) + commit-search
   (Codex, Claude Code) — both date-windowed under the 1000/30-min limits.
 
-## 0.2 Build the labeled gold set — DEPRIORITIZED (was the heart; now optional wild-cohort)
-> Superseded by 0.A/0.B per the 2026-06-26 pivot. Retained as an optional "AI repos in
-> the wild" comparison cohort; no precision target gates collection. The flagged gold
-> audit (5/70 rows done) can be resumed if/when the contrast cohort is wanted.
-- [x] Stage 0 mini-sample (May 2026, all 6 agents incl. commit-search) → 2016 unique
-      repos (`data/sample/repo_sample.csv`). `src/seed_sample.py`.
-- [x] Batch metadata via GraphQL (`src/fetch_meta.py`): web-app skewed, 16.5% have
-      any topic, 51% have no description.
-- [x] Stratified **180** candidates over 5 strata, over-sampling positives
-      (`src/stratify.py`). 7 dual-signal cases.
-- [x] Evidence (README head + manifests, dep-based BUILDS/USES) →
-      `data/gold/gold_repos.csv` (`src/build_worksheet.py`).
-- [x] Claude proposed all 180 labels w/ confidence + audit flags
-      (`src/apply_labels.py`): BUILDS 37 / USES 35 / NOT 108; 66 flagged.
-      **Cheap-rule anchor agreed with judgment only 47%** → rules alone inadequate.
-- [x] First-draft **`RUBRIC.md` v0** with boundary rules from the labeling.
-- [ ] **Ron audits** the 66 flagged rows (+ spot-check) → fills `human_label`;
-      finalize RUBRIC.  ← NEXT, BLOCKING
-- [ ] Double-label ~30 for an agreement number (review note 3).
-- Deliverable: `data/gold/gold_repos.csv` + `RUBRIC.md` (both started; await audit).
-
-## 0.3 Characterize signals vs the gold set (1 day)  [DONE]
-Measure each cheap signal's precision/recall against the human labels:
-- [ ] **Topics** — recall of the topic-accept rule on gold BUILDS_AI (expect mediocre).
-- [ ] **Org owner** — build allowlist from gold owners, check leakage/precision.
-- [ ] **Dependencies** — pull root manifests for gold repos; test whether
-      torch/transformers vs openai-sdk-only separates BUILDS from USES cleanly.
-- [ ] **Stars/language** — weak prior or noise?
-- Deliverable: **`signal_analysis.md`** — precision/recall per signal + decision on
-  which become auto-accept/reject rules vs which defer to the LLM.
-
-## 0.4 Prototype & measure the layered classifier (1 day)
-- [ ] Implement Stage 2 layered classifier (rules → LLM on residual), per
-      `PIPELINE_SPEC.md` §Stage 2. Cache by `repo_id`, stamp `rule_version`.
-- [ ] Run on gold; report confusion matrix + precision/recall per label.
-- [ ] Tune rubric + thresholds until precision ≥ target AND recall ≥ floor; re-audit.
-- Deliverable: classifier code in `src/` + measured precision + **`RUBRIC.md` v1**.
+## 0.2–0.4 Labeled gold set & layered classifier — REMOVED (historical)
+The original Phase-0 heart: a 180-repo hand-labeled gold set, a 4-class rubric
+(BUILDS_AI/USES_AI/AI_INFRA/NOT_AI), signal precision/recall analysis, and a
+layered rules→LLM classifier. The gold audit showed cheap rules agreed with
+judgment only 47% and the class boundary itself was judgment-heavy — which
+motivated the 2026-06-26 pivot to org-provenance scoping. The track was carried
+as "optional wild-cohort" until 2026-07-08, then removed outright: the study's
+population is the org enumeration from third-party lists, full stop. All code
+(`src/{seed_sample,fetch_meta,stratify,build_worksheet,apply_labels,
+signal_analysis}.py`), `RUBRIC.md`, `signal_analysis.md`, and `data/gold/`
+live in git history before 2026-07-08.
 
 ## 0.5 Estimate full-run cost (½ day)
 - [ ] Extrapolate from the sample: expected unique AI R&D repos, PRs to hydrate,

@@ -9,8 +9,8 @@ analysis marts to support trend claims about agent/AI adoption among top AI buil
 Scope by **org provenance, not domain classification.** The original plan tried to
 classify arbitrary GitHub repos as "AI R&D" via a layered LLM classifier — a fuzzy,
 low-precision, judgment-heavy task (the gold audit showed even humans disagree on
-core-vs-auxiliary; see RUBRIC.md boundary cases). We replace that with a curated
-allowlist of top AI organizations (`ai_labs.yaml`): frontier/research labs, and
+core-vs-auxiliary). We replace that with an externally-sourced set
+of top AI organizations: frontier/research labs, and
 well-funded ($100M+) AI startups. Any repo under an allowlisted org is in-scope by
 construction (precision ~1.0, no classifier). This deliberately targets the
 practices of **top AI developers** and excludes hobbyist / low-signal repos, which
@@ -31,7 +31,13 @@ are not the object of study. The bottleneck is no longer "what is an AI repo" bu
   invisible to naive author-search.
 
 ## Retained as optional secondary cohort (was the primary plan)
-The domain classifier / gold set / `RUBRIC.md` work is **deprioritized, not deleted**.
+**UPDATE 2026-07-08: the domain classifier / gold set / `RUBRIC.md` track was
+REMOVED** (git history preserves it). The org set is no longer hand-curated
+(`ai_labs.yaml` deleted): it is built from third-party source lists — LF AI &
+Data landscape, Hugging Face top orgs, GitHub AI topics — with a quality gate
+(>=1 repo with >=1k stars) and an AI-evidence keep rule; see
+`src/pipeline/org_set.py` and `docs/METHODS.md`.
+The old note is kept below for history:
 The hand-labeled gold set may serve as a small "AI repos in the wild" comparison
 cohort to contrast against the top-org cohort. It is no longer on the critical path
 and its precision target no longer gates collection.
