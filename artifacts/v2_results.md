@@ -323,8 +323,26 @@ search but visible in the head-branch name. Consequently our Codex figure
 branch-level signal captures far more. Both AIDev/PRarena's count (noisy but
 sensitive) and ours (clean but narrow) are defensible for different purposes;
 the paper should report Codex-branch PR share as a separate, clearly-labeled
-signal. Population-wide codex-branch share by quarter: per-org scan in
-`data/resume_state/v2/codex_branch_scan.tsv` (in progress).
+signal. **Population-wide codex-branch share (per-org scan, 210 orgs, complete
+precount denominators; `data/resume_state/v2/codex_branch_scan.tsv`):**
+
+| quarter | codex/-branch PRs | total PRs | share |
+|---|---|---|---|
+| Q1-2024 | 0 | 101,323 | 0.00% |
+| Q4-2025 | 471 | 180,214 | 0.26% |
+| Q1-2026 | 4,999 | 257,094 | 1.94% |
+| Q2-2026 | **13,829** | 379,631 | **3.64%** |
+
+The zero in Q1-2024 doubles as a false-positive check: humans did not name
+branches codex/ before the product existed, so the heuristic is clean in
+practice within this population. 3.64% is ~24x the marker-attributed Codex
+floor (0.15%). Top Q2-2026 orgs: lance-format 2,513, openai 1,610 (dogfooding),
+NousResearch 1,474, NVIDIA 921. Implication for the headline: adding
+codex-branch PRs to the numerator (near-disjoint from trailer-detected
+Claude/Cursor, which key on different commits) lifts pooled Q2-2026 AI-code
+involvement from 13.4% to ~17%; the contributor-weighted headline (11.5%)
+rises similarly by ~3pp. Report it as "AI-involvement including branch-level
+Codex attribution" — PR-level evidence, not commit-forensic.
 
 Similarly for agent-AUTHORED PRs (PRarena's Copilot/Jules lines): in OUR
 population these are a small share of census PRs — Q4-2025 1.95%, Q1-2026
