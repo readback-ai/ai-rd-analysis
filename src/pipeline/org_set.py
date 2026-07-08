@@ -5,11 +5,18 @@ EXTERNAL sources — no per-repo domain classification anywhere:
 
 1. Candidate sources (third-party lists, snapshotted in data/resume_state/v2/):
    - lfai_orgs.txt      LF AI & Data landscape orgs (by project count)
-   - hf_orgs.tsv        Hugging Face hub top orgs (models, downloads)
+   - hf_orgs.tsv        Hugging Face hub top orgs (models, downloads) — HF
+                        handles; TRANSCRIBED to GitHub handles in
+                        candidates.tsv (e.g. laion -> LAION-AI)
    - gh_topic_orgs.txt  GitHub orgs prominent in AI topics
-   - v1_carryover.txt   frontier labs + TechCrunch 2025 $100M+-funded AI
-                        companies (third-party list, handles verified via API)
-   Union -> candidates (with source tags, candidates.tsv/candidates_clean.txt).
+   - v1_carryover.txt   TRANSCRIBED lab/startup list: funded startups from
+                        TechCrunch's 2025 $100M+ AI round-up + frontier labs
+                        by public prominence; handles API-verified; per-org
+                        category annotations included
+   candidates.tsv is the transcription RECORD (GitHub handle -> source tags);
+   verification compares against it, since raw HF handles differ from GitHub
+   handles. All four sources are third-party lists; our contribution is handle
+   transcription/verification, not membership judgment.
 2. Quality gate: org's flagship repo has >=1,000 stars (org_scale.tsv,
    collected via API) — drops hobbyist/placeholder orgs.
 3. AI-evidence keep: the org-level commit scan (stage 1) found tool-marker
@@ -44,22 +51,28 @@ def _lines(name: str) -> list[str]:
 
 
 def source_orgs() -> dict[str, set[str]]:
-    """Each third-party source list -> set of org handles."""
+    """Each third-party source list -> set of handles AS LISTED (HF handles
+    for hf-hub; GitHub handles elsewhere). For membership checks use
+    candidates(), which holds the transcribed GitHub handles."""
     return {
         "lfai": {ln.split()[-1] for ln in _lines("lfai_orgs.txt")},
         "hf-hub": {ln.split("\t")[0] for ln in _lines("hf_orgs.tsv")},
         "gh-topic": set(_lines("gh_topic_orgs.txt")),
-        "v1": set(_lines("v1_carryover.txt")),
+        "v1": {ln.split("\t")[0] for ln in _lines("v1_carryover.txt")},
     }
 
 
 def candidates() -> dict[str, str]:
-    """org -> 'src1|src2' union over sources (mirrors candidates.tsv)."""
-    out: dict[str, set[str]] = {}
-    for src, orgs in source_orgs().items():
-        for org in orgs:
-            out.setdefault(org, set()).add(src)
-    return {org: "|".join(sorted(tags)) for org, tags in out.items()}
+    """GitHub handle -> 'src1|src2' source tags: the transcription record
+    (candidates.tsv, GitHub handles) plus the v1 lab/startup list."""
+    out: dict[str, str] = {}
+    for ln in _lines("candidates.tsv"):
+        f = ln.split("\t")
+        if len(f) == 2:
+            out[f[0]] = f[1]
+    for org in source_orgs()["v1"]:
+        out[org] = (out[org] + "|v1") if org in out else "v1"
+    return out
 
 
 def quality_gated() -> set[str]:
@@ -88,10 +101,13 @@ def verify() -> None:
     print(f"quality gate (flagship >= {FLAGSHIP_MIN_STARS} stars): {len(gate)}")
     print(f"frozen active population: {len(act)} "
           f"= {len(ext)} externally-listed + {len(act & srcs['v1'])} v1-carryover")
-    unsourced = act - set(cand)
+    lower = {c.lower() for c in cand}
+    unsourced = {o for o in act if o.lower() not in lower}
     if unsourced:
         print(f"WARN: {len(unsourced)} active orgs missing from all source "
               f"snapshots: {sorted(unsourced)[:10]}")
+    else:
+        print("every active org traces to a source snapshot (case-insensitive)")
     ungated = ext - gate
     if ungated:
         print(f"note: {len(ungated)} externally-listed active orgs below the "

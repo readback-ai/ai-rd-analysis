@@ -12,19 +12,23 @@ domain ("is this AI R&D?") — an earlier gold-set audit showed that boundary is
 judgment-heavy and low-agreement (cheap rules matched human judgment 47%), and
 hobbyist repos are not the object of study. Instead (`org_set.py`, stage 0):
 
-1. **Candidate sources** — third-party lists, snapshotted in
+1. **Candidate sources** — four third-party lists, snapshotted in
    `data/resume_state/v2/`: the LF AI & Data landscape (266 orgs), Hugging
    Face hub top organizations (114), GitHub AI-topic organizations (180), and
-   a lab/startup list grounded in TechCrunch's 2025 $100M+ AI funding round-up
-   plus frontier labs of public prominence (47 carried into the final set;
-   `v1_carryover.txt`). Union: 566 candidate orgs.
+   a lab/startup list from TechCrunch's 2025 $100M+ AI funding round-up plus
+   frontier labs of public prominence (47 carried into the final set;
+   `v1_carryover.txt`, per-org category annotations). Our contribution to
+   sourcing is TRANSCRIPTION, not membership judgment: mapping listed names to
+   GitHub handles (e.g. Hugging Face's `laion` -> GitHub `LAION-AI`) and
+   API-verifying them; `candidates.tsv` is the transcription record. Union:
+   529 candidate orgs.
 2. **Quality gate** — the org's flagship repository has ≥1,000 stars
    (`org_scale.tsv`): 364 orgs.
 3. **AI-evidence keep** — the stage-1 marker scan found tool activity (≥5
    marker commits, or ≥0.1% of PRs for high-volume orgs): the frozen
    population `v2_active.txt`, **216 orgs**, of which 169 trace to the three
-   public lists and 47 to the lab/startup list. (One org, LAION-AI, predates
-   the snapshots; `org_set.py --verify` reports the full reconciliation.)
+   public lists and 47 to the lab/startup list. Every active org traces to a
+   source snapshot (`org_set.py --verify` reports the reconciliation).
 4. **Repo enumeration** (`enum_repos.py`, stage 2) — inside active orgs, keep
    repos with detectable AI-tool commits under the same keep rule:
    **1,996 repos** (`census_repos.txt`).

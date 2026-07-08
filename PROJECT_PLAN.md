@@ -33,8 +33,10 @@ are not the object of study. The bottleneck is no longer "what is an AI repo" bu
 ## Retained as optional secondary cohort (was the primary plan)
 **UPDATE 2026-07-08: the domain classifier / gold set / `RUBRIC.md` track was
 REMOVED** (git history preserves it). The org set is no longer hand-curated
-(`ai_labs.yaml` deleted): it is built from third-party source lists — LF AI &
-Data landscape, Hugging Face top orgs, GitHub AI topics — with a quality gate
+(`ai_labs.yaml` deleted): it is built from four third-party source lists — LF
+AI & Data landscape, Hugging Face top orgs, GitHub AI topics, and TechCrunch's
+2025 $100M+ AI funding round-up (+ frontier labs; transcription record
+`v1_carryover.txt`) — with a quality gate
 (>=1 repo with >=1k stars) and an AI-evidence keep rule; see
 `src/pipeline/org_set.py` and `docs/METHODS.md`.
 The old note is kept below for history:
