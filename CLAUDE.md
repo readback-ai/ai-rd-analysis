@@ -2,8 +2,8 @@
 
 Project: a fresh, queryable dataset of **AI-assisted development practices at leading
 AI organizations** — how top AI labs and well-funded AI startups use autonomous coding
-agents / AI assistance in their public repos. See `PROJECT_PLAN.md` (phasing) and
-`PIPELINE_SPEC.md` (architecture). **Pivoted 2026-06-26** from per-repo "AI R&D"
+agents / AI assistance in their public repos. See `README.md` (overview) and
+`docs/METHODS.md` (methodology). **Pivoted 2026-06-26** from per-repo "AI R&D"
 classification to **org-provenance scoping**: the tracked population is the org
 enumeration built from third-party lists (`src/pipeline/org_set.py`; LF AI landscape +
 HF top orgs + GitHub topics, quality-gated). Detection methodology = `src/pipeline/detect.py`

@@ -1,3 +1,7 @@
+> **SUPERSEDED 2026-07-08** by [`docs/METHODS.md`](../docs/METHODS.md)
+> (canonical methodology, incl. the three-layer detection taxonomy and
+> the org-set builder `pipeline.org_set`). Kept as a historical snapshot.
+
 # Scope & methods: AI-assisted development at leading AI organizations
 
 Snapshot 2026-06-29. Window analyzed: **Q1-2024 (pre-AI baseline) + Q3-2025 → Q2-2026**.
