@@ -1,0 +1,52 @@
+# v1 carryover component of the v2 org set (47 orgs).
+# Provenance: frontier/research labs of public prominence + AI companies from
+# TechCrunch's 2025 $100M+ funding list (third-party), handle-verified via gh api.
+# Kept in v2 when org-level AI-evidence scan found activity. The other 169 orgs
+# come from candidates_clean.txt (LF AI landscape + HF hub + GitHub topics).
+aleph-alpha
+anthropics
+anyscale
+anysphere
+augmentcode
+basetenlabs
+bytedance-seed
+cerebras
+character-ai
+chroma-core
+cohere-ai
+contextualai
+elevenlabs
+fal-ai
+fw-ai
+groq
+hazyresearch
+imbue-ai
+lambdalabsml
+minimax-ai
+ml-explore
+modal-labs
+modelscope
+modular
+nvidia-nemo
+nvlabs
+physical-intelligence
+pinecone-io
+primeintellect-ai
+replicate
+runwayml
+sakanaai
+salesforceairesearch
+sambanova
+sarvamai
+scaleapi
+sgl-project
+skyworkai
+stability-ai
+stanford-crfm
+stepfun-ai
+tenstorrent
+thinking-machines-lab
+togethercomputer
+twelvelabs-io
+unstructured-io
+writer

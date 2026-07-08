@@ -30,11 +30,14 @@ from pipeline.scan_orgs import QUARTER_RANGES
 
 PAGE_SIZE = 50   # per-call PR fetch; the census cap per cell (single page, no pagination)
 
+# headRefName (detection layer C) and mergedBy (self-merge/accountability)
+# were added 2026-07-08; cells pulled earlier lack them and downstream code
+# must treat the fields as optional (detect.classify_pr does).
 PR_QUERY = """
 query($q:String!){ search(query:$q, type:ISSUE, first:%d){
   nodes{ ... on PullRequest{ number createdAt mergedAt closedAt authorAssociation
-    additions deletions changedFiles
-    author{login __typename}
+    additions deletions changedFiles headRefName
+    author{login __typename} mergedBy{login __typename}
     commits(first:12){ nodes{ commit{ message
       authors(first:6){ nodes{ email } }
       committer{ email user{ login } } } } }
