@@ -1,11 +1,15 @@
-"""Stage 4 — weighted metrics from census cells, with bootstrap CIs.
+"""Stage 4 — HOW METRICS ARE CREATED from census cells (bootstrap CIs).
 
-Reads raw/census/ cells, classifies each PR (AI-code via marker set; reviewer
-types), computes per-repo-period rates, then reports equal-weight and
+Reads raw/census/ cells, classifies each PR once via detect.classify_pr, turns
+the classifications into per-repo-period rates, then reports equal-weight and
 contributor-weighted averages per period with bootstrap 95% CIs over repos.
+Detection semantics (marker sets, reviewer taxonomies, the reviewer!=author
+correction) all live in pipeline.detect — nothing here re-defines them.
 
-Bot-review is DECOMPOSED (review gap P1.4): reviewers whose login is in
-AI_REVIEWERS count as ai_review; other Bot-typed reviewers as other_bot_review.
+human_review keeps the LEGACY any-User-reviewer definition so published tables
+reproduce exactly; human_rev_other is the corrected reviewer!=author rate
+(v2_results §11c). self_merged is only available in cells pulled after
+2026-07-08 (mergedBy added to the census query) and reports nan before that.
 
 PRs are DEDUPED by number within each (repo, period): the durable store can
 hold overlapping cell generations (full-quarter + sub-window cells, or cells
@@ -23,15 +27,8 @@ import random
 from collections import defaultdict
 from pathlib import Path
 
-from pipeline.ghx import (MARKERS_V1, MARKERS_V2, decode_cell_stem,
-                          pr_ai_tools, raw_dir, read_cell)
-
-AI_REVIEWERS = {  # dedicated AI code-review bots seen in the data (extend as found)
-    "gemini-code-assist", "copilot-pull-request-reviewer", "coderabbitai",
-    "greptile-apps", "qodo-merge-pro", "cursor", "chatgpt-codex-connector",
-    "copilot-swe-agent", "claude",
-}
-INSIDER = {"MEMBER", "OWNER", "COLLABORATOR"}
+from pipeline.detect import MARKERS_V1, MARKERS_V2, classify_pr
+from pipeline.ghx import decode_cell_stem, raw_dir, read_cell
 
 
 def load_cells() -> dict[tuple[str, str], list[dict]]:
@@ -78,24 +75,25 @@ def group_by_period(cells: dict[tuple[str, str], list[dict]],
 
 
 def pr_metrics(pr: dict, markers: dict) -> dict:
-    revs = [r for r in (pr.get("reviews") or {}).get("nodes") or [] if r.get("author")]
-    human = [r for r in revs if r["author"]["__typename"] == "User"]
-    bots = [r for r in revs if r["author"]["__typename"] == "Bot"]
-    ai_rev = [r for r in bots
-              if (r["author"].get("login") or "").removesuffix("[bot]") in AI_REVIEWERS]
+    c = classify_pr(pr, markers)
     return {
-        "ai_code": bool(pr_ai_tools(pr, markers)),
-        "merged": bool(pr.get("mergedAt")),
-        "human_review": bool(human),
-        "ai_review": bool(ai_rev),
-        "other_bot_review": bool(len(ai_rev) < len(bots)),
-        "no_review": not revs,
-        "insider": pr.get("authorAssociation") in INSIDER,
+        "ai_code": bool(c.marker_tools),
+        "ai_involved": c.ai_involved,          # all 3 layers (needs headRefName)
+        "merged": c.merged,
+        "human_review": c.human_reviewed_any,  # legacy (published §1/§4/§5)
+        "human_rev_other": c.human_reviewed,   # corrected reviewer != author
+        "ai_review": c.ai_reviewed,
+        "other_bot_review": c.other_bot_reviewed,
+        "no_review": not (c.human_reviewed_any or c.ai_reviewed
+                          or c.other_bot_reviewed),
+        "insider": c.insider,
+        # None (field absent in pre-2026-07-08 cells) -> skipped by rate calc
+        "self_merged": c.self_merged,
     }
 
 
-METRICS = ["ai_code", "merged", "human_review", "ai_review",
-           "other_bot_review", "no_review", "insider"]
+METRICS = ["ai_code", "merged", "human_review", "human_rev_other", "ai_review",
+           "other_bot_review", "no_review", "insider", "self_merged"]
 
 
 def weighted_mean(pairs: list[tuple[float, float]]) -> float:
@@ -138,7 +136,10 @@ def main() -> None:
             if p != per or len(prs) < a.min_prs:
                 continue
             ms = [pr_metrics(pr, markers) for pr in prs]
-            rates = {m: sum(x[m] for x in ms) / len(ms) for m in METRICS}
+            rates = {}
+            for m in METRICS:
+                vals = [x[m] for x in ms if x[m] is not None]
+                rates[m] = sum(vals) / len(vals) if vals else None
             rows.append((repo, rates))
         if not rows:
             continue
@@ -146,7 +147,11 @@ def main() -> None:
                            ("contrib-weight", lambda r: weights.get(r, 1.0))):
             line = f"{per:9}{label:16}{len(rows):>6}"
             for m in METRICS:
-                pairs = [(rates[m], wfn(repo)) for repo, rates in rows]
+                pairs = [(rates[m], wfn(repo)) for repo, rates in rows
+                         if rates[m] is not None]
+                if not pairs:
+                    line += f"  {'n/a':>17}"
+                    continue
                 mean = weighted_mean(pairs)
                 lo, hi = bootstrap_ci(pairs, a.bootstrap)
                 line += f"  {100*mean:5.1f} [{100*lo:4.1f},{100*hi:4.1f}]"

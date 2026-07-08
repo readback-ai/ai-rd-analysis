@@ -21,7 +21,8 @@ import sys
 import time
 from pathlib import Path
 
-from pipeline.ghx import MARKERS_V1, MARKERS_V2, cell_path, read_cell, rest_count
+from pipeline.detect import MARKERS_V1, MARKERS_V2
+from pipeline.ghx import cell_path, read_cell, rest_count
 
 QUARTER_RANGES = {
     "Q1-2024": "2024-01-01..2024-03-31",

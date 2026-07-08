@@ -5,10 +5,10 @@ import random
 
 import pytest
 
-from pipeline import analyze, ghx
+from pipeline import ghx
 from pipeline.analyze import (bootstrap_ci, load_cells, period_of, pr_metrics,
                               weighted_mean)
-from pipeline.ghx import MARKERS_V1
+from pipeline.detect import MARKERS_V1
 from pipeline.scan_orgs import QUARTER_RANGES
 
 
@@ -126,6 +126,7 @@ def test_insider_is_a_reported_metric():
 
 def test_ai_reviewer_list_covers_observed_reviewers():
     """Reviewers actually seen in the Phase-0 data must be classified as AI."""
+    from pipeline.detect import AI_REVIEWERS
     for login in ("gemini-code-assist", "copilot-pull-request-reviewer",
                   "coderabbitai", "greptile-apps"):
-        assert login in analyze.AI_REVIEWERS
+        assert login in AI_REVIEWERS

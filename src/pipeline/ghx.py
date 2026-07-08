@@ -23,7 +23,6 @@ import json
 import os
 import subprocess
 import time
-from dataclasses import dataclass
 from pathlib import Path
 
 # ---------------------------------------------------------------- storage
@@ -141,68 +140,4 @@ def graphql_nodes(query: str, variables: dict[str, object],
     return None
 
 
-# ---------------------------------------------------------------- AI tools
-
-@dataclass(frozen=True)
-class ToolSpec:
-    """One AI tool's identity, in one place.
-    search_terms: full commit-search query fragments (bare trailer terms, or
-      qualifier terms like committer:/author-email: for tools that ARE the
-      author/committer). Stage counts use max-over-terms — terms overlap on
-      the same commits, so summing would double-count; max is an honest floor.
-    needles: substrings matched against a PR's commit messages + author AND
-      committer emails/logins by pr_ai_tools."""
-    search_terms: tuple[str, ...]
-    needles: tuple[str, ...]
-
-
-# v1 marker set: what every published Phase-0 number used (comparability).
-MARKERS_V1 = {
-    "claude": ToolSpec(
-        search_terms=("noreply@anthropic.com", '"Generated with [Claude Code]"'),
-        needles=("noreply@anthropic.com", "Generated with [Claude Code]")),
-    "cursor": ToolSpec(
-        search_terms=("cursoragent@cursor.com",),
-        needles=("cursoragent@cursor.com",)),
-}
-# v2 adds the R4 extensions (quantify the delta before switching headlines).
-# Codex cloud commits VIA the bot committer need qualifier search + the
-# committer field in the census GraphQL query (bare terms only match message
-# text, and the bot never appears there).
-MARKERS_V2 = MARKERS_V1 | {
-    "aider": ToolSpec(
-        search_terms=('"Co-authored-by: aider"',),
-        needles=("Co-authored-by: aider",)),
-    "codex": ToolSpec(
-        search_terms=("committer:chatgpt-codex-connector[bot]",
-                      "author-email:codex@openai.com"),
-        needles=("codex@openai.com", "chatgpt-codex-connector")),
-}
-# PR authors that are coding agents (bot-authored PRs carry no trailer).
-AGENT_PR_AUTHORS = {
-    "copilot-swe-agent", "devin-ai-integration", "cursor", "google-labs-jules",
-    "codegen-sh", "amazon-q-developer", "factory-droid", "claude",
-}
-
-
-def pr_ai_tools(pr: dict, markers: dict[str, ToolSpec] = MARKERS_V1,
-                include_bot_authors: bool = False) -> set[str]:
-    """Which AI tools left evidence in this PR (search-API PullRequest node
-    with commits{nodes{commit{message authors{...} committer{...}}}})."""
-    found: set[str] = set()
-    for c in (pr.get("commits") or {}).get("nodes") or []:
-        commit = c.get("commit") or {}
-        hay = commit.get("message") or ""
-        for a in (commit.get("authors") or {}).get("nodes") or []:
-            hay += "\n" + ((a or {}).get("email") or "")
-        committer = commit.get("committer") or {}
-        hay += "\n" + (committer.get("email") or "")
-        hay += "\n" + (((committer.get("user") or {}).get("login")) or "")
-        for tool, spec in markers.items():
-            if any(n in hay for n in spec.needles):
-                found.add(tool)
-    if include_bot_authors:
-        login = ((pr.get("author") or {}).get("login") or "").removesuffix("[bot]")
-        if login in AGENT_PR_AUTHORS:
-            found.add(f"agent:{login}")
-    return found
+# AI-detection identities/logic live in pipeline.detect (single home).

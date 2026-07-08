@@ -4,8 +4,7 @@ import json
 import pytest
 
 from pipeline import ghx
-from pipeline.ghx import (MARKERS_V1, MARKERS_V2, cell_path, cell_valid,
-                          decode_cell_stem, pr_ai_tools, read_cell)
+from pipeline.ghx import (cell_path, cell_valid, decode_cell_stem, read_cell)
 
 
 @pytest.fixture(autouse=True)
@@ -94,69 +93,3 @@ def test_graphql_nodes_returns_valid_list(monkeypatch):
     monkeypatch.setattr(ghx, "graphql_budget_wait", lambda **k: None)
     monkeypatch.setattr(ghx, "_gh", lambda *a, **k: '[{"number": 1}]')
     assert ghx.graphql_nodes("q", {}, ".data", expect=list) == [{"number": 1}]
-
-
-# --------------------------------------------------------------- AI markers
-
-def _pr(messages=(), emails=(), author=None):
-    return {
-        "author": {"login": author, "__typename": "Bot"} if author else None,
-        "commits": {"nodes": [
-            {"commit": {"message": m,
-                        "authors": {"nodes": [{"email": e} for e in emails]}}}
-            for m in messages or [""]
-        ]},
-    }
-
-
-def test_detects_claude_coauthor_email():
-    pr = _pr(messages=["fix bug"], emails=["dev@x.com", "noreply@anthropic.com"])
-    assert pr_ai_tools(pr) == {"claude"}
-
-
-def test_detects_claude_footer_without_email():
-    """Squash-merge often keeps the footer even when trailers are stripped."""
-    pr = _pr(messages=["feat: x\n\n🤖 Generated with [Claude Code](https://...)"])
-    assert pr_ai_tools(pr) == {"claude"}
-
-
-def test_detects_cursor_trailer():
-    pr = _pr(messages=["Update\n\nCo-authored-by: Cursor <cursoragent@cursor.com>"])
-    assert pr_ai_tools(pr) == {"cursor"}
-
-
-def test_v1_ignores_aider_and_codex_but_v2_detects():
-    pr = _pr(messages=["x\n\nCo-authored-by: aider <aider@aider.chat>"],
-             emails=["codex@openai.com"])
-    assert pr_ai_tools(pr, MARKERS_V1) == set()
-    assert pr_ai_tools(pr, MARKERS_V2) == {"aider", "codex"}
-
-
-def test_v2_detects_codex_cloud_via_committer():
-    """Review finding: Codex cloud only appears as the COMMITTER; the old
-    query/classifier never saw it."""
-    pr = _pr(messages=["normal"])
-    pr["commits"]["nodes"][0]["commit"]["committer"] = {
-        "email": "", "user": {"login": "chatgpt-codex-connector"}}
-    assert pr_ai_tools(pr, MARKERS_V2) == {"codex"}
-    assert pr_ai_tools(pr, MARKERS_V1) == set()
-
-
-def test_marker_specs_have_search_terms_and_needles():
-    for spec in MARKERS_V2.values():
-        assert spec.search_terms and spec.needles
-
-
-def test_plain_pr_detects_nothing():
-    assert pr_ai_tools(_pr(messages=["normal commit"], emails=["h@x.com"])) == set()
-
-
-def test_bot_authored_pr_flagged_only_when_enabled():
-    pr = _pr(messages=["done"], author="copilot-swe-agent[bot]")
-    assert pr_ai_tools(pr) == set()
-    assert pr_ai_tools(pr, include_bot_authors=True) == {"agent:copilot-swe-agent"}
-
-
-def test_empty_commits_do_not_crash():
-    assert pr_ai_tools({"commits": None}) == set()
-    assert pr_ai_tools({}) == set()

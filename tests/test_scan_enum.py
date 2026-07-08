@@ -6,7 +6,8 @@ import json
 import pytest
 
 from pipeline import enum_repos, scan_orgs
-from pipeline.ghx import MARKERS_V1, MARKERS_V2, cell_path
+from pipeline.detect import MARKERS_V1, MARKERS_V2
+from pipeline.ghx import cell_path
 
 N_TERMS_V1 = sum(len(s.search_terms) for s in MARKERS_V1.values())
 

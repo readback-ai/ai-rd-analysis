@@ -26,7 +26,8 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
-from pipeline.ghx import MARKERS_V1, MARKERS_V2, cell_path, read_cell, rest_count
+from pipeline.detect import MARKERS_V1, MARKERS_V2
+from pipeline.ghx import cell_path, read_cell, rest_count
 
 RATE_KEEP = 0.001                       # 0.1% of PRs (keep-rule OR-branch)
 SEARCH_CAP = 1000                       # GitHub search hard cap per query
