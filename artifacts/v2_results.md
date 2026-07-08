@@ -501,6 +501,9 @@ trailer-detected Claude/Cursor, so additive treatment is sound.
 | >=50% | 5.9% | 6.9% | 6.9% | **8.4%** |
 | >=75% | 2.0% | 2.5% | 2.5% | **3.5%** |
 With Codex included, ~4 in 5 orgs clear the 10% bar and >1 in 3 clear 25%.
+(Baseline here differs from §3 — this cut uses all censused repos and v2
+markers, §3 filters to repos with >=10 PRs/period and v1 markers; read the
++codex DELTAS as the finding, +3.5 to +12.4pp, largest at the 10% bar.)
 
 **12b. Codex-branch PRs are a distinct, low-review, low-merge lane:**
 | period | humRev% | AIrev% | merged% | noRev of merged | self-merged of merged | one-person of merged |
