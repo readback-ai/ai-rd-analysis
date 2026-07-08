@@ -531,3 +531,64 @@ Including codex lowers the AI-code human-review level ~3-4pp in every quarter
 5 AI PRs, flat across quarters. Note humRev here = reviewer!=author (§11c).
 Caveats: codex sample is first-page-per-org-quarter (created-desc; mild
 within-quarter recency bias); one-person metric lacks the comment check.
+
+## 13. Consistent integration of ALL AI detections (2026-07-08)
+
+Detection is now three explicit layers (`src/pipeline/detect.py`), combined
+disjointly by `pipeline.integrate` with overlaps MEASURED on org-stratified
+samples of every branch prefix (613 sample cells; per-prefix one page per
+org-quarter, org-weighted):
+A = commit markers · B = agent PR authors · C = branch prefixes
+(codex/, copilot/, cursor/, claude/) · total = A + B + (C minus overlap).
+
+**13a. Measured per-prefix overlap — each prefix is a DIFFERENT thing:**
+| prefix (Q2-2026) | bot-authored (=B) | marker overlap (=A) | branch-ONLY increment |
+|---|---|---|---|
+| codex/ | 0.0% | 2.4% | **~98%** — genuinely new detection |
+| copilot/ | 95.4% | 1.1% | ~4% — already counted as agent-authored |
+| cursor/ | 26.4% | 89.7% | ~0% — carries the cursoragent trailer |
+| claude/ | 0.0% | 67.1% | ~33% — trailer survives in most, not all |
+Q1-2024 = 0 PRs for every prefix (false-positive check passes universally).
+
+**13b. Layered AI-involvement (pooled share of population PRs):**
+| period | A markers | B agent-authored | C branch-only | **total AI-involved** |
+|---|---|---|---|---|
+| Q1-2024 | 0.00 | 0.00 | 0.00 | **0.00** |
+| Q4-2025 | 2.54 | 1.95 | 0.33 | **4.82** |
+| Q1-2026 | 9.16 | 1.84 | 1.99 | **12.99** |
+| Q2-2026 | 13.44 | 0.84 | 3.73 | **18.01** |
+The C increment is ~all Codex. (Headline CW marker series unchanged: 11.5%
+Q2-2026; the layered table is pooled — weighting note per §7.)
+
+**13c. Org adoption thresholds, overlap-corrected (supersedes §12a):**
+| threshold | Q1-2026 markers → +branch | Q2-2026 markers → +branch |
+|---|---|---|
+| >=10% | 48.5% → 52.0% | 66.8% → **79.2%** |
+| >=25% | 19.3% → 23.3% | 31.2% → **36.6%** |
+| >=50% | 5.9% → 6.9% | 6.9% → **8.4%** |
+| >=75% | 2.0% → 2.5% | 2.5% → **3.5%** |
+(±0-1pp vs §12a's codex-only numbers: copilot/cursor/claude branch-only
+increments are too small to move org thresholds.)
+
+**13d. Review-of-AI trends with all lanes blended (reviewer!=author):**
+| period | marker-AI humRev% | ALL-lanes humRev% | marker noRev-of-merged% | ALL-lanes |
+|---|---|---|---|---|
+| Q4-2025 | 42.5 | 40.6 | 39.3 | 42.3 |
+| Q1-2026 | 45.2 | 40.3 | 39.9 | 39.7 |
+| Q2-2026 | 48.5 | **44.7** | 37.4 | **37.9** |
+Direction unchanged; level ~4pp lower. ~2 in 5 merged AI PRs still merge
+without human review, flat across quarters.
+
+**13e. Lane characteristics (Q2-2026, of merged PRs in each lane):**
+| lane | humRev% | merged% | noRev of merged | self-merged of merged |
+|---|---|---|---|---|
+| copilot/ (delegated, bot-authored) | 73.6 | 66.2 | 6.4 | **2.1** |
+| marker-attributed (IDE/CLI) | 48.5 | 68 | 37.4 | ~76 (§11b) |
+| claude/ (web) | 34.6 | 59.6 | 47.6 | 66.6 |
+| codex/ (web) | 30.3 | **38.0** | 41.7 | 71.4 |
+| cursor/ (agents) | 30.2 | 43.1 | 34.7 | 76.7 |
+The governance gradient is the finding: the SAME organizations run Copilot's
+assignee-gated flow (74% reviewed, ~0 self-merge) alongside web-agent lanes
+where two-thirds+ of merges are self-merges and the gate is merge triage
+(codex merges only 38% of what it opens). Oversight is a property of the
+LANE, not the org.
