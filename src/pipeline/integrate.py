@@ -89,8 +89,13 @@ def branch_counts(*paths: Path) -> dict[tuple[str, str, str], int]:
 
 def sample_stats(sample_dir: Path, markers=MARKERS_V2) -> dict[str, dict[str, float]]:
     """Org-weighted per-period stats from one prefix's sample cells:
-    marker_overlap, bot_author_share, human_rev, ai_rev, merged, self_merged,
-    norev_merged (share of merged with no human review). Weights = pop_count."""
+    marker_overlap, bot_author_share, human_rev, ai_rev, merged (shares of all
+    PRs), and norev_merged / self_merged (shares of MERGED PRs). Weights =
+    pop_count. Conditional metrics use POPULATION-RATIO semantics (weighted
+    merged mass in the denominator), i.e. "of merged <prefix> PRs population-
+    wide, X% were self-merged" — matching v2_results §12b — not a mean of
+    per-org conditional rates (orgs' merge rates differ too much for those to
+    coincide)."""
     acc: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
     for f in sorted(sample_dir.glob("*.json")):
         try:
@@ -102,19 +107,26 @@ def sample_stats(sample_dir: Path, markers=MARKERS_V2) -> dict[str, dict[str, fl
             continue
         w, n = cell["pop_count"], len(prs)
         d = acc[cell["period"]]
-        merged = [c for c in map(lambda p: classify_pr(p, markers), prs) if c.merged]
         cls = [classify_pr(p, markers) for p in prs]
+        merged = [c for c in cls if c.merged]
         d["w"] += w
         d["marker_overlap"] += w * sum(bool(pr_ai_tools(p, markers)) for p in prs) / n
         d["bot_author"] += w * sum(pr_agent_author(p) is not None for p in prs) / n
         d["human_rev"] += w * sum(c.human_reviewed for c in cls) / n
         d["ai_rev"] += w * sum(c.ai_reviewed for c in cls) / n
         d["merged"] += w * len(merged) / n
-        if merged:
-            d["norev_merged"] += w * sum(not c.human_reviewed for c in merged) / len(merged)
-            d["self_merged"] += w * sum(bool(c.self_merged) for c in merged) / len(merged)
-    return {per: {k: (v / d["w"] if k != "w" else v) for k, v in d.items()}
-            for per, d in acc.items()}
+        d["norev_merged_mass"] += w * sum(not c.human_reviewed for c in merged) / n
+        d["self_merged_mass"] += w * sum(bool(c.self_merged) for c in merged) / n
+    out: dict[str, dict[str, float]] = {}
+    for per, d in acc.items():
+        w = d["w"]
+        row = {k: v / w for k, v in d.items() if k != "w"}
+        row["w"] = w
+        m = row.pop("norev_merged_mass"), row.pop("self_merged_mass")
+        row["norev_merged"] = m[0] / row["merged"] if row["merged"] else 0.0
+        row["self_merged"] = m[1] / row["merged"] if row["merged"] else 0.0
+        out[per] = row
+    return out
 
 
 # ----------------------------------------------------------------- layers A+B
@@ -167,9 +179,11 @@ def layered_table(sample_dirs: dict[str, Path]) -> None:
               f"{100*c_only:>14.2f}%{100*(a+b+c_only):>9.2f}%{note}")
 
 
-def threshold_table(contrib_csv: Path = V2 / "repo_contributors_v2.csv") -> None:
-    """Org adoption thresholds: CW marker rate + org branch share (all
-    prefixes, overlap-corrected where samples exist)."""
+def threshold_table(contrib_csv: Path = V2 / "repo_contributors_v2.csv",
+                    sample_dirs: dict[str, Path] | None = None) -> None:
+    """Org adoption thresholds: CW marker rate + org branch share with the
+    measured per-prefix overlap corrections applied (period-global factors —
+    per-org overlap is not identified from one sample page)."""
     weights: dict[str, float] = {}
     with open(contrib_csv) as fh:
         for row in csv.reader(fh):
@@ -182,6 +196,13 @@ def threshold_table(contrib_csv: Path = V2 / "repo_contributors_v2.csv") -> None
         if human:
             rate[(repo, per)] = sum(bool(pr_ai_tools(p, MARKERS_V2)) for p in human) / len(human)
     counts = branch_counts(V2 / "branch_scan.tsv", V2 / "codex_branch_scan.tsv")
+    stats = {pfx: sample_stats(d) for pfx, d in (sample_dirs or {}).items()
+             if d.exists()}
+
+    def keep_factor(pfx: str, per: str) -> float:
+        st = stats.get(pfx, {}).get(per)
+        return max(0.0, 1 - st["marker_overlap"] - st["bot_author"]) if st else 1.0
+
     ototal = org_totals()
     org_repos: dict[str, list[str]] = defaultdict(list)
     for repo in (V2 / "census_repos.txt").read_text().split():
@@ -198,7 +219,7 @@ def threshold_table(contrib_csv: Path = V2 / "repo_contributors_v2.csv") -> None
             if not den:
                 continue
             cw = num / den
-            branch = sum(v for (o, q, _), v in counts.items()
+            branch = sum(v * keep_factor(p, q) for (o, q, p), v in counts.items()
                          if o == org and q == per)
             share = branch / ototal[(org, per)] if ototal.get((org, per)) else 0.0
             base.append(cw)
@@ -217,7 +238,7 @@ def main() -> None:
     sample_dirs = {f"{tag}/": V2 / f"{tag}_prs"
                    for tag in ("codex", "copilot", "cursor", "claude")}
     if a.thresholds:
-        threshold_table()
+        threshold_table(sample_dirs=sample_dirs)
     else:
         layered_table(sample_dirs)
 
