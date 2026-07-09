@@ -1052,3 +1052,197 @@ ok   apache/airflow-publish Q1-2024: 0 PRs
 ok   apache/airflow-publish Q3-2025: 0 PRs
 ok   apache/airflow-publish Q4-2025: 0 PRs
 ok   apache/airflow-publish Q1-2026: 0 PRs
+ok   apache/airflow-publish Q2-2026: 1 PRs
+FAIL apache/burr Q1-2024
+FAIL apache/burr Q3-2025
+FAIL apache/burr Q4-2025
+FAIL apache/burr Q1-2026
+FAIL apache/burr Q2-2026
+FAIL apache/casbin-Talent2026 Q1-2024
+FAIL apache/casbin-Talent2026 Q3-2025
+FAIL apache/casbin-Talent2026 Q4-2025
+FAIL apache/casbin-Talent2026 Q1-2026
+FAIL apache/casbin-Talent2026 Q2-2026
+FAIL apache/casbin-gateway Q1-2024
+FAIL apache/casbin-gateway Q3-2025
+FAIL apache/casbin-gateway Q4-2025
+FAIL apache/casbin-gateway Q1-2026
+FAIL apache/casbin-gateway Q2-2026
+FAIL apache/casbin-mcp-gateway Q1-2024
+FAIL apache/casbin-mcp-gateway Q3-2025
+FAIL apache/casbin-mcp-gateway Q4-2025
+FAIL apache/casbin-mcp-gateway Q1-2026
+FAIL apache/casbin-mcp-gateway Q2-2026
+FAIL apache/cloudberry Q1-2024
+FAIL apache/cloudberry Q3-2025
+FAIL apache/cloudberry Q4-2025
+FAIL apache/cloudberry Q1-2026
+FAIL apache/cloudberry Q2-2026
+FAIL apache/cloudberry-devops-release Q1-2024
+FAIL apache/cloudberry-devops-release Q3-2025
+FAIL apache/cloudberry-devops-release Q4-2025
+FAIL apache/cloudberry-devops-release Q1-2026
+FAIL apache/cloudberry-devops-release Q2-2026
+FAIL apache/cloudberry-go-libs Q1-2024
+FAIL apache/cloudberry-go-libs Q3-2025
+FAIL apache/cloudberry-go-libs Q4-2025
+FAIL apache/cloudberry-go-libs Q1-2026
+FAIL apache/cloudberry-go-libs Q2-2026
+FAIL apache/cloudberry-gpbackup-s3-plugin Q1-2024
+FAIL apache/cloudberry-gpbackup-s3-plugin Q3-2025
+FAIL apache/cloudberry-gpbackup-s3-plugin Q4-2025
+FAIL apache/cloudberry-gpbackup-s3-plugin Q1-2026
+FAIL apache/cloudberry-gpbackup-s3-plugin Q2-2026
+FAIL apache/cloudberry-pxf Q1-2024
+FAIL apache/cloudberry-pxf Q3-2025
+FAIL apache/cloudberry-pxf Q4-2025
+FAIL apache/cloudberry-pxf Q1-2026
+FAIL apache/cloudberry-pxf Q2-2026
+FAIL apache/ctakes Q1-2024
+FAIL apache/ctakes Q3-2025
+FAIL apache/ctakes Q4-2025
+FAIL apache/ctakes Q1-2026
+FAIL apache/ctakes Q2-2026
+FAIL apache/ctakes-website Q1-2024
+FAIL apache/ctakes-website Q3-2025
+FAIL apache/ctakes-website Q4-2025
+FAIL apache/ctakes-website Q1-2026
+FAIL apache/ctakes-website Q2-2026
+FAIL apache/dolphinscheduler-mlflow Q1-2024
+FAIL apache/dolphinscheduler-mlflow Q3-2025
+FAIL apache/dolphinscheduler-mlflow Q4-2025
+FAIL apache/dolphinscheduler-mlflow Q1-2026
+FAIL apache/dolphinscheduler-mlflow Q2-2026
+FAIL apache/doris Q1-2024
+FAIL apache/doris Q3-2025
+FAIL apache/doris Q4-2025
+FAIL apache/doris Q1-2026
+FAIL apache/doris Q2-2026
+FAIL apache/doris-mcp-server Q1-2024
+ok   apache/doris-mcp-server Q3-2025: 32 PRs
+ok   apache/doris-mcp-server Q4-2025: 4 PRs
+ok   apache/doris-mcp-server Q1-2026: 4 PRs
+ok   apache/doris-mcp-server Q2-2026: 4 PRs
+ok   apache/flink-agents Q1-2024: 0 PRs
+ok   apache/flink-agents Q3-2025: 93 PRs
+ok   apache/flink-agents Q4-2025: 88 PRs
+ok   apache/flink-agents Q1-2026: 125 PRs
+ok   apache/flink-agents Q2-2026: 136 PRs
+ok   apache/flink-agents-demos Q1-2024: 0 PRs
+ok   apache/flink-agents-demos Q3-2025: 0 PRs
+ok   apache/flink-agents-demos Q4-2025: 0 PRs
+ok   apache/flink-agents-demos Q1-2026: 4 PRs
+ok   apache/flink-agents-demos Q2-2026: 3 PRs
+ok   apache/flink-ml Q1-2024: 2 PRs
+ok   apache/flink-ml Q3-2025: 0 PRs
+ok   apache/flink-ml Q4-2025: 0 PRs
+ok   apache/flink-ml Q1-2026: 0 PRs
+ok   apache/flink-ml Q2-2026: 2 PRs
+ok   apache/hamilton Q1-2024: 141 PRs
+ok   apache/hamilton Q3-2025: 32 PRs
+ok   apache/hamilton Q4-2025: 23 PRs
+ok   apache/hamilton Q1-2026: 94 PRs
+ok   apache/hamilton Q2-2026: 107 PRs
+ok   apache/hertzbeat Q1-2024: 143 PRs
+ok   apache/hertzbeat Q3-2025: 179 PRs
+ok   apache/hertzbeat Q4-2025: 89 PRs
+ok   apache/hertzbeat Q1-2026: 103 PRs
+ok   apache/hertzbeat Q2-2026: 43 PRs
+ok   apache/hertzbeat-helm-chart Q1-2024: 0 PRs
+ok   apache/hertzbeat-helm-chart Q3-2025: 5 PRs
+ok   apache/hertzbeat-helm-chart Q4-2025: 2 PRs
+ok   apache/hertzbeat-helm-chart Q1-2026: 0 PRs
+ok   apache/hertzbeat-helm-chart Q2-2026: 3 PRs
+ok   apache/incubator-kie-optaplanner Q1-2024: 17 PRs
+ok   apache/incubator-kie-optaplanner Q3-2025: 5 PRs
+ok   apache/incubator-kie-optaplanner Q4-2025: 8 PRs
+ok   apache/incubator-kie-optaplanner Q1-2026: 26 PRs
+ok   apache/incubator-kie-optaplanner Q2-2026: 20 PRs
+ok   apache/incubator-kie-optaplanner-quickstarts Q1-2024: 4 PRs
+ok   apache/incubator-kie-optaplanner-quickstarts Q3-2025: 1 PRs
+ok   apache/incubator-kie-optaplanner-quickstarts Q4-2025: 0 PRs
+ok   apache/incubator-kie-optaplanner-quickstarts Q1-2026: 1 PRs
+ok   apache/incubator-kie-optaplanner-quickstarts Q2-2026: 1 PRs
+ok   apache/incubator-liminal Q1-2024: 0 PRs
+ok   apache/incubator-liminal Q3-2025: 0 PRs
+ok   apache/incubator-liminal Q4-2025: 0 PRs
+ok   apache/incubator-liminal Q1-2026: 0 PRs
+ok   apache/incubator-liminal Q2-2026: 0 PRs
+ok   apache/incubator-liminal-site Q1-2024: 0 PRs
+ok   apache/incubator-liminal-site Q3-2025: 0 PRs
+ok   apache/incubator-liminal-site Q4-2025: 0 PRs
+ok   apache/incubator-liminal-site Q1-2026: 0 PRs
+ok   apache/incubator-liminal-site Q2-2026: 0 PRs
+ok   apache/incubator-nlpcraft Q1-2024: 15 PRs
+ok   apache/incubator-nlpcraft Q3-2025: 12 PRs
+ok   apache/incubator-nlpcraft Q4-2025: 0 PRs
+ok   apache/incubator-nlpcraft Q1-2026: 0 PRs
+ok   apache/incubator-nlpcraft Q2-2026: 0 PRs
+ok   apache/incubator-nlpcraft-java-client Q1-2024: 0 PRs
+ok   apache/incubator-nlpcraft-java-client Q3-2025: 1 PRs
+ok   apache/incubator-nlpcraft-java-client Q4-2025: 0 PRs
+ok   apache/incubator-nlpcraft-java-client Q1-2026: 0 PRs
+ok   apache/incubator-nlpcraft-java-client Q2-2026: 0 PRs
+ok   apache/incubator-nlpcraft-ui Q1-2024: 0 PRs
+ok   apache/incubator-nlpcraft-ui Q3-2025: 0 PRs
+ok   apache/incubator-nlpcraft-ui Q4-2025: 0 PRs
+ok   apache/incubator-nlpcraft-ui Q1-2026: 0 PRs
+ok   apache/incubator-nlpcraft-ui Q2-2026: 0 PRs
+ok   apache/incubator-nlpcraft-website Q1-2024: 0 PRs
+ok   apache/incubator-nlpcraft-website Q3-2025: 0 PRs
+ok   apache/incubator-nlpcraft-website Q4-2025: 0 PRs
+ok   apache/incubator-nlpcraft-website Q1-2026: 0 PRs
+ok   apache/incubator-nlpcraft-website Q2-2026: 0 PRs
+ok   apache/opennlp Q1-2024: 10 PRs
+ok   apache/opennlp Q3-2025: 56 PRs
+ok   apache/opennlp Q4-2025: 57 PRs
+ok   apache/opennlp Q1-2026: 90 PRs
+ok   apache/opennlp Q2-2026: 125 PRs
+ok   apache/opennlp-models Q1-2024: 0 PRs
+ok   apache/opennlp-models Q3-2025: 6 PRs
+ok   apache/opennlp-models Q4-2025: 9 PRs
+ok   apache/opennlp-models Q1-2026: 7 PRs
+ok   apache/opennlp-models Q2-2026: 9 PRs
+ok   apache/opennlp-sandbox Q1-2024: 2 PRs
+ok   apache/opennlp-sandbox Q3-2025: 56 PRs
+ok   apache/opennlp-sandbox Q4-2025: 49 PRs
+ok   apache/opennlp-sandbox Q1-2026: 50 PRs
+ok   apache/opennlp-sandbox Q2-2026: 57 PRs
+ok   apache/seatunnel Q1-2024: 240 PRs
+ok   apache/seatunnel Q3-2025: 202 PRs
+ok   apache/seatunnel Q4-2025: 209 PRs
+ok   apache/seatunnel Q1-2026: 250 PRs
+WARN apache/seatunnel Q2-2026: collected 342/392 PRs (sub-window saturation) — raise --subwindows to recover
+ok   apache/seatunnel Q2-2026: 342 PRs
+ok   apache/seatunnel-tools Q1-2024: 0 PRs
+ok   apache/seatunnel-tools Q3-2025: 2 PRs
+ok   apache/seatunnel-tools Q4-2025: 0 PRs
+ok   apache/seatunnel-tools Q1-2026: 2 PRs
+ok   apache/seatunnel-tools Q2-2026: 0 PRs
+ok   apache/singa Q1-2024: 26 PRs
+ok   apache/singa Q3-2025: 28 PRs
+ok   apache/singa Q4-2025: 14 PRs
+ok   apache/singa Q1-2026: 23 PRs
+ok   apache/singa Q2-2026: 1 PRs
+ok   apache/skywalking-mcp Q1-2024: 0 PRs
+ok   apache/skywalking-mcp Q3-2025: 12 PRs
+ok   apache/skywalking-mcp Q4-2025: 1 PRs
+ok   apache/skywalking-mcp Q1-2026: 19 PRs
+ok   apache/skywalking-mcp Q2-2026: 2 PRs
+ok   apache/submarine Q1-2024: 5 PRs
+ok   apache/submarine Q3-2025: 0 PRs
+ok   apache/submarine Q4-2025: 0 PRs
+ok   apache/submarine Q1-2026: 0 PRs
+ok   apache/submarine Q2-2026: 0 PRs
+ok   apache/texera Q1-2024: 238 PRs
+ok   apache/texera Q3-2025: 186 PRs
+ok   apache/texera Q4-2025: 162 PRs
+ok   apache/texera Q1-2026: 120 PRs
+WARN apache/texera Q2-2026: collected 431/863 PRs (sub-window saturation) — raise --subwindows to recover
+ok   apache/texera Q2-2026: 431 PRs
+WARN apache/tvm Q1-2024: collected 413/427 PRs (sub-window saturation) — raise --subwindows to recover
+ok   apache/tvm Q1-2024: 413 PRs
+ok   apache/tvm Q3-2025: 215 PRs
+ok   apache/tvm Q4-2025: 195 PRs
+WARN apache/tvm Q1-2026: collected 278/286 PRs (sub-window saturation) — raise --subwindows to recover
+ok   apache/tvm Q1-2026: 278 PRs

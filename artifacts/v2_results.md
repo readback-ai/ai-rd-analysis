@@ -593,7 +593,7 @@ where two-thirds+ of merges are self-merges and the gate is merge triage
 (codex merges only 38% of what it opens). Oversight is a property of the
 LANE, not the org.
 
-## 14. Appendix: org segmentation by AI-portfolio concentration (2026-07-09)
+## 14. [SUPERSEDED by §14b below — desc-regex grouping over-promoted AI-washed orgs] Appendix: org segmentation by AI-portfolio concentration (2026-07-09)
 
 Ron's 3-group segmentation of the v2.1 population, by how many of the org's
 top-5 starred repos are AI (maintainer topics OR description regex — the
@@ -633,3 +633,40 @@ before publication. Under this segmentation microsoft is repo-scoped: 429
 census repos -> ~125 AI-classified retained (drops vscode-class repos that
 USE AI heavily but are not AI-domain — the segmentation measures domain, not
 usage; the two-tier v2.1 population remains the primary lens).
+
+## 14b. FINAL org segmentation: developers-of-AI semantics (2026-07-09)
+
+Ron's refinements over §14: (a) source-list override validated by FP analysis —
+TechCrunch/frontier v1 list SUITABLE (FP 2-3%: replit, ±unstructured-io), HF-
+publisher list NOT suitable (FP ~50% of promotions: microsoft, apple, awslabs);
+(b) AI USERS demoted — the focus is developers OF AI, so vscode-class repos and
+AI-washed orgs drop out. Metadata alone cannot make this cut (maintainers SEO
+their topics: gitleaks, a secrets scanner, self-tags `llm-training`), so the
+~40 single-product borderline orgs got a published one-line adjudication each
+(`single_product_adjudication.json`): 30 AI-developers (ollama, dify, litellm,
+AutoGPT, faster-whisper, axolotl...) vs 11 AI-users demoted (gitleaks,
+meilisearch, espeak-ng, daytonaio, databendlabs, streamlit, InsForge, VertaAI,
+beclab, genkit-ai, shareAI-lab).
+
+**Final rule:** AI-majority = v1-listed OR >=3 of top-5 repos topic-AI OR
+adjudicated single-product AI-developer; AI-heavy = 2 of top-5; repo-scoped =
+rest (only their AI-classified repos count). Repo AI-ness = maintainer topics
+(descriptions dropped: AI-washing).
+
+| group | orgs | repos | AI-code % Q2-2026 | humRev(other)% | AIrev% | self-merged% |
+|---|---|---|---|---|---|---|
+| AI-majority | 181 | 1,121 | **13.2 [11.8,14.8]** | 52.9 | 24.2 | 48.5 |
+| AI-heavy | 45 | 271 | **8.4 [6.5,10.4]** | 50.8 | 20.4 | 20.0 |
+| repo-scoped | 35 | 471* | **11.0 [6.5,16.0]** | 51.2 | 35.3 | 60.5 |
+| (Q1-2026 AI-code, same order) | | | 8.1 / 8.2 / 7.3 | | | |
+
+Under clean developer semantics the §14 conclusion REVERSES: AI-majority orgs
+now adopt significantly more than AI-heavy (13.2 vs 8.4, non-overlapping CIs)
+— portfolio concentration on AI DOES track adoption once AI-washed orgs stop
+polluting the majority group. Review rates are group-uniform (~51-53%
+other-human review of all PRs); the differentiators are AI-review deployment
+(repo-scoped big-tech AI units highest, 35.3%) and self-merge culture
+(AI-heavy lowest at 20.0% — the research-lab pattern of google-deepmind/
+facebookresearch-class orgs; AI-majority product companies 48.5%).
+(*) repo-scoped includes the 6 tier-2 big-tech AI strata; tier-2 census was
+still completing — counts will firm.
