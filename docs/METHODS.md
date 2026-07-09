@@ -45,11 +45,20 @@ topic vocabulary; "agents" deliberately excluded), or the #1 repo does
 (single-product orgs, e.g. ollama), or the org login/description carries an
 AI term (rescues topic-sparse AI orgs: flashinfer-ai, embeddings-benchmark).
 Applied retroactively for consistency: 17 v2 orgs leave (trinodb, tikv,
-MariaDB, dotnet, scipy...; also google/alibaba/Netflix, whose AI lives in
-sibling orgs like google-deepmind — now admitted). Population v2.1 =
-**255 orgs** (199 retained + 56 additions; `v21_active.txt`). The v2
-216-org population remains the basis of §1-13 published numbers until v2.1
-is re-baselined.
+MariaDB, dotnet, scipy...). Population v2.1 = **255 orgs** (199 retained +
+56 additions; `v21_active.txt`). The v2 216-org population remains the basis
+of §1-13 published numbers until v2.1 is re-baselined.
+
+**Tier-2 repo-scoped orgs.** Large organizations that are not primarily AI
+developers (google, alibaba, apache, dotnet, IBM, Netflix) fail the flagship
+gate as orgs, yet contain real AI units. Rule: a gate-failed org with **>=2
+AI-topic repos of >=1k stars** re-enters with **only its AI-topic repos**
+(all of them, full pagination — e.g. google/adk-python, alibaba/MNN,
+apache/tvm), censused as a labeled stratum. Repo-level metrics include the
+stratum; org-level adoption statistics flag it (a repo-scoped org's rate
+describes its AI unit, not the whole org). This recovers the AI divisions of
+big tech without re-admitting kubernetes-class infrastructure — the same
+maintainer-declared-topic evidence decides both.
 
 **Keep-rule re-audit (2026-07-08).** The original AI-evidence keep tested only
 layer-A commit markers, and its scan window predated some orgs' adoption. A

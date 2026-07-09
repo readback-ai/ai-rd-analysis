@@ -127,6 +127,20 @@ def v21_active() -> list[str]:
     return _lines("v21_active.txt")
 
 
+# Tier-2 repo-scoped orgs (2026-07-09): orgs that FAIL the flagship gate as a
+# whole (not primarily AI developers) but have >=2 AI-topic repos with >=1k
+# stars. Their AI-TOPIC REPOS ONLY are included as a labeled stratum — the
+# org-level metrics exclude them or flag them, since their rate describes the
+# org's AI unit, not the org. Qualification scan: repo_scope_scan.tsv;
+# included repos: tier2_repos.txt (all AI-topic repos, full pagination).
+def tier2_orgs() -> list[str]:
+    return _lines("tier2_orgs.txt")
+
+
+def tier2_repos() -> list[str]:
+    return [ln.split("\t")[0] for ln in _lines("tier2_repos.txt")]
+
+
 def verify() -> None:
     srcs = source_orgs()
     cand = candidates()
