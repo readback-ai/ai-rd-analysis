@@ -1246,3 +1246,85 @@ ok   apache/tvm Q3-2025: 215 PRs
 ok   apache/tvm Q4-2025: 195 PRs
 WARN apache/tvm Q1-2026: collected 278/286 PRs (sub-window saturation) — raise --subwindows to recover
 ok   apache/tvm Q1-2026: 278 PRs
+WARN apache/tvm Q2-2026: collected 404/498 PRs (sub-window saturation) — raise --subwindows to recover
+ok   apache/tvm Q2-2026: 404 PRs
+ok   apache/tvm-ffi Q1-2024: 0 PRs
+ok   apache/tvm-ffi Q3-2025: 76 PRs
+WARN apache/tvm-ffi Q4-2025: collected 212/233 PRs (sub-window saturation) — raise --subwindows to recover
+ok   apache/tvm-ffi Q4-2025: 212 PRs
+ok   apache/tvm-ffi Q1-2026: 123 PRs
+ok   apache/tvm-ffi Q2-2026: 112 PRs
+ok   apache/tvm-rfcs Q1-2024: 2 PRs
+ok   apache/tvm-rfcs Q3-2025: 0 PRs
+ok   apache/tvm-rfcs Q4-2025: 0 PRs
+ok   apache/tvm-rfcs Q1-2026: 0 PRs
+ok   apache/tvm-rfcs Q2-2026: 0 PRs
+ok   apache/tvm-vta Q1-2024: 0 PRs
+ok   apache/tvm-vta Q3-2025: 0 PRs
+ok   apache/tvm-vta Q4-2025: 0 PRs
+ok   apache/tvm-vta Q1-2026: 0 PRs
+ok   apache/tvm-vta Q2-2026: 0 PRs
+ok   apache/wayang Q1-2024: 25 PRs
+ok   apache/wayang Q3-2025: 21 PRs
+ok   apache/wayang Q4-2025: 21 PRs
+ok   apache/wayang Q1-2026: 77 PRs
+ok   apache/wayang Q2-2026: 33 PRs
+ok   dotnet/infer Q1-2024: 10 PRs
+ok   dotnet/infer Q3-2025: 2 PRs
+ok   dotnet/infer Q4-2025: 2 PRs
+ok   dotnet/infer Q1-2026: 0 PRs
+ok   dotnet/infer Q2-2026: 1 PRs
+ok   dotnet/machinelearning Q1-2024: 87 PRs
+ok   dotnet/machinelearning Q3-2025: 11 PRs
+ok   dotnet/machinelearning Q4-2025: 41 PRs
+ok   dotnet/machinelearning Q1-2026: 20 PRs
+ok   dotnet/machinelearning Q2-2026: 14 PRs
+ok   dotnet/machinelearning-samples Q1-2024: 4 PRs
+ok   dotnet/machinelearning-samples Q3-2025: 1 PRs
+ok   dotnet/machinelearning-samples Q4-2025: 0 PRs
+ok   dotnet/machinelearning-samples Q1-2026: 0 PRs
+ok   dotnet/machinelearning-samples Q2-2026: 1 PRs
+ok   dotnet/maui-labs Q1-2024: 0 PRs
+ok   dotnet/maui-labs Q3-2025: 0 PRs
+ok   dotnet/maui-labs Q4-2025: 0 PRs
+ok   dotnet/maui-labs Q1-2026: 38 PRs
+WARN dotnet/maui-labs Q2-2026: collected 195/213 PRs (sub-window saturation) — raise --subwindows to recover
+ok   dotnet/maui-labs Q2-2026: 195 PRs
+ok   dotnet/mbmlbook Q1-2024: 0 PRs
+ok   dotnet/mbmlbook Q3-2025: 0 PRs
+ok   dotnet/mbmlbook Q4-2025: 0 PRs
+ok   dotnet/mbmlbook Q1-2026: 0 PRs
+ok   dotnet/mbmlbook Q2-2026: 0 PRs
+ok   dotnet/spark Q1-2024: 0 PRs
+ok   dotnet/spark Q3-2025: 2 PRs
+ok   dotnet/spark Q4-2025: 0 PRs
+ok   dotnet/spark Q1-2026: 13 PRs
+ok   dotnet/spark Q2-2026: 2 PRs
+ok   google/ARC-GEN Q1-2024: 0 PRs
+ok   google/ARC-GEN Q3-2025: 0 PRs
+ok   google/ARC-GEN Q4-2025: 0 PRs
+ok   google/ARC-GEN Q1-2026: 0 PRs
+ok   google/ARC-GEN Q2-2026: 0 PRs
+ok   google/BEGIN-dataset Q1-2024: 0 PRs
+ok   google/BEGIN-dataset Q3-2025: 0 PRs
+ok   google/BEGIN-dataset Q4-2025: 0 PRs
+ok   google/BEGIN-dataset Q1-2026: 0 PRs
+ok   google/BEGIN-dataset Q2-2026: 0 PRs
+WARN google/XNNPACK Q1-2024: collected 327/337 PRs (sub-window saturation) — raise --subwindows to recover
+ok   google/XNNPACK Q1-2024: 327 PRs
+ok   google/XNNPACK Q3-2025: 260 PRs
+WARN google/XNNPACK Q4-2025: collected 411/423 PRs (sub-window saturation) — raise --subwindows to recover
+ok   google/XNNPACK Q4-2025: 411 PRs
+WARN google/XNNPACK Q1-2026: collected 400/477 PRs (sub-window saturation) — raise --subwindows to recover
+ok   google/XNNPACK Q1-2026: 400 PRs
+WARN google/XNNPACK Q2-2026: collected 500/780 PRs (sub-window saturation) — raise --subwindows to recover
+ok   google/XNNPACK Q2-2026: 500 PRs
+ok   google/adk-go Q1-2024: 0 PRs
+ok   google/adk-go Q3-2025: 98 PRs
+WARN google/adk-go Q4-2025: collected 226/231 PRs (sub-window saturation) — raise --subwindows to recover
+ok   google/adk-go Q4-2025: 226 PRs
+ok   google/adk-go Q1-2026: 175 PRs
+WARN google/adk-go Q2-2026: collected 342/357 PRs (sub-window saturation) — raise --subwindows to recover
+ok   google/adk-go Q2-2026: 342 PRs
+ok   google/adk-java Q1-2024: 0 PRs
+ok   google/adk-java Q3-2025: 190 PRs

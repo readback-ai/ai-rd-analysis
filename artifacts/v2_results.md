@@ -670,3 +670,38 @@ other-human review of all PRs); the differentiators are AI-review deployment
 facebookresearch-class orgs; AI-majority product companies 48.5%).
 (*) repo-scoped includes the 6 tier-2 big-tech AI strata; tier-2 census was
 still completing — counts will firm.
+
+## 15. Appendix: org-type cut — public / private / community (2026-07-09)
+
+Ownership hand-classified as-of 2026-07 into a published table
+(`org_type.tsv`; 38 public, 179 private, 44 community). Rules: subsidiaries
+and research arms take the parent's type (google-deepmind, awslabs -> public;
+ray-project -> Anyscale -> private); foundations, academic labs, and
+nonprofits -> community (apache, pytorch/LF, EleutherAI, LAION, THUDM,
+allenai); xai-org -> public (SpaceX acquisition + IPO). Includes tier-2
+AI-repo strata under their parent's type. Contributor-weighted:
+
+| type | orgs | Q2-repos | AI-code % | humRev(other)% | AIrev% | no-review% | self-merged% |
+|---|---|---|---|---|---|---|---|
+| public | 38 | 428 | 8.9 [7.4,10.6] | **62.6** | 26.2 | 29.3 | 58.6 |
+| private | 179 | 626 | **13.9 [12.5,15.4]** | 48.5 | 22.1 | 38.1 | 46.2 |
+| community | 44 | 144 | 9.9 [6.4,13.6] | 55.2 | 24.9 | 32.4 | **34.9** |
+| (Q1-2024 baseline, same order) | | | 0 / 0 / 0 | 72.3 / 59.1 / 64.9 | ~0 | 27.1 / 39.2 / 33.8 | 70.9 / 48.4 / 38.5 |
+
+Findings:
+1. **Private companies adopt fastest**: 13.9% AI-code vs public 8.9%
+   (non-overlapping CIs) — consistent with §14b (the AI-majority group is
+   dominated by private AI companies) and with enterprise enablement lag at
+   public companies.
+2. **Review discipline is governance-typed, its EROSION is universal.**
+   Human review of PRs declined ~10pp everywhere since Q1-2024, but the
+   LEVELS order cleanly: public 62.6% > community 55.2% > private 48.5%.
+   Public-company process survives AI adoption better; private-company
+   velocity culture absorbs AI code with the least review.
+3. Community orgs have the LOWEST self-merge (34.9%) — foundation committer
+   governance — despite mid-level adoption; public-company self-merge (58.6,
+   wide CI) is inflated by big-tech monorepo-owner patterns.
+
+Caveats: classification is world-knowledge as-of 2026-07 (ownership changes
+fast: xai-org flipped this year); hand-classified but published and
+auditable; community n=144 Q2-repos gives wide CIs.
