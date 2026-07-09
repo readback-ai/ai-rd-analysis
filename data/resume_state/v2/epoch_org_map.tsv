@@ -1,0 +1,369 @@
+# Epoch notable-models Organization -> GitHub handle transcription (2026-07-09).
+# Source: epoch.ai/data/notable_ai_models.csv (CC-BY), models <= 2026-06-30.
+# Unmapped Epoch orgs (no public GitHub org found / not transcribed) listed with '-'.
+01.AI	01-ai
+AI21 Labs	AI21Labs
+AT&T	att
+Alibaba	alibaba
+Allen Institute for AI	allenai
+Amazon	amazon-science
+Anthropic	anthropics
+Apple	apple
+Baidu	PaddlePaddle
+BigScience	bigscience-workshop
+ByteDance	bytedance
+Chai discovery	chaidiscovery
+Cohere	cohere-ai
+Cursor	anysphere
+Databricks	databricks
+DeepMind	deepmind
+DeepSeek	deepseek-ai
+EleutherAI	EleutherAI
+Facebook	facebook
+Google	google
+Google Brain	google-research
+Google DeepMind	google-deepmind
+Google Research	google-research
+Hugging Face	huggingface
+IBM	IBM
+Inflection AI	inflection-ai
+Intel Labs	IntelLabs
+Meta AI	facebookresearch
+Microsoft	microsoft
+Microsoft Research	microsoft
+Midjourney	midjourney
+MiniMax	minimax-ai
+Mistral AI	mistralai
+NVIDIA	NVIDIA
+Netflix	Netflix
+OpenAI	openai
+Physical Intelligence	physical-intelligence
+Reka AI	reka-ai
+Runway	runwayml
+Salesforce	salesforceairesearch
+Sony	sony
+Stability AI	stability-ai
+Suno	suno-ai
+Tencent	Tencent
+Tsinghua University	THUDM
+Writer	writer
+rinna	rinna
+xAI	xai-org
+AIMST University	-
+ASAPP	-
+Aalto University	-
+Adobe	adobe
+Advanced Telecommunications Research Institute	-
+Alan Turing Institute	-
+Alibaba DAMO Academy	alibaba
+Ant Group	antgroup
+Bar-Ilan University	-
+Bayerische Staatsbibliothek Muenchen	-
+Beihang University	-
+Beijing Academy of Artificial Intelligence / BAAI	FlagOpen
+Beijing Institute of Technology	-
+Beijing University of Posts and Telecommunications	-
+Bell Laboratories	-
+Ben-Gurion University of the Negev	-
+BioMap Research	-
+Biological Cybernetics	-
+Bloomberg	-
+Bosch Center for Artificial Intelligence	-
+Brno University of Technology	-
+Brown University	-
+CENPARMI	-
+CIFAR AI Research	-
+CSIRO	-
+CUHK Shenzhen Research Institute	-
+CZ Biohub Network	-
+California Institute of Technology	-
+Capital One	-
+Carleton University	-
+Carnegie Mellon University (CMU)	-
+Centre de Recherche en Automatique de Nancy (CRAN)	-
+Cerebras Systems	-
+Charles University	-
+China Telecom	-
+Chinese Academy of Sciences	-
+Chinese University of Hong Kong (CUHK)	-
+Chongqing University of Posts and Telecommunications	-
+Cognition	-
+Cohere for AI	-
+Collaborations Pharmaceuticals	-
+Columbia University	-
+Compaq CRL	-
+Complutense University of Madrid	-
+Cornell Aeronautical Laboratory	-
+Cornell University	-
+Courant Institute of Mathematical Sciences	-
+Czech Technical University	-
+DSO National Laboratories	-
+Data61	-
+Deep Trading	-
+DeepL	-
+DeepScale	-
+Dezhou University	-
+Discover Dollar	-
+Disney Research	-
+Dublin City University	-
+Duke University	-
+ESAT - PSI	-
+ETH Zurich	-
+Ecole Normale Supèrieure	-
+EvolutionaryScale	-
+Facebook AI	-
+Facebook AI Research	-
+Forschungszentrum Julich	-
+Fraunhofer Heinrich Hertz Institute	-
+Fudan University	-
+Georgia Institute of Technology	-
+Google AI	-
+Google Cloud	-
+Grammarly	-
+Griffith University	-
+HEC	-
+Harbin Institute of Technology	-
+Harrison.ai	-
+Harvard Medical School	-
+Harvard University	-
+Hebrew University of Jerusalem	-
+Heidelberg University	-
+Helsinki University of Technology	-
+Hong Kong Polytechnic University	-
+Hong Kong University of Science and Technology (HKUST)	-
+Huawei	huawei-noah
+Huawei Noah's Ark Lab	huawei-noah
+Huazhong University of Science and Technology	-
+IDIAP	-
+IDSIA	-
+IEEE	-
+INRIA	-
+Inception G42	-
+Inception Labs	-
+Inspur	-
+InstaDeep	-
+Institute for Advanced Study	-
+Institute for Research in Fundamental Sciences (IPM)	-
+Institute of Advanced Research in Artificial Intelligence	-
+Islamic Azad University	-
+Isomorphic Labs	-
+JD Explore Academy	-
+JD.com	-
+Jacobs University	-
+Jacobs University Bremen	-
+Jagiellonian University	-
+Jane Street	-
+Jiangnan University	-
+Johannes Kepler University Linz	-
+Johns Hopkins University	-
+KU Leuven	-
+Karolinska Institute	-
+King Abdullah University of Science and Technology (KAUST)	-
+Kingsoft	-
+Korea Advanced Institute of Science and Technology (KAIST)	-
+Korea University	-
+Kunlun Inc.	-
+LG	-
+LG AI Research	-
+LORIA	-
+Lawrence Berkeley National Laboratory	-
+Leipzig University	-
+Ludwig Maximilian University of Munich	-
+MIT-IBM Watson AI Lab	-
+Magic	-
+Maluuba	-
+Massachusetts Institute of Technology (MIT)	-
+Max Planck Institute for Informatics	-
+Max Planck Institute for Intelligent Systems	-
+McGill University	-
+Med AI Technology	-
+Megvii Inc	-
+Meituan Inc	-
+MetaMind Inc	-
+Michigan State University	-
+Microsoft Research Asia	-
+Mila - Quebec AI (originally Montreal Institute for Learning Algorithms)	-
+Mitsubishi Electric Research Labs	-
+Mobvoi	-
+Mohamed bin Zayed University of Artificial Intelligence (MBZUAI)	-
+Monash University	-
+Moonshot	-
+NAVER	-
+NC AI	-
+NEC Laboratories	-
+NERSC	-
+NHK Broadcasting Science Research Laboratories	-
+NTT Communication Science Laboratories	-
+Nanjing University	-
+Nankai University	-
+Nanyang Technological University	-
+National Cancer Institute	-
+National Institute of Informatics	-
+National Tsing Hua University	-
+National University of Singapore	-
+New York University (NYU)	-
+NiuTrans Research	-
+Northeastern University	-
+Northeastern University (China)	-
+Oak Ridge National Laboratory	-
+Oppo Mobile Telecommunications	-
+Oregon State University	-
+PSL University	-
+Panasonic R&D	-
+Peking University	-
+Peng Cheng Laboratory	-
+Perplexity	-
+Pragmatic Theory Inc.	-
+Prime Intellect	-
+Princeton University	-
+Purdue University	-
+Queen Mary University of London	-
+RWTH Aachen University	-
+Reed College	-
+Rice University	-
+Roblox	-
+Rutgers University	-
+SAP	-
+SK Telecom	-
+SUPSI	-
+Saama	-
+Salesforce Research	-
+Samsung	-
+Samsung R&D Institute Russia	-
+Sandia Corporation	-
+Sapient Intelligence	-
+Sapienza Università di Roma	-
+Saudi Aramco	-
+Saudi Company for Artificial Intelligence	-
+Saudi Data and Artificial Intelligence Authority	-
+ScaDS.AI	-
+Science Applications International Corporation / SAIC	-
+Sea AI Lab	-
+SenseTime	-
+Sensifai	-
+Seoul National University	-
+ServiceNow	-
+Shandong University	-
+Shanghai AI Lab	-
+Shanghai Jiao Tong University	-
+Shanghai Qi Zhi institute	-
+ShanghaiTech University	-
+Shannon.AI	-
+Shenzhen Institute of Advanced Technology	-
+Simon Fraser University	-
+Singapore University of Technology & Design	-
+Soochow University	-
+Sorbonne University	-
+Stanford University	-
+Sun Yat-sen University	-
+Swiss Federal Institute of Technology	-
+TU Berlin	-
+TU Darmstadt	-
+Technical University of Denmark	-
+Technical University of Munich	-
+Technicolor R&I	-
+Technion - Israel Institute of Technology	-
+Technology Innovation Institute	tiiuae
+Tel Aviv University	-
+Telefonica	-
+TensorTour	-
+Texas A&M	-
+Thinking Machines	-
+Tianjin University	-
+Tohoku University	-
+Tokyo Medical and Dental University	-
+Toloka	-
+Toshiba Cambridge Research Laboratory	-
+Toyota Research Institute	-
+Toyota Technological Institute at Chicago	-
+Twitter	-
+UC Irvine	-
+ULSee Inc.	-
+UT Austin	-
+Uber AI	-
+UnfoldML	-
+Universidad Nacional de San Martín	-
+Universite de Technologie de Compiègne – CNRS	-
+University College London (UCL)	-
+University at Buffalo	-
+University of Alberta	-
+University of Allahabad	-
+University of Amsterdam	-
+University of Bern	-
+University of Bonn	-
+University of British Columbia (UBC)	-
+University of California (UC) Berkeley	-
+University of California Los Angeles (UCLA)	-
+University of California San Diego	-
+University of Cambridge	-
+University of Chicago	-
+University of Chinese Academy of Sciences	-
+University of Copenhagen	-
+University of Edinburgh	-
+University of Freiburg	-
+University of Hyderabad	-
+University of Illinois Urbana-Champaign (UIUC)	-
+University of Iowa	-
+University of Kansas	-
+University of London	-
+University of Lorraine	-
+University of Lubeck	-
+University of Maine	-
+University of Manchester	-
+University of Maryland	-
+University of Massachusetts Amherst	-
+University of Massachusetts Lowell	-
+University of Michigan	-
+University of Minnesota	-
+University of Montreal / Université de Montréal	-
+University of North Carolina	-
+University of Notre Dame	-
+University of Oslo	-
+University of Oulu	-
+University of Oxford	-
+University of Pennsylvania	-
+University of Pittsburgh	-
+University of Science and Technology of China (USTC)	-
+University of Sheffield	-
+University of Sherbrooke	-
+University of Siena	-
+University of Southern California	-
+University of Surrey	-
+University of Sydney	-
+University of Technology Sydney	-
+University of Texas at Austin	-
+University of Texas at Houston	-
+University of Toronto	-
+University of Trento	-
+University of Turku	-
+University of Vermont	-
+University of Warwick	-
+University of Washington	-
+University of Waterloo	-
+University of West London	-
+University of Western Ontario	-
+University of Wisconsin Madison	-
+University of Zagreb	-
+Université Grenoble Alpes	-
+Université Paris-Est	-
+Upstage	-
+Utrecht University	-
+Vector Institute	-
+Visual Computing Institute	-
+Waseda University	-
+Washington University in St Louis	-
+Weizmann Institute of Science	-
+Wellesley College	-
+Westlake University	-
+Williams College	-
+Wuhan AI Computing Center	-
+Wuhan University	-
+Xiaomi Corp	-
+Xi’an Jiaotong University	-
+Yahoo Research	-
+Yonsei University	-
+York University	-
+Z.ai (Zhipu AI)	-
+Zhejiang University (ZJU)	-
+Zhuiyi Technology	-
+deepset	-
