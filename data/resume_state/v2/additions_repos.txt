@@ -6,6 +6,7 @@ AnswerDotAI/fastsql
 AnswerDotAI/ipymini
 AnswerDotAI/msglm
 AnswerDotAI/safecmd
+FoundationAgents/OpenManus
 FoundationAgents/foundation-protocol
 FunAudioLLM/Fun-ASR
 FunAudioLLM/SenseVoice
@@ -37,6 +38,7 @@ explosion/confection
 explosion/cython-blis
 google-deepmind/formal-conjectures
 google-deepmind/simply
+google-gemini/gemini-cli
 google-gemini/workshops
 insilicomedicine/ChemCensor
 insilicomedicine/URSA
@@ -44,10 +46,15 @@ interpretml/interpret
 iterative/setup-cml
 jax-ml/scaling-book
 k2-fsa/sherpa-onnx
+khoj-ai/khoj
 lm-sys/lm-sys.github.io
+ollama/ollama
+ollama/ollama-python
 onnx/backend-scoreboard
+onnx/ir-py
 onnx/onnx
 onnx/onnx-mlir
+onnx/sklearn-onnx
 onnx/tensorflow-onnx
 opencv/opencv
 pyg-team/pytorch_geometric
@@ -61,3 +68,4 @@ triton-inference-server/onnxruntime_backend
 triton-inference-server/pytorch_backend
 triton-inference-server/tensorrt_backend
 truera/trulens
+xai-org/xai-sdk-python
