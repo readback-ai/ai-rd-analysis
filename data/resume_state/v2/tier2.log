@@ -450,3 +450,605 @@ WARN IBM/mcp-context-forge Q3-2025: collected 412/452 PRs (sub-window saturation
 ok   IBM/mcp-context-forge Q3-2025: 412 PRs
 WARN IBM/mcp-context-forge Q4-2025: collected 350/359 PRs (sub-window saturation) — raise --subwindows to recover
 ok   IBM/mcp-context-forge Q4-2025: 350 PRs
+FAIL IBM/mcp-context-forge Q1-2026
+FAIL IBM/mcp-context-forge Q2-2026
+FAIL IBM/mi-prometheus Q1-2024
+FAIL IBM/mi-prometheus Q3-2025
+FAIL IBM/mi-prometheus Q4-2025
+FAIL IBM/mi-prometheus Q1-2026
+FAIL IBM/mi-prometheus Q2-2026
+FAIL IBM/mic-sts-nlu-weather-tone-analyzer Q1-2024
+FAIL IBM/mic-sts-nlu-weather-tone-analyzer Q3-2025
+FAIL IBM/mic-sts-nlu-weather-tone-analyzer Q4-2025
+FAIL IBM/mic-sts-nlu-weather-tone-analyzer Q1-2026
+FAIL IBM/mic-sts-nlu-weather-tone-analyzer Q2-2026
+FAIL IBM/mlapp Q1-2024
+FAIL IBM/mlapp Q3-2025
+FAIL IBM/mlapp Q4-2025
+FAIL IBM/mlapp Q1-2026
+FAIL IBM/mlapp Q2-2026
+FAIL IBM/model-evaluation-workbench Q1-2024
+FAIL IBM/model-evaluation-workbench Q3-2025
+FAIL IBM/model-evaluation-workbench Q4-2025
+FAIL IBM/model-evaluation-workbench Q1-2026
+FAIL IBM/model-evaluation-workbench Q2-2026
+FAIL IBM/model-mgmt-on-watson-studio-local Q1-2024
+FAIL IBM/model-mgmt-on-watson-studio-local Q3-2025
+FAIL IBM/model-mgmt-on-watson-studio-local Q4-2025
+FAIL IBM/model-mgmt-on-watson-studio-local Q1-2026
+FAIL IBM/model-mgmt-on-watson-studio-local Q2-2026
+FAIL IBM/modified-bAbI-dialog-tasks Q1-2024
+FAIL IBM/modified-bAbI-dialog-tasks Q3-2025
+FAIL IBM/modified-bAbI-dialog-tasks Q4-2025
+FAIL IBM/modified-bAbI-dialog-tasks Q1-2026
+FAIL IBM/modified-bAbI-dialog-tasks Q2-2026
+FAIL IBM/monitor-custom-ml-engine-with-watson-openscale Q1-2024
+FAIL IBM/monitor-custom-ml-engine-with-watson-openscale Q3-2025
+FAIL IBM/monitor-custom-ml-engine-with-watson-openscale Q4-2025
+FAIL IBM/monitor-custom-ml-engine-with-watson-openscale Q1-2026
+FAIL IBM/monitor-custom-ml-engine-with-watson-openscale Q2-2026
+FAIL IBM/monitor-wml-model-with-watson-openscale Q1-2024
+FAIL IBM/monitor-wml-model-with-watson-openscale Q3-2025
+FAIL IBM/monitor-wml-model-with-watson-openscale Q4-2025
+FAIL IBM/monitor-wml-model-with-watson-openscale Q1-2026
+FAIL IBM/monitor-wml-model-with-watson-openscale Q2-2026
+FAIL IBM/multi-data-lineage-capture-py Q1-2024
+FAIL IBM/multi-data-lineage-capture-py Q3-2025
+FAIL IBM/multi-data-lineage-capture-py Q4-2025
+FAIL IBM/multi-data-lineage-capture-py Q1-2026
+FAIL IBM/multi-data-lineage-capture-py Q2-2026
+FAIL IBM/naturalistic-variation-goal-oriented-dialog-datasets Q1-2024
+FAIL IBM/naturalistic-variation-goal-oriented-dialog-datasets Q3-2025
+FAIL IBM/naturalistic-variation-goal-oriented-dialog-datasets Q4-2025
+FAIL IBM/naturalistic-variation-goal-oriented-dialog-datasets Q1-2026
+FAIL IBM/naturalistic-variation-goal-oriented-dialog-datasets Q2-2026
+FAIL IBM/ne-table-datasets Q1-2024
+FAIL IBM/ne-table-datasets Q3-2025
+FAIL IBM/ne-table-datasets Q4-2025
+FAIL IBM/ne-table-datasets Q1-2026
+ok   IBM/ne-table-datasets Q2-2026: 0 PRs
+ok   IBM/nesa-demo Q1-2024: 0 PRs
+ok   IBM/nesa-demo Q3-2025: 0 PRs
+ok   IBM/nesa-demo Q4-2025: 0 PRs
+ok   IBM/nesa-demo Q1-2026: 0 PRs
+ok   IBM/nesa-demo Q2-2026: 0 PRs
+ok   IBM/neuroaikit Q1-2024: 0 PRs
+ok   IBM/neuroaikit Q3-2025: 1 PRs
+ok   IBM/neuroaikit Q4-2025: 0 PRs
+ok   IBM/neuroaikit Q1-2026: 0 PRs
+ok   IBM/neuroaikit Q2-2026: 0 PRs
+ok   IBM/nlc-email-phishing Q1-2024: 0 PRs
+ok   IBM/nlc-email-phishing Q3-2025: 0 PRs
+ok   IBM/nlc-email-phishing Q4-2025: 0 PRs
+ok   IBM/nlc-email-phishing Q1-2026: 0 PRs
+ok   IBM/nlc-email-phishing Q2-2026: 0 PRs
+ok   IBM/object-detection-anki-overdrive-cars Q1-2024: 0 PRs
+ok   IBM/object-detection-anki-overdrive-cars Q3-2025: 0 PRs
+ok   IBM/object-detection-anki-overdrive-cars Q4-2025: 0 PRs
+ok   IBM/object-detection-anki-overdrive-cars Q1-2026: 0 PRs
+ok   IBM/object-detection-anki-overdrive-cars Q2-2026: 0 PRs
+ok   IBM/online-alt-min Q1-2024: 0 PRs
+ok   IBM/online-alt-min Q3-2025: 0 PRs
+ok   IBM/online-alt-min Q4-2025: 0 PRs
+ok   IBM/online-alt-min Q1-2026: 0 PRs
+ok   IBM/online-alt-min Q2-2026: 0 PRs
+ok   IBM/orchestrate-adk-agent Q1-2024: 0 PRs
+ok   IBM/orchestrate-adk-agent Q3-2025: 2 PRs
+ok   IBM/orchestrate-adk-agent Q4-2025: 0 PRs
+ok   IBM/orchestrate-adk-agent Q1-2026: 0 PRs
+ok   IBM/orchestrate-adk-agent Q2-2026: 0 PRs
+ok   IBM/pandasqlite Q1-2024: 0 PRs
+ok   IBM/pandasqlite Q3-2025: 1 PRs
+ok   IBM/pandasqlite Q4-2025: 0 PRs
+ok   IBM/pandasqlite Q1-2026: 0 PRs
+ok   IBM/pandasqlite Q2-2026: 0 PRs
+ok   IBM/permuted-bAbI-dialog-tasks Q1-2024: 0 PRs
+ok   IBM/permuted-bAbI-dialog-tasks Q3-2025: 0 PRs
+ok   IBM/permuted-bAbI-dialog-tasks Q4-2025: 0 PRs
+ok   IBM/permuted-bAbI-dialog-tasks Q1-2026: 0 PRs
+ok   IBM/permuted-bAbI-dialog-tasks Q2-2026: 0 PRs
+ok   IBM/personas-llms-analysis Q1-2024: 0 PRs
+ok   IBM/personas-llms-analysis Q3-2025: 3 PRs
+ok   IBM/personas-llms-analysis Q4-2025: 0 PRs
+ok   IBM/personas-llms-analysis Q1-2026: 1 PRs
+ok   IBM/personas-llms-analysis Q2-2026: 0 PRs
+ok   IBM/pmlayer Q1-2024: 0 PRs
+ok   IBM/pmlayer Q3-2025: 1 PRs
+ok   IBM/pmlayer Q4-2025: 0 PRs
+ok   IBM/pmlayer Q1-2026: 0 PRs
+ok   IBM/pmlayer Q2-2026: 0 PRs
+ok   IBM/powerai-counting-cars Q1-2024: 0 PRs
+ok   IBM/powerai-counting-cars Q3-2025: 0 PRs
+ok   IBM/powerai-counting-cars Q4-2025: 0 PRs
+ok   IBM/powerai-counting-cars Q1-2026: 0 PRs
+ok   IBM/powerai-counting-cars Q2-2026: 0 PRs
+ok   IBM/powerai-vision-object-detection Q1-2024: 0 PRs
+ok   IBM/powerai-vision-object-detection Q3-2025: 0 PRs
+ok   IBM/powerai-vision-object-detection Q4-2025: 0 PRs
+ok   IBM/powerai-vision-object-detection Q1-2026: 0 PRs
+ok   IBM/powerai-vision-object-detection Q2-2026: 0 PRs
+ok   IBM/predict-fraud-using-auto-ai Q1-2024: 0 PRs
+ok   IBM/predict-fraud-using-auto-ai Q3-2025: 0 PRs
+ok   IBM/predict-fraud-using-auto-ai Q4-2025: 0 PRs
+ok   IBM/predict-fraud-using-auto-ai Q1-2026: 0 PRs
+ok   IBM/predict-fraud-using-auto-ai Q2-2026: 0 PRs
+ok   IBM/predict-home-value-using-watson-machine-learning-and-db2 Q1-2024: 0 PRs
+ok   IBM/predict-home-value-using-watson-machine-learning-and-db2 Q3-2025: 0 PRs
+ok   IBM/predict-home-value-using-watson-machine-learning-and-db2 Q4-2025: 0 PRs
+ok   IBM/predict-home-value-using-watson-machine-learning-and-db2 Q1-2026: 0 PRs
+ok   IBM/predict-home-value-using-watson-machine-learning-and-db2 Q2-2026: 0 PRs
+ok   IBM/predict-wildfire-intensity Q1-2024: 0 PRs
+ok   IBM/predict-wildfire-intensity Q3-2025: 0 PRs
+ok   IBM/predict-wildfire-intensity Q4-2025: 0 PRs
+ok   IBM/predict-wildfire-intensity Q1-2026: 0 PRs
+ok   IBM/predict-wildfire-intensity Q2-2026: 0 PRs
+ok   IBM/prediction-using-netezza-in-database-analytics-functions Q1-2024: 0 PRs
+ok   IBM/prediction-using-netezza-in-database-analytics-functions Q3-2025: 0 PRs
+ok   IBM/prediction-using-netezza-in-database-analytics-functions Q4-2025: 0 PRs
+ok   IBM/prediction-using-netezza-in-database-analytics-functions Q1-2026: 0 PRs
+ok   IBM/prediction-using-netezza-in-database-analytics-functions Q2-2026: 0 PRs
+ok   IBM/probabilistic-federated-neural-matching Q1-2024: 0 PRs
+ok   IBM/probabilistic-federated-neural-matching Q3-2025: 0 PRs
+ok   IBM/probabilistic-federated-neural-matching Q4-2025: 0 PRs
+ok   IBM/probabilistic-federated-neural-matching Q1-2026: 0 PRs
+ok   IBM/probabilistic-federated-neural-matching Q2-2026: 0 PRs
+ok   IBM/pulse-iot-wml-mobile-health Q1-2024: 0 PRs
+ok   IBM/pulse-iot-wml-mobile-health Q3-2025: 0 PRs
+ok   IBM/pulse-iot-wml-mobile-health Q4-2025: 0 PRs
+ok   IBM/pulse-iot-wml-mobile-health Q1-2026: 0 PRs
+ok   IBM/pulse-iot-wml-mobile-health Q2-2026: 0 PRs
+ok   IBM/pytorch-on-watson-studio Q1-2024: 0 PRs
+ok   IBM/pytorch-on-watson-studio Q3-2025: 1 PRs
+ok   IBM/pytorch-on-watson-studio Q4-2025: 0 PRs
+ok   IBM/pytorch-on-watson-studio Q1-2026: 0 PRs
+ok   IBM/pytorch-on-watson-studio Q2-2026: 0 PRs
+ok   IBM/regen Q1-2024: 0 PRs
+ok   IBM/regen Q3-2025: 0 PRs
+ok   IBM/regen Q4-2025: 0 PRs
+ok   IBM/regen Q1-2026: 0 PRs
+ok   IBM/regen Q2-2026: 0 PRs
+ok   IBM/regression-transformer Q1-2024: 0 PRs
+ok   IBM/regression-transformer Q3-2025: 1 PRs
+ok   IBM/regression-transformer Q4-2025: 0 PRs
+ok   IBM/regression-transformer Q1-2026: 0 PRs
+ok   IBM/regression-transformer Q2-2026: 0 PRs
+ok   IBM/science-result-extractor Q1-2024: 0 PRs
+ok   IBM/science-result-extractor Q3-2025: 0 PRs
+ok   IBM/science-result-extractor Q4-2025: 0 PRs
+ok   IBM/science-result-extractor Q1-2026: 0 PRs
+ok   IBM/science-result-extractor Q2-2026: 0 PRs
+ok   IBM/sciqa-arcade198-dataset Q1-2024: 0 PRs
+ok   IBM/sciqa-arcade198-dataset Q3-2025: 0 PRs
+ok   IBM/sciqa-arcade198-dataset Q4-2025: 0 PRs
+ok   IBM/sciqa-arcade198-dataset Q1-2026: 0 PRs
+ok   IBM/sciqa-arcade198-dataset Q2-2026: 0 PRs
+ok   IBM/simulai Q1-2024: 12 PRs
+ok   IBM/simulai Q3-2025: 1 PRs
+ok   IBM/simulai Q4-2025: 0 PRs
+ok   IBM/simulai Q1-2026: 1 PRs
+ok   IBM/simulai Q2-2026: 0 PRs
+ok   IBM/smart-email-support Q1-2024: 0 PRs
+ok   IBM/smart-email-support Q3-2025: 0 PRs
+ok   IBM/smart-email-support Q4-2025: 0 PRs
+ok   IBM/smart-email-support Q1-2026: 0 PRs
+ok   IBM/smart-email-support Q2-2026: 0 PRs
+ok   IBM/sms-analysis-with-wks Q1-2024: 0 PRs
+ok   IBM/sms-analysis-with-wks Q3-2025: 0 PRs
+ok   IBM/sms-analysis-with-wks Q4-2025: 0 PRs
+ok   IBM/sms-analysis-with-wks Q1-2026: 0 PRs
+ok   IBM/sms-analysis-with-wks Q2-2026: 0 PRs
+ok   IBM/sms-spam-filter-using-hortonworks Q1-2024: 0 PRs
+ok   IBM/sms-spam-filter-using-hortonworks Q3-2025: 0 PRs
+ok   IBM/sms-spam-filter-using-hortonworks Q4-2025: 0 PRs
+ok   IBM/sms-spam-filter-using-hortonworks Q1-2026: 0 PRs
+ok   IBM/sms-spam-filter-using-hortonworks Q2-2026: 0 PRs
+ok   IBM/speech-to-text-code-pattern Q1-2024: 0 PRs
+ok   IBM/speech-to-text-code-pattern Q3-2025: 0 PRs
+ok   IBM/speech-to-text-code-pattern Q4-2025: 0 PRs
+ok   IBM/speech-to-text-code-pattern Q1-2026: 0 PRs
+ok   IBM/speech-to-text-code-pattern Q2-2026: 0 PRs
+ok   IBM/spnl Q1-2024: 0 PRs
+WARN IBM/spnl Q3-2025: collected 306/321 PRs (sub-window saturation) — raise --subwindows to recover
+ok   IBM/spnl Q3-2025: 306 PRs
+ok   IBM/spnl Q4-2025: 201 PRs
+WARN IBM/spnl Q1-2026: collected 283/344 PRs (sub-window saturation) — raise --subwindows to recover
+ok   IBM/spnl Q1-2026: 283 PRs
+ok   IBM/spnl Q2-2026: 5 PRs
+ok   IBM/tensorflow-kubernetes-art-classification Q1-2024: 0 PRs
+ok   IBM/tensorflow-kubernetes-art-classification Q3-2025: 0 PRs
+ok   IBM/tensorflow-kubernetes-art-classification Q4-2025: 0 PRs
+ok   IBM/tensorflow-kubernetes-art-classification Q1-2026: 0 PRs
+ok   IBM/tensorflow-kubernetes-art-classification Q2-2026: 0 PRs
+ok   IBM/text-to-speech-code-pattern Q1-2024: 0 PRs
+ok   IBM/text-to-speech-code-pattern Q3-2025: 0 PRs
+ok   IBM/text-to-speech-code-pattern Q4-2025: 0 PRs
+ok   IBM/text-to-speech-code-pattern Q1-2026: 0 PRs
+ok   IBM/text-to-speech-code-pattern Q2-2026: 0 PRs
+ok   IBM/transition-amr-parser Q1-2024: 0 PRs
+ok   IBM/transition-amr-parser Q3-2025: 1 PRs
+ok   IBM/transition-amr-parser Q4-2025: 0 PRs
+ok   IBM/transition-amr-parser Q1-2026: 0 PRs
+ok   IBM/transition-amr-parser Q2-2026: 1 PRs
+ok   IBM/twitter-customer-care-document-prediction Q1-2024: 0 PRs
+ok   IBM/twitter-customer-care-document-prediction Q3-2025: 0 PRs
+ok   IBM/twitter-customer-care-document-prediction Q4-2025: 0 PRs
+ok   IBM/twitter-customer-care-document-prediction Q1-2026: 0 PRs
+ok   IBM/twitter-customer-care-document-prediction Q2-2026: 0 PRs
+ok   IBM/unitxt Q1-2024: 259 PRs
+ok   IBM/unitxt Q3-2025: 87 PRs
+ok   IBM/unitxt Q4-2025: 15 PRs
+ok   IBM/unitxt Q1-2026: 7 PRs
+ok   IBM/unitxt Q2-2026: 7 PRs
+ok   IBM/use-advanced-nlp-and-tone-analyser-to-analyse-speaker-insights Q1-2024: 0 PRs
+ok   IBM/use-advanced-nlp-and-tone-analyser-to-analyse-speaker-insights Q3-2025: 0 PRs
+ok   IBM/use-advanced-nlp-and-tone-analyser-to-analyse-speaker-insights Q4-2025: 0 PRs
+ok   IBM/use-advanced-nlp-and-tone-analyser-to-analyse-speaker-insights Q1-2026: 0 PRs
+ok   IBM/use-advanced-nlp-and-tone-analyser-to-analyse-speaker-insights Q2-2026: 0 PRs
+ok   IBM/use-deep-learning-in-ibm-cloud-functions Q1-2024: 0 PRs
+ok   IBM/use-deep-learning-in-ibm-cloud-functions Q3-2025: 0 PRs
+ok   IBM/use-deep-learning-in-ibm-cloud-functions Q4-2025: 0 PRs
+ok   IBM/use-deep-learning-in-ibm-cloud-functions Q1-2026: 0 PRs
+ok   IBM/use-deep-learning-in-ibm-cloud-functions Q2-2026: 0 PRs
+ok   IBM/virtual-insurance-assistant Q1-2024: 0 PRs
+ok   IBM/virtual-insurance-assistant Q3-2025: 1 PRs
+ok   IBM/virtual-insurance-assistant Q4-2025: 0 PRs
+ok   IBM/virtual-insurance-assistant Q1-2026: 0 PRs
+ok   IBM/virtual-insurance-assistant Q2-2026: 0 PRs
+ok   IBM/vision-terraform Q1-2024: 0 PRs
+ok   IBM/vision-terraform Q3-2025: 0 PRs
+ok   IBM/vision-terraform Q4-2025: 0 PRs
+ok   IBM/vision-terraform Q1-2026: 0 PRs
+ok   IBM/vision-terraform Q2-2026: 0 PRs
+ok   IBM/visualize-unstructured-data-with-watson Q1-2024: 0 PRs
+ok   IBM/visualize-unstructured-data-with-watson Q3-2025: 0 PRs
+ok   IBM/visualize-unstructured-data-with-watson Q4-2025: 0 PRs
+ok   IBM/visualize-unstructured-data-with-watson Q1-2026: 0 PRs
+ok   IBM/visualize-unstructured-data-with-watson Q2-2026: 0 PRs
+ok   IBM/vsrl-framework Q1-2024: 0 PRs
+ok   IBM/vsrl-framework Q3-2025: 0 PRs
+ok   IBM/vsrl-framework Q4-2025: 0 PRs
+ok   IBM/vsrl-framework Q1-2026: 0 PRs
+ok   IBM/vsrl-framework Q2-2026: 0 PRs
+ok   IBM/watson-assistant-multi-bot-agent Q1-2024: 0 PRs
+ok   IBM/watson-assistant-multi-bot-agent Q3-2025: 0 PRs
+ok   IBM/watson-assistant-multi-bot-agent Q4-2025: 0 PRs
+ok   IBM/watson-assistant-multi-bot-agent Q1-2026: 0 PRs
+ok   IBM/watson-assistant-multi-bot-agent Q2-2026: 0 PRs
+ok   IBM/watson-automation Q1-2024: 0 PRs
+ok   IBM/watson-automation Q3-2025: 1 PRs
+ok   IBM/watson-automation Q4-2025: 0 PRs
+ok   IBM/watson-automation Q1-2026: 0 PRs
+ok   IBM/watson-automation Q2-2026: 0 PRs
+ok   IBM/watson-document-classifier Q1-2024: 0 PRs
+ok   IBM/watson-document-classifier Q3-2025: 0 PRs
+ok   IBM/watson-document-classifier Q4-2025: 0 PRs
+ok   IBM/watson-document-classifier Q1-2026: 0 PRs
+ok   IBM/watson-document-classifier Q2-2026: 0 PRs
+ok   IBM/watson-document-co-relation Q1-2024: 0 PRs
+ok   IBM/watson-document-co-relation Q3-2025: 0 PRs
+ok   IBM/watson-document-co-relation Q4-2025: 0 PRs
+ok   IBM/watson-document-co-relation Q1-2026: 0 PRs
+ok   IBM/watson-document-co-relation Q2-2026: 0 PRs
+ok   IBM/watson-machine-learning-model-deploy Q1-2024: 0 PRs
+ok   IBM/watson-machine-learning-model-deploy Q3-2025: 0 PRs
+ok   IBM/watson-machine-learning-model-deploy Q4-2025: 0 PRs
+ok   IBM/watson-machine-learning-model-deploy Q1-2026: 0 PRs
+ok   IBM/watson-machine-learning-model-deploy Q2-2026: 0 PRs
+ok   IBM/watson-nao-robot Q1-2024: 0 PRs
+ok   IBM/watson-nao-robot Q3-2025: 0 PRs
+ok   IBM/watson-nao-robot Q4-2025: 0 PRs
+ok   IBM/watson-nao-robot Q1-2026: 0 PRs
+ok   IBM/watson-nao-robot Q2-2026: 0 PRs
+ok   IBM/watson-stock-advisor Q1-2024: 0 PRs
+ok   IBM/watson-stock-advisor Q3-2025: 0 PRs
+ok   IBM/watson-stock-advisor Q4-2025: 0 PRs
+ok   IBM/watson-stock-advisor Q1-2026: 0 PRs
+ok   IBM/watson-stock-advisor Q2-2026: 0 PRs
+ok   IBM/watson-streaming-stt Q1-2024: 0 PRs
+ok   IBM/watson-streaming-stt Q3-2025: 0 PRs
+ok   IBM/watson-streaming-stt Q4-2025: 0 PRs
+ok   IBM/watson-streaming-stt Q1-2026: 0 PRs
+ok   IBM/watson-streaming-stt Q2-2026: 0 PRs
+ok   IBM/watsonx-ai-java-sdk Q1-2024: 0 PRs
+ok   IBM/watsonx-ai-java-sdk Q3-2025: 91 PRs
+ok   IBM/watsonx-ai-java-sdk Q4-2025: 76 PRs
+ok   IBM/watsonx-ai-java-sdk Q1-2026: 49 PRs
+ok   IBM/watsonx-ai-java-sdk Q2-2026: 41 PRs
+ok   IBM/watsonx-ai-platform-demos Q1-2024: 0 PRs
+ok   IBM/watsonx-ai-platform-demos Q3-2025: 1 PRs
+ok   IBM/watsonx-ai-platform-demos Q4-2025: 0 PRs
+ok   IBM/watsonx-ai-platform-demos Q1-2026: 0 PRs
+ok   IBM/watsonx-ai-platform-demos Q2-2026: 0 PRs
+ok   IBM/watsonx-developer-hub Q1-2024: 0 PRs
+ok   IBM/watsonx-developer-hub Q3-2025: 24 PRs
+ok   IBM/watsonx-developer-hub Q4-2025: 3 PRs
+ok   IBM/watsonx-developer-hub Q1-2026: 19 PRs
+ok   IBM/watsonx-developer-hub Q2-2026: 3 PRs
+ok   IBM/watsonx-go Q1-2024: 6 PRs
+ok   IBM/watsonx-go Q3-2025: 3 PRs
+ok   IBM/watsonx-go Q4-2025: 2 PRs
+ok   IBM/watsonx-go Q1-2026: 0 PRs
+ok   IBM/watsonx-go Q2-2026: 0 PRs
+ok   IBM/watsonx-prompt-lab Q1-2024: 3 PRs
+ok   IBM/watsonx-prompt-lab Q3-2025: 1 PRs
+ok   IBM/watsonx-prompt-lab Q4-2025: 0 PRs
+ok   IBM/watsonx-prompt-lab Q1-2026: 0 PRs
+ok   IBM/watsonx-prompt-lab Q2-2026: 0 PRs
+ok   IBM/wxflows Q1-2024: 0 PRs
+ok   IBM/wxflows Q3-2025: 2 PRs
+ok   IBM/wxflows Q4-2025: 0 PRs
+ok   IBM/wxflows Q1-2026: 0 PRs
+ok   IBM/wxflows Q2-2026: 0 PRs
+ok   IBM/xgboost-smote-detect-fraud Q1-2024: 0 PRs
+ok   IBM/xgboost-smote-detect-fraud Q3-2025: 0 PRs
+ok   IBM/xgboost-smote-detect-fraud Q4-2025: 0 PRs
+ok   IBM/xgboost-smote-detect-fraud Q1-2026: 0 PRs
+ok   IBM/xgboost-smote-detect-fraud Q2-2026: 0 PRs
+ok   IBM/zrl-deepsearch-ai-playground Q1-2024: 0 PRs
+ok   IBM/zrl-deepsearch-ai-playground Q3-2025: 0 PRs
+ok   IBM/zrl-deepsearch-ai-playground Q4-2025: 0 PRs
+ok   IBM/zrl-deepsearch-ai-playground Q1-2026: 0 PRs
+ok   IBM/zrl-deepsearch-ai-playground Q2-2026: 0 PRs
+ok   IBM/zshot Q1-2024: 2 PRs
+ok   IBM/zshot Q3-2025: 1 PRs
+ok   IBM/zshot Q4-2025: 0 PRs
+ok   IBM/zshot Q1-2026: 0 PRs
+ok   IBM/zshot Q2-2026: 0 PRs
+ok   Netflix/maestro Q1-2024: 0 PRs
+ok   Netflix/maestro Q3-2025: 28 PRs
+ok   Netflix/maestro Q4-2025: 27 PRs
+ok   Netflix/maestro Q1-2026: 11 PRs
+ok   Netflix/maestro Q2-2026: 23 PRs
+ok   Netflix/metaflow Q1-2024: 95 PRs
+ok   Netflix/metaflow Q3-2025: 122 PRs
+ok   Netflix/metaflow Q4-2025: 87 PRs
+WARN Netflix/metaflow Q1-2026: collected 218/259 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Netflix/metaflow Q1-2026: 218 PRs
+ok   Netflix/metaflow Q2-2026: 167 PRs
+ok   Netflix/metaflow-service Q1-2024: 10 PRs
+ok   Netflix/metaflow-service Q3-2025: 0 PRs
+ok   Netflix/metaflow-service Q4-2025: 1 PRs
+ok   Netflix/metaflow-service Q1-2026: 12 PRs
+ok   Netflix/metaflow-service Q2-2026: 9 PRs
+ok   Netflix/user2020-metaflow-tutorial Q1-2024: 0 PRs
+ok   Netflix/user2020-metaflow-tutorial Q3-2025: 0 PRs
+ok   Netflix/user2020-metaflow-tutorial Q4-2025: 0 PRs
+ok   Netflix/user2020-metaflow-tutorial Q1-2026: 0 PRs
+ok   Netflix/user2020-metaflow-tutorial Q2-2026: 1 PRs
+ok   alibaba/AILens Q1-2024: 0 PRs
+ok   alibaba/AILens Q3-2025: 0 PRs
+ok   alibaba/AILens Q4-2025: 0 PRs
+ok   alibaba/AILens Q1-2026: 0 PRs
+ok   alibaba/AILens Q2-2026: 0 PRs
+ok   alibaba/AIOpsServing Q1-2024: 0 PRs
+ok   alibaba/AIOpsServing Q3-2025: 0 PRs
+ok   alibaba/AIOpsServing Q4-2025: 0 PRs
+ok   alibaba/AIOpsServing Q1-2026: 0 PRs
+ok   alibaba/AIOpsServing Q2-2026: 0 PRs
+ok   alibaba/AliceMind Q1-2024: 0 PRs
+ok   alibaba/AliceMind Q3-2025: 0 PRs
+ok   alibaba/AliceMind Q4-2025: 0 PRs
+ok   alibaba/AliceMind Q1-2026: 0 PRs
+ok   alibaba/AliceMind Q2-2026: 0 PRs
+ok   alibaba/Alink Q1-2024: 1 PRs
+ok   alibaba/Alink Q3-2025: 0 PRs
+ok   alibaba/Alink Q4-2025: 3 PRs
+ok   alibaba/Alink Q1-2026: 0 PRs
+ok   alibaba/Alink Q2-2026: 0 PRs
+ok   alibaba/BladeDISC Q1-2024: 12 PRs
+ok   alibaba/BladeDISC Q3-2025: 1 PRs
+ok   alibaba/BladeDISC Q4-2025: 0 PRs
+ok   alibaba/BladeDISC Q1-2026: 0 PRs
+ok   alibaba/BladeDISC Q2-2026: 0 PRs
+ok   alibaba/CloudEval-YAML Q1-2024: 0 PRs
+ok   alibaba/CloudEval-YAML Q3-2025: 0 PRs
+ok   alibaba/CloudEval-YAML Q4-2025: 0 PRs
+ok   alibaba/CloudEval-YAML Q1-2026: 0 PRs
+ok   alibaba/CloudEval-YAML Q2-2026: 0 PRs
+ok   alibaba/Dynamic-popularity-aware-recommendation Q1-2024: 0 PRs
+ok   alibaba/Dynamic-popularity-aware-recommendation Q3-2025: 0 PRs
+ok   alibaba/Dynamic-popularity-aware-recommendation Q4-2025: 0 PRs
+ok   alibaba/Dynamic-popularity-aware-recommendation Q1-2026: 0 PRs
+ok   alibaba/Dynamic-popularity-aware-recommendation Q2-2026: 0 PRs
+ok   alibaba/EasyCV Q1-2024: 5 PRs
+ok   alibaba/EasyCV Q3-2025: 0 PRs
+ok   alibaba/EasyCV Q4-2025: 0 PRs
+ok   alibaba/EasyCV Q1-2026: 0 PRs
+ok   alibaba/EasyCV Q2-2026: 0 PRs
+ok   alibaba/EasyNLP Q1-2024: 3 PRs
+ok   alibaba/EasyNLP Q3-2025: 0 PRs
+ok   alibaba/EasyNLP Q4-2025: 0 PRs
+ok   alibaba/EasyNLP Q1-2026: 0 PRs
+ok   alibaba/EasyNLP Q2-2026: 0 PRs
+ok   alibaba/EasyParallelLibrary Q1-2024: 0 PRs
+ok   alibaba/EasyParallelLibrary Q3-2025: 0 PRs
+ok   alibaba/EasyParallelLibrary Q4-2025: 0 PRs
+ok   alibaba/EasyParallelLibrary Q1-2026: 0 PRs
+ok   alibaba/EasyParallelLibrary Q2-2026: 0 PRs
+ok   alibaba/FastNN Q1-2024: 0 PRs
+ok   alibaba/FastNN Q3-2025: 0 PRs
+ok   alibaba/FastNN Q4-2025: 0 PRs
+ok   alibaba/FastNN Q1-2026: 0 PRs
+ok   alibaba/FastNN Q2-2026: 0 PRs
+ok   alibaba/FederatedScope Q1-2024: 4 PRs
+ok   alibaba/FederatedScope Q3-2025: 2 PRs
+ok   alibaba/FederatedScope Q4-2025: 0 PRs
+ok   alibaba/FederatedScope Q1-2026: 1 PRs
+ok   alibaba/FederatedScope Q2-2026: 0 PRs
+ok   alibaba/GraphTranslator Q1-2024: 1 PRs
+ok   alibaba/GraphTranslator Q3-2025: 0 PRs
+ok   alibaba/GraphTranslator Q4-2025: 0 PRs
+ok   alibaba/GraphTranslator Q1-2026: 0 PRs
+ok   alibaba/GraphTranslator Q2-2026: 0 PRs
+ok   alibaba/Helios Q1-2024: 0 PRs
+ok   alibaba/Helios Q3-2025: 0 PRs
+ok   alibaba/Helios Q4-2025: 0 PRs
+ok   alibaba/Helios Q1-2026: 0 PRs
+ok   alibaba/Helios Q2-2026: 0 PRs
+ok   alibaba/InferSim Q1-2024: 0 PRs
+ok   alibaba/InferSim Q3-2025: 0 PRs
+ok   alibaba/InferSim Q4-2025: 1 PRs
+ok   alibaba/InferSim Q1-2026: 1 PRs
+ok   alibaba/InferSim Q2-2026: 3 PRs
+ok   alibaba/LucaProt Q1-2024: 3 PRs
+ok   alibaba/LucaProt Q3-2025: 5 PRs
+ok   alibaba/LucaProt Q4-2025: 0 PRs
+ok   alibaba/LucaProt Q1-2026: 1 PRs
+ok   alibaba/LucaProt Q2-2026: 0 PRs
+ok   alibaba/MNN Q1-2024: 9 PRs
+ok   alibaba/MNN Q3-2025: 74 PRs
+ok   alibaba/MNN Q4-2025: 45 PRs
+ok   alibaba/MNN Q1-2026: 101 PRs
+ok   alibaba/MNN Q2-2026: 112 PRs
+ok   alibaba/SRDiffusion Q1-2024: 0 PRs
+ok   alibaba/SRDiffusion Q3-2025: 0 PRs
+ok   alibaba/SRDiffusion Q4-2025: 0 PRs
+ok   alibaba/SRDiffusion Q1-2026: 0 PRs
+ok   alibaba/SRDiffusion Q2-2026: 0 PRs
+ok   alibaba/ServeGen Q1-2024: 0 PRs
+ok   alibaba/ServeGen Q3-2025: 0 PRs
+ok   alibaba/ServeGen Q4-2025: 0 PRs
+ok   alibaba/ServeGen Q1-2026: 0 PRs
+ok   alibaba/ServeGen Q2-2026: 0 PRs
+ok   alibaba/SimCSE-with-CARDS Q1-2024: 0 PRs
+ok   alibaba/SimCSE-with-CARDS Q3-2025: 0 PRs
+ok   alibaba/SimCSE-with-CARDS Q4-2025: 0 PRs
+ok   alibaba/SimCSE-with-CARDS Q1-2026: 0 PRs
+ok   alibaba/SimCSE-with-CARDS Q2-2026: 0 PRs
+ok   alibaba/TePDist Q1-2024: 0 PRs
+ok   alibaba/TePDist Q3-2025: 0 PRs
+ok   alibaba/TePDist Q4-2025: 0 PRs
+ok   alibaba/TePDist Q1-2026: 0 PRs
+ok   alibaba/TePDist Q2-2026: 0 PRs
+ok   alibaba/TinyNeuralNetwork Q1-2024: 7 PRs
+ok   alibaba/TinyNeuralNetwork Q3-2025: 2 PRs
+ok   alibaba/TinyNeuralNetwork Q4-2025: 5 PRs
+ok   alibaba/TinyNeuralNetwork Q1-2026: 0 PRs
+ok   alibaba/TinyNeuralNetwork Q2-2026: 0 PRs
+ok   alibaba/Trescope Q1-2024: 0 PRs
+ok   alibaba/Trescope Q3-2025: 0 PRs
+ok   alibaba/Trescope Q4-2025: 0 PRs
+ok   alibaba/Trescope Q1-2026: 0 PRs
+ok   alibaba/Trescope Q2-2026: 0 PRs
+ok   alibaba/app-controller Q1-2024: 0 PRs
+ok   alibaba/app-controller Q3-2025: 0 PRs
+ok   alibaba/app-controller Q4-2025: 0 PRs
+ok   alibaba/app-controller Q1-2026: 0 PRs
+ok   alibaba/app-controller Q2-2026: 0 PRs
+ok   alibaba/easydist Q1-2024: 5 PRs
+ok   alibaba/easydist Q3-2025: 0 PRs
+ok   alibaba/easydist Q4-2025: 0 PRs
+ok   alibaba/easydist Q1-2026: 0 PRs
+ok   alibaba/easydist Q2-2026: 0 PRs
+ok   alibaba/easyrobust Q1-2024: 0 PRs
+ok   alibaba/easyrobust Q3-2025: 0 PRs
+ok   alibaba/easyrobust Q4-2025: 0 PRs
+ok   alibaba/easyrobust Q1-2026: 0 PRs
+ok   alibaba/easyrobust Q2-2026: 0 PRs
+ok   alibaba/euler Q1-2024: 0 PRs
+ok   alibaba/euler Q3-2025: 0 PRs
+ok   alibaba/euler Q4-2025: 0 PRs
+ok   alibaba/euler Q1-2026: 0 PRs
+ok   alibaba/euler Q2-2026: 0 PRs
+ok   alibaba/feathub Q1-2024: 0 PRs
+ok   alibaba/feathub Q3-2025: 0 PRs
+ok   alibaba/feathub Q4-2025: 0 PRs
+ok   alibaba/feathub Q1-2026: 0 PRs
+ok   alibaba/feathub Q2-2026: 2 PRs
+ok   alibaba/graph-gpt Q1-2024: 0 PRs
+ok   alibaba/graph-gpt Q3-2025: 0 PRs
+ok   alibaba/graph-gpt Q4-2025: 0 PRs
+ok   alibaba/graph-gpt Q1-2026: 0 PRs
+ok   alibaba/graph-gpt Q2-2026: 0 PRs
+ok   alibaba/graphlearn-for-pytorch Q1-2024: 19 PRs
+ok   alibaba/graphlearn-for-pytorch Q3-2025: 4 PRs
+ok   alibaba/graphlearn-for-pytorch Q4-2025: 0 PRs
+ok   alibaba/graphlearn-for-pytorch Q1-2026: 1 PRs
+ok   alibaba/graphlearn-for-pytorch Q2-2026: 0 PRs
+ok   alibaba/gym-starcraft Q1-2024: 0 PRs
+ok   alibaba/gym-starcraft Q3-2025: 0 PRs
+ok   alibaba/gym-starcraft Q4-2025: 0 PRs
+ok   alibaba/gym-starcraft Q1-2026: 0 PRs
+ok   alibaba/gym-starcraft Q2-2026: 0 PRs
+ok   alibaba/identity-grpo Q1-2024: 0 PRs
+ok   alibaba/identity-grpo Q3-2025: 0 PRs
+ok   alibaba/identity-grpo Q4-2025: 0 PRs
+ok   alibaba/identity-grpo Q1-2026: 0 PRs
+ok   alibaba/identity-grpo Q2-2026: 0 PRs
+ok   alibaba/loongsuite-js Q1-2024: 0 PRs
+ok   alibaba/loongsuite-js Q3-2025: 0 PRs
+ok   alibaba/loongsuite-js Q4-2025: 0 PRs
+ok   alibaba/loongsuite-js Q1-2026: 0 PRs
+ok   alibaba/loongsuite-js Q2-2026: 50 PRs
+ok   alibaba/open-agent-auth Q1-2024: 0 PRs
+ok   alibaba/open-agent-auth Q3-2025: 0 PRs
+ok   alibaba/open-agent-auth Q4-2025: 0 PRs
+ok   alibaba/open-agent-auth Q1-2026: 19 PRs
+ok   alibaba/open-agent-auth Q2-2026: 0 PRs
+ok   alibaba/page-agent Q1-2024: 0 PRs
+ok   alibaba/page-agent Q3-2025: 13 PRs
+ok   alibaba/page-agent Q4-2025: 46 PRs
+WARN alibaba/page-agent Q1-2026: collected 148/151 PRs (sub-window saturation) — raise --subwindows to recover
+ok   alibaba/page-agent Q1-2026: 148 PRs
+ok   alibaba/page-agent Q2-2026: 128 PRs
+ok   alibaba/pipcook Q1-2024: 1 PRs
+ok   alibaba/pipcook Q3-2025: 0 PRs
+ok   alibaba/pipcook Q4-2025: 0 PRs
+ok   alibaba/pipcook Q1-2026: 0 PRs
+ok   alibaba/pipcook Q2-2026: 0 PRs
+ok   alibaba/rtp-llm Q1-2024: 5 PRs
+ok   alibaba/rtp-llm Q3-2025: 46 PRs
+ok   alibaba/rtp-llm Q4-2025: 320 PRs
+WARN alibaba/rtp-llm Q1-2026: collected 328/332 PRs (sub-window saturation) — raise --subwindows to recover
+ok   alibaba/rtp-llm Q1-2026: 328 PRs
+ok   alibaba/rtp-llm Q2-2026: 298 PRs
+ok   alibaba/sec-code-bench Q1-2024: 0 PRs
+ok   alibaba/sec-code-bench Q3-2025: 5 PRs
+ok   alibaba/sec-code-bench Q4-2025: 2 PRs
+FAIL alibaba/sec-code-bench Q1-2026
+ok   alibaba/sec-code-bench Q2-2026: 2 PRs
+ok   alibaba/skill-up Q1-2024: 0 PRs
+ok   alibaba/skill-up Q3-2025: 0 PRs
+ok   alibaba/skill-up Q4-2025: 0 PRs
+ok   alibaba/skill-up Q1-2026: 0 PRs
+ok   alibaba/skill-up Q2-2026: 95 PRs
+ok   alibaba/smart-vscode-extension Q1-2024: 0 PRs
+ok   alibaba/smart-vscode-extension Q3-2025: 0 PRs
+ok   alibaba/smart-vscode-extension Q4-2025: 0 PRs
+ok   alibaba/smart-vscode-extension Q1-2026: 0 PRs
+ok   alibaba/smart-vscode-extension Q2-2026: 0 PRs
+ok   alibaba/spring-ai-alibaba Q1-2024: 0 PRs
+WARN alibaba/spring-ai-alibaba Q3-2025: collected 476/667 PRs (sub-window saturation) — raise --subwindows to recover
+ok   alibaba/spring-ai-alibaba Q3-2025: 476 PRs
+ok   alibaba/spring-ai-alibaba Q4-2025: 230 PRs
+ok   alibaba/spring-ai-alibaba Q1-2026: 151 PRs
+ok   alibaba/spring-ai-alibaba Q2-2026: 107 PRs
+ok   alibaba/tair-kvcache Q1-2024: 0 PRs
+ok   alibaba/tair-kvcache Q3-2025: 0 PRs
+ok   alibaba/tair-kvcache Q4-2025: 0 PRs
+ok   alibaba/tair-kvcache Q1-2026: 93 PRs
+ok   alibaba/tair-kvcache Q2-2026: 114 PRs
+ok   alibaba/webmcp-nexus Q1-2024: 0 PRs
+ok   alibaba/webmcp-nexus Q3-2025: 0 PRs
+ok   alibaba/webmcp-nexus Q4-2025: 0 PRs
+ok   alibaba/webmcp-nexus Q1-2026: 0 PRs
+ok   alibaba/webmcp-nexus Q2-2026: 2 PRs
+ok   alibaba/zvec Q1-2024: 0 PRs
+ok   alibaba/zvec Q3-2025: 0 PRs
+ok   alibaba/zvec Q4-2025: 7 PRs
+ok   alibaba/zvec Q1-2026: 204 PRs
+ok   alibaba/zvec Q2-2026: 189 PRs
+WARN apache/airflow Q1-2024: collected 500/1463 PRs (sub-window saturation) — raise --subwindows to recover
+ok   apache/airflow Q1-2024: 500 PRs
+WARN apache/airflow Q3-2025: collected 500/2668 PRs (sub-window saturation) — raise --subwindows to recover
+ok   apache/airflow Q3-2025: 500 PRs
+WARN apache/airflow Q4-2025: collected 500/2970 PRs (sub-window saturation) — raise --subwindows to recover
+ok   apache/airflow Q4-2025: 500 PRs
+WARN apache/airflow Q1-2026: collected 500/3693 PRs (sub-window saturation) — raise --subwindows to recover
+ok   apache/airflow Q1-2026: 500 PRs
+WARN apache/airflow Q2-2026: collected 500/3920 PRs (sub-window saturation) — raise --subwindows to recover
+ok   apache/airflow Q2-2026: 500 PRs
+ok   apache/airflow-publish Q1-2024: 0 PRs
+ok   apache/airflow-publish Q3-2025: 0 PRs
+ok   apache/airflow-publish Q4-2025: 0 PRs
+ok   apache/airflow-publish Q1-2026: 0 PRs

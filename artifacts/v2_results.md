@@ -592,3 +592,44 @@ assignee-gated flow (74% reviewed, ~0 self-merge) alongside web-agent lanes
 where two-thirds+ of merges are self-merges and the gate is merge triage
 (codex merges only 38% of what it opens). Oversight is a property of the
 LANE, not the org.
+
+## 14. Appendix: org segmentation by AI-portfolio concentration (2026-07-09)
+
+Ron's 3-group segmentation of the v2.1 population, by how many of the org's
+top-5 starred repos are AI (maintainer topics OR description regex — the
+regex is required because frontier labs rarely set topics):
+- **AI-majority** (>=3 of top-5): 165 orgs — anthropics, openai, huggingface,
+  NVIDIA, mistralai, QwenLM, meta-llama, vllm-project, langchain-ai...
+- **AI-heavy** (2 of top-5): 50 orgs — google-deepmind, facebookresearch,
+  bytedance-seed...
+- **repo-scoped** (<2 of top-5; only their AI-classified repos included):
+  46 orgs — microsoft, google, alibaba, Tencent, apache, apple, awslabs...
+
+Contributor-weighted, per group (repo counts are qualifying repos in Q2-2026):
+
+| group | orgs | repos | AI-code % | human rev % (other) | AI rev % | no-review % | self-merged % |
+|---|---|---|---|---|---|---|---|
+| AI-majority Q2-2026 | 165 | 686 | **12.7 [11.4,14.0]** | 50.8 | 23.7 | 36.2 | 48.5 |
+| AI-heavy Q2-2026 | 50 | 175 | **13.6 [10.0,17.4]** | 57.7 | 25.0 | 31.5 | 22.4 |
+| repo-scoped Q2-2026 | 46 | 113* | **6.9 [5.2,9.4]** | 50.4 | 30.8 | 37.4 | 68.6* |
+| (Q1-2026, same order) | | | 8.1 / 9.8 / 5.2 | 56.5 / 61.2 / 54.6 | 24.7 / 20.3 / 34.9 | 32.1 / 31.9 / 32.4 | 52.2 / 14.8 / 72.7 |
+
+Reading: AI-majority and AI-heavy orgs adopt at statistically similar rates
+(12.7 vs 13.6, overlapping CIs) — concentration of an org's PORTFOLIO on AI
+does not predict deeper tool adoption beyond the threshold. The AI units of
+non-AI-primary big tech (repo-scoped) run at roughly HALF the AI-code rate
+(6.9%) with the same trend shape — consistent with slower enterprise
+enablement rather than different practice. AI-review is highest in the
+repo-scoped stratum (30.8%) — big orgs deploy review bots more.
+
+Caveats: (*) tier-2 census still completing when computed — repo-scoped row
+uses 113 qualifying repos, will grow; repo-scoped self-merge (68.6%) is
+apache/airflow-committer-driven and n-small. Known boundary artifacts:
+deepseek-ai, ollama, xai-org land in "repo-scoped" because their repo
+descriptions are minimal (V3/R1 repos have no description) — a source-list
+override (HF-publisher/TechCrunch orgs -> AI-majority) is arguably more
+correct; sensitivity is small (few censused repos) but should be decided
+before publication. Under this segmentation microsoft is repo-scoped: 429
+census repos -> ~125 AI-classified retained (drops vscode-class repos that
+USE AI heavily but are not AI-domain — the segmentation measures domain, not
+usage; the two-tier v2.1 population remains the primary lens).
