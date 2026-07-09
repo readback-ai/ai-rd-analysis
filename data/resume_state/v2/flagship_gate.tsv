@@ -1,0 +1,441 @@
+01-ai	1	1	1	Yi
+0xPlaygrounds	1	1	1	rig
+2noise	1	1	1	ChatTTS
+4paradigm	1	4	1	OpenMLDB,AutoX,DemoApps,phanthymotus
+AI21Labs	1	4	0	lm-evaluation,ai21-python,sense-bert,ai21-tokenizer
+AI4Bharat	0	1	0	Indic-BERT-v1
+AI4Finance-Foundation	1	3	1	FinGPT,FinRobot,ElegantRL
+AIDotNet	1	4	1	OpenDeepWiki,auto-prompt,koala-ai,Thor
+Alibaba-NLP	1	2	1	DeepResearch,CHRONOS
+Angel-ML	1	2	1	angel,serving
+AnswerDotAI	0	1	0	ModernBERT
+Arize-ai	1	3	1	phoenix,openinference,arize-skills
+Artelnics	0	0	0	
+BerriAI	1	1	1	litellm
+BorealisAI	1	2	1	advertorch,flora-opt
+CaviraOSS	1	4	1	OpenMemory,PageLM,OpenReason,SecuPrompt
+CompVis	1	2	0	geometry-free-view-synthesis,zigma
+ComposioHQ	1	4	1	awesome-claude-skills,composio,awesome-codex-skills,open-chatgpt-atlas
+Delta-ML	1	1	1	delta
+EleutherAI	1	4	1	lm-evaluation-harness,gpt-neo,gpt-neox,DALLE-mtf
+EpistasisLab	1	2	1	tpot,tpot2
+Essential-AI	0	0	0	
+Eventual-Inc	1	1	1	Daft
+Exafunction	0	0	0	
+FedML-AI	1	5	1	FedML,FedNLP,FedGraphNN,FedCV,FedIoT
+FederatedAI	1	4	1	FATE,FATE-LLM,FATE-Serving,FATE-Board
+FellouAI	1	1	1	eko
+FlagOpen	1	1	1	FlagEmbedding
+FlowiseAI	1	1	1	Flowise
+FoundationAgents	1	1	1	MetaGPT
+FoundationVision	1	5	1	VAR,LlamaGen,Infinity,Liquid,Groma
+FunAudioLLM	1	3	1	CosyVoice,SenseVoice,Fun-ASR
+Giskard-AI	1	4	1	giskard-oss,awesome-ai-safety,giskard-vision,giskard-skills
+GoogleCloudPlatform	1	3	0	generative-ai,kubectl-ai,agent-starter-pack
+HKUDS	1	4	1	nanobot,LightRAG,DeepTutor,Vibe-Trading
+HandsOnLLM	1	1	1	Hands-On-Large-Language-Models
+Helicone	1	3	1	helicone,ai-gateway,ai-sdk-provider
+HelixDB	1	1	1	helix-db
+Hitachi-Automotive-And-Industry-Lab	1	1	1	semantic-segmentation-editor
+HumeAI	1	4	0	hume-api-examples,hume-python-sdk,hume-typescript-sdk,hume-react-sdk
+IBM	0	1	0	mcp-context-forge
+IDEA-Research	0	1	0	DINO
+InsForge	1	1	1	InsForge
+IntelLabs	1	4	1	nlp-architect,fastRAG,RAG-FiT,causality-lab
+InternLM	1	7	1	lmdeploy,InternLM,MindSearch,xtuner,InternLM-XComposer
+JanusGraph	0	0	0	
+JohnSnowLabs	1	6	1	spark-nlp,nlu,spark-nlp-models,johnsnowlabs,spark-nlp-streamlit
+JuliaLang	1	1	1	julia
+Kiln-AI	1	1	1	Kiln
+KomputeProject	1	1	1	kompute
+LAION-AI	1	1	1	Open-Assistant
+Lightning-AI	1	6	1	pytorch-lightning,litgpt,LitServe,torchmetrics,dl-fundamentals
+Lightricks	1	4	1	LTX-Video,LTX-2,ComfyUI-LTXVideo,LTX-Desktop
+MariaDB	0	0	0	
+Marker-Inc-Korea	1	3	1	AutoRAG,KO-Platypus,KO-VLM-Benchmark
+MarquezProject	0	0	0	
+MinishLab	1	4	0	model2vec,vicinity,model2vec-rs,tokenlearn
+Mintplex-Labs	1	9	1	anything-llm,vector-admin,openai-assistant-swarm,anythingllm-docs,anythingllm-extension
+ModelTC	1	5	1	LightLLM,LightX2V,LightCompress,GenRL,TFMQ-DM
+NVIDIA	1	4	1	NemoClaw,Megatron-LM,DeepLearningExamples,TensorRT
+Netflix	0	1	0	metaflow
+NousResearch	1	1	1	hermes-agent
+OpenBMB	1	3	0	VoxCPM,UltraRAG,AgentVerse
+OpenGVLab	1	4	1	InternVL,Ask-Anything,InternGPT,VisionLLM
+OpenHands	1	1	1	OpenHands
+OpenLineage	0	0	0	
+OpenMined	1	3	1	PySyft,TenSEAL,SyferText
+PAIR-code	1	4	1	facets,lit,what-if-tool,saliency
+PaddlePaddle	1	6	1	PaddleOCR,Paddle,PaddleNLP,PaddleSpeech,ERNIE
+Portkey-AI	1	6	1	gateway,portkey-python-sdk,models,portkey-node-sdk,hoot
+PrefectHQ	1	2	1	fastmcp,marvin
+ProsusAI	0	1	0	project-echo
+QuivrHQ	1	2	1	quivr,MegaParse
+QwenLM	1	2	0	Qwen,Qwen-VL
+RWKV	1	1	1	rwkv.cpp
+RasaHQ	1	3	1	rasa,rasa_core,rasalit
+RediSearch	0	0	0	
+RunanywhereAI	1	2	1	runanywhere-sdks,RCLI
+SandAI-org	1	2	1	MAGI-1,MagiCompiler
+SeldonIO	1	5	1	seldon-core,alibi,seldon-server,MLServer,tempo
+SesameAILabs	0	0	0	
+Significant-Gravitas	1	1	1	AutoGPT
+StarRocks	0	1	0	mcp-server-starrocks
+StarTrail-org	1	2	1	LEANN,PixelRAG
+Systran	1	1	1	faster-whisper
+THUDM	1	5	0	AgentBench,P-tuning-v2,LongWriter,WebGLM,LongBench
+TauricResearch	1	1	1	TradingAgents
+TeamHG-Memex	1	1	1	eli5
+Tencent	1	2	0	ncnn,WeKnora
+Tencent-Hunyuan	1	3	1	Hunyuan3D-2,HunyuanVideo,HY-World-2.0
+Tiiny-AI	1	1	1	PowerInfer
+TransformerOptimus	1	5	1	SuperAGI,SuperCoder,AutoNode,Awesome-SuperAGI,SuperAGI-Docs
+Trusted-AI	1	3	1	adversarial-robustness-toolbox,AIF360,AIX360
+UKPLab	0	1	0	gpl
+VKCOM	0	1	0	YouTokenToMe
+VectifyAI	1	5	1	PageIndex,OpenKB,ChatIndex,ConDB,Model-Augmented-Fine-Tuning
+VertaAI	1	1	1	modeldb
+aaif-goose	1	1	1	goose
+accord-net	1	1	1	framework
+activeloopai	1	2	1	deeplake,hivemind
+advboxes	1	1	1	AdvBox
+agentscope-ai	1	7	1	agentscope,QwenPaw,agentscope-java,ReMe,OpenJudge
+agno-agi	1	7	1	agno,dash,agent-ui,scout,investment-team
+aiming-lab	1	3	0	SimpleMem,MetaClaw,AutoHarness
+aleph-alpha	1	2	0	intelligence-layer-sdk,pharia-skill
+algorithmicsuperintelligence	0	1	0	optillm
+ali-vilab	1	2	0	VGen,TeaCache
+alibaba	0	1	0	page-agent
+allenai	1	5	0	allennlp,RL4LMs,scispacy,ai2thor,scibert
+alluxio	0	1	0	k8s-operator
+alteryx	1	5	1	featuretools,evalml,compose,open_source_demos,woodwork
+amazon-science	1	5	1	chronos-forecasting,auto-cot,siam-mot,RefChecker,bigdetection
+amundsen-io	0	0	0	
+anthropics	0	0	0	
+anyscale	1	2	0	llm-router,ray-summit-2023-training
+anysphere	0	0	0	
+apache	0	1	0	airflow
+apple	0	1	0	turicreate
+apptainer	0	0	0	
+arcee-ai	1	4	1	mergekit,DALM,PruneMe,arcee-python
+argilla-io	1	6	1	argilla,distilabel,notus,biome-text,get_started_with_deep_learning_for_text_with_allennlp
+argmaxinc	1	1	1	argmax-oss-swift
+argoproj	0	1	0	argo-workflows
+augmentcode	0	0	0	
+autogluon	1	3	1	autogluon,autogluon-assistant,autogluon-cloud
+autonomio	1	5	1	talos,autonomio,studio,wrangle,kerasplotlib
+awslabs	0	1	0	gluonts
+axolotl-ai-cloud	1	1	1	axolotl
+azkaban	0	0	0	
+baichuan-inc	1	3	1	Baichuan-7B,Baichuan2,Baichuan-13B
+basetenlabs	1	2	1	truss,truss-examples
+beclab	1	1	1	Olares
+bentoml	1	7	1	OpenLLM,BentoML,Yatai,BentoDiffusion,llm-inference-handbook
+bethgelab	1	2	1	foolbox,robustness
+bigcode-project	1	2	0	bigcodebench,selfcodealign
+bigscience-workshop	1	5	1	petals,promptsource,bigscience,xmtf,data-preparation
+biohub	0	0	0	
+black-forest-labs	0	0	0	
+blue-yonder	0	0	0	
+bokeh	0	0	0	
+browser-use	1	2	1	browser-use,browser-harness
+bytedance	1	3	1	deer-flow,trae-agent,flowgram.ai
+bytedance-seed	0	0	0	
+cactus-compute	1	5	1	cactus,needle,cactus-react-native,cactus-kotlin,cactus-flutter
+caicloud	0	1	0	mlsys-ladder
+camel-ai	1	5	1	owl,camel,oasis,crab,multi-agent-streamlit-ui
+carbon-design-system	0	0	0	
+cartesia-ai	0	0	0	
+catalyst-team	1	4	1	catalyst,alchemy,classification,segmentation
+catboost	1	1	1	catboost
+ceph	0	0	0	
+cerebras	0	0	0	
+chaidiscovery	0	0	0	
+chainer	1	6	1	chainer,chainercv,chainerrl,chainer-chemistry,tutorials
+character-ai	0	1	0	prompt-poet
+chatchat-space	1	2	1	Langchain-Chatchat,LangGraph-Chatchat
+chroma-core	1	2	1	chroma,chroma-cookbooks
+cisco	0	0	0	
+ckan	0	0	0	
+clab	0	0	0	
+claimed-framework	1	2	1	claimed,mlx_deprecated
+clearml	1	8	1	clearml,clearml-server,clearml-agent,clearml-serving,clearml-fractional-gpu
+cleverhans-lab	1	1	1	cleverhans
+cohere-ai	1	3	0	sandbox-topically,magikarp,sandbox-conversant-lib
+combust	1	1	1	mleap
+comet-ml	1	5	1	opik,kangas,opik-mcp,comet-examples,issue-tracking
+contextualai	1	2	0	gritlm,LMUnit
+coqui-ai	1	8	1	TTS,STT,open-speech-corpora,TTS-papers,Trainer
+cortexlabs	1	1	1	cortex
+coze-dev	1	3	1	coze-studio,coze-loop,coze-js
+crewAIInc	1	3	1	crewAI,crewAI-tools,crewAI-quickstarts
+d3	0	0	0	
+dagster-io	1	1	1	dagster
+dask	0	0	0	
+databendlabs	1	2	1	databend,snowtree
+dataelement	1	2	1	bisheng,Clawith
+datahub-project	0	0	0	
+datalab-to	1	2	0	chandra,lift
+datawhalechina	1	10	1	hello-agents,happy-llm,self-llm,pumpkin-book,llm-cookbook
+daytonaio	1	1	1	daytona
+dbiir	1	1	1	UER-py
+deepseek-ai	0	1	0	Janus
+deepset-ai	1	10	1	haystack,FARM,haystack-cookbook,haystack-tutorials,COVID-QA
+delta-io	0	0	0	
+determined-ai	1	3	1	determined,environments,determined-examples
+dmlc	1	6	1	xgboost,dgl,gluon-cv,gluon-nlp,nnvm
+docarray	1	1	1	docarray
+doccano	1	6	1	doccano,doccano-transformer,doccano-client,doccano-mini,auto-labeling-pipeline
+docling-project	1	3	1	docling,docling-graph,docling-java
+dotnet	0	0	0	
+dragonflyoss	0	0	0	
+dssg	1	4	1	hitchhikers-guide,triage,mlforpublicpolicylab,MLforPublicPolicy
+elastic	0	0	0	
+elevenlabs	1	7	1	elevenlabs-python,ui,examples,elevenlabs-js,skills
+elyra-ai	1	2	1	elyra,pipeline-editor
+embeddings-benchmark	0	0	0	
+espeak-ng	1	1	1	espeak-ng
+espnet	1	2	1	espnet,interspeech2019-tutorial
+evidentlyai	1	2	1	evidently,ml_observability_course
+explosion	1	10	1	spaCy,thinc,spacy-course,spacy-models,sense2vec
+facebook	0	0	0	
+facebookresearch	0	1	0	fairseq
+fairlearn	1	1	1	fairlearn
+fal-ai	1	5	0	dbt-fal,real-time-demo-app,fal-swift,fal-js,edit-anything-app
+fastai	1	6	1	fastai,fastbook,numerical-linear-algebra,course-v3,course22
+feast-dev	1	2	1	feast,feast-java-old
+firecrawl	1	3	1	firecrawl,open-scouts,firecrawl-app-examples
+fixie-ai	1	2	1	ultravox,ai-jsx
+flairNLP	1	2	1	flair,fundus
+flashinfer-ai	0	0	0	
+flashlight	1	2	1	wav2letter,flashlight
+fluent	0	0	0	
+flyteorg	1	5	1	flyte,flytekit,flyte-sdk,flytesnacks,flyteconsole
+fw-ai	1	1	1	cookbook
+genkit-ai	1	5	1	genkit,docsite,genkit-go,skills,aws-bedrock-js-plugin
+getredash	0	0	0	
+ggml-org	1	5	0	whisper.cpp,ggml,llama.vim,llama.vscode,Llama-macOS
+gitleaks	1	1	1	gitleaks
+gnes-ai	1	1	1	gnes
+google	0	1	0	langextract
+google-deepmind	1	4	0	sonnet,pysc2,lab,graph_nets
+google-gemini	1	3	1	gemini-cli,genai-processors,starter-applets
+google-research	1	4	1	bert,google-research,simclr,scenic
+googlecolab	0	0	0	
+gpustack	1	2	1	gpustack,vox-box
+grafana	0	0	0	
+groq	0	0	0	
+h2oai	1	7	1	h2ogpt,h2o-3,h2o-llmstudio,h2o-tutorials,sparkling-water
+hao-ai-lab	1	7	1	FastVideo,Consistency_LLM,Dynasor,JetSpec,d3LLM
+harmonic-ai	0	0	0	
+hazyresearch	1	2	0	data-centric-ai,meerkat
+headroomlabs-ai	1	1	1	headroom
+homenc	0	0	0	
+horovod	1	1	1	horovod
+huggingface	1	4	1	transformers,diffusers,datasets,peft
+hustvl	1	3	0	4DGaussians,YOLOS,GaussianDreamer
+hyperopt	0	0	0	
+i-am-bee	1	3	1	beeai-framework,beeai-framework-ts-starter,bee-api
+ibm-granite	0	0	0	
+imbue-ai	1	1	1	vet
+infiniflow	1	2	1	ragflow,infinity
+influxdata	0	0	0	
+insilicomedicine	0	1	0	precious3-gpt
+intel	1	3	0	ipex-llm,neural-compressor,intel-extension-for-transformers
+intelligent-machine-learning	0	0	0	
+interpretml	1	5	1	interpret,DiCE,interpret-community,interpret-text,gam-changer
+ipython	0	0	0	
+iree-org	1	3	1	iree,iree-turbine,iree-torch
+iterative	1	6	1	cml,mlem,terraform-provider-iterative,awesome-iterative-projects,magnetic-tiles-defect
+jax-ml	1	3	0	scaling-book,jax-llm-examples,bonsai
+jeecgboot	1	4	1	JeecgBoot,jimureport,skills,qiaoqiaoyun
+jina-ai	1	6	1	serve,clip-as-service,reader,discoart,langchain-serve
+jolibrain	1	5	1	deepdetect,colette,joliGEN,wheatley,fluidnet_cxx
+jupyter	0	0	0	
+k2-fsa	1	3	1	sherpa-onnx,sherpa-ncnn,sherpa
+kakaobrain	1	5	1	fast-autoaugment,pororo,kogpt,torchgpipe,word2word
+katanemo	1	1	1	plano
+kedro-org	1	1	1	kedro
+keras-team	1	5	1	keras,autokeras,keras-tuner,keras-contrib,keras-hub
+kestra-io	1	2	1	kestra,mcp-server-python
+khoj-ai	1	7	1	khoj,openpaper,flint,knowledge-graph,llm-coup
+kserve	1	2	1	kserve,website
+kubernetes	0	0	0	
+kyutai-labs	0	0	0	
+lambdalabsml	0	0	0	
+lance-format	1	1	1	lance
+lancedb	1	2	0	vectordb-recipes,yoloexplorer
+langchain-ai	1	4	1	langchain,langgraph,deepagents,open-swe
+langchain4j	1	1	1	langchain4j
+langflow-ai	1	3	1	langflow,langflow-client-ts,langflow-twilio-voice
+langfuse	1	6	1	langfuse,langfuse-docs,mcp-server-langfuse,langfuse-js,oss-llmops-stack
+langgenius	1	1	1	dify
+lemonade-sdk	1	1	1	lemonade
+leon-ai	1	1	1	leon
+lightly-ai	1	3	1	lightly,lightly-train,lightly-studio
+lm-sys	0	0	0	
+ludwig-ai	1	1	1	ludwig
+lumalabs	0	0	0	
+mars-project	1	1	1	mars
+maximhq	1	3	1	bifrost,maxim-go,maxim-docs
+meilisearch	1	1	1	meilisearch
+mem0ai	1	2	1	mem0,mem0-chrome-extension
+memvid	1	7	1	memvid,claude-brain,design-memory,maw,canvas
+meta-llama	1	2	0	llama-cookbook,synthetic-data-kit
+metabase	0	0	0	
+microsoft	1	3	0	generative-ai-for-beginners,ML-For-Beginners,ai-agents-for-beginners
+milvus-io	1	2	1	milvus,bootcamp
+mindsdb	1	6	1	minds,anton,lightwood,aipdf,flat-ai
+mindspore-ai	0	0	0	
+minimax-ai	1	7	0	MiniMax-01,MiniMax-M1,Mini-Agent,MiniMax-M2,cli
+mistralai	1	1	1	mistral-inference
+mixedbread-ai	0	0	0	
+ml-explore	0	1	0	mlx-lm
+mlcommons	1	6	1	training,inference,croissant,ck,GaNDLF
+mlflow	1	1	1	mlflow
+mlpack	1	5	1	mlpack,ensmallen,benchmarks,blog,onnx-mlpack
+modal-labs	1	6	1	modal-examples,quillman,modal-client,devlooper,doppel-bot
+modelscope	1	6	1	FunASR,ms-swift,modelscope,FunClip,ClearerVoice-Studio
+modular	1	1	1	modular
+moonshotai	0	1	0	MoBA
+mosaicml	1	3	1	composer,llm-foundry,streaming
+mozilla	1	2	0	DeepSpeech,TTS
+myshell-ai	1	3	1	OpenVoice,MeloTTS,AIlice
+mysql	0	0	0	
+nari-labs	1	2	1	dia,dia2
+ncbi	0	0	0	
+neuml	1	8	1	txtai,paperai,codequestion,rag,annotateai
+neuralmagic	1	4	1	deepsparse,sparseml,sparsezoo,sparsify
+nexu-io	1	4	1	open-design,html-anything,nexu,agentic-design
+nilearn	1	1	1	nilearn
+nomic-ai	0	1	0	contrastors
+nucleuscloud	1	1	1	neosync
+numba	0	0	0	
+numpy	0	0	0	
+nunchaku-ai	1	1	1	nunchaku
+nvidia-nemo	1	7	1	Speech,Guardrails,DataDesigner,Curator,Nemotron
+nvlabs	1	4	1	instant-ngp,Sana,neuralangelo,tiny-cuda-nn
+oceanbase	1	2	0	seekdb,powermem
+ollama	1	1	1	ollama
+onnx	1	6	1	onnx,models,onnx-tensorrt,tensorflow-onnx,onnx-tensorflow
+onyx-dot-app	1	3	1	onyx,EnterpriseRAG-Bench,python-sandbox
+open-mmlab	1	4	0	Amphion,mmagic,mmaction2,mmocr
+open-webui	1	3	1	open-webui,open-terminal,openapi-servers
+openai	1	3	0	openai-cookbook,CLIP,openai-agents-python
+opencv	1	2	1	opencv,opencv_zoo
+openshift	0	0	0	
+openvinotoolkit	1	4	1	openvino,openvino_notebooks,nncf,model_server
+oracle	0	1	0	tribuo
+oramasearch	1	2	0	onnx-go,oramacore
+orchest	1	1	1	orchest
+oumi-ai	1	2	1	oumi,halloumi-demo
+pandas-dev	0	0	0	
+pathwaycom	0	1	0	llm-app
+physical-intelligence	0	0	0	
+pinecone-io	1	6	1	examples,canopy,pinecone-vercel-starter,pinecone-ts-client,aws-reference-architecture-pulumi
+pixiedust	0	0	0	
+plaidml	0	0	0	
+plastic-labs	1	3	1	honcho,tutor-gpt,openclaw-honcho
+plotly	1	1	1	dash
+polyaxon	1	10	1	polyaxon,traceml,haupt,mloperator,polyaxon-examples
+polynote	0	0	0	
+postgres	0	0	0	
+postgresml	1	3	1	postgresml,korvus,postgresml-django
+pravega	0	0	0	
+predibase	1	1	1	lorax
+prestodb	0	0	0	
+primeintellect-ai	0	0	0	
+prometheus	0	0	0	
+promptfoo	1	2	1	promptfoo,promptfoo-action
+pycaret	1	1	1	pycaret
+pyg-team	1	3	1	pytorch_geometric,pytorch-frame,pyg-lib
+pymc-devs	0	1	0	pytensor
+pyro-ppl	1	2	1	pyro,funsor
+python	0	0	0	
+pytorch	1	7	1	pytorch,vision,executorch,ignite,serve
+qdrant	1	4	1	qdrant,fastembed,mcp-server-qdrant,quaterion
+quiltdata	0	0	0	
+raga-ai-hub	1	2	1	RagaAI-Catalyst,raga-llm-hub
+ray-project	1	5	1	ray,kuberay,llm-applications,ray-llm,ray-educational-materials
+reka-ai	1	2	0	api-examples-dotnet,api-examples-python
+reorproject	1	1	1	reor
+replicate	1	3	1	cog,keepsake,cog-comfyui
+replit	0	1	0	ReplitLM
+rhasspy	1	2	1	piper,rhasspy
+robinhood	0	0	0	
+rstudio	0	0	0	
+rtk-ai	1	4	1	rtk,icm,vox,grit
+run-llama	1	4	1	llama_index,rags,LlamaIndexTS,llama_deploy
+runwayml	1	4	0	RunwayML-for-Photoshop,learn,processing-library,model-sdk
+sakanaai	1	2	0	text-to-lora,doc-to-lora
+salesforce	1	6	1	LAVIS,CodeGen,Merlion,CodeT5,decaNLP
+salesforceairesearch	1	2	1	uni2ts,xLAM
+sambanova	0	1	0	sambanova-ai-provider
+sarvamai	0	0	0	
+scaleapi	1	1	1	llm-engine
+scikit-learn	1	2	1	scikit-learn,blog
+scipy	0	0	0	
+sentient-agi	0	1	0	OML-1.0-Fingerprinting
+sgl-project	1	3	1	sglang,SpecForge,rbg
+shareAI-lab	1	1	1	learn-claude-code
+shield-ai	0	0	0	
+shogun-toolbox	1	2	1	shogun,shogun-rust
+skiplang	0	0	0	
+skyworkai	1	3	0	Skywork-R1V,Skywork,UniPic
+smallcloudai	1	2	1	refact,refact-lsp
+snorkel-team	1	1	1	snorkel
+sony	0	0	0	
+spiceai	1	4	1	spiceai,cookbook,quickstarts,samples
+spotify	1	2	0	pedalboard,basic-pitch
+sql-machine-learning	1	2	1	sqlflow,elasticdl
+stability-ai	1	3	0	StableStudio,StableSwarmUI,stability-sdk
+stan-dev	0	1	0	pystan2
+stanford-crfm	0	0	0	
+stanford-futuredata	0	0	0	
+stanford-oval	1	5	1	storm,WikiChat,genie-server,genie-toolkit,genienlp
+stanfordnlp	1	3	0	CoreNLP,stanza,python-stanford-corenlp
+stepfun-ai	0	1	0	Step-Audio-EditX
+streamlit	1	2	1	streamlit,30DaysOfAI
+supabase	1	3	1	supabase,supabase-py,agent-skills
+superduper-io	1	1	1	superduper
+supertone-inc	1	2	1	supertonic,supertonic-py
+tektoncd	0	0	0	
+tensorchord	1	7	1	Awesome-LLMOps,envd,pgvecto.rs,openmodelz,modelz-llm
+tensorflow	1	4	1	tensorflow,tfjs,tensor2tensor,tfjs-core
+tensorzero	1	1	1	tensorzero
+tenstorrent	1	1	1	tt-metal
+tf-encrypted	1	5	1	tf-encrypted,tf-seal,moose,tf-pjc,tf-big
+thinking-machines-lab	0	0	0	
+thu-ml	1	5	0	TurboDiffusion,SageAttention,zhusuan,SpargeAttn,Causal-Forcing
+thu-pacman	1	1	1	chitu
+tikv	0	0	0	
+togethercomputer	0	1	0	open-data-scientist
+topoteretes	1	5	1	cognee,awesome-ai-memory,PromethAI-Backend,PromethAI-Mobile,cognee-rs
+towhee-io	1	2	1	towhee,examples
+traceloop	1	4	1	openllmetry,openllmetry-js,hub,go-openllmetry
+transformerlab	1	1	1	transformerlab-app
+trinodb	0	0	0	
+triton-inference-server	1	3	1	server,pytriton,model_analyzer
+truefoundry	1	2	1	cognita,models
+truera	1	1	1	trulens
+twelvelabs-io	0	0	0	
+twosigma	0	0	0	
+uTensor	1	2	1	uTensor,utensor_cgen
+ucbrise	1	3	0	flor,graphtrans,cirrus
+unitycatalog	0	0	0	
+unslothai	1	2	1	unsloth,hyperlearn
+unstructured-io	1	2	1	unstructured,community
+upstash	1	5	1	context7,wikipedia-semantic-search,semantic-cache,rag-chat,degree-guru
+vearch	1	2	1	vearch,vearch-python
+vespa-engine	1	2	1	vespa,pyvespa
+vibrantlabsai	1	2	1	ragas,notes
+visgl	0	0	0	
+vllm-project	1	4	1	vllm,vllm-omni,semantic-router,vllm-ascend
+voyage-ai	1	1	1	voyageai-python
+weaviate	1	4	1	weaviate,recipes,weaviate-examples,elysia-frontend
+whylabs	1	4	1	whylogs,langkit,whylogs-java,whylogs-examples
+writer	1	4	1	writer-framework,fitbert,replaCy,cerebro
+xai-org	0	0	0	
+zai-org	1	2	0	ChatGLM2-6B,CogVideo
+zenml-io	1	7	1	zenml,awesome-open-data-annotation,mlstacks,kitaru,zenbytes
+zilliztech	1	5	1	claude-context,GPTCache,deep-searcher,memsearch,akcio

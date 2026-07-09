@@ -33,6 +33,24 @@ hobbyist repos are not the object of study. Instead (`org_set.py`, stage 0):
    repos with detectable AI-tool commits under the same keep rule:
    **1,996 repos** (`census_repos.txt`).
 
+**Flagship AI-topic gate (2026-07-09).** Generic ecosystem lists (LF AI &
+Data landscape, GitHub topics) admit non-AI infrastructure orgs (kubernetes,
+apache, trinodb). A two-tier admission rule fixes this without re-introducing
+per-repo domain judgment: orgs on AI-SCOPED sources (TechCrunch $100M+ AI /
+frontier-lab list, HF hub model publishers) are admitted by the source's own
+scope; orgs whose only provenance is a generic list must pass a flagship
+gate — >=2 of their top-10 starred repos carry maintainer-declared AI topics
+(frozen 28-topic dictionary in `org_set.py`, anchored to GitHub's curated
+topic vocabulary; "agents" deliberately excluded), or the #1 repo does
+(single-product orgs, e.g. ollama), or the org login/description carries an
+AI term (rescues topic-sparse AI orgs: flashinfer-ai, embeddings-benchmark).
+Applied retroactively for consistency: 17 v2 orgs leave (trinodb, tikv,
+MariaDB, dotnet, scipy...; also google/alibaba/Netflix, whose AI lives in
+sibling orgs like google-deepmind — now admitted). Population v2.1 =
+**255 orgs** (199 retained + 56 additions; `v21_active.txt`). The v2
+216-org population remains the basis of §1-13 published numbers until v2.1
+is re-baselined.
+
 **Keep-rule re-audit (2026-07-08).** The original AI-evidence keep tested only
 layer-A commit markers, and its scan window predated some orgs' adoption. A
 layered re-audit of all 225 dropped-but-quality-gated (or v1-listed) orgs —

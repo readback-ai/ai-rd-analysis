@@ -85,9 +85,46 @@ def quality_gated() -> set[str]:
     return keep
 
 
+# Flagship AI-topic gate (2026-07-09): orgs whose ONLY provenance is a
+# generic ecosystem list (LF AI & Data, GitHub topics) must show AI presence
+# in their repo portfolio. Maintainer-declared topics, frozen dictionary.
+# Pass if >=2 of the top-10 starred repos carry an AI topic, or the #1 repo
+# does (single-product orgs), or the login/description carries an AI term
+# (rescues topic-sparse AI orgs). AI-scoped sources (TechCrunch/frontier v1
+# list, HF hub model publishers) are exempt: the source itself asserts
+# AI-ness. Scan results: flagship_gate.tsv (pipeline-generated).
+AI_TOPICS = {
+    "machine-learning", "deep-learning", "artificial-intelligence", "ai",
+    "neural-network", "neural-networks", "llm", "llms", "large-language-models",
+    "nlp", "natural-language-processing", "computer-vision",
+    "reinforcement-learning", "generative-ai", "transformers",
+    "diffusion-models", "ai-agents", "mlops", "speech-recognition",
+    "text-to-speech", "llmops", "language-model", "gpt", "chatgpt",
+    "stable-diffusion", "rag", "fine-tuning", "model-serving",
+}
+LOGIN_FALLBACK = ("ai", "ml", "llm", "agi", "nlp", "intelligence")
+
+
+def flagship_gate() -> dict[str, bool]:
+    """org -> passed, from the scan snapshot (flagship_gate.tsv)."""
+    out = {}
+    for ln in _lines("flagship_gate.tsv"):
+        f = ln.split("\t")
+        if len(f) >= 2:
+            out[f[0]] = f[1] == "1"
+    return out
+
+
 def active() -> list[str]:
-    """The frozen census population (what every published number uses)."""
+    """The frozen v2 census population (basis of v2_results §1-13)."""
     return _lines("v2_active.txt")
+
+
+def v21_active() -> list[str]:
+    """The v2.1 population: v2 minus 17 gate-failing generic-list orgs
+    (v21_retro_dropped.txt) plus 56 re-audited additions
+    (additions_orgs_gated.txt). Frozen in v21_active.txt."""
+    return _lines("v21_active.txt")
 
 
 def verify() -> None:
