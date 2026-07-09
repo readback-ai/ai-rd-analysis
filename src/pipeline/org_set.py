@@ -1,98 +1,59 @@
-"""Stage 0 — HOW THE POPULATION IS DEFINED: the tracked org set.
+"""Stage 0 — HOW THE POPULATION IS DEFINED. Five rules, one override table.
 
-The study population is an enumeration of leading AI organizations built from
-EXTERNAL sources — no per-repo domain classification anywhere:
+Inputs (data/sources/ — third-party snapshots, transcriptions, declarations):
+  lfai_orgs.txt, hf_orgs.tsv, gh_topic_orgs.txt   ecosystem candidate lists
+  epoch_org_map.tsv                Epoch notable-models orgs -> GitHub handles
+                                   (epoch.ai CC-BY; snapshot in epoch/)
+  techcrunch_ai_orgs.tsv           rote transcription of TechCrunch's 2025
+                                   $100M+ AI funding round-up
+  curated_orgs.tsv                 declared hand-curated remainder (~33 labs
+                                   on neither Epoch nor TechCrunch)
+  candidates.tsv                   ecosystem-list handle-transcription record
+  conglomerates.txt                declared umbrella orgs -> repo-scoped
+  org_overrides.tsv                published adjudications (exclude AI-users /
+                                   include topic-sparse AI developers)
 
-1. Candidate sources (third-party lists, snapshotted in data/resume_state/v2/):
-   - lfai_orgs.txt      LF AI & Data landscape orgs (by project count)
-   - hf_orgs.tsv        Hugging Face hub top orgs (models, downloads) — HF
-                        handles; TRANSCRIBED to GitHub handles in
-                        candidates.tsv (e.g. laion -> LAION-AI)
-   - gh_topic_orgs.txt  GitHub orgs prominent in AI topics
-   - v1_carryover.txt   TRANSCRIBED lab/startup list: funded startups from
-                        TechCrunch's 2025 $100M+ AI round-up + frontier labs
-                        by public prominence; handles API-verified; per-org
-                        category annotations included
-   candidates.tsv is the transcription RECORD (GitHub handle -> source tags);
-   verification compares against it, since raw HF handles differ from GitHub
-   handles. All four sources are third-party lists; our contribution is handle
-   transcription/verification, not membership judgment.
-2. Quality gate: org's flagship repo has >=1,000 stars (org_scale.tsv,
-   collected via API) — drops hobbyist/placeholder orgs.
-3. AI-evidence keep: the org-level commit scan (stage 1) found tool-marker
-   activity — >=5 marker commits OR >=0.1% of PRs in the scan window
-   (ai_scan.tsv). An org with zero detectable AI evidence contributes nothing
-   to AI-practice metrics and only noise to denominators.
+Derived inputs (data/derived/ — machine-generated scans):
+  org_scale.tsv, top5_topics.jsonl (stars + maintainer-topic AI-ness of each
+  org's top-5 repos), ai_scan.tsv / recheck_scan.tsv / branch_scan.tsv /
+  codex_branch_scan.tsv / census_org_evidence.json (AI-evidence layers).
 
-The FROZEN population actually censused is v2_active.txt (215 orgs -> 1,996
-repos, census_repos.txt). The keep step used live API data at scan time, so
-re-deriving today drifts slightly; this module therefore (a) rebuilds the
-candidate/gate layers reproducibly from the snapshot files and (b) VERIFIES
-the frozen population against them, printing the reconciliation instead of
-regenerating the set silently.
+THE RULES (docs/METHODS.md section 1):
+  R1 candidates = union of the five lists.
+  R2 quality    = flagship repo >=1k stars; AI-developer-list members exempt
+                  (those lists already vet significance).
+  R3 identity   = AI developer iff on Epoch/TechCrunch/curated list OR >=2 of
+                  top-5 repos carry maintainer AI topics (AI_TOPICS dict).
+  R4 evidence   = >=5 AI-evidence PRs/commits across the three detection
+                  layers, or >=0.1% of PRs, summed over the sampled quarters.
+  R5 scope      = developers enter FULL-ORG except declared conglomerates
+                  (repo-scoped); non-developers with a >=1k-star AI-topic
+                  flagship enter repo-scoped; all else out.
+Overrides apply last (exclude beats everything; include-full asserts R3).
+
+Output: data/derived/population.tsv (org, scope, why).
 
 Usage:
-  python -m pipeline.org_set --verify
+  python -m pipeline.org_set            # write population.tsv, print summary
+  python -m pipeline.org_set --explain ORG
 """
 from __future__ import annotations
 
 import argparse
+import json
+from collections import defaultdict
 from pathlib import Path
 
-V2 = Path("data/resume_state/v2")
+SRC = Path("data/sources")
+DRV = Path("data/derived")
+
 FLAGSHIP_MIN_STARS = 1000
-KEEP_MIN_COMMITS = 5          # abs branch of the keep rule
-KEEP_MIN_PR_RATE = 0.001      # rate branch (enum_repos.keep_reason mirrors this)
+KEEP_MIN_EVIDENCE = 5
+KEEP_MIN_PR_RATE = 0.001
+TOP5_MIN_AI = 2
 
-
-def _lines(name: str) -> list[str]:
-    return [ln.strip() for ln in (V2 / name).read_text().splitlines()
-            if ln.strip() and not ln.startswith("#")]
-
-
-def source_orgs() -> dict[str, set[str]]:
-    """Each third-party source list -> set of handles AS LISTED (HF handles
-    for hf-hub; GitHub handles elsewhere). For membership checks use
-    candidates(), which holds the transcribed GitHub handles."""
-    return {
-        "lfai": {ln.split()[-1] for ln in _lines("lfai_orgs.txt")},
-        "hf-hub": {ln.split("\t")[0] for ln in _lines("hf_orgs.tsv")},
-        "gh-topic": set(_lines("gh_topic_orgs.txt")),
-        "v1": {ln.split("\t")[0] for ln in _lines("v1_carryover.txt")},
-    }
-
-
-def candidates() -> dict[str, str]:
-    """GitHub handle -> 'src1|src2' source tags: the transcription record
-    (candidates.tsv, GitHub handles) plus the v1 lab/startup list."""
-    out: dict[str, str] = {}
-    for ln in _lines("candidates.tsv"):
-        f = ln.split("\t")
-        if len(f) == 2:
-            out[f[0]] = f[1]
-    for org in source_orgs()["v1"]:
-        out[org] = (out[org] + "|v1") if org in out else "v1"
-    return out
-
-
-def quality_gated() -> set[str]:
-    """Orgs whose flagship repo clears FLAGSHIP_MIN_STARS (org_scale.tsv)."""
-    keep = set()
-    for ln in _lines("org_scale.tsv")[1:]:
-        f = ln.split("\t")
-        if len(f) >= 3 and f[2].isdigit() and int(f[2]) >= FLAGSHIP_MIN_STARS:
-            keep.add(f[0])
-    return keep
-
-
-# Flagship AI-topic gate (2026-07-09): orgs whose ONLY provenance is a
-# generic ecosystem list (LF AI & Data, GitHub topics) must show AI presence
-# in their repo portfolio. Maintainer-declared topics, frozen dictionary.
-# Pass if >=2 of the top-10 starred repos carry an AI topic, or the #1 repo
-# does (single-product orgs), or the login/description carries an AI term
-# (rescues topic-sparse AI orgs). AI-scoped sources (TechCrunch/frontier v1
-# list, HF hub model publishers) are exempt: the source itself asserts
-# AI-ness. Scan results: flagship_gate.tsv (pipeline-generated).
+# Maintainer-declared AI topics (frozen; anchored to GitHub's curated topic
+# vocabulary; generic/gameable terms like "agents" deliberately excluded).
 AI_TOPICS = {
     "machine-learning", "deep-learning", "artificial-intelligence", "ai",
     "neural-network", "neural-networks", "llm", "llms", "large-language-models",
@@ -102,77 +63,164 @@ AI_TOPICS = {
     "text-to-speech", "llmops", "language-model", "gpt", "chatgpt",
     "stable-diffusion", "rag", "fine-tuning", "model-serving",
 }
-LOGIN_FALLBACK = ("ai", "ml", "llm", "agi", "nlp", "intelligence")
 
 
-def flagship_gate() -> dict[str, bool]:
-    """org -> passed, from the scan snapshot (flagship_gate.tsv)."""
+def _lines(path: Path) -> list[str]:
+    return [ln for ln in path.read_text().splitlines()
+            if ln.strip() and not ln.startswith("#")]
+
+
+# ------------------------------------------------------------------ inputs
+
+def candidate_sources() -> dict[str, set[str]]:
+    """canonical handle -> source tags. Ecosystem lists come via the
+    transcription record; developer lists via their own files."""
+    canon: dict[str, str] = {}
+
+    def C(o: str) -> str:
+        return canon.setdefault(o.lower(), o)
+
+    tags: dict[str, set[str]] = defaultdict(set)
+    for ln in _lines(SRC / "candidates.tsv"):
+        o, t = ln.split("\t")
+        tags[C(o)].update(t.split("|"))
+    for ln in _lines(SRC / "epoch_org_map.tsv"):
+        _, h = ln.split("\t")
+        if h != "-":
+            tags[C(h)].add("epoch")
+    for ln in _lines(SRC / "techcrunch_ai_orgs.tsv"):
+        tags[C(ln.split("\t")[0])].add("techcrunch")
+    for ln in _lines(SRC / "curated_orgs.tsv"):
+        tags[C(ln.split("\t")[0])].add("curated")
+    return dict(tags)
+
+
+def top5() -> dict[str, list[dict]]:
     out = {}
-    for ln in _lines("flagship_gate.tsv"):
-        f = ln.split("\t")
-        if len(f) >= 2:
-            out[f[0]] = f[1] == "1"
+    for ln in (DRV / "top5_topics.jsonl").read_text().splitlines():
+        d = json.loads(ln)
+        out[d["org"].lower()] = d["top5"]
     return out
 
 
-def active() -> list[str]:
-    """The frozen v2 census population (basis of v2_results §1-13)."""
-    return _lines("v2_active.txt")
+def evidence() -> tuple[dict[str, int], set[str]]:
+    """org(lower) -> max evidence count across layers; plus rate-branch set."""
+    ev: dict[str, int] = defaultdict(int)
+    for ln in _lines(DRV / "ai_scan.tsv"):
+        f = ln.split("\t")
+        ev[f[0].lower()] = max(ev[f[0].lower()], int(f[1]))
+    rc: dict[str, int] = defaultdict(int)
+    for ln in _lines(DRV / "recheck_scan.tsv"):
+        o, probe, n = ln.split("\t")
+        if probe != "total_pr":
+            rc[o.lower()] += int(n)
+    for o, n in rc.items():
+        ev[o] = max(ev[o], n)
+    br: dict[str, int] = defaultdict(int)
+    for ln in _lines(DRV / "branch_scan.tsv"):
+        f = ln.split("\t")
+        if len(f) == 4:
+            br[f[0].lower()] += int(f[3])
+    for ln in _lines(DRV / "codex_branch_scan.tsv"):
+        f = ln.split("\t")
+        if len(f) == 3:
+            br[f[0].lower()] += int(f[2])
+    for o, n in br.items():
+        ev[o] = max(ev[o], n)
+    rate_ok = set()
+    cens = json.loads((DRV / "census_org_evidence.json").read_text())
+    for o, (e, t) in cens.items():
+        ev[o] = max(ev[o], e)
+        if t and e >= 1 and e / t >= KEEP_MIN_PR_RATE:
+            rate_ok.add(o)
+    return dict(ev), rate_ok
 
 
-def v21_active() -> list[str]:
-    """The v2.1 population: v2 minus 17 gate-failing generic-list orgs
-    (v21_retro_dropped.txt) plus 56 re-audited additions
-    (additions_orgs_gated.txt). Frozen in v21_active.txt."""
-    return _lines("v21_active.txt")
+def stars_ok_set() -> set[str]:
+    ok = set()
+    for ln in _lines(DRV / "org_scale.tsv")[1:]:
+        f = ln.split("\t")
+        if len(f) >= 3 and f[2].isdigit() and int(f[2]) >= FLAGSHIP_MIN_STARS:
+            ok.add(f[0].lower())
+    for o, t5 in top5().items():
+        if t5 and t5[0]["stars"] >= FLAGSHIP_MIN_STARS:
+            ok.add(o)
+    return ok
 
 
-# Tier-2 repo-scoped orgs (2026-07-09): orgs that FAIL the flagship gate as a
-# whole (not primarily AI developers) but have >=2 AI-topic repos with >=1k
-# stars. Their AI-TOPIC REPOS ONLY are included as a labeled stratum — the
-# org-level metrics exclude them or flag them, since their rate describes the
-# org's AI unit, not the org. Qualification scan: repo_scope_scan.tsv;
-# included repos: tier2_repos.txt (all AI-topic repos, full pagination).
-def tier2_orgs() -> list[str]:
-    return _lines("tier2_orgs.txt")
+def overrides() -> dict[str, tuple[str, str]]:
+    out = {}
+    for ln in _lines(SRC / "org_overrides.tsv"):
+        f = ln.split("\t")
+        out[f[0].lower()] = (f[1], f[2] if len(f) > 2 else "")
+    return out
 
 
-def tier2_repos() -> list[str]:
-    return [ln.split("\t")[0] for ln in _lines("tier2_repos.txt")]
+# ------------------------------------------------------------------ engine
+
+def build() -> dict[str, tuple[str, str]]:
+    """org -> (scope, why); scope in {full, repo}."""
+    cand = candidate_sources()
+    dev_lists = {o.lower() for o, tags in cand.items()
+                 if tags & {"epoch", "techcrunch", "curated"}}
+    t5 = top5()
+    ev, rate_ok = evidence()
+    stars = stars_ok_set()
+    conglomerates = {o.lower() for o in _lines(SRC / "conglomerates.txt")}
+    ovr = overrides()
+
+    pop: dict[str, tuple[str, str]] = {}
+    for org in sorted(cand, key=str.lower):
+        lo = org.lower()
+        o_action = ovr.get(lo, ("", ""))[0]
+        if o_action == "exclude":
+            continue
+        if lo not in stars and lo not in dev_lists:
+            continue                                     # R2
+        if ev.get(lo, 0) < KEEP_MIN_EVIDENCE and lo not in rate_ok:
+            continue                                     # R4
+        n5 = sum(r["ai"] for r in t5.get(lo, []))
+        is_dev = (lo in dev_lists or n5 >= TOP5_MIN_AI
+                  or o_action == "include-full")         # R3
+        if lo in conglomerates:                          # R5
+            pop[org] = ("repo", "conglomerate")
+        elif is_dev:
+            why = ("override" if o_action == "include-full" else
+                   "dev-list" if lo in dev_lists else f"top5:{n5}")
+            pop[org] = ("full", why)
+        elif t5.get(lo) and any(r["ai"] and r["stars"] >= FLAGSHIP_MIN_STARS
+                                for r in t5[lo]):
+            pop[org] = ("repo", "ai-flagship")
+    return pop
 
 
-def verify() -> None:
-    srcs = source_orgs()
-    cand = candidates()
-    gate = quality_gated()
-    act = set(active())
-    ext = act - srcs["v1"]
-    print("sources: " + ", ".join(f"{k}={len(v)}" for k, v in srcs.items()))
-    print(f"candidates (union): {len(cand)}")
-    print(f"quality gate (flagship >= {FLAGSHIP_MIN_STARS} stars): {len(gate)}")
-    print(f"frozen active population: {len(act)} "
-          f"= {len(ext)} externally-listed + {len(act & srcs['v1'])} v1-carryover")
-    lower = {c.lower() for c in cand}
-    unsourced = {o for o in act if o.lower() not in lower}
-    if unsourced:
-        print(f"WARN: {len(unsourced)} active orgs missing from all source "
-              f"snapshots: {sorted(unsourced)[:10]}")
-    else:
-        print("every active org traces to a source snapshot (case-insensitive)")
-    ungated = ext - gate
-    if ungated:
-        print(f"note: {len(ungated)} externally-listed active orgs below the "
-              f"gate snapshot (scan-time API drift): {sorted(ungated)[:10]}")
+def population(scope: str | None = None) -> list[str]:
+    """Orgs from data/derived/population.tsv (generated by main())."""
+    out = []
+    for ln in _lines(DRV / "population.tsv"):
+        org, sc, _ = ln.split("\t")
+        if scope is None or sc == scope:
+            out.append(org)
+    return out
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--verify", action="store_true")
+    ap.add_argument("--explain", metavar="ORG")
     a = ap.parse_args()
-    if a.verify:
-        verify()
-    else:
-        print("\n".join(active()))
+    pop = build()
+    if a.explain:
+        lo = a.explain.lower()
+        hit = {o: v for o, v in pop.items() if o.lower() == lo}
+        print(hit or f"{a.explain}: NOT in population")
+        return
+    with (DRV / "population.tsv").open("w") as f:
+        f.write("# GENERATED by pipeline.org_set — do not edit. org\tscope\twhy\n")
+        for org, (scope, why) in pop.items():
+            f.write(f"{org}\t{scope}\t{why}\n")
+    full = sum(1 for s, _ in pop.values() if s == "full")
+    print(f"population: {len(pop)} orgs = {full} full + {len(pop) - full} repo-scoped "
+          f"-> data/derived/population.tsv")
 
 
 if __name__ == "__main__":

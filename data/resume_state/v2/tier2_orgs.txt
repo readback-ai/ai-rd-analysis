@@ -1,7 +1,0 @@
-# Tier-2 repo-scoped orgs: gate-failed but >=2 AI-topic repos >=1k stars (2026-07-09)
-IBM
-Netflix
-alibaba
-apache
-dotnet
-google

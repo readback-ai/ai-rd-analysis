@@ -10,12 +10,12 @@ skips cells that already validate; failed cells are retried on the next run.
 
 ```
 PYTHONPATH=src python3 -m pipeline.org_set    --verify
-PYTHONPATH=src python3 -m pipeline.scan_orgs  --orgs data/resume_state/v2/v2_active.txt \
+PYTHONPATH=src python3 -m pipeline.scan_orgs  --orgs data/derived/population.tsv \
     --quarters Q1-2024 Q4-2025 Q1-2026 Q2-2026 --out scan.tsv
 PYTHONPATH=src python3 -m pipeline.enum_repos --orgs active_orgs.txt --out repos.tsv
 PYTHONPATH=src python3 -m pipeline.census     --repos repos.tsv
 PYTHONPATH=src python3 -m pipeline.branch_scan
-PYTHONPATH=src python3 -m pipeline.pull_prs   --prefix codex/ --out-dir data/resume_state/v2/codex_prs
+PYTHONPATH=src python3 -m pipeline.pull_prs   --prefix codex/ --out-dir data/derived/branch_samples/codex
 PYTHONPATH=src python3 -m pipeline.analyze    --bootstrap 2000
 PYTHONPATH=src python3 -m pipeline.integrate
 ```

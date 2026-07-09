@@ -108,7 +108,7 @@ def load_branch_samples(out_dir: Path) -> list[dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--prefix", required=True, help="e.g. codex/")
-    ap.add_argument("--scan", default="data/resume_state/v2/branch_scan.tsv")
+    ap.add_argument("--scan", default="data/derived/branch_scan.tsv")
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--periods", nargs="+",
                     default=["Q4-2025", "Q1-2026", "Q2-2026"])

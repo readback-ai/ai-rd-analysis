@@ -43,16 +43,16 @@ Methodology: [`docs/METHODS.md`](docs/METHODS.md)**
 | question | where |
 |---|---|
 | How is data collected? | `src/pipeline/` stages 0–3c (below); every stage checkpoints raw cells to `$AIRD_DATA_DIR` and is idempotent/resumable |
-| How is the population defined? | [`src/pipeline/org_set.py`](src/pipeline/org_set.py) + METHODS §1: 4 third-party source lists → transcription → quality gate → layered AI-evidence keep → flagship AI-topic gate → tier-2 repo-scoping. Every rule's inputs/outputs are published files in `data/resume_state/v2/` |
+| How is the population defined? | [`src/pipeline/org_set.py`](src/pipeline/org_set.py) + METHODS §1: five rules (candidates → quality → AI-developer identity → evidence → scope) + one override table. Inputs in `data/sources/`, outputs in `data/derived/population.tsv` |
 | How is AI contribution & review detected? | [`src/pipeline/detect.py`](src/pipeline/detect.py) — the single home: three detection layers + review classification |
 | How are metrics created? | [`src/pipeline/analyze.py`](src/pipeline/analyze.py) (census metrics, weighting, bootstrap CIs) and [`src/pipeline/integrate.py`](src/pipeline/integrate.py) (cross-layer union) |
-| How are orgs classified for appendix cuts? | METHODS §1b: developer-of-AI groups (topics-only + published 40-org adjudication `single_product_adjudication.json`) and org-type (`org_type.tsv`: public/private/community, ownership as-of cutoff) |
+| How are orgs classified for appendix cuts? | METHODS §1b: developer-of-AI groups (topics-only + published adjudications in `data/sources/org_overrides.tsv`) and org-type (`data/sources/org_type.tsv`: public/private/community, ownership as-of cutoff) |
 
 ## Pipeline
 
 | stage | module | what it does |
 |---|---|---|
-| 0 | `pipeline.org_set` | population definition from third-party lists + quality gate; verifies the frozen org set |
+| 0 | `pipeline.org_set` | the five population rules over `data/sources/` -> `data/derived/population.tsv` |
 | 1 | `pipeline.scan_orgs` | org-level AI-evidence scan (commit-marker search) |
 | 2 | `pipeline.enum_repos` | repo enumeration inside AI-active orgs (keep rule: ≥5 marker commits or ≥0.1% of PRs) |
 | 3a | `pipeline.precount` | batch PR-count denominators (aliased GraphQL) |
@@ -70,7 +70,7 @@ uv sync && source .venv/bin/activate
 pytest -q                                   # 84 tests
 python -m pipeline.org_set --verify         # population reconciliation
 # with the durable store present ($AIRD_DATA_DIR, ~26,800 census cells):
-python -m pipeline.analyze --contributors data/resume_state/v2/repo_contributors_v2.csv
+python -m pipeline.analyze --contributors data/derived/repo_contributors_v2.csv
 python -m pipeline.integrate                # layered involvement table
 ```
 

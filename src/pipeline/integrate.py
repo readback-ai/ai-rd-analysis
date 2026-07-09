@@ -36,13 +36,13 @@ from pipeline.detect import (MARKERS_V2, classify_pr, pr_agent_author,
 from pipeline.precount import precount_path
 from pipeline.scan_orgs import QUARTER_RANGES
 
-V2 = Path("data/resume_state/v2")
+V2 = Path("data/derived")
 PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
 
 
 # ------------------------------------------------------------- denominators
 
-def population_totals(repos_file: Path = V2 / "census_repos.txt",
+def population_totals(repos_file: Path = V2 / "census_repos_frozen.txt",
                       periods: list[str] = PERIODS) -> dict[str, int]:
     """period -> total PRs in the population (precount sums)."""
     totals: dict[str, int] = defaultdict(int)
@@ -58,7 +58,7 @@ def population_totals(repos_file: Path = V2 / "census_repos.txt",
 def org_totals(periods: list[str] = PERIODS) -> dict[tuple[str, str], int]:
     """(org, period) -> total PRs (for org-level threshold adjustment)."""
     out: dict[tuple[str, str], int] = defaultdict(int)
-    for repo in (V2 / "census_repos.txt").read_text().split():
+    for repo in (V2 / "census_repos_frozen.txt").read_text().split():
         org = repo.split("/")[0]
         for per in periods:
             try:
@@ -205,7 +205,7 @@ def threshold_table(contrib_csv: Path = V2 / "repo_contributors_v2.csv",
 
     ototal = org_totals()
     org_repos: dict[str, list[str]] = defaultdict(list)
-    for repo in (V2 / "census_repos.txt").read_text().split():
+    for repo in (V2 / "census_repos_frozen.txt").read_text().split():
         org_repos[repo.split("/")[0]].append(repo)
     for per in ("Q1-2026", "Q2-2026"):
         base, adj = [], []

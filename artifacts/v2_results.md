@@ -1,4 +1,9 @@
-# v2 results — AI-assisted development at leading AI orgs (updated 2026-07-07)
+# WORKING RESULTS LOG — AI-assisted development at leading AI orgs
+> Nothing here is published. Numbers were computed on interim populations while
+> methodology iterated; the population is now defined by `pipeline.org_set`
+> (docs/METHODS.md §1) and all headline/appendix tables will be regenerated on
+> it. Directional findings have been stable across every population revision
+> (headline moved 0.2pp between revisions).
 
 **Weighting policy: every number in this document is contributor-weighted** —
 per-repo rates (repos with ≥10 PRs/period; cohort cells need ≥5 PRs) averaged

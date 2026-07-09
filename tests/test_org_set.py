@@ -1,0 +1,72 @@
+"""The five population rules + overrides, exercised on synthetic sources."""
+import json
+
+import pytest
+
+from pipeline import org_set
+
+
+@pytest.fixture()
+def world(tmp_path, monkeypatch):
+    src = tmp_path / "sources"
+    drv = tmp_path / "derived"
+    src.mkdir(); drv.mkdir()
+    monkeypatch.setattr(org_set, "SRC", src)
+    monkeypatch.setattr(org_set, "DRV", drv)
+
+    (src / "candidates.tsv").write_text(
+        "lab\tlfai\nbigco\tlfai\nwasher\tgh-topic\nsoloai\tgh-topic\n"
+        "tiny\tgh-topic\nquiet\tlfai\n")
+    (src / "epoch_org_map.tsv").write_text("Lab Inc\tlab\nUnmapped\t-\n")
+    (src / "techcrunch_ai_orgs.tsv").write_text("startup\n")
+    (src / "curated_orgs.tsv").write_text("")
+    (src / "conglomerates.txt").write_text("bigco\n")
+    (src / "org_overrides.tsv").write_text(
+        "washer\texclude\tAI-washed topics\nsparse\tinclude-full\treal lab\n")
+
+    def t5(ai_flags, stars=None):
+        stars = stars or [5000] * len(ai_flags)
+        return [{"name": f"r{i}", "stars": s, "ai": a}
+                for i, (a, s) in enumerate(zip(ai_flags, stars))]
+    rows = {
+        "lab":    t5([False] * 5),          # dev-list identity, topic-sparse
+        "bigco":  t5([True] * 5),           # conglomerate despite AI topics
+        "washer": t5([True, True]),         # would pass, but excluded
+        "soloai": t5([True, False, False]), # 1 AI flagship -> repo-scoped
+        "tiny":   t5([True, True], stars=[400, 300]),   # fails quality
+        "quiet":  t5([True, True]),         # fails evidence
+        "startup": t5([False]),             # techcrunch + small stars: exempt
+        "sparse": t5([False] * 5),          # include-full override
+    }
+    (drv / "top5_topics.jsonl").write_text(
+        "\n".join(json.dumps({"org": o, "top5": v}) for o, v in rows.items()))
+    (src / "candidates.tsv").write_text(
+        (src / "candidates.tsv").read_text() + "sparse\tlfai\n")
+    (drv / "org_scale.tsv").write_text("org\trepos\tflagship_stars\n")
+    (drv / "ai_scan.tsv").write_text(
+        "lab\t50\t0\tx\nbigco\t50\t0\tx\nwasher\t50\t0\tx\nsoloai\t50\t0\tx\n"
+        "tiny\t50\t0\tx\nstartup\t50\t0\tx\nsparse\t50\t0\tx\n")
+    (drv / "recheck_scan.tsv").write_text("")
+    (drv / "branch_scan.tsv").write_text("")
+    (drv / "codex_branch_scan.tsv").write_text("")
+    (drv / "census_org_evidence.json").write_text(json.dumps({"quiet": [1, 5000]}))
+    return src, drv
+
+
+def test_rules(world):
+    pop = org_set.build()
+    assert pop["lab"] == ("full", "dev-list")          # R3 via Epoch transcription
+    assert pop["bigco"] == ("repo", "conglomerate")    # R5 declared umbrella
+    assert "washer" not in pop                         # override exclude wins
+    assert pop["soloai"] == ("repo", "ai-flagship")    # single-product -> stratum
+    assert "tiny" not in pop                           # R2 quality (not dev-listed)
+    assert pop["startup"][0] == "full"                 # R2 exemption for dev lists
+    assert "quiet" not in pop                          # R4: 1/5000 PRs, no rate pass
+    assert pop["sparse"] == ("full", "override")       # include-full asserts R3
+
+
+def test_rate_branch_passes_evidence(world):
+    src, drv = world
+    (drv / "census_org_evidence.json").write_text(json.dumps({"quiet": [6, 5000]}))
+    pop = org_set.build()
+    assert "quiet" in pop                              # 6/5000 >= 0.1%

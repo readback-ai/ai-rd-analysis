@@ -1,7 +1,0 @@
-=== sweep 2 ===
-census complete: 7953 cells ok, 31 failed (re-run to retry fails)
-=== integrity: corrupt cells ===
-cells=26819 corrupt=0
-=== analyze v1 markers ===
-=== analyze v2 markers ===
-ANALYSIS COMPLETE

@@ -8,7 +8,7 @@ changing a quarter definition or the marker set re-pulls instead of silently
 serving stale counts.
 
 Usage:
-  python -m pipeline.scan_orgs --orgs data/resume_state/v2/v2_active.txt \
+  python -m pipeline.scan_orgs --orgs data/derived/population.tsv \
       --quarters Q1-2024 Q3-2025 Q4-2025 Q1-2026 Q2-2026 --out scan.tsv
   (omit --quarters for all-time counts)
 """

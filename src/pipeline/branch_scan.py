@@ -16,7 +16,7 @@ Checkpointing: TSV append, one row per completed cell; reruns skip done cells.
 A failed count is SKIPPED, never written as 0 (absence-of-evidence rule).
 
 Usage:
-  python -m pipeline.branch_scan --out data/resume_state/v2/branch_scan.tsv
+  python -m pipeline.branch_scan --out data/derived/branch_scan.tsv
 """
 from __future__ import annotations
 
@@ -64,13 +64,13 @@ def load(out_path: Path) -> dict[tuple[str, str, str], int]:
 
 
 def main() -> None:
-    from pipeline.org_set import active
+    from pipeline.org_set import population
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="data/resume_state/v2/branch_scan.tsv")
+    ap.add_argument("--out", default="data/derived/branch_scan.tsv")
     ap.add_argument("--periods", nargs="+", default=list(QUARTER_RANGES),
                     choices=list(QUARTER_RANGES))
     a = ap.parse_args()
-    scan(active(), Path(a.out),
+    scan(population(), Path(a.out),
          {p: QUARTER_RANGES[p] for p in a.periods}, BRANCH_PREFIXES)
     print("branch scan complete")
 

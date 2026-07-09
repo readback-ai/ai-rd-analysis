@@ -24,11 +24,12 @@ env/
 # Tracked: code, docs, small curated/derived tables, resume-state manifests.
 # Ignored: bulk collected data and caches (regenerable / large / license-sensitive).
 data/**
-# small curated/derived tables from the org-provenance scope ARE tracked:
-!data/ai_evidence_repos.csv
-!data/repo_contributors.csv
-!data/resume_state/
-!data/resume_state/**
+# inputs (third-party snapshots + transcriptions + declarations) and
+# machine-derived tables ARE tracked:
+!data/sources/
+!data/sources/**
+!data/derived/
+!data/derived/**
 raw/
 *.duckdb
 *.duckdb.wal
