@@ -33,6 +33,22 @@ hobbyist repos are not the object of study. Instead (`org_set.py`, stage 0):
    repos with detectable AI-tool commits under the same keep rule:
    **1,996 repos** (`census_repos.txt`).
 
+**Keep-rule re-audit (2026-07-08).** The original AI-evidence keep tested only
+layer-A commit markers, and its scan window predated some orgs' adoption. A
+layered re-audit of all 225 dropped-but-quality-gated (or v1-listed) orgs —
+probing branch prefixes, agent authorship, and fresh markers for Q2-2026 —
+found 110 now pass: 16 v1-listed AI labs regaining entry (google-deepmind,
+xai-org, THUDM, replit, lm-sys...), 55 rescued only by layers B/C (ollama,
+google-gemini, onnx... — confirming the marker-only keep was exclusionary),
+and 39 late marker adopters that are mostly non-AI-core OSS foundations
+(apache, elastic, grafana). The first two groups (**71 orgs, "v2.1
+additions"**, `additions_orgs.txt`) are being enumerated and censused as an
+extension stratum; the frozen 216-org population remains the basis of all
+published numbers until the extension is re-baselined and reported
+separately. The late-adopter group is deferred pending a population-scope
+decision (adding apache/elastic shifts the object of study from "leading AI
+organizations" toward "AI-ecosystem OSS at large").
+
 Consequence for inference: the population is prominence-selected. Findings
 describe practices at leading AI organizations; the Q1-2024 same-repo census
 is the temporal control (pre-agentic baseline), not an external control group.
