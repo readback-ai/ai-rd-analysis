@@ -112,6 +112,9 @@ def main() -> None:
     from pipeline.scan_orgs import QUARTER_RANGES
     ap = argparse.ArgumentParser()
     ap.add_argument("--contributors", default="data/repo_contributors.csv")
+    ap.add_argument("--repos", default=None,
+                    help="optional repo-list file: restrict metrics to this "
+                         "population (e.g. v2.1 rebaseline)")
     ap.add_argument("--markers", choices=["v1", "v2"], default="v1")
     ap.add_argument("--min-prs", type=int, default=10)
     ap.add_argument("--bootstrap", type=int, default=2000)
@@ -127,6 +130,10 @@ def main() -> None:
                     pass
 
     grouped = group_by_period(load_cells(), QUARTER_RANGES)
+    if a.repos:
+        keep = {ln.split("\t")[0].strip() for ln in Path(a.repos).read_text().splitlines()
+                if ln.strip() and not ln.startswith("#")}
+        grouped = {k: v for k, v in grouped.items() if k[0] in keep}
 
     print(f"{'period':9}{'weighting':16}{'repos':>6}" +
           "".join(f"{m:>18}" for m in METRICS))
