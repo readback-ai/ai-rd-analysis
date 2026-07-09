@@ -15,3 +15,4 @@ shareAI-lab	exclude	tutorial/content org
 flashinfer-ai	include-full	LLM inference kernels (topic-sparse); ev 284/1636 PRs
 embeddings-benchmark	include-full	MTEB benchmark org (topic-sparse)
 AnswerDotAI	include-full	Answer.AI research lab (ModernBERT); ev 13/101 PRs
+datahub-project	exclude	data catalog product; heavy AI user (19% of PRs) but not an AI developer
