@@ -1,9 +1,12 @@
 # AI-Assisted Development Practices at Leading AI Organizations
 
 An empirical study of how the organizations building AI use AI to build
-software — measured from public GitHub metadata over 216 leading AI
-organizations (1,996 repositories, ~919,000 pull requests across four
-quarters: Q1-2024 baseline, Q4-2025, Q1-2026, Q2-2026).
+software — measured from public GitHub metadata over 255 leading AI
+organizations (~1,900 repositories plus 6 big-tech AI-unit strata, ~940,000
+pull requests across four quarters: Q1-2024 baseline, Q4-2025, Q1-2026,
+Q2-2026). **Study cutoff: 2026-06-30** — all activity data is windowed to the
+cutoff; classification metadata is pinned as close to it as the API allows
+(see METHODS §0).
 
 ## Abstract
 
@@ -40,8 +43,10 @@ Methodology: [`docs/METHODS.md`](docs/METHODS.md)**
 | question | where |
 |---|---|
 | How is data collected? | `src/pipeline/` stages 0–3c (below); every stage checkpoints raw cells to `$AIRD_DATA_DIR` and is idempotent/resumable |
+| How is the population defined? | [`src/pipeline/org_set.py`](src/pipeline/org_set.py) + METHODS §1: 4 third-party source lists → transcription → quality gate → layered AI-evidence keep → flagship AI-topic gate → tier-2 repo-scoping. Every rule's inputs/outputs are published files in `data/resume_state/v2/` |
 | How is AI contribution & review detected? | [`src/pipeline/detect.py`](src/pipeline/detect.py) — the single home: three detection layers + review classification |
 | How are metrics created? | [`src/pipeline/analyze.py`](src/pipeline/analyze.py) (census metrics, weighting, bootstrap CIs) and [`src/pipeline/integrate.py`](src/pipeline/integrate.py) (cross-layer union) |
+| How are orgs classified for appendix cuts? | METHODS §1b: developer-of-AI groups (topics-only + published 40-org adjudication `single_product_adjudication.json`) and org-type (`org_type.tsv`: public/private/community, ownership as-of cutoff) |
 
 ## Pipeline
 

@@ -5,6 +5,23 @@ organizations. Successor to the pre-pivot `PIPELINE_SPEC.md` and
 `artifacts/scope_and_methods.md`; this document is canonical. Results live in
 `artifacts/v2_results.md`; every module named here is in `src/pipeline/`.
 
+## 0. Study cutoff and as-of policy
+
+The study cutoff is **2026-06-30** (end of Q2-2026).
+- **Activity data** (PRs, commits, reviews, branch-prefix counts) is strictly
+  windowed: every query carries `created:<=2026-06-30` bounds. Collection ran
+  2026-07-01..09, so review/merge events landing after collection are
+  censored (mild recency effect on the last quarter, noted in §6).
+- **Classification metadata** (repo topics, descriptions, star counts,
+  org descriptions) has no historical API — it was observed 2026-07-07..09,
+  as close to the cutoff as possible, and applied uniformly to all orgs. Drift
+  over those days is assumed negligible; the observation date is recorded in
+  each snapshot file.
+- **Ownership** (org-type cut) is pinned as-of the cutoff: e.g. xai-org
+  counts as public (SpaceX acquisition + IPO completed before the cutoff).
+- **Contributor weights** are all-time counts at pull date (known limitation,
+  §6): GitHub does not expose windowed contributor statistics cheaply.
+
 ## 1. Population: org-provenance, not repo classification
 
 The unit of scoping is the ORGANIZATION. We do not classify repositories by
@@ -33,52 +50,75 @@ hobbyist repos are not the object of study. Instead (`org_set.py`, stage 0):
    repos with detectable AI-tool commits under the same keep rule:
    **1,996 repos** (`census_repos.txt`).
 
-**Flagship AI-topic gate (2026-07-09).** Generic ecosystem lists (LF AI &
-Data landscape, GitHub topics) admit non-AI infrastructure orgs (kubernetes,
-apache, trinodb). A two-tier admission rule fixes this without re-introducing
-per-repo domain judgment: orgs on AI-SCOPED sources (TechCrunch $100M+ AI /
-frontier-lab list, HF hub model publishers) are admitted by the source's own
-scope; orgs whose only provenance is a generic list must pass a flagship
-gate — >=2 of their top-10 starred repos carry maintainer-declared AI topics
-(frozen 28-topic dictionary in `org_set.py`, anchored to GitHub's curated
-topic vocabulary; "agents" deliberately excluded), or the #1 repo does
-(single-product orgs, e.g. ollama), or the org login/description carries an
-AI term (rescues topic-sparse AI orgs: flashinfer-ai, embeddings-benchmark).
-Applied retroactively for consistency: 17 v2 orgs leave (trinodb, tikv,
-MariaDB, dotnet, scipy...). Population v2.1 = **255 orgs** (199 retained +
-56 additions; `v21_active.txt`). The v2 216-org population remains the basis
-of §1-13 published numbers until v2.1 is re-baselined.
+**Admission rules layered on the base pipeline** (chronological order of
+adoption; all applied retroactively so the final population is
+rule-consistent; every input/output file is in `data/resume_state/v2/`):
 
-**Tier-2 repo-scoped orgs.** Large organizations that are not primarily AI
-developers (google, alibaba, apache, dotnet, IBM, Netflix) fail the flagship
-gate as orgs, yet contain real AI units. Rule: a gate-failed org with **>=2
-AI-topic repos of >=1k stars** re-enters with **only its AI-topic repos**
-(all of them, full pagination — e.g. google/adk-python, alibaba/MNN,
-apache/tvm), censused as a labeled stratum. Repo-level metrics include the
-stratum; org-level adoption statistics flag it (a repo-scoped org's rate
-describes its AI unit, not the whole org). This recovers the AI divisions of
-big tech without re-admitting kubernetes-class infrastructure — the same
-maintainer-declared-topic evidence decides both.
+5. **Keep-rule re-audit** (fixes a detection artifact). The original
+   AI-evidence keep tested only layer-A commit markers with an early scan
+   window. A layered re-audit of all 225 dropped-but-quality-gated (or
+   v1-listed) orgs — branch prefixes, agent authorship, fresh markers, all
+   windowed to the cutoff — found 110 passing: 16 v1-listed labs regaining
+   entry (google-deepmind, xai-org, THUDM...), 55 rescued only by layers B/C
+   (ollama, google-gemini, onnx...), 39 late marker adopters (mostly
+   generic-OSS foundations). Groups 1+2 = the "v2.1 additions"
+   (`additions_orgs.txt` -> gated -> `additions_orgs_gated.txt`).
+   Files: `recheck_orgs.txt`, `recheck_scan.tsv`.
+6. **Flagship AI-topic gate** (fixes generic-list leakage: kubernetes,
+   apache, trinodb arrived via the LF AI & Data landscape / GitHub topics).
+   Two-tier admission: orgs on AI-SCOPED sources (TechCrunch/frontier v1
+   list) are admitted by the source's own scope; orgs whose only provenance
+   is a generic ecosystem list must pass: >=2 of top-10 starred repos carry
+   maintainer-declared AI topics (frozen dictionary `AI_TOPICS` in
+   `org_set.py`), OR the #1 repo does (single-product orgs), OR the org
+   login/description carries an AI term (rescues topic-sparse AI orgs).
+   Validated before adoption: probe separated kubernetes 0/10, apache 1/10,
+   elastic 0/10 from deepmind 4/10, onnx 6/10, intel 3/10.
+   Source-override false-positive analysis: TechCrunch/frontier list FP 2-3%
+   (replit) — adopted; HF-publisher list FP ~50% of promotions (microsoft,
+   apple, awslabs) — rejected as an override.
+   Applied retroactively: 17 v2 orgs leave (`v21_retro_dropped.txt`).
+   Files: `flagship_gate.tsv`.
+7. **Tier-2 repo-scoped orgs** (recovers big-tech AI units). A gate-failed
+   org with >=2 AI-topic repos of >=1k stars re-enters with ONLY its
+   AI-topic repos (full pagination), censused as a labeled stratum: google
+   (adk-python, langextract...), alibaba (MNN...), apache (airflow, tvm...),
+   dotnet, IBM, Netflix. Org-level adoption stats flag the stratum — a
+   repo-scoped org's rate describes its AI unit, not the company.
+   Files: `repo_scope_scan.tsv`, `tier2_orgs.txt`, `tier2_repos.txt`.
 
-**Keep-rule re-audit (2026-07-08).** The original AI-evidence keep tested only
-layer-A commit markers, and its scan window predated some orgs' adoption. A
-layered re-audit of all 225 dropped-but-quality-gated (or v1-listed) orgs —
-probing branch prefixes, agent authorship, and fresh markers for Q2-2026 —
-found 110 now pass: 16 v1-listed AI labs regaining entry (google-deepmind,
-xai-org, THUDM, replit, lm-sys...), 55 rescued only by layers B/C (ollama,
-google-gemini, onnx... — confirming the marker-only keep was exclusionary),
-and 39 late marker adopters that are mostly non-AI-core OSS foundations
-(apache, elastic, grafana). The first two groups (**71 orgs, "v2.1
-additions"**, `additions_orgs.txt`) are being enumerated and censused as an
-extension stratum; the frozen 216-org population remains the basis of all
-published numbers until the extension is re-baselined and reported
-separately. The late-adopter group is deferred pending a population-scope
-decision (adding apache/elastic shifts the object of study from "leading AI
-organizations" toward "AI-ecosystem OSS at large").
+**Resulting populations.**
+- **v2 (frozen)**: 216 orgs / 1,996 repos — the basis of v2_results §1-13.
+- **v2.1**: 255 orgs (199 retained + 56 gated additions; `v21_active.txt`,
+  `v21_repos.txt`) + 6 tier-2 repo-scoped strata (338 repos). Re-baseline
+  check: the headline CW AI-code series moves 11.5% -> 11.3% (Q2-2026) —
+  the findings are not composition artifacts.
 
-Consequence for inference: the population is prominence-selected. Findings
-describe practices at leading AI organizations; the Q1-2024 same-repo census
-is the temporal control (pre-agentic baseline), not an external control group.
+## 1b. Appendix segmentations (reviewable classification layers)
+
+Two labeled cuts for appendix reporting, both orthogonal to admission:
+
+**Developer-of-AI groups** (v2_results §14b). The study's object is
+organizations that DEVELOP AI; orgs that merely USE AI to build non-AI
+products (vscode-class work) are segmented out. Because maintainers SEO
+their metadata with AI terms (a secrets scanner self-tags `llm-training`),
+no single field decides this: repo AI-ness = maintainer TOPICS only
+(descriptions dropped after measured over-promotion), org grouping =
+- AI-majority: v1-listed OR >=3 of top-5 starred repos topic-AI OR
+  adjudicated single-product AI developer;
+- AI-heavy: exactly 2 of top-5;
+- repo-scoped: the rest — only their AI-classified repos count.
+The ~40 single-product borderline orgs carry a PUBLISHED one-line
+adjudication each (`single_product_adjudication.json`): 30 AI-developers
+(ollama, dify, litellm, AutoGPT...), 11 AI-users demoted (gitleaks,
+meilisearch, streamlit, daytonaio...). Files: `top5_topics.jsonl`,
+`org_groups.json`, `group_*_repos.txt`.
+
+**Org-type cut** (v2_results §15). Ownership as-of the cutoff, hand-
+classified into a published table (`org_type.tsv`): public (38) / private
+(179) / community (44; foundations, academic labs, nonprofits).
+Subsidiaries and research arms take the parent's type (google-deepmind ->
+public; ray-project -> Anyscale -> private).
 
 ## 2. Detection: three independent layers (`detect.py`)
 

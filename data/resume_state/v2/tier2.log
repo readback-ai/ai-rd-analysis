@@ -1328,3 +1328,67 @@ WARN google/adk-go Q2-2026: collected 342/357 PRs (sub-window saturation) — ra
 ok   google/adk-go Q2-2026: 342 PRs
 ok   google/adk-java Q1-2024: 0 PRs
 ok   google/adk-java Q3-2025: 190 PRs
+ok   google/adk-java Q4-2025: 178 PRs
+WARN google/adk-java Q1-2026: collected 350/372 PRs (sub-window saturation) — raise --subwindows to recover
+ok   google/adk-java Q1-2026: 350 PRs
+ok   google/adk-java Q2-2026: 164 PRs
+ok   google/adk-js Q1-2024: 0 PRs
+ok   google/adk-js Q3-2025: 5 PRs
+ok   google/adk-js Q4-2025: 18 PRs
+ok   google/adk-js Q1-2026: 127 PRs
+ok   google/adk-js Q2-2026: 177 PRs
+ok   google/adk-python Q1-2024: 0 PRs
+WARN google/adk-python Q3-2025: collected 383/562 PRs (sub-window saturation) — raise --subwindows to recover
+ok   google/adk-python Q3-2025: 383 PRs
+ok   google/adk-python Q4-2025: 252 PRs
+WARN google/adk-python Q1-2026: collected 404/457 PRs (sub-window saturation) — raise --subwindows to recover
+ok   google/adk-python Q1-2026: 404 PRs
+WARN google/adk-python Q2-2026: collected 491/635 PRs (sub-window saturation) — raise --subwindows to recover
+ok   google/adk-python Q2-2026: 491 PRs
+ok   google/agamotto Q1-2024: 1 PRs
+ok   google/agamotto Q3-2025: 0 PRs
+ok   google/agamotto Q4-2025: 0 PRs
+ok   google/agamotto Q1-2026: 0 PRs
+ok   google/agamotto Q2-2026: 0 PRs
+ok   google/agents-cli Q1-2024: 0 PRs
+ok   google/agents-cli Q3-2025: 0 PRs
+ok   google/agents-cli Q4-2025: 0 PRs
+ok   google/agents-cli Q1-2026: 0 PRs
+ok   google/agents-cli Q2-2026: 0 PRs
+ok   google/ai-abap-assistant-sample Q1-2024: 0 PRs
+ok   google/ai-abap-assistant-sample Q3-2025: 1 PRs
+ok   google/ai-abap-assistant-sample Q4-2025: 0 PRs
+ok   google/ai-abap-assistant-sample Q1-2026: 0 PRs
+ok   google/ai-abap-assistant-sample Q2-2026: 1 PRs
+FAIL google/aiyprojects-raspbian Q1-2024
+FAIL google/aiyprojects-raspbian Q3-2025
+FAIL google/aiyprojects-raspbian Q4-2025
+FAIL google/aiyprojects-raspbian Q1-2026
+FAIL google/aiyprojects-raspbian Q2-2026
+FAIL google/applied-machine-learning-intensive Q1-2024
+FAIL google/applied-machine-learning-intensive Q3-2025
+FAIL google/applied-machine-learning-intensive Q4-2025
+FAIL google/applied-machine-learning-intensive Q1-2026
+FAIL google/applied-machine-learning-intensive Q2-2026
+FAIL google/balloon-learning-environment Q1-2024
+FAIL google/balloon-learning-environment Q3-2025
+FAIL google/balloon-learning-environment Q4-2025
+FAIL google/balloon-learning-environment Q1-2026
+FAIL google/balloon-learning-environment Q2-2026
+FAIL google/bayesnf Q1-2024
+FAIL google/bayesnf Q3-2025
+FAIL google/bayesnf Q4-2025
+FAIL google/bayesnf Q1-2026
+FAIL google/bayesnf Q2-2026
+FAIL google/brax Q1-2024
+FAIL google/brax Q3-2025
+FAIL google/brax Q4-2025
+FAIL google/brax Q1-2026
+FAIL google/brax Q2-2026
+FAIL google/break-a-scene Q1-2024
+FAIL google/break-a-scene Q3-2025
+FAIL google/break-a-scene Q4-2025
+FAIL google/break-a-scene Q1-2026
+FAIL google/break-a-scene Q2-2026
+FAIL google/budou Q1-2024
+FAIL google/budou Q3-2025
