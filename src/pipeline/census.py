@@ -29,6 +29,11 @@ from pipeline.precount import get_precount
 from pipeline.scan_orgs import QUARTER_RANGES
 
 PAGE_SIZE = 50   # per-call PR fetch; the census cap per cell (single page, no pagination)
+# Cell-store stage name. Versioned because the PR_QUERY changed (headRefName +
+# mergedBy added): a cell's content depends on the query, so the cache key
+# must too (ghx lesson). Cells pulled with the old query live in "census";
+# analyze merges both stores, preferring census-v2.
+STAGE = "census-v2"
 
 # headRefName (detection layer C) and mergedBy (self-merge/accountability)
 # were added 2026-07-08; cells pulled earlier lack them and downstream code
@@ -66,7 +71,7 @@ def subwindows(rng: str, k: int) -> list[str]:
 
 def pull_cell(repo: str, rng: str) -> tuple[list | None, bool]:
     """-> (nodes, was_cached). Cached hits cost no network and need no pacing."""
-    p = cell_path("census", repo, rng)
+    p = cell_path(STAGE, repo, rng)
     cached = read_cell(p, list)
     if cached is not None:
         return cached, True
@@ -81,7 +86,7 @@ def pull_cell(repo: str, rng: str) -> tuple[list | None, bool]:
 def census_repo_period(repo: str, period: str, k: int) -> int | None:
     rng = QUARTER_RANGES[period]
     # fully-cached fast path: a valid full-range cell needs no denominator call
-    cached = read_cell(cell_path("census", repo, rng), list)
+    cached = read_cell(cell_path(STAGE, repo, rng), list)
     if cached is not None:
         return len(cached)
     total = get_precount(repo, period)          # batch-precounted (GraphQL)

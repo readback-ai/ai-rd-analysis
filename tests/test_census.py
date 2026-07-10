@@ -65,7 +65,7 @@ def test_pull_cell_checkpoints_and_skips_refetch(monkeypatch):
 
 
 def test_pull_cell_repulls_corrupt_cell(monkeypatch):
-    p = ghx.cell_path("census", "o/r", "2026-01-01..2026-01-31")
+    p = ghx.cell_path(census.STAGE, "o/r", "2026-01-01..2026-01-31")
     p.write_text(json.dumps({"errors": [{"type": "RATE_LIMIT"}]}))
     monkeypatch.setattr(census, "graphql_nodes", lambda *a, **k: [{"number": 2}])
     nodes, cached = pull_cell("o/r", "2026-01-01..2026-01-31")
@@ -76,7 +76,7 @@ def test_pull_cell_repulls_corrupt_cell(monkeypatch):
 def test_pull_cell_failure_writes_nothing(monkeypatch):
     monkeypatch.setattr(census, "graphql_nodes", lambda *a, **k: None)
     assert pull_cell("o/r", "2026-02-01..2026-02-28") == (None, False)
-    assert not ghx.cell_path("census", "o/r", "2026-02-01..2026-02-28").exists()
+    assert not ghx.cell_path(census.STAGE, "o/r", "2026-02-01..2026-02-28").exists()
 
 
 def test_census_small_repo_single_cell(monkeypatch):
@@ -101,7 +101,7 @@ def test_census_cached_full_cell_skips_denominator_call(monkeypatch):
     """Review finding: resume runs paid a search call + sleeps per cached
     repo-period. A valid full-range cell must short-circuit entirely."""
     rng = QUARTER_RANGES["Q1-2026"]
-    ghx.cell_path("census", "o/r", rng).write_text(json.dumps([{"number": 1}] * 3))
+    ghx.cell_path(census.STAGE, "o/r", rng).write_text(json.dumps([{"number": 1}] * 3))
     def boom(*a, **k):
         raise AssertionError("rest_count must not be called on cached cells")
     monkeypatch.setattr(census, "rest_count", boom)

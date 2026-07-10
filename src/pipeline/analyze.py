@@ -32,17 +32,18 @@ from pipeline.ghx import decode_cell_stem, raw_dir, read_cell
 
 
 def load_cells() -> dict[tuple[str, str], list[dict]]:
-    """(repo, date-range) -> PR nodes, via ghx's cell-name decoding."""
-    cells: dict[tuple[str, str], list[dict]] = defaultdict(list)
-    for f in raw_dir("census").glob("*.json"):
-        nodes = read_cell(f, list)
-        if nodes is None:
-            continue
-        parts = decode_cell_stem(f.stem)
-        if len(parts) != 2:
-            continue
-        repo, rng = parts
-        cells[(repo, rng)].extend(n for n in nodes if n)
+    """(repo, date-range) -> PR nodes, merged across cell-store generations:
+    census-v2 (query with headRefName+mergedBy) wins over census per cell."""
+    cells: dict[tuple[str, str], list[dict]] = {}
+    for stage in ("census", "census-v2"):          # later stage overwrites
+        for f in raw_dir(stage).glob("*.json"):
+            nodes = read_cell(f, list)
+            if nodes is None:
+                continue
+            parts = decode_cell_stem(f.stem)
+            if len(parts) != 2:
+                continue
+            cells[(parts[0], parts[1])] = [n for n in nodes if n]
     return cells
 
 
