@@ -53,7 +53,6 @@ def slices() -> dict[str, set[str]]:
     for ln in _lines(DRV / "population.tsv"):
         org, scope, why = ln.split("\t")
         out[adoption_group(scope, why)].add(org.lower())
-    types = {}
     pop = {o for s in out.values() for o in s}
     for ln in _lines(SRC / "org_type.tsv"):
         o, t = ln.split("\t")
