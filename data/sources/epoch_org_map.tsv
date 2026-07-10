@@ -1,6 +1,9 @@
 # Epoch notable-models Organization -> GitHub handle transcription (2026-07-09).
 # Source: epoch.ai/data/notable_ai_models.csv (CC-BY), models <= 2026-06-30.
 # Unmapped Epoch orgs (no public GitHub org found / not transcribed) listed with '-'.
+# NOT 1-1: a lab's models may live across several GitHub orgs (Meta AI ->
+# facebookresearch + meta-llama + meta-pytorch; Alibaba -> alibaba + QwenLM +
+# ali-vilab + modelscope; ...). Duplicate Organization rows express this.
 01.AI	01-ai
 AI21 Labs	AI21Labs
 AT&T	att
@@ -368,3 +371,21 @@ Zhejiang University (ZJU)	-
 Zhuiyi Technology	-
 deepset	-
 MiniMax	minimax-ai
+Meta AI	meta-llama
+Meta AI	meta-pytorch
+Google	tensorflow
+Google	google-ai-edge
+Google Research	google-gemini
+Alibaba	QwenLM
+Alibaba	ali-vilab
+Alibaba	modelscope
+Tencent	Tencent-Hunyuan
+Tencent	TencentARC
+ByteDance	bytedance-seed
+Apple	ml-explore
+NVIDIA	NVlabs
+NVIDIA	NVIDIA-NeMo
+Stanford University	stanford-crfm
+Stanford University	stanfordnlp
+Stanford University	hazyresearch
+Tsinghua University	thu-ml

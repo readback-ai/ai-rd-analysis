@@ -56,3 +56,27 @@ ok   Arize-ai/openinference Q4-2025: 222 PRs
 WARN Arize-ai/openinference Q1-2026: collected 265/267 PRs (sub-window saturation) — raise --subwindows to recover
 ok   Arize-ai/openinference Q1-2026: 265 PRs
 ok   Arize-ai/openinference Q2-2026: 310 PRs
+WARN Arize-ai/phoenix Q1-2024: collected 291/300 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Arize-ai/phoenix Q1-2024: 291 PRs
+WARN Arize-ai/phoenix Q4-2025: collected 475/598 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Arize-ai/phoenix Q4-2025: 475 PRs
+WARN Arize-ai/phoenix Q1-2026: collected 500/1074 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Arize-ai/phoenix Q1-2026: 500 PRs
+WARN Arize-ai/phoenix Q2-2026: collected 500/1041 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Arize-ai/phoenix Q2-2026: 500 PRs
+ok   Arize-ai/project-rosetta-stone Q1-2024: 0 PRs
+ok   Arize-ai/project-rosetta-stone Q4-2025: 0 PRs
+ok   Arize-ai/project-rosetta-stone Q1-2026: 1 PRs
+ok   Arize-ai/project-rosetta-stone Q2-2026: 45 PRs
+ok   Arize-ai/text-to-graphql-mcp Q1-2024: 0 PRs
+ok   Arize-ai/text-to-graphql-mcp Q4-2025: 0 PRs
+ok   Arize-ai/text-to-graphql-mcp Q1-2026: 1 PRs
+ok   Arize-ai/text-to-graphql-mcp Q2-2026: 0 PRs
+ok   Arize-ai/twitter-to-newsletter Q1-2024: 0 PRs
+ok   Arize-ai/twitter-to-newsletter Q4-2025: 0 PRs
+ok   Arize-ai/twitter-to-newsletter Q1-2026: 0 PRs
+ok   Arize-ai/twitter-to-newsletter Q2-2026: 0 PRs
+WARN BerriAI/litellm Q1-2024: collected 479/575 PRs (sub-window saturation) — raise --subwindows to recover
+ok   BerriAI/litellm Q1-2024: 479 PRs
+WARN BerriAI/litellm Q4-2025: collected 500/1988 PRs (sub-window saturation) — raise --subwindows to recover
+ok   BerriAI/litellm Q4-2025: 500 PRs
