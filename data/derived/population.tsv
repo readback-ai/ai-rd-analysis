@@ -89,7 +89,7 @@ imbue-ai	full	dev-list
 infiniflow	full	top5:2
 insilicomedicine	full	dev-list
 intel	repo	conglomerate
-InternLM	full	dev-list
+InternLM	full	top5:5
 interpretml	full	top5:5
 iterative	full	top5:3
 jeecgboot	full	top5:2
@@ -193,7 +193,7 @@ spotify	full	top5:2
 stability-ai	full	dev-list
 stanford-crfm	full	dev-list
 stanford-oval	full	top5:3
-stanfordnlp	full	dev-list
+stanfordnlp	full	top5:2
 StarTrail-org	full	top5:2
 stepfun-ai	full	dev-list
 supertone-inc	full	top5:2
@@ -222,6 +222,6 @@ vllm-project	full	dev-list
 weaviate	full	dev-list
 writer	full	dev-list
 xai-org	full	dev-list
-zai-org	full	dev-list
+zai-org	full	top5:2
 zenml-io	full	top5:4
 zilliztech	full	dev-list

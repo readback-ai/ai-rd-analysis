@@ -43,3 +43,16 @@ ok   Arize-ai/coding-harness-tracing Q4-2025: 0 PRs
 ok   Arize-ai/coding-harness-tracing Q1-2026: 1 PRs
 ok   Arize-ai/coding-harness-tracing Q2-2026: 62 PRs
 ok   Arize-ai/context-graphs Q1-2024: 0 PRs
+ok   Arize-ai/context-graphs Q4-2025: 0 PRs
+ok   Arize-ai/context-graphs Q1-2026: 0 PRs
+ok   Arize-ai/context-graphs Q2-2026: 0 PRs
+ok   Arize-ai/msft-copilot-integration Q1-2024: 0 PRs
+ok   Arize-ai/msft-copilot-integration Q4-2025: 0 PRs
+ok   Arize-ai/msft-copilot-integration Q1-2026: 0 PRs
+ok   Arize-ai/msft-copilot-integration Q2-2026: 0 PRs
+WARN Arize-ai/openinference Q1-2024: collected 232/238 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Arize-ai/openinference Q1-2024: 232 PRs
+ok   Arize-ai/openinference Q4-2025: 222 PRs
+WARN Arize-ai/openinference Q1-2026: collected 265/267 PRs (sub-window saturation) — raise --subwindows to recover
+ok   Arize-ai/openinference Q1-2026: 265 PRs
+ok   Arize-ai/openinference Q2-2026: 310 PRs
