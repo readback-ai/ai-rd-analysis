@@ -1,10 +1,9 @@
 # AI-Assisted Development Practices at Leading AI Organizations
 
 An empirical study of how the organizations building AI use AI to build
-software — measured from public GitHub metadata over 255 leading AI
-organizations (~1,900 repositories plus 6 big-tech AI-unit strata, ~940,000
-pull requests across four quarters: Q1-2024 baseline, Q4-2025, Q1-2026,
-Q2-2026). **Study cutoff: 2026-06-30** — all activity data is windowed to the
+software — measured from public GitHub metadata over 226 leading AI
+organizations (178 full-org + 48 repo-scoped; 2,055 repositories) across
+four quarters: Q1-2024 baseline, Q4-2025, Q1-2026, Q2-2026. **Study cutoff: 2026-06-30** — all activity data is windowed to the
 cutoff; classification metadata is pinned as close to it as the API allows
 (see METHODS §0).
 
@@ -18,8 +17,8 @@ four quarters spanning the agentic-coding transition. AI involvement is
 detected in three independent layers: commit-forensic markers (co-author
 trailers, generation footers, tool committer identities), agent bot
 authorship, and agent branch-naming conventions. Findings (contributor-
-weighted unless noted): AI-written code rose from 0% (Q1-2024) to 11.5% of
-PRs (Q2-2026) by commit markers alone, and to ~18% of PRs (pooled) when all
+weighted unless noted): AI-written code rose from 0% (Q1-2024) to 11.1% of
+PRs (Q2-2026) by commit markers alone, and to 18.5% of PRs (pooled) when all
 three detection layers are combined; four in five organizations now exceed
 10% AI involvement. Human review of AI-code PRs reached rate-parity with
 non-AI PRs while review depth stayed higher — but the aggregate conceals a
@@ -35,7 +34,7 @@ lane in which the human gate moves from line-level review to merge triage
 squash-merge strips markers, and default local CLI usage is structurally
 undetectable.
 
-**Full results: [`artifacts/v2_results.md`](artifacts/v2_results.md) ·
+**Full results: [`artifacts/results.md`](artifacts/results.md) (regenerated) · working log: [`artifacts/v2_results.md`](artifacts/v2_results.md) ·
 Methodology: [`docs/METHODS.md`](docs/METHODS.md)**
 
 ## How to verify the three claims that matter
