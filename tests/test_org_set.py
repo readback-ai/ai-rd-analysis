@@ -10,7 +10,8 @@ from pipeline import org_set
 def world(tmp_path, monkeypatch):
     src = tmp_path / "sources"
     drv = tmp_path / "derived"
-    src.mkdir(); drv.mkdir()
+    src.mkdir()
+    drv.mkdir()
     monkeypatch.setattr(org_set, "SRC", src)
     monkeypatch.setattr(org_set, "DRV", drv)
 
@@ -55,14 +56,14 @@ def world(tmp_path, monkeypatch):
 
 def test_rules(world):
     pop = org_set.build()
-    assert pop["lab"] == ("full", "dev-list")          # R3 via Epoch transcription
-    assert pop["bigco"] == ("repo", "conglomerate")    # R5 declared umbrella
+    assert pop["lab"][:2] == ("full", "dev-list")          # R3 via Epoch transcription
+    assert pop["bigco"][:2] == ("repo", "conglomerate")    # R5 declared umbrella
     assert "washer" not in pop                         # override exclude wins
-    assert pop["soloai"] == ("repo", "ai-flagship")    # single-product -> stratum
+    assert pop["soloai"][:2] == ("repo", "ai-flagship")    # single-product -> stratum
     assert "tiny" not in pop                           # R2 quality (not dev-listed)
     assert pop["startup"][0] == "full"                 # R2 exemption for dev lists
     assert "quiet" not in pop                          # R4: 1/5000 PRs, no rate pass
-    assert pop["sparse"] == ("full", "override")       # include-full asserts R3
+    assert pop["sparse"][:2] == ("full", "override")       # include-full asserts R3
 
 
 def test_rate_branch_passes_evidence(world):
@@ -70,3 +71,10 @@ def test_rate_branch_passes_evidence(world):
     (drv / "census_org_evidence.json").write_text(json.dumps({"quiet": [6, 5000]}))
     pop = org_set.build()
     assert "quiet" in pop                              # 6/5000 >= 0.1%
+
+
+def test_top5_ai_recorded_independently_of_admission(world):
+    """A dev-list org's measured concentration must still be visible."""
+    pop = org_set.build()
+    assert pop["lab"][2] == 0            # admitted dev-list, measured 0/5
+    assert pop["bigco"][2] == 5          # conglomerate, measured 5/5

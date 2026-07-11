@@ -1,0 +1,10 @@
+repo	ai_commits	keep_rule	claude	cursor	aider	codex
+thinking-machines-lab/tinker-cookbook	245	abs	241	4	0	0
+meta-pytorch/tritonbench	3	rate	3	0	0	0
+meta-pytorch/executorch-examples	3	rate	3	0	0	0
+meta-pytorch/tokenizers	2	rate	2	0	0	0
+meta-pytorch/KernelAgent	1	rate	1	0	0	0
+meta-pytorch/MSLK	1	rate	1	0	0	0
+TencentARC/Pixal3D	2	rate	1	1	0	0
+TencentARC/TimeLens	1	rate	0	1	0	0
+google-gemini/workshops	8	abs	0	0	8	0

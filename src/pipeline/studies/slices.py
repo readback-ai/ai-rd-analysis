@@ -39,20 +39,24 @@ def _lines(p: Path) -> list[str]:
             if ln.strip() and not ln.startswith("#")]
 
 
-def adoption_group(scope: str, why: str) -> str:
+def adoption_group(scope: str, why: str, top5_ai: int) -> str:
+    """Grouping uses the MEASURED concentration (top5_ai), not the admission
+    reason: AI-majority = >=3 of top-5 AI-topic'd OR dev-list/override
+    identity (topic-sparse labs are AI companies by list scope); AI-heavy =
+    full-org with measured 0-2 and no list identity."""
     if scope == "repo":
         return "repo-scoped"
-    if why.startswith("top5:") and why != "top5:2" or why in ("dev-list", "override"):
+    if top5_ai >= 3 or why in ("dev-list", "override"):
         return "AI-majority"
-    return "AI-heavy"          # top5:2
+    return "AI-heavy"
 
 
 def slices() -> dict[str, set[str]]:
     """slice name -> set of orgs (lower)."""
     out: dict[str, set[str]] = defaultdict(set)
     for ln in _lines(DRV / "population.tsv"):
-        org, scope, why = ln.split("\t")
-        out[adoption_group(scope, why)].add(org.lower())
+        org, scope, why, n5 = ln.split("\t")
+        out[adoption_group(scope, why, int(n5))].add(org.lower())
     pop = {o for s in out.values() for o in s}
     for ln in _lines(SRC / "org_type.tsv"):
         o, t = ln.split("\t")
