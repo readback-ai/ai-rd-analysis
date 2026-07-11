@@ -21,7 +21,7 @@ Layout (worktrees live in a common dir alongside the repo under `~/devel`):
 ```
 ~/devel/ai-rd-analysis                       # main repo  (branch: main)
 ~/devel/ai-rd-analysis-worktrees/
-    phase-0-definition                       # branch: phase-0-definition
+    ai-dev-practices                         # branch: ai-dev-practices
     <feature>                                # branch: <feature>
 ```
 
