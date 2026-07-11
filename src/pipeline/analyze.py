@@ -93,8 +93,8 @@ def pr_metrics(pr: dict, markers: dict) -> dict:
     }
 
 
-METRICS = ["ai_code", "merged", "human_review", "human_rev_other", "ai_review",
-           "other_bot_review", "no_review", "insider", "self_merged"]
+METRICS = ["ai_code", "ai_involved", "merged", "human_review", "human_rev_other",
+           "ai_review", "other_bot_review", "no_review", "insider", "self_merged"]
 
 
 def weighted_mean(pairs: list[tuple[float, float]]) -> float:

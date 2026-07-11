@@ -46,3 +46,55 @@ review-mode residue, per-tool trends, appendix cuts) live in
 populations whose headline differs by <=0.4pp from the final one, and their
 directional findings carry over. They will be re-run on the final population
 as needed for the paper draft.
+
+## 5. PRIMARY METRIC: AI involvement (A∪B∪C), by population slice
+(2026-07-11; census-v2 complete — headRefName + mergedBy population-wide,
+97.5% repo-period coverage, 70 inaccessible repos documented in
+`data/derived/inaccessible_repos.txt`.)
+
+The primary metric is now **ai_involved = union of the three detection
+layers per PR** (commit markers ∪ agent authorship ∪ agent branch prefix) —
+still a lower bound (squash-merge, local CLI defaults). Whole population,
+contributor-weighted: **0.0 → 3.0 → 9.4 → 14.4% [13.1,15.9]** of PRs.
+
+Q2-2026 by slice (CW; full series via `pipeline.studies.slices`):
+| slice | repos | AI-involved % | human rev % | AI rev % | merged % |
+|---|---|---|---|---|---|
+| AI-majority | 779 | **16.3 [14.8,18.0]** | 52.5 | 24.0 | 62.1 |
+| AI-heavy | 162 | 14.2 [10.6,19.3] | 49.2 | 20.3 | 69.8 |
+| repo-scoped | 186 | 9.9 [7.2,13.4] | 54.1 | 24.4 | 59.7 |
+| private | 665 | **18.5 [16.8,20.4]** | 46.5 | 21.8 | 63.5 |
+| public | 314 | 11.9 [9.7,14.3] | 53.2 | 25.6 | 59.6 |
+| community | 148 | 10.0 [7.3,13.5] | **62.1** | 24.7 | 64.0 |
+
+Gradients: private > public > community in adoption; exactly reversed in
+human review. AI-review deployment is uniform (~20-26%) across every slice.
+
+## 6. Self-merge behavior on the primary metric, by slice
+
+| Q2-2026 slice | self-merged % of merged | AI-inv of SELF-merged | AI-inv of OTHER-merged | humRev of self-merged AI | ...non-AI |
+|---|---|---|---|---|---|
+| AI-majority | 52.2 | **18.2** | 12.6 | 71.7 | 66.4 |
+| AI-heavy | 52.2 | 13.4 | 12.3 | 46.4 | 55.1 |
+| repo-scoped | 41.3 | 10.9 | 9.0 | 78.5 | 73.7 |
+| private | 55.9 | **21.2** | 14.8 | 65.7 | 61.0 |
+| public | 50.1 | 11.5 | 10.1 | 81.6 | 71.6 |
+| community | 38.2 | 10.6 | 8.5 | 69.4 | 71.3 |
+
+Findings on complete census data:
+1. **Self-merge rates are FLAT over time in every slice** (e.g. AI-majority
+   51.6 -> 52.2 from Q1-2024). Levels are cultural: private 56% > AI-labs ~52%
+   > public 50% > repo-scoped 41% > community 38% (foundation governance).
+2. **AI concentrates in self-merged PRs in every slice** (Q2-2026 ratios
+   1.1-1.4x; strongest in private companies, 21.2 vs 14.8).
+3. **IMPORTANT CORRECTION to the working log's §11b**: on the primary metric,
+   complete mergedBy data, and contributor weighting, self-merged AI-involved
+   PRs are human-reviewed at rates SIMILAR OR HIGHER than self-merged non-AI
+   PRs (e.g. AI-majority 71.7 vs 66.4; public 81.6 vs 71.6). The earlier
+   "review of self-merged AI code collapsed 69% -> 38%" came from a pooled,
+   marker-only, 37-PR sample — that collapse characterizes the pooled mass
+   (dominated by a few high-volume, low-review repos), NOT the typical repo.
+   The exception with the old direction is AI-heavy (research labs): 46.4 vs
+   55.1 — the only slice where self-merged AI code is reviewed less.
+   Conditional cells use per-repo >=5-PR floors; "reviewed" = formal review by
+   a User other than the author ("B reviewed, A merged" counts as reviewed).
