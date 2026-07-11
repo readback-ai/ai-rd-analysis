@@ -41,7 +41,7 @@ def stage_a() -> None:
 def stage_b() -> Path:
     print("=== B: population repo list ===", flush=True)
     full = set(population(scope="full"))
-    censused = (DRV / "census_repos_frozen.txt").read_text().split()
+    censused = (DRV / "fullorg_repos.txt").read_text().split()
     repos = {r for r in censused if r.split("/")[0] in full}
     n_full = len(repos)
     for ln in (DRV / "strata_repos.tsv").read_text().splitlines():

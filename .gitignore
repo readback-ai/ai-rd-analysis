@@ -30,6 +30,7 @@ data/**
 !data/sources/**
 !data/derived/
 !data/derived/**
+data/derived/*.log
 raw/
 *.duckdb
 *.duckdb.wal

@@ -49,7 +49,6 @@ def world(tmp_path, monkeypatch):
         "tiny\t50\t0\tx\nstartup\t50\t0\tx\nsparse\t50\t0\tx\n")
     (drv / "recheck_scan.tsv").write_text("")
     (drv / "branch_scan.tsv").write_text("")
-    (drv / "codex_branch_scan.tsv").write_text("")
     (drv / "census_org_evidence.json").write_text(json.dumps({"quiet": [1, 5000]}))
     return src, drv
 

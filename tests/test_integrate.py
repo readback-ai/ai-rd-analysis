@@ -13,24 +13,11 @@ def tmp_store(tmp_path, monkeypatch):
     return tmp_path
 
 
-def test_branch_counts_merges_both_tsv_formats(tmp_path):
-    four = tmp_path / "branch_scan.tsv"
-    four.write_text("acme\tQ2-2026\tclaude/\t10\n")
-    three = tmp_path / "codex_branch_scan.tsv"
-    three.write_text("acme\tQ2-2026\t7\n")
-    counts = integrate.branch_counts(four, three)
-    assert counts == {("acme", "Q2-2026", "claude/"): 10,
-                      ("acme", "Q2-2026", "codex/"): 7}
-
-
-def test_branch_counts_four_col_wins_over_legacy(tmp_path):
-    """If the same codex cell exists in both files, the explicit 4-col row is
-    authoritative (setdefault on the legacy format)."""
-    four = tmp_path / "a.tsv"
-    four.write_text("acme\tQ2-2026\tcodex/\t99\n")
-    three = tmp_path / "b.tsv"
-    three.write_text("acme\tQ2-2026\t7\n")
-    assert integrate.branch_counts(four, three)[("acme", "Q2-2026", "codex/")] == 99
+def test_branch_counts_reads_four_col_format(tmp_path):
+    scan = tmp_path / "branch_scan.tsv"
+    scan.write_text("acme\tQ2-2026\tclaude/\t10\nacme\tQ2-2026\tcodex/\t7\n")
+    assert integrate.branch_counts(scan) == {
+        ("acme", "Q2-2026", "claude/"): 10, ("acme", "Q2-2026", "codex/"): 7}
 
 
 def test_missing_scan_files_are_tolerated(tmp_path):

@@ -16,7 +16,7 @@ Inputs (data/sources/ — third-party snapshots, transcriptions, declarations):
 Derived inputs (data/derived/ — machine-generated scans):
   org_scale.tsv, top5_topics.jsonl (stars + maintainer-topic AI-ness of each
   org's top-5 repos), ai_scan.tsv / recheck_scan.tsv / branch_scan.tsv /
-  codex_branch_scan.tsv / census_org_evidence.json (AI-evidence layers).
+  census_org_evidence.json (AI-evidence layers).
 
 THE RULES (docs/METHODS.md section 1):
   R1 candidates = union of the five lists.
@@ -126,10 +126,6 @@ def evidence() -> tuple[dict[str, int], set[str]]:
         f = ln.split("\t")
         if len(f) == 4:
             br[f[0].lower()] += int(f[3])
-    for ln in _lines(DRV / "codex_branch_scan.tsv"):
-        f = ln.split("\t")
-        if len(f) == 3:
-            br[f[0].lower()] += int(f[2])
     for o, n in br.items():
         ev[o] = max(ev[o], n)
     rate_ok = set()

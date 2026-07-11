@@ -42,7 +42,7 @@ PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
 
 # ------------------------------------------------------------- denominators
 
-def population_totals(repos_file: Path = V2 / "census_repos_frozen.txt",
+def population_totals(repos_file: Path = V2 / "fullorg_repos.txt",
                       periods: list[str] = PERIODS) -> dict[str, int]:
     """period -> total PRs in the population (precount sums)."""
     totals: dict[str, int] = defaultdict(int)
@@ -58,7 +58,7 @@ def population_totals(repos_file: Path = V2 / "census_repos_frozen.txt",
 def org_totals(periods: list[str] = PERIODS) -> dict[tuple[str, str], int]:
     """(org, period) -> total PRs (for org-level threshold adjustment)."""
     out: dict[tuple[str, str], int] = defaultdict(int)
-    for repo in (V2 / "census_repos_frozen.txt").read_text().split():
+    for repo in (V2 / "fullorg_repos.txt").read_text().split():
         org = repo.split("/")[0]
         for per in periods:
             try:
@@ -71,9 +71,7 @@ def org_totals(periods: list[str] = PERIODS) -> dict[tuple[str, str], int]:
 # ----------------------------------------------------------------- layer C
 
 def branch_counts(*paths: Path) -> dict[tuple[str, str, str], int]:
-    """Merge branch-scan TSVs. Accepts both the 4-col format
-    (org, period, prefix, n) and the original 3-col codex scan
-    (org, period, n -> prefix codex/)."""
+    """Read branch-scan TSVs (org, period, prefix, n)."""
     counts: dict[tuple[str, str, str], int] = {}
     for path in paths:
         if not path.exists():
@@ -82,8 +80,6 @@ def branch_counts(*paths: Path) -> dict[tuple[str, str, str], int]:
             f = ln.split("\t")
             if len(f) == 4 and f[3].isdigit():
                 counts[(f[0], f[1], f[2])] = int(f[3])
-            elif len(f) == 3 and f[2].isdigit():
-                counts.setdefault((f[0], f[1], "codex/"), int(f[2]))
     return counts
 
 
@@ -152,7 +148,7 @@ def census_layers(markers=MARKERS_V2) -> dict[str, dict[str, float]]:
 
 def layered_table(sample_dirs: dict[str, Path]) -> None:
     pop = population_totals()
-    counts = branch_counts(V2 / "branch_scan.tsv", V2 / "codex_branch_scan.tsv")
+    counts = branch_counts(V2 / "branch_scan.tsv")
     census = census_layers()
     stats = {pfx: sample_stats(d) for pfx, d in sample_dirs.items() if d.exists()}
     print(f"{'period':9}{'markerA%':>9}{'agentB%':>9}"
@@ -195,7 +191,7 @@ def threshold_table(contrib_csv: Path = V2 / "repo_contributors_v2.csv",
         human = [p for p in prs if (p.get("author") or {}).get("__typename") != "Bot"]
         if human:
             rate[(repo, per)] = sum(bool(pr_ai_tools(p, MARKERS_V2)) for p in human) / len(human)
-    counts = branch_counts(V2 / "branch_scan.tsv", V2 / "codex_branch_scan.tsv")
+    counts = branch_counts(V2 / "branch_scan.tsv")
     stats = {pfx: sample_stats(d) for pfx, d in (sample_dirs or {}).items()
              if d.exists()}
 
@@ -205,7 +201,7 @@ def threshold_table(contrib_csv: Path = V2 / "repo_contributors_v2.csv",
 
     ototal = org_totals()
     org_repos: dict[str, list[str]] = defaultdict(list)
-    for repo in (V2 / "census_repos_frozen.txt").read_text().split():
+    for repo in (V2 / "fullorg_repos.txt").read_text().split():
         org_repos[repo.split("/")[0]].append(repo)
     for per in ("Q1-2026", "Q2-2026"):
         base, adj = [], []
@@ -235,7 +231,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--thresholds", action="store_true")
     a = ap.parse_args()
-    sample_dirs = {f"{tag}/": V2 / f"{tag}_prs"
+    sample_dirs = {f"{tag}/": V2 / "branch_samples" / tag
                    for tag in ("codex", "copilot", "cursor", "claude")}
     if a.thresholds:
         threshold_table(sample_dirs=sample_dirs)
