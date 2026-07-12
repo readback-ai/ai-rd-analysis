@@ -27,12 +27,14 @@ uv run python -m pipeline.integrate                 # exact layer decomposition
 | `org_set` | population from third-party lists + quality gate; verifies frozen set | (reads snapshots) |
 | `scan_orgs` | AI-marker commit counts per org x period (bare-term search) | `raw/scan_orgs/` |
 | `enum_repos` | AI-evidence repos per org (paginated marker hits by repo) | `raw/enum_repos/` |
-| `census` | PR nodes (commits+reviews+assoc+size+headRefName+mergedBy); full census <=cap, else uniform date sub-windows | `raw/census/` |
+| `census` | PR nodes (commits+reviews+assoc+size+headRefName+mergedBy); adaptive sub-windows + cursor pagination, atomic writes, fail-hard on saturation | `raw/census-v2/` |
+| `enum_strata` | AI-topic repos of repo-scoped orgs (full pagination, DONE sentinels) | TSV append |
+| `contributors` | window-scoped contributor weights (Q4-2025..Q2-2026 active core) | CSV |
 | `branch_scan` | branch-prefix PR counts per org x quarter (detection layer C) | TSV append |
 | `pull_prs` | targeted PR hydration + org-stratified branch-PR samples | JSON cells |
 | `analyze` | per-repo rates -> equal- & contributor-weighted means + bootstrap 95% CIs; bot review decomposed into `ai_review` vs `other_bot_review` | (reads cells) |
-| `integrate` | layered union: marker + agent-author + branch-only with measured overlap corrections | (reads all) |
-| `studies/*` | reproducible analyses behind v2_results section 10-12 | (reads cells + API) |
+| `integrate` | exact per-PR layer decomposition (B > A > C, union = ai_involved) on the population manifest | (reads cells) |
+| `studies/*` | slices (6 populations, self-merge, balanced panel), layer-C precision, behavioral studies | (reads cells + API) |
 
 Encoded lessons (why this code looks the way it does — evidence in
 `artifacts/agent_detection_cues.md` and `artifacts/RESUME.md`):

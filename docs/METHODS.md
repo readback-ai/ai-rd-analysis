@@ -154,22 +154,22 @@ residue (v2_results §11d–e).
 
 ## 3. Census design (`precount.py`, `census.py`)
 
-For each of 1,996 repos × 4 quarters (Q1-2024, Q4-2025, Q1-2026, Q2-2026 —
-full quarters): denominators via batched aliased-GraphQL counts; PR nodes via
-the search API. Repo-periods with ≤50 PRs are fully censused in one call;
-larger ones are sampled by splitting the quarter into ≤10 uniform date
-sub-windows of ≤50 PRs each (uniform-over-time; integer boundary math —
-float rounding produced inverted windows). Collected-vs-total is compared and
-undercounts WARN — silent truncation is how a census becomes a biased sample.
+For every population repo × 4 quarters (Q1-2024, Q4-2025, Q1-2026, Q2-2026
+— full quarters): denominators via batched aliased-GraphQL counts; PR nodes
+via the search API into the versioned census-v2 store (the cell-store name
+encodes the query version). Repo-quarters are collected COMPLETELY: the
+sub-window count adapts to PR volume (integer-boundary date splits — float
+rounding once produced inverted windows), each window paginates by cursor up
+to the API's 1,000-node cap (= up to 1,000 PRs per day-window), cells are
+written atomically (tmp+rename: torn writes cannot exist), and a repo-quarter
+that still cannot be completed FAILS the run. Report generation is gated on
+gap-free valid-cell coverage of every manifest repo-quarter, with documented
+inaccessible repos waived explicitly (`inaccessible_repos.txt`).
 Fields per PR: commits (messages, author emails, committer), formal reviews
 (author, type, state, inline-comment counts), author association, size,
-timestamps, and (from 2026-07-08) headRefName + mergedBy. Coverage:
-7,953/7,984 repo-periods (99.6%), 26,819 cells, 0 corrupt.
+timestamps, headRefName and mergedBy.
 
-Per-repo-period completeness: sub-window counts adapt to PR volume and
-paginate within windows (up to 1,000 PRs/day); a repo-period that still
-cannot be completed FAILS rather than silently truncating. Per-PR field
-caps remain: the census fetches each PR's first 12 commits and 15 reviews
+Per-PR field caps: the census fetches each PR's first 12 commits and 15 reviews
 (no per-PR pagination — one search call per ~45 PRs is what makes a
 2,000-repo census feasible). Consequence: a marker appearing only after a
 PR's 12th commit, or a review after the 15th, is unobserved. Both
@@ -212,10 +212,14 @@ self-approval, so a second-human merge is treated as tacit review.
 All stages are checkpointed, idempotent, and resume-safe; collection was
 ~36h wall-clock under rate limits with zero data loss across interruptions.
 Studies use seeded sampling (published draws reproduce exactly); their
-API-hydration steps re-pull live state. 84 unit tests cover storage
-semantics, window math, detection, weighting, and integration math.
-Verification after the 2026-07-08 restructure: the headline contributor-
-weighted AI-code series reproduces exactly (0.0 / 1.7 / 7.7 / 11.5%).
+API-hydration steps re-pull live state. 97 unit tests cover storage
+semantics, window math, detection (incl. cutoff filtering and the layer-C
+false-positive exclusion), weighting, coverage gating, and the layered
+decomposition. The end-to-end path is `scripts/regenerate.py`: a fixed-point
+loop over collection stages, hard gates (nonzero exits, strata DONE
+sentinels, gap-free coverage with explicit waivers), then a generated report
+(`artifacts/report_generated.md`) plus a hashed census manifest — canonical
+numbers come only from that artifact.
 
 ## 6. Known limitations
 

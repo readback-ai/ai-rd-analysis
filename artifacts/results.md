@@ -1,8 +1,14 @@
 # Results — AI-assisted development at leading AI organizations
-Regenerated 2026-07-09 on the clean five-rule population (docs/METHODS.md §1;
-`data/derived/population.tsv`). Study cutoff 2026-06-30. Contributor-weighted
-with bootstrap 95% CIs unless noted. Reproduce with
-`PYTHONPATH=src python scripts/regenerate.py` (stages resume from checkpoints).
+> ⚠ INTERIM (2026-07-09 numbers): the 2026-07-12 external-review remediation
+> changed measurement (record-dedup fix, event-timestamp cutoff, unified
+> >=5-PR floor, window-scoped contributor weights, layer-C FP exclusion,
+> saturation re-collection). All tables below will be REPLACED by
+> `artifacts/report_generated.md` from `scripts/regenerate.py` once the
+> re-collection completes; expect small shifts, directions unchanged.
+
+Clean five-rule population (docs/METHODS.md §1; `data/derived/population.tsv`).
+Study cutoff 2026-06-30. Contributor-weighted with bootstrap 95% CIs unless
+noted.
 
 ## Population
 229 organizations = 182 full-org + 47 repo-scoped (AI-topic repos only);
