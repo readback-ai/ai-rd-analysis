@@ -57,9 +57,14 @@ def period_of(rng: str, quarters: dict[str, str]) -> str | None:
 
 def group_by_period(cells: dict[tuple[str, str], list[dict]],
                     quarters: dict[str, str]) -> dict[tuple[str, str], list[dict]]:
-    """(repo, period) -> PRs, deduped by PR number across cell generations."""
+    """(repo, period) -> PRs, deduped by PR number across cell generations.
+    When the same PR appears in overlapping cells (legacy full-quarter +
+    census-v2 sub-window), the RICHER record wins: a node carrying
+    headRefName (the v2 query marker field) replaces one that lacks it,
+    regardless of iteration order — otherwise a stale legacy record silently
+    strips branch attribution and mergedBy (external review P1)."""
     grouped: dict[tuple[str, str], list[dict]] = defaultdict(list)
-    seen: dict[tuple[str, str], set] = defaultdict(set)
+    index: dict[tuple[str, str], dict] = defaultdict(dict)
     for (repo, rng), nodes in cells.items():
         per = period_of(rng, quarters)
         if not per:
@@ -67,11 +72,16 @@ def group_by_period(cells: dict[tuple[str, str], list[dict]],
         key = (repo, per)
         for pr in nodes:
             num = pr.get("number")
-            if num is not None:
-                if num in seen[key]:
-                    continue
-                seen[key].add(num)
-            grouped[key].append(pr)
+            if num is None:
+                grouped[key].append(pr)
+                continue
+            prev = index[key].get(num)
+            if prev is None:
+                index[key][num] = pr
+                grouped[key].append(pr)
+            elif "headRefName" in pr and "headRefName" not in prev:
+                grouped[key][grouped[key].index(prev)] = pr
+                index[key][num] = pr
     return grouped
 
 

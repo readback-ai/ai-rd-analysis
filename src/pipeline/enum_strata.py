@@ -68,6 +68,7 @@ def main() -> None:
     # rows from an interrupted run are re-enumerated (review finding 13)
     done = {ln.split("\t")[0] for ln in out_path.read_text().splitlines()
             if "\t" in ln and ln.split("\t")[1] == "DONE"} if out_path.exists() else set()
+    failures = 0
     with out_path.open("a") as f:
         for org in population(scope="repo"):
             if org in done:
@@ -75,12 +76,15 @@ def main() -> None:
             repos = enum_org(org)
             if repos is None:
                 print(f"FAIL {org}", flush=True)
+                failures += 1
                 continue
             for repo, stars in repos:
                 f.write(f"{org}\t{repo}\t{stars}\n")
             f.write(f"{org}\tDONE\t0\n")
             f.flush()
             print(f"ok {org}: {len(repos)} AI-topic repos", flush=True)
+    if failures:
+        raise SystemExit(f"strata enumeration incomplete: {failures} orgs failed")
     print("strata enumeration complete")
 
 

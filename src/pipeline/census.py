@@ -157,6 +157,8 @@ def main() -> None:
                 done += 1
                 print(f"ok   {repo} {per}: {n} PRs", flush=True)
     print(f"census complete: {done} cells ok, {failed} failed (re-run to retry fails)")
+    if failed:
+        sys.exit(1)          # incomplete collection must not look successful
 
 
 if __name__ == "__main__":

@@ -130,3 +130,19 @@ def test_ai_reviewer_list_covers_observed_reviewers():
     for login in ("gemini-code-assist", "copilot-pull-request-reviewer",
                   "coderabbitai", "greptile-apps"):
         assert login in AI_REVIEWERS
+
+
+def test_richer_v2_record_wins_over_legacy_on_overlap():
+    """External review P1: a legacy full-quarter cell must not strip
+    headRefName/mergedBy from the same PR delivered by a v2 sub-window,
+    regardless of dict iteration order."""
+    legacy = {"number": 7, "reviews": {"nodes": []}}
+    rich = {"number": 7, "headRefName": "codex/x", "mergedBy": None,
+            "reviews": {"nodes": []}}
+    for first, second in ((legacy, rich), (rich, legacy)):
+        cells = {("o/r", "2026-04-01..2026-06-30"): [first],
+                 ("o/r", "2026-04-01..2026-04-09"): [second]}
+        from pipeline.analyze import group_by_period
+        grouped = group_by_period(cells, QUARTER_RANGES)
+        prs = grouped[("o/r", "Q2-2026")]
+        assert len(prs) == 1 and "headRefName" in prs[0]

@@ -53,10 +53,17 @@ def stage_b() -> Path:
     censused = (DRV / "fullorg_repos.txt").read_text().split()
     repos = {r for r in censused if r.split("/")[0] in full}
     n_full = len(repos)
+    strata_done = set()
     for ln in (DRV / "strata_repos.tsv").read_text().splitlines():
         f = ln.split("\t")
-        if len(f) == 3 and f[1] != "DONE" and f[0] in scoped:
+        if len(f) == 3 and f[1] == "DONE":
+            strata_done.add(f[0])
+        elif len(f) == 3 and f[0] in scoped:
             repos.add(f[1])
+    unfinished = scoped - strata_done
+    if unfinished:
+        raise SystemExit(f"strata enumeration missing DONE for: "
+                         f"{sorted(unfinished)[:5]} — rerun pipeline.enum_strata")
     bad = [r for r in repos if not REPO_RE.fullmatch(r)]
     if bad:
         raise SystemExit(f"malformed repo entries: {bad[:5]}")
@@ -138,17 +145,51 @@ def stage_e() -> bool:
     return True
 
 
+def coverage_check(repos_file: Path) -> dict:
+    """Cell coverage over the manifest; FAIL unless every repo-period is
+    covered or its repo is documented inaccessible (review P1)."""
+    from pipeline.ghx import cell_path, read_cell
+    from pipeline.scan_orgs import QUARTER_RANGES
+    inaccessible = set()
+    p = DRV / "inaccessible_repos.txt"
+    if p.exists():
+        inaccessible = set(p.read_text().split())
+    repos = repos_file.read_text().split()
+    store = cell_path("census-v2", "x", "y").parent
+    missing = []
+    covered = 0
+    for repo in repos:
+        for per, rng in QUARTER_RANGES.items():
+            if per == "Q3-2025":
+                continue
+            safe = repo.replace("/", "~")
+            if read_cell(cell_path("census-v2", repo, rng), list) is not None \
+                    or any(store.glob(f"{safe}@{rng.split('..')[0]}*")):
+                covered += 1
+            elif repo not in inaccessible:
+                missing.append((repo, per))
+    total = len(repos) * 4
+    if missing:
+        raise SystemExit(f"census coverage incomplete: {len(missing)} "
+                         f"repo-periods missing and not documented "
+                         f"inaccessible, e.g. {missing[:5]}")
+    return {"repo_periods": total, "covered": covered,
+            "documented_inaccessible_repos": len(inaccessible)}
+
+
 def stage_f(repos_file: Path) -> None:
     """Write the generated report artifact + census manifest (the numbers
     behind artifacts/results.md come from THIS file, not ad-hoc runs)."""
     print("=== F: report artifact ===", flush=True)
     import hashlib
+    coverage = coverage_check(repos_file)
+    print(f"coverage: {coverage}", flush=True)
     out = Path("artifacts/report_generated.md")
     with out.open("w") as fh:
         fh.write("# GENERATED report — scripts/regenerate.py\n\n")
         for title, args in (
             ("Contributor-weighted metrics",
-             ["pipeline.analyze", "--contributors",
+             ["pipeline.analyze", "--markers", "v2", "--contributors",
               str(DRV / "repo_contributors_v2.csv"),
               "--repos", str(repos_file), "--bootstrap", "2000"]),
             ("Layered decomposition (pooled)", ["pipeline.integrate"]),
@@ -168,6 +209,7 @@ def stage_f(repos_file: Path) -> None:
         "population": hashlib.sha256(
             (DRV / "population.tsv").read_bytes()).hexdigest()[:16],
         "repos": len(repos_file.read_text().split()),
+        "coverage": coverage,
     }
     (DRV / "census_manifest.json").write_text(json.dumps(manifest, indent=1))
     print(f"wrote {out} + census_manifest.json", flush=True)
