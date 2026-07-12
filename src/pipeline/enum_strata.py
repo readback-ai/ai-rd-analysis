@@ -32,10 +32,12 @@ query($org:String!, $cur:String){ organization(login:$org){
 """
 
 
-def enum_org(org: str, max_pages: int = 40) -> list[tuple[str, int]] | None:
-    """AI-topic repos of one org, or None on API failure."""
+def enum_org(org: str, max_pages: int = 100) -> list[tuple[str, int]] | None:
+    """AI-topic repos of one org, or None on API failure OR if the org has
+    more repositories than max_pages can cover — silent truncation of a
+    conglomerate's tail is worse than a loud failure (review finding 13)."""
     cur, out, pages = None, [], 0
-    while pages < max_pages:
+    while True:
         data = graphql_nodes(Q, {"org": org, **({"cur": cur} if cur else {})},
                              ".data.organization.repositories", expect=dict)
         if data is None:
@@ -48,10 +50,13 @@ def enum_org(org: str, max_pages: int = 40) -> list[tuple[str, int]] | None:
         pages += 1
         pi = data.get("pageInfo") or {}
         if not pi.get("hasNextPage"):
-            break
+            return out
+        if pages >= max_pages:
+            print(f"FAIL {org}: >{max_pages * 100} repos, raise max_pages",
+                  flush=True)
+            return None
         cur = pi.get("endCursor")
         time.sleep(1)
-    return out
 
 
 def main() -> None:
@@ -59,8 +64,10 @@ def main() -> None:
     ap.add_argument("--out", default=str(DRV / "strata_repos.tsv"))
     a = ap.parse_args()
     out_path = Path(a.out)
+    # resume-safety: only a DONE sentinel proves an org completed; partial
+    # rows from an interrupted run are re-enumerated (review finding 13)
     done = {ln.split("\t")[0] for ln in out_path.read_text().splitlines()
-            if "\t" in ln} if out_path.exists() else set()
+            if "\t" in ln and ln.split("\t")[1] == "DONE"} if out_path.exists() else set()
     with out_path.open("a") as f:
         for org in population(scope="repo"):
             if org in done:
