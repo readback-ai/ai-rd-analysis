@@ -65,6 +65,14 @@ def test_corrupt_cell_is_not_coverage(tmp_path):
         regenerate.coverage_check(_manifest(tmp_path, ["o/r"]))
 
 
+def test_bracketed_but_malformed_cell_is_not_coverage(tmp_path):
+    """Review P1 regression repro: '[not valid json]' passed the structural
+    head/tail proxy — coverage must validate the full JSON."""
+    _cell("o/r", Q2, payload="[not valid json]")
+    with pytest.raises(SystemExit):
+        regenerate.coverage_check(_manifest(tmp_path, ["o/r"]))
+
+
 def test_inaccessible_repos_waived_and_excluded_from_collection(tmp_path):
     (regenerate.DRV / "inaccessible_repos.txt").write_text("o/dead\n")
     cov = regenerate.coverage_check(_manifest(tmp_path, ["o/dead"]))

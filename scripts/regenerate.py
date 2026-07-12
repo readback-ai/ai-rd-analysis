@@ -161,32 +161,23 @@ def stage_e() -> bool:
 
 def _index_cells() -> dict[str, list[tuple]]:
     """ONE pass over the census-v2 store: repo -> [(start, end)] spans of
-    structurally valid cells. Validity here is a fast structural proxy
-    (nonempty file bracketed by '[' ... ']') rather than a full JSON parse —
-    the store holds tens of thousands of cells and the real-world corruption
-    mode (rate-limit error objects) starts with '{' (review P2: the previous
-    per-repo-quarter globbing rescanned the directory ~8.5k times)."""
+    VALID cells. Every cell is validated through read_cell (full JSON parse)
+    — a bracket-shaped but malformed file must not count as coverage
+    (review P1 regression). This stays linear in the store (the earlier bug
+    was ~8.5k repeated directory globs, not the per-cell parse); census
+    writes cells atomically, so torn writes cannot exist as .json files."""
     from datetime import date
 
-    from pipeline.ghx import cell_path, decode_cell_stem
+    from pipeline.ghx import cell_path, decode_cell_stem, read_cell
     store = cell_path("census-v2", "x", "y").parent
     index: dict[str, list[tuple]] = {}
     for f in store.glob("*.json"):
         parts = decode_cell_stem(f.stem)
-        if len(parts) != 2:
+        if len(parts) != 2 or read_cell(f, list) is None:
             continue
         try:
-            size = f.stat().st_size
-            if size < 2:
-                continue
-            with f.open("rb") as fh:        # head/tail only — cells are
-                head = fh.read(1)           # written without padding, so
-                fh.seek(-1, 2)              # full reads of a multi-GB store
-                tail = fh.read(1)           # are unnecessary
-            if not (head == b"[" and tail == b"]"):
-                continue
             a, b = (date.fromisoformat(x) for x in parts[1].split(".."))
-        except (OSError, ValueError):
+        except ValueError:
             continue
         index.setdefault(parts[0], []).append((a, b))
     for spans in index.values():

@@ -93,7 +93,9 @@ def pull_cell(repo: str, rng: str) -> tuple[list | None, bool]:
             break
         cur = pi.get("endCursor")
         time.sleep(1)
-    p.write_text(json.dumps(nodes))
+    tmp = p.with_suffix(".tmp")
+    tmp.write_text(json.dumps(nodes))       # json.dumps output is valid JSON;
+    tmp.replace(p)                          # atomic rename => complete-or-absent
     return nodes, False
 
 
