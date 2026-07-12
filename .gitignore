@@ -31,6 +31,7 @@ data/**
 !data/derived/
 !data/derived/**
 data/derived/*.log
+data/derived/branch_samples/
 raw/
 *.duckdb
 *.duckdb.wal

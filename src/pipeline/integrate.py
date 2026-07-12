@@ -31,6 +31,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from pipeline.analyze import group_by_period, load_cells
+from pipeline.ghx import raw_dir
 from pipeline.detect import (MARKERS_V2, classify_pr, pr_agent_author,
                              pr_ai_tools)
 from pipeline.precount import precount_path
@@ -205,7 +206,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--thresholds", action="store_true")
     a = ap.parse_args()
-    sample_dirs = {f"{tag}/": V2 / "branch_samples" / tag
+    sample_dirs = {f"{tag}/": raw_dir("branch_samples") / tag
                    for tag in ("codex", "copilot", "cursor", "claude")}
     if a.thresholds:
         threshold_table(sample_dirs=sample_dirs)

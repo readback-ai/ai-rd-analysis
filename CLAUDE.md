@@ -7,9 +7,9 @@ agents / AI assistance in their public repos. See `README.md` (overview) and
 classification to **org-provenance scoping**: the tracked population is the org
 enumeration built from third-party lists (`src/pipeline/org_set.py`; LF AI landscape +
 HF top orgs + GitHub topics, quality-gated). Detection methodology = `src/pipeline/detect.py`
-+ `agents.yaml` + `artifacts/agent_detection_cues.md`. The classifier/gold/RUBRIC track
-was removed 2026-07-08 (git history preserves it). Canonical docs: `README.md`,
-`docs/METHODS.md`, results in `artifacts/v2_results.md`.
+(single canonical home; the old agents.yaml was archived 2026-07-12 — it was
+unused by code and disagreed with detect.py). Canonical docs: `README.md`,
+`docs/METHODS.md`, results in `artifacts/results.md`.
 
 ## Parallel work via git worktrees
 
@@ -44,7 +44,7 @@ Conventions:
 
 - GitHub: use `gh api ...` / `gh` — it inherits the keyring auth (no PAT env var
   needed). All Phase 0 calls are read-only.
-- Python 3.14 + `uv` for envs/deps. `jq` available. `duckdb` CLI not yet installed
+- Python 3.11 (`.python-version`) + `uv` for envs/deps. `jq` available. `duckdb` CLI not yet installed
   (only needed from Phase 1; `pip install duckdb` or `brew install duckdb`).
 
 ## Data store (Phase 1+)
@@ -58,4 +58,4 @@ Phase 1 starts.
 ## Commit trailer
 
 End commit messages with:
-`Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>`
+`Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`
