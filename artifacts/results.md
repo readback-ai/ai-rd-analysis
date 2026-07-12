@@ -5,8 +5,9 @@ with bootstrap 95% CIs unless noted. Reproduce with
 `PYTHONPATH=src python scripts/regenerate.py` (stages resume from checkpoints).
 
 ## Population
-226 organizations = 178 full-org + 48 repo-scoped (AI-topic repos only);
-2,055 repositories (1,274 full-org + 781 strata). Convergence: the population
+229 organizations = 182 full-org + 47 repo-scoped (AI-topic repos only);
+~2,060 repositories (`data/derived/population_repos.txt` is the canonical
+manifest; counts move slightly as inaccessible repos are documented). Convergence: the population
 is STABLE when the evidence rule is recomputed uniformly from the census
 itself (stage E) — admission does not depend on scan-window quirks.
 
@@ -40,12 +41,11 @@ within each other's CIs. The findings are properties of the phenomenon, not
 of population construction.
 
 ## 4. Detailed analyses
-The behavioral analyses (review reallocation, self-merge lane, accountability,
-review-mode residue, per-tool trends, appendix cuts) live in
-`artifacts/v2_results.md` as a working log; they were computed on interim
-populations whose headline differs by <=0.4pp from the final one, and their
-directional findings carry over. They will be re-run on the final population
-as needed for the paper draft.
+The behavioral analyses in `artifacts/v2_results.md` are a working log
+computed on interim populations and methods. Each finding must be re-derived
+on the final population/method before use — §6 above documents one case
+(self-merge review collapse) where re-derivation REVERSED the interim
+conclusion for the typical repo. Do not cite the working log directly.
 
 ## 5. PRIMARY METRIC: AI involvement (A∪B∪C), by population slice
 (2026-07-11; census-v2 complete — headRefName + mergedBy population-wide,

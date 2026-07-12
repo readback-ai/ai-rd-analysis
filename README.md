@@ -1,8 +1,8 @@
 # AI-Assisted Development Practices at Leading AI Organizations
 
 An empirical study of how the organizations building AI use AI to build
-software — measured from public GitHub metadata over 226 leading AI
-organizations (178 full-org + 48 repo-scoped; 2,055 repositories) across
+software — measured from public GitHub metadata over 229 leading AI
+organizations (182 full-org + 47 repo-scoped; ~2,060 repositories) across
 four quarters: Q1-2024 baseline, Q4-2025, Q1-2026, Q2-2026. **Study cutoff: 2026-06-30** — all activity data is windowed to the
 cutoff; classification metadata is pinned as close to it as the API allows
 (see METHODS §0).
@@ -17,22 +17,24 @@ four quarters spanning the agentic-coding transition. AI involvement is
 detected in three independent layers: commit-forensic markers (co-author
 trailers, generation footers, tool committer identities), agent bot
 authorship, and agent branch-naming conventions. Findings (contributor-
-weighted unless noted): AI-written code rose from 0% (Q1-2024) to 11.1% of
-PRs (Q2-2026) by commit markers alone, and to 18.5% of PRs (pooled) when all
-three detection layers are combined; four in five organizations now exceed
-10% AI involvement. Human review of AI-code PRs reached rate-parity with
-non-AI PRs while review depth stayed higher — but the aggregate conceals a
-reallocation: PRs merged by a second person are reviewed more than ever
-(88–93%), while a growing self-merge lane (63% of merged PRs) concentrates
-2.2× more AI code and its AI-heavy PRs lost second-person review fastest
-(69% → 38% in one quarter). Accountability has shifted from two-person to
-one-person-plus-AI: most merged-unreviewed AI PRs are self-merged by their
-human author, with AI performing review-shaped labor (visible in commit
-trails) without gating merges. Codex-style delegated agents add a distinct
-lane in which the human gate moves from line-level review to merge triage
-(38% of agent-branch PRs merge vs 68% baseline). All rates are floors:
-squash-merge strips markers, and default local CLI usage is structurally
-undetectable.
+weighted unless noted): The primary metric is AI INVOLVEMENT — the union of
+the three layers per PR — which rose from 0% (Q1-2024) to 14.4%
+contributor-weighted / 17.0% pooled (Q2-2026); commit markers alone reach
+11%. Among these (by construction AI-active) organizations, adoption is
+broad, led by private companies (18.5%) over public (11.9%) and community
+(10.0%). Human review declined ~10pp everywhere while its LEVEL follows
+governance (community 62% > public 53% > private 47%); AI review deployment
+is uniform (~20-26%). Self-merge rates are flat over time and cultural in
+level (private 56% > labs 52% > public 50% > community 38%); AI concentrates
+modestly in self-merged PRs (1.1-1.4x). On complete merged-by data,
+self-merged AI-involved PRs are human-reviewed at similar-or-higher rates
+than non-AI ones in most slices — an earlier sampled finding of a review
+collapse characterized the pooled mass of a few high-volume repos, not the
+typical repo; the one slice where self-merged AI code IS reviewed less is
+research labs (46 vs 55%). Delegated-agent lanes move the human gate from
+line-level review to merge triage (38% of codex-branch PRs merge vs 68%
+baseline). All rates are floors: squash-merge strips markers, and default
+local CLI usage is structurally undetectable.
 
 **Full results: [`artifacts/results.md`](artifacts/results.md) (regenerated) · working log: [`artifacts/v2_results.md`](artifacts/v2_results.md) ·
 Methodology: [`docs/METHODS.md`](docs/METHODS.md)**
@@ -66,7 +68,7 @@ Methodology: [`docs/METHODS.md`](docs/METHODS.md)**
 
 ```bash
 uv sync && source .venv/bin/activate
-pytest -q                                   # 84 tests
+pytest -q
 python -m pipeline.org_set --verify         # population reconciliation
 # with the durable store present ($AIRD_DATA_DIR, ~26,800 census cells):
 python -m pipeline.analyze --contributors data/derived/repo_contributors_v2.csv

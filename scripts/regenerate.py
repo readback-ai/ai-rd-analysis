@@ -38,16 +38,35 @@ def stage_a() -> None:
     run("pipeline.enum_strata")
 
 
+REPO_RE = __import__("re").compile(r"[\w.-]+/[\w.-]+")
+
+
 def stage_b() -> Path:
+    """Assemble the canonical repo manifest with validation: every entry is
+    owner/repo-shaped, every org traces to population.tsv, and classification
+    coverage (org_type) is complete (external review finding 5)."""
     print("=== B: population repo list ===", flush=True)
     full = set(population(scope="full"))
+    scoped = set(population(scope="repo"))
     censused = (DRV / "fullorg_repos.txt").read_text().split()
     repos = {r for r in censused if r.split("/")[0] in full}
     n_full = len(repos)
     for ln in (DRV / "strata_repos.tsv").read_text().splitlines():
         f = ln.split("\t")
-        if len(f) == 3 and f[1] != "DONE":
+        if len(f) == 3 and f[1] != "DONE" and f[0] in scoped:
             repos.add(f[1])
+    bad = [r for r in repos if not REPO_RE.fullmatch(r)]
+    if bad:
+        raise SystemExit(f"malformed repo entries: {bad[:5]}")
+    orphans = {r.split("/")[0] for r in repos} - full - scoped
+    if orphans:
+        raise SystemExit(f"repos from orgs outside population.tsv: {sorted(orphans)[:5]}")
+    types = {ln.split("\t")[0].lower()
+             for ln in (Path("data/sources/org_type.tsv").read_text().splitlines())
+             if ln.strip() and not ln.startswith("#")}
+    untyped = {o for o in full | scoped if o.lower() not in types}
+    if untyped:
+        raise SystemExit(f"population orgs missing org_type rows: {sorted(untyped)[:5]}")
     out = DRV / "population_repos.txt"
     out.write_text("\n".join(sorted(repos)) + "\n")
     print(f"population repos: {len(repos)} ({n_full} full-org + "

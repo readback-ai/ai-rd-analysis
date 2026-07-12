@@ -17,9 +17,6 @@ Arize-ai/project-rosetta-stone
 Arize-ai/text-to-graphql-mcp
 Arize-ai/twitter-to-newsletter
 BerriAI/litellm
-ByteDance-Seed/Cola-DLM
-ByteDance-Seed/JoltQC
-ByteDance-Seed/VeOmni
 CaviraOSS/OpenMemory
 CaviraOSS/PageLM
 ComposioHQ/.github
@@ -89,9 +86,6 @@ HKUDS/RAG-Anything
 HKUDS/ViMax
 HKUDS/Vibe-Trading
 HKUDS/nanobot
-HazyResearch/HipKittens
-HazyResearch/intelligence-per-watt
-HazyResearch/minions
 Helicone/helicone
 Helicone/helicone-helm-v3
 HelixDB/helix-db
@@ -521,6 +515,8 @@ Tencent/TurboTransformers
 Tencent/WeKnora
 Tencent/ncnn
 Tencent/tencent-ml-images
+TencentARC/Pixal3D
+TencentARC/TimeLens
 Unstructured-IO/UNS-MCP
 Unstructured-IO/unstructured
 Unstructured-IO/unstructured-api
@@ -957,8 +953,7 @@ ggml-org/ggml
 ggml-org/llama.cpp
 ggml-org/whisper.cpp
 google-gemini/gemini-cli
-google-gemini/genai-processors
-google-gemini/starter-applets
+google-gemini/workshops
 google/ARC-GEN
 google/BEGIN-dataset
 google/XNNPACK
@@ -1317,6 +1312,11 @@ mem0ai/mem0
 mem0ai/mem0-mcp
 memvid/maw
 memvid/memvid
+meta-pytorch/KernelAgent
+meta-pytorch/MSLK
+meta-pytorch/executorch-examples
+meta-pytorch/tokenizers
+meta-pytorch/tritonbench
 microsoft/0xDeCA10B
 microsoft/ACV
 microsoft/AI-For-Beginners
@@ -1908,6 +1908,7 @@ tenstorrent/tt-umd
 tenstorrent/tt-xla
 tenstorrent/ttnn-visualizer
 tenstorrent/vllm-tt-plugin
+thinking-machines-lab/tinker-cookbook
 thu-pacman/chitu
 togethercomputer/detect_agent
 togethercomputer/skills

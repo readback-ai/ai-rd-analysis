@@ -53,9 +53,10 @@ name heuristics are deliberately NOT used: maintainers SEO their metadata
 ("AI-powered" secrets scanners self-tag `llm-training`), and topics-only plus
 lists proved the robust combination.
 
-**R4 — Evidence.** >=5 AI-evidence PRs/commits across the three detection
-layers (§2), or >=0.1% of the org's PRs, summed over the sampled quarters
-(all <= cutoff). An org with no measurable AI-tool footprint contributes
+**R4 — Evidence.** >=5 AI-evidence PRs/commits in the MAXIMUM single
+evidence source (marker scan, layered recheck, branch counts, or census-
+derived union — maxima avoid double-counting one PR across sources), or
+>=0.1% of the org's censused PRs; windows all <= cutoff. An org with no measurable AI-tool footprint contributes
 nothing to AI-practice metrics and only noise to denominators.
 
 **R5 — Scope.** AI developers enter FULL-ORG, except the declared
@@ -73,7 +74,7 @@ daytonaio, streamlit, datahub-project, ...) and 3 included topic-sparse AI
 developers (flashinfer-ai, embeddings-benchmark, AnswerDotAI). Exclusion
 beats every rule; inclusion asserts R3 only (quality/evidence still apply).
 
-Result (2026-07-09 run): **226 orgs = 178 full-org + 48 repo-scoped.**
+Result (2026-07-10 run): **229 orgs = 182 full-org + 47 repo-scoped** (`population.tsv` is authoritative; docs quote it).
 Consequence for inference: the population is prominence-selected; findings
 describe practices at leading AI organizations, with the Q1-2024 same-repo
 census as the temporal control.
