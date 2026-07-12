@@ -251,6 +251,8 @@ def stage_f(repos_file: Path) -> None:
                                      "--table", "involvement"]),
             ("Slices: self-merge", ["pipeline.studies.slices",
                                     "--table", "selfmerge"]),
+            ("Balanced-panel sensitivity", ["pipeline.studies.slices",
+                                            "--table", "panel"]),
         ):
             r = subprocess.run([sys.executable, "-m", *args],
                                capture_output=True, text=True)

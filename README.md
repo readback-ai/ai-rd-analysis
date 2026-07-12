@@ -36,7 +36,7 @@ line-level review to merge triage (38% of codex-branch PRs merge vs 68%
 baseline). All rates are floors: squash-merge strips markers, and default
 local CLI usage is structurally undetectable.
 
-**Full results: [`artifacts/results.md`](artifacts/results.md) (regenerated) · working log: [`artifacts/v2_results.md`](artifacts/v2_results.md) ·
+**Full results: [`artifacts/results.md`](artifacts/results.md) (regenerated) · metrics reference: [`docs/METRICS.md`](docs/METRICS.md) · working log: [`artifacts/v2_results.md`](artifacts/v2_results.md) ·
 Methodology: [`docs/METHODS.md`](docs/METHODS.md)**
 
 ## How to verify the three claims that matter

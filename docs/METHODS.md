@@ -1,5 +1,8 @@
 # Methods
 
+(Metric-level definitions and the generated-report layout live in
+[`METRICS.md`](METRICS.md).)
+
 Methodology for the study of AI-assisted development practices at leading AI
 organizations. Successor to the pre-pivot `PIPELINE_SPEC.md` and
 `artifacts/scope_and_methods.md`; this document is canonical. Results live in

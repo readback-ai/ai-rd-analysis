@@ -136,14 +136,40 @@ def table(metrics: list[str], header: str) -> None:
             print(line)
 
 
+def balanced_panel() -> None:
+    """Sensitivity check promised in METHODS §1: the headline series on the
+    BALANCED panel — only repos that qualify (>= MIN_PRS PRs) in every
+    censused quarter — versus the repeated cross-section reported elsewhere.
+    Separates the adoption trend from cohort-composition change."""
+    rates = repo_rates()
+    w = weights()
+    by_repo: dict[str, set[str]] = defaultdict(set)
+    for (repo, per) in rates:
+        by_repo[repo].add(per)
+    panel = {r for r, pers in by_repo.items() if set(PERIODS) <= pers}
+    print(f"balanced panel: {len(panel)} repos qualify in all "
+          f"{len(PERIODS)} quarters")
+    print(f"{'period':9}{'panel ai_involved':>22}{'cross-section':>22}")
+    for per in PERIODS:
+        rows_p = [(rates[(r, per)]["ai_involved"], w.get(r, 1.0)) for r in panel]
+        rows_x = [(v["ai_involved"], w.get(repo, 1.0))
+                  for (repo, p), v in rates.items() if p == per]
+        mp, (lp, hp) = weighted_mean(rows_p), bootstrap_ci(rows_p, 1000)
+        mx, (lx, hx) = weighted_mean(rows_x), bootstrap_ci(rows_x, 1000)
+        print(f"{per:9}  {100*mp:5.1f} [{100*lp:4.1f},{100*hp:4.1f}]"
+              f"  {100*mx:5.1f} [{100*lx:4.1f},{100*hx:4.1f}]")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--table", choices=["involvement", "selfmerge"],
+    ap.add_argument("--table", choices=["involvement", "selfmerge", "panel"],
                     default="involvement")
     a = ap.parse_args()
     if a.table == "involvement":
         table(["ai_involved", "hum_rev", "ai_rev", "merged"],
               "AI involvement (A∪B∪C) by slice")
+    elif a.table == "panel":
+        balanced_panel()
     else:
         table(["self_merged", "ai_of_selfm", "ai_of_otherm",
                "humrev_selfm_ai", "humrev_selfm_non"],
