@@ -159,35 +159,53 @@ def stage_e() -> bool:
     return True
 
 
-def _quarter_covered(repo: str, rng: str) -> bool:
-    """True iff VALID cells' date ranges union to the full quarter with no
-    gaps (a lone first sub-window from a failed run must not count —
-    review P1). Cells are validated through read_cell (JSON shape)."""
-    from datetime import date, timedelta
+def _index_cells() -> dict[str, list[tuple]]:
+    """ONE pass over the census-v2 store: repo -> [(start, end)] spans of
+    structurally valid cells. Validity here is a fast structural proxy
+    (nonempty file bracketed by '[' ... ']') rather than a full JSON parse —
+    the store holds tens of thousands of cells and the real-world corruption
+    mode (rate-limit error objects) starts with '{' (review P2: the previous
+    per-repo-quarter globbing rescanned the directory ~8.5k times)."""
+    from datetime import date
 
-    from pipeline.ghx import cell_path, decode_cell_stem, read_cell
-    q_start, q_end = (date.fromisoformat(x) for x in rng.split(".."))
+    from pipeline.ghx import cell_path, decode_cell_stem
     store = cell_path("census-v2", "x", "y").parent
-    safe = repo.replace("/", "~")
-    spans = []
-    for f in store.glob(f"{safe}@*.json"):
+    index: dict[str, list[tuple]] = {}
+    for f in store.glob("*.json"):
         parts = decode_cell_stem(f.stem)
-        if len(parts) != 2 or read_cell(f, list) is None:
+        if len(parts) != 2:
             continue
         try:
+            size = f.stat().st_size
+            if size < 2:
+                continue
+            with f.open("rb") as fh:        # head/tail only — cells are
+                head = fh.read(1)           # written without padding, so
+                fh.seek(-1, 2)              # full reads of a multi-GB store
+                tail = fh.read(1)           # are unnecessary
+            if not (head == b"[" and tail == b"]"):
+                continue
             a, b = (date.fromisoformat(x) for x in parts[1].split(".."))
-        except ValueError:
+        except (OSError, ValueError):
             continue
-        if a <= q_end and b >= q_start:
-            spans.append((max(a, q_start), min(b, q_end)))
-    if not spans:
-        return False
-    spans.sort()
+        index.setdefault(parts[0], []).append((a, b))
+    for spans in index.values():
+        spans.sort()
+    return index
+
+
+def _quarter_covered(spans: list[tuple], rng: str) -> bool:
+    """True iff the repo's valid-cell spans union to the full quarter with no
+    gaps (a lone first sub-window from a failed run must not count)."""
+    from datetime import date, timedelta
+    q_start, q_end = (date.fromisoformat(x) for x in rng.split(".."))
     cursor = q_start
-    for a, b in spans:
-        if a > cursor:
-            return False                 # gap
-        cursor = max(cursor, b + timedelta(days=1))
+    for a, b in spans:                       # sorted by start
+        if a > q_end or b < q_start:
+            continue
+        if max(a, q_start) > cursor:
+            return False                     # gap
+        cursor = max(cursor, min(b, q_end) + timedelta(days=1))
         if cursor > q_end:
             return True
     return cursor > q_end
@@ -199,15 +217,17 @@ def coverage_check(repos_file: Path) -> dict:
     from pipeline.scan_orgs import QUARTER_RANGES
     skip = inaccessible()
     repos = repos_file.read_text().split()
+    index = _index_cells()
     missing = []
     covered = waived = 0
     for repo in repos:
+        spans = index.get(repo, [])
         for per, rng in QUARTER_RANGES.items():
             if per == "Q3-2025":
                 continue
             if repo in skip:
                 waived += 1
-            elif _quarter_covered(repo, rng):
+            elif _quarter_covered(spans, rng):
                 covered += 1
             else:
                 missing.append((repo, per))
