@@ -70,8 +70,15 @@ def population_repos() -> set[str]:
 
 
 def weights() -> dict[str, float]:
+    """Window-scoped contributor weights (pipeline.contributors); falls back
+    to the all-time file with a warning until the window pull completes."""
+    src = DRV / "repo_contributors_window.csv"
+    if not src.exists():
+        src = DRV / "repo_contributors_v2.csv"
+        print(f"WARN: using ALL-TIME contributor weights ({src.name}); "
+              f"run pipeline.contributors for window weights", flush=True)
     out = {}
-    with open(DRV / "repo_contributors_v2.csv") as fh:
+    with open(src) as fh:
         for row in csv.reader(fh):
             if row and row[0] != "repo":
                 out[row[0]] = max(1.0, float(row[1] or 1))

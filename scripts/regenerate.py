@@ -16,11 +16,9 @@ modules, so rerunning after interruption is safe and cheap.
 
 Run:  PYTHONPATH=src python scripts/regenerate.py
 """
-import csv
 import json
 import subprocess
 import sys
-import time
 from pathlib import Path
 
 sys.path.insert(0, "src")
@@ -106,29 +104,11 @@ def stage_c(repos_file: Path) -> None:
 
 
 def stage_d(repos_file: Path) -> None:
-    print("=== D: contributor weights ===", flush=True)
-    weights = DRV / "repo_contributors_v2.csv"
-    have = {row[0] for row in csv.reader(weights.open()) if row}
-    todo = [r for r in repos_file.read_text().split() if r not in have]
-    print(f"pulling contributors for {len(todo)} repos", flush=True)
-    with weights.open("a") as out:
-        w = csv.writer(out)
-        failed = 0
-        for repo in todo:
-            r = subprocess.run(
-                ["gh", "api", f"repos/{repo}/contributors?per_page=100",
-                 "--paginate", "--jq",
-                 '[.[] | select((.type != "Bot") and (.contributions >= 10))] | length'],
-                capture_output=True, text=True)
-            counts = [int(x) for x in r.stdout.split() if x.strip().isdigit()]
-            if r.returncode == 0 and counts:
-                w.writerow([repo, sum(counts)])
-            else:
-                failed += 1          # do NOT record: a permanent weight=1 is
-            time.sleep(0.4)          # worse than a retry on the next run
-        if failed:
-            print(f"WARN: {failed} contributor pulls failed; rerun stage D "
-                  f"to retry (weights default to 1.0 until then)", flush=True)
+    """Window-scoped contributor weights (Q4-2025..Q2-2026 active core
+    committers; pipeline.contributors). Fails nonzero on pull failures."""
+    print("=== D: contributor weights (window-scoped) ===", flush=True)
+    run("pipeline.contributors", "--repos", str(repos_file),
+        "--out", str(DRV / "repo_contributors_window.csv"))
 
 
 def stage_e() -> bool:
@@ -244,7 +224,7 @@ def stage_f(repos_file: Path) -> None:
         for title, args in (
             ("Contributor-weighted metrics",
              ["pipeline.analyze", "--markers", "v2", "--contributors",
-              str(DRV / "repo_contributors_v2.csv"),
+              str(DRV / "repo_contributors_window.csv"),
               "--repos", str(repos_file), "--bootstrap", "2000"]),
             ("Layered decomposition (pooled)", ["pipeline.integrate"]),
             ("Slices: involvement", ["pipeline.studies.slices",

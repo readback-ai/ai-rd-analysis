@@ -48,12 +48,10 @@ over C, so each PR counts once (`integrate.layered_table`).
 - **`analyze.pr_metrics`**: per-repo-quarter rate = share of that repo's
   censused PRs with the property. Metrics whose field is unavailable on a PR
   (e.g. `self_merged` on a legacy cell) are skipped, not zeroed.
-- **Repo qualification floors**: `analyze --min-prs` defaults to **10**
-  PRs/quarter; `studies.slices.MIN_PRS` is **5**, and slice CONDITIONAL
+- **Repo qualification floor**: **≥5 PRs/quarter everywhere** (`analyze
+  --min-prs` default and `studies.slices.MIN_PRS`); slice CONDITIONAL
   metrics additionally require ≥5 PRs in the conditioning denominator
   (e.g. ≥5 self-merged AI PRs before a review-rate of that cell is emitted).
-  ⚠ REVIEW NOTE: the two floors differ by design history, not by argument —
-  flag if you want them unified.
 - Census sampling: repo-quarters are collected completely (adaptive windows
   + pagination + fail-hard saturation); rates are over ALL of a repo's PRs
   in the window, coverage-gated at report time.
@@ -61,9 +59,14 @@ over C, so each PR counts once (`integrate.layered_table`).
 ## 4. Aggregation
 
 - **Contributor weighting (primary)**: weighted mean of per-repo rates,
-  weight = repo's core human contributors (≥10 commits, bots excluded;
-  `data/derived/repo_contributors_v2.csv`). Answers "the typical AI-org
-  developer's PR flow". Caveat: contributor counts are all-time at pull date.
+  weight = repo's core human contributors ACTIVE IN THE STUDY WINDOW —
+  ≥5 commits authored during Q4-2025..Q2-2026, bots excluded, from GitHub's
+  weekly contributor statistics (`pipeline.contributors` →
+  `data/derived/repo_contributors_window.csv`). Answers "the typical
+  currently-active AI-org developer's PR flow"; a dormant project's
+  historical committers no longer inflate its weight. The all-time variant
+  (≥10 commits ever, `repo_contributors_v2.csv`) is retained as a
+  sensitivity file.
 - **Pooled (secondary)**: share over all PRs (repo-size-dominated; the
   layered decomposition table is pooled and labeled as such).
 - **Uncertainty**: bootstrap 95% CIs over repos, 2,000 resamples, seeded RNG

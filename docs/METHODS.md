@@ -171,7 +171,9 @@ outside the worktree in `$AIRD_DATA_DIR`.
 
 Per-repo-period rates over PRs (repos need ≥10 PRs/period to qualify), then
 **contributor-weighted** means across repos: weight = the repo's core human
-contributors (≥10 commits, bots excluded; `repo_contributors_v2.csv`).
+contributors active in the study window (≥5 commits authored in
+Q4-2025..Q2-2026, bots excluded, from GitHub weekly contributor stats;
+`repo_contributors_window.csv`; all-time variant kept for sensitivity).
 Contributor weighting answers "what does the typical AI-org developer's PR
 flow look like"; pooled and equal-weight variants differ through a repo-size
 gradient (small repos are AI-heavier: 19.5% vs 12.2% AI-code in the smallest
@@ -206,7 +208,6 @@ weighted AI-code series reproduces exactly (0.0 / 1.7 / 7.7 / 11.5%).
 - **Prominence-selected population**; no claim about GitHub at large.
 - **Q2-2026 mild recency censoring** (collected ~1 week after quarter end;
   late reviews/merges undercounted).
-- **Contributor counts are all-time**, not window-scoped.
 - **31 repo-periods (0.4%) permanently inaccessible.**
 - **Branch-PR samples are first-page (created-desc) per org-quarter** — mild
   within-quarter recency bias.

@@ -130,7 +130,7 @@ def main() -> None:
                     help="optional repo-list file: restrict metrics to this "
                          "population (e.g. v2.1 rebaseline)")
     ap.add_argument("--markers", choices=["v1", "v2"], default="v1")
-    ap.add_argument("--min-prs", type=int, default=10)
+    ap.add_argument("--min-prs", type=int, default=5)   # unified floor (METRICS §3)
     ap.add_argument("--bootstrap", type=int, default=2000)
     a = ap.parse_args()
     markers = MARKERS_V1 if a.markers == "v1" else MARKERS_V2
