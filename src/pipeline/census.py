@@ -39,7 +39,8 @@ STAGE = "census-v2"
 # were added 2026-07-08; cells pulled earlier lack them and downstream code
 # must treat the fields as optional (detect.classify_pr does).
 PR_QUERY = """
-query($q:String!){ search(query:$q, type:ISSUE, first:%d){
+query($q:String!, $cur:String){ search(query:$q, type:ISSUE, first:%d, after:$cur){
+  pageInfo{ hasNextPage endCursor }
   nodes{ ... on PullRequest{ number createdAt mergedAt closedAt authorAssociation
     additions deletions changedFiles headRefName
     author{login __typename} mergedBy{login __typename}
@@ -70,20 +71,39 @@ def subwindows(rng: str, k: int) -> list[str]:
 
 
 def pull_cell(repo: str, rng: str) -> tuple[list | None, bool]:
-    """-> (nodes, was_cached). Cached hits cost no network and need no pacing."""
+    """-> (nodes, was_cached). Cached hits cost no network and need no pacing.
+    Paginates within the window via search cursors (search API hard-caps at
+    1,000 nodes per query, i.e. 20 pages), so a one-day window holds up to
+    1,000 PRs — no realistic repo exceeds that."""
     p = cell_path(STAGE, repo, rng)
     cached = read_cell(p, list)
     if cached is not None:
         return cached, True
-    nodes = graphql_nodes(PR_QUERY, {"q": f"repo:{repo} is:pr created:{rng} sort:created-desc"},
-                          ".data.search.nodes", expect=list)
-    if nodes is None:
-        return None, False
+    q = f"repo:{repo} is:pr created:{rng} sort:created-desc"
+    nodes: list = []
+    cur = None
+    for _ in range(20):
+        variables = {"q": q, **({"cur": cur} if cur else {})}
+        page = graphql_nodes(PR_QUERY, variables, ".data.search", expect=dict)
+        if page is None:
+            return None, False
+        nodes.extend(n for n in page.get("nodes") or [])
+        pi = page.get("pageInfo") or {}
+        if not pi.get("hasNextPage"):
+            break
+        cur = pi.get("endCursor")
+        time.sleep(1)
     p.write_text(json.dumps(nodes))
     return nodes, False
 
 
 def census_repo_period(repo: str, period: str, k: int) -> int | None:
+    """k is a FLOOR on sub-windows; the actual count adapts to the repo's
+    PR volume (ceil(total/45) with 10% headroom, capped at one window per
+    day) so a quarter is never silently capped at k*PAGE_SIZE PRs. If the
+    adaptive windows still saturate (sub-day burstiness), the repo-period
+    FAILS — an incomplete census must be visible, not a warning
+    (external review finding 4)."""
     rng = QUARTER_RANGES[period]
     # fully-cached fast path: a valid full-range cell needs no denominator call
     cached = read_cell(cell_path(STAGE, repo, rng), list)
@@ -95,6 +115,7 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
         time.sleep(2)
     if total is None:
         return None
+    k = max(k, -(-total * 11 // (10 * (PAGE_SIZE - 5))))   # ceil w/ headroom
     ranges = [rng] if total <= PAGE_SIZE else subwindows(rng, k)
     n = 0
     for r in ranges:
@@ -104,10 +125,11 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
         n += len(nodes)
         if not was_cached:
             time.sleep(1)
-    if n < total:
-        print(f"WARN {repo} {period}: collected {n}/{total} PRs "
-              f"(sub-window saturation) — raise --subwindows to recover",
+    if n < total * 0.98:            # search totals drift by a PR or two
+        print(f"FAIL {repo} {period}: collected {n}/{total} PRs even with "
+              f"{len(ranges)} sub-windows (sub-day saturation)",
               file=sys.stderr, flush=True)
+        return None
     return n
 
 

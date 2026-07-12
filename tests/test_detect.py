@@ -138,3 +138,23 @@ def test_ai_involved_union_of_layers():
     assert classify_pr(dict(pr, headRefName="codex/x")).ai_involved
     bot = dict(pr, author={"login": "devin-ai-integration[bot]", "__typename": "Bot"})
     assert classify_pr(bot).ai_involved
+
+
+# ------------------------------------------------------------ study cutoff
+
+def test_events_after_cutoff_are_excluded():
+    """Late merges and reviews (collection ran after the cutoff) must not
+    count — METHODS section 0."""
+    pr = _pr_reviews(reviews=[
+        _rev("bob", state="APPROVED") | {"submittedAt": "2026-06-15T00:00:00Z"},
+        _rev("carol", state="APPROVED") | {"submittedAt": "2026-07-03T00:00:00Z"}])
+    pr["reviews"]["nodes"][0]["submittedAt"] = "2026-06-15T00:00:00Z"
+    pr["reviews"]["nodes"][1]["submittedAt"] = "2026-07-03T00:00:00Z"
+    c = classify_pr(pr)
+    assert c.human_reviewed                      # in-window review counts
+    late = dict(_pr_reviews(), mergedAt="2026-07-02T01:00:00Z",
+                mergedBy={"login": "alice", "__typename": "User"})
+    assert not classify_pr(late).merged          # post-cutoff merge excluded
+    ok = dict(_pr_reviews(), mergedAt="2026-06-29T01:00:00Z",
+              mergedBy={"login": "alice", "__typename": "User"})
+    assert classify_pr(ok).merged and classify_pr(ok).self_merged is True

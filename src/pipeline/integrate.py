@@ -1,25 +1,25 @@
-"""Stage 5 — INTEGRATED AI-involvement metrics across all detection layers.
+"""Stage 5 — INTEGRATED AI-involvement decomposition across detection layers.
 
-Combines, per quarter, with layers kept disjoint (v2_results §12/§13):
+Since census-v2 (headRefName + mergedBy population-wide), ALL THREE layers
+are observed per-PR inside the census, so the layered decomposition is exact
+and computed on ONE population (population_repos.txt) — no cross-source
+denominators, no sample-based overlap corrections:
 
-  A. marker-attributed PRs   — census cells, detect.pr_ai_tools (pooled rate)
-  B. agent-authored PRs      — census cells, detect.pr_agent_author
-  C. branch-attributed PRs   — branch_scan counts / precount denominators,
-                               with per-prefix overlap corrections measured on
-                               the org-stratified samples (pull_prs):
-                               - marker overlap (would double-count layer A)
-                               - bot-author overlap (would double-count B;
-                                 ~100% of copilot/ PRs are Copilot-authored)
+  B  agent-authored      detect.pr_agent_author
+  A' marker, not B       detect.pr_ai_tools
+  C' branch, not A/B     detect.pr_branch_tool
+  union = ai_involved    (the primary metric; see studies.slices)
 
-  total AI involvement = A + B + C_only
+Pooled shares are over census-sampled PRs (uniform-over-time sub-windows;
+see census.py) and are reported alongside the contributor-weighted per-repo
+series. Cells that name repos outside the population manifest FAIL loudly.
 
-Also blends branch-sample review metrics into the census-based review-of-AI
-trends, weighting each component by its population PR count. Prefixes without
-a pulled sample get their raw count share reported with overlap marked
-unknown — never silently assumed.
+The org-level branch scans and per-prefix PR samples remain as admission
+evidence and for per-prefix lane characterization (sample_stats measures the
+A∪B overlap DIRECTLY as a union share — never as summed marginals).
 
 Usage:
-  python -m pipeline.integrate                      # layered table
+  python -m pipeline.integrate                      # layered decomposition
   python -m pipeline.integrate --thresholds         # org adoption thresholds
 """
 from __future__ import annotations
@@ -41,19 +41,6 @@ PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
 
 
 # ------------------------------------------------------------- denominators
-
-def population_totals(repos_file: Path = V2 / "fullorg_repos.txt",
-                      periods: list[str] = PERIODS) -> dict[str, int]:
-    """period -> total PRs in the population (precount sums)."""
-    totals: dict[str, int] = defaultdict(int)
-    for repo in repos_file.read_text().split():
-        for per in periods:
-            try:
-                totals[per] += json.load(open(precount_path(repo, per)))["total"]
-            except (OSError, ValueError, KeyError):
-                continue
-    return dict(totals)
-
 
 def org_totals(periods: list[str] = PERIODS) -> dict[tuple[str, str], int]:
     """(org, period) -> total PRs (for org-level threshold adjustment)."""
@@ -85,8 +72,10 @@ def branch_counts(*paths: Path) -> dict[tuple[str, str, str], int]:
 
 def sample_stats(sample_dir: Path, markers=MARKERS_V2) -> dict[str, dict[str, float]]:
     """Org-weighted per-period stats from one prefix's sample cells:
-    marker_overlap, bot_author_share, human_rev, ai_rev, merged (shares of all
-    PRs), and norev_merged / self_merged (shares of MERGED PRs). Weights =
+    ab_overlap (share of sampled PRs already caught by layer A or B — a
+    DIRECT union measurement, never summed marginals), human_rev, ai_rev,
+    merged (shares of all PRs), and norev_merged / self_merged (shares of
+    MERGED PRs). Weights =
     pop_count. Conditional metrics use POPULATION-RATIO semantics (weighted
     merged mass in the denominator), i.e. "of merged <prefix> PRs population-
     wide, X% were self-merged" — matching v2_results §12b — not a mean of
@@ -106,8 +95,9 @@ def sample_stats(sample_dir: Path, markers=MARKERS_V2) -> dict[str, dict[str, fl
         cls = [classify_pr(p, markers) for p in prs]
         merged = [c for c in cls if c.merged]
         d["w"] += w
-        d["marker_overlap"] += w * sum(bool(pr_ai_tools(p, markers)) for p in prs) / n
-        d["bot_author"] += w * sum(pr_agent_author(p) is not None for p in prs) / n
+        d["ab_overlap"] += w * sum(bool(pr_ai_tools(p, markers))
+                                   or pr_agent_author(p) is not None
+                                   for p in prs) / n
         d["human_rev"] += w * sum(c.human_reviewed for c in cls) / n
         d["ai_rev"] += w * sum(c.ai_reviewed for c in cls) / n
         d["merged"] += w * len(merged) / n
@@ -125,54 +115,35 @@ def sample_stats(sample_dir: Path, markers=MARKERS_V2) -> dict[str, dict[str, fl
     return out
 
 
-# ----------------------------------------------------------------- layers A+B
+# ------------------------------------------------------------------- report
 
-def census_layers(markers=MARKERS_V2) -> dict[str, dict[str, float]]:
-    """period -> pooled census shares: marker rate (layer A) and
-    agent-authored rate (layer B) over ALL census PRs."""
+def layered_table() -> None:
+    """Exact per-PR layer decomposition over the population manifest."""
+    keep = set((V2 / "population_repos.txt").read_text().split())
     grouped = group_by_period(load_cells(), QUARTER_RANGES)
-    agg: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
-    for (_, per), prs in grouped.items():
+    agg: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
+    for (repo, per), prs in grouped.items():
+        if repo not in keep:
+            continue
         d = agg[per]
         for p in prs:
             d["n"] += 1
-            if pr_agent_author(p):
-                d["agent"] += 1
-            elif pr_ai_tools(p, markers):
-                d["marker"] += 1
-    return {per: {"marker": d["marker"] / d["n"], "agent": d["agent"] / d["n"]}
-            for per, d in agg.items() if d["n"]}
-
-
-# ------------------------------------------------------------------- report
-
-def layered_table(sample_dirs: dict[str, Path]) -> None:
-    pop = population_totals()
-    counts = branch_counts(V2 / "branch_scan.tsv")
-    census = census_layers()
-    stats = {pfx: sample_stats(d) for pfx, d in sample_dirs.items() if d.exists()}
-    print(f"{'period':9}{'markerA%':>9}{'agentB%':>9}"
-          f"{'branch raw%':>12}{'branch-only C%':>15}{'total AI%':>10}")
+            c = classify_pr(p, MARKERS_V2)
+            if c.agent_author:
+                d["b"] += 1
+            elif c.marker_tools:
+                d["a"] += 1
+            elif c.branch_tool:
+                d["c"] += 1
+    print(f"{'period':9}{'PRs':>8}{'A marker%':>10}{'B agent%':>9}"
+          f"{'C branch%':>10}{'union%':>8}")
     for per in PERIODS:
-        if per not in census or not pop.get(per):
+        d = agg.get(per)
+        if not d or not d["n"]:
             continue
-        a, b = census[per]["marker"], census[per]["agent"]
-        raw = c_only = 0.0
-        unknown = []
-        for pfx in {p for (_, q, p) in counts if q == per}:
-            n = sum(v for (o, q, p), v in counts.items() if q == per and p == pfx)
-            share = n / pop[per]
-            raw += share
-            st = stats.get(pfx, {}).get(per)
-            if st:
-                c_only += share * max(0.0, 1 - st["marker_overlap"] - st["bot_author"])
-            else:
-                unknown.append(pfx)
-                c_only += share          # uncorrected; flagged below
-        note = f"  (no sample for {','.join(sorted(unknown))}: overlap uncorrected)" \
-            if unknown else ""
-        print(f"{per:9}{100*a:>8.2f}%{100*b:>8.2f}%{100*raw:>11.2f}%"
-              f"{100*c_only:>14.2f}%{100*(a+b+c_only):>9.2f}%{note}")
+        n = d["n"]
+        print(f"{per:9}{n:>8}{100*d['a']/n:>9.2f}%{100*d['b']/n:>8.2f}%"
+              f"{100*d['c']/n:>9.2f}%{100*(d['a']+d['b']+d['c'])/n:>7.2f}%")
 
 
 def threshold_table(contrib_csv: Path = V2 / "repo_contributors_v2.csv",
@@ -197,7 +168,7 @@ def threshold_table(contrib_csv: Path = V2 / "repo_contributors_v2.csv",
 
     def keep_factor(pfx: str, per: str) -> float:
         st = stats.get(pfx, {}).get(per)
-        return max(0.0, 1 - st["marker_overlap"] - st["bot_author"]) if st else 1.0
+        return max(0.0, 1 - st["ab_overlap"]) if st else 1.0
 
     ototal = org_totals()
     org_repos: dict[str, list[str]] = defaultdict(list)
@@ -236,7 +207,7 @@ def main() -> None:
     if a.thresholds:
         threshold_table(sample_dirs=sample_dirs)
     else:
-        layered_table(sample_dirs)
+        layered_table()
 
 
 if __name__ == "__main__":

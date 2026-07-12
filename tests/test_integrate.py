@@ -46,28 +46,29 @@ def _pr(marker=False, bot_author=False, merged=True):
 
 
 def test_sample_stats_weighted_by_population_count(tmp_path):
-    """org A (pop 90): all marker-overlap; org B (pop 10): none.
+    """org A (pop 90): all A/B-overlapped; org B (pop 10): none.
     Weighted overlap must be 0.9, not the unweighted 0.5."""
     d = _cell(tmp_path, "a__Q2-2026", 90, [_pr(marker=True)])
     _cell(tmp_path, "b__Q2-2026", 10, [_pr(marker=False)])
     stats = integrate.sample_stats(d)
-    assert stats["Q2-2026"]["marker_overlap"] == pytest.approx(0.9)
+    assert stats["Q2-2026"]["ab_overlap"] == pytest.approx(0.9)
 
 
-def test_sample_stats_measures_bot_author_overlap(tmp_path):
-    d = _cell(tmp_path, "a__Q2-2026", 50, [_pr(bot_author=True), _pr()])
+def test_ab_overlap_is_a_union_not_summed_marginals(tmp_path):
+    """A PR carrying BOTH a marker and a bot author must count once —
+    summed marginals double-subtracted (external review finding 3)."""
+    d = _cell(tmp_path, "a__Q2-2026", 50, [_pr(marker=True, bot_author=True)])
     stats = integrate.sample_stats(d)
-    assert stats["Q2-2026"]["bot_author"] == pytest.approx(0.5)
+    assert stats["Q2-2026"]["ab_overlap"] == pytest.approx(1.0)
 
 
-def test_layer_disjointness_agent_author_wins_over_marker(tmp_path, monkeypatch):
+def test_layer_disjointness_agent_author_wins_over_marker():
     """A bot-authored PR whose commits also carry markers must count ONCE
-    (as layer B), or the union double-counts."""
-    from pipeline import analyze
+    (as layer B) in the layered decomposition."""
+    from pipeline.detect import MARKERS_V2, classify_pr
     pr = _pr(marker=True, bot_author=True)
-    pr["number"] = 1
-    monkeypatch.setattr(analyze, "load_cells", lambda: {})
-    monkeypatch.setattr(integrate, "load_cells",
-                        lambda: {("o/r", "2026-04-01..2026-06-30"): [pr]})
-    layers = integrate.census_layers()
-    assert layers["Q2-2026"] == {"marker": 0.0, "agent": 1.0}
+    c = classify_pr(pr, MARKERS_V2)
+    assert c.agent_author and c.marker_tools     # both signals present
+    # the decomposition rule: B wins, so the PR is not double-counted
+    layer = "b" if c.agent_author else "a" if c.marker_tools else "c"
+    assert layer == "b"

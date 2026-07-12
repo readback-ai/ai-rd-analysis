@@ -146,6 +146,17 @@ Fields per PR: commits (messages, author emails, committer), formal reviews
 timestamps, and (from 2026-07-08) headRefName + mergedBy. Coverage:
 7,953/7,984 repo-periods (99.6%), 26,819 cells, 0 corrupt.
 
+Per-repo-period completeness: sub-window counts adapt to PR volume and
+paginate within windows (up to 1,000 PRs/day); a repo-period that still
+cannot be completed FAILS rather than silently truncating. Per-PR field
+caps remain: the census fetches each PR's first 12 commits and 15 reviews
+(no per-PR pagination — one search call per ~45 PRs is what makes a
+2,000-repo census feasible). Consequence: a marker appearing only after a
+PR's 12th commit, or a review after the 15th, is unobserved. Both
+truncations bias DOWNWARD (consistent with the floor framing); PRs with
+>12 commits are a small minority and markers typically recur across a
+session's commits.
+
 Durability rules (`ghx.py`): every response is shape-validated before being
 written (GitHub serves rate-limit error bodies that naive checks store as
 data — this corrupted 267 cells once); failed calls are never recorded as

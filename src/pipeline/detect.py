@@ -28,6 +28,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+# Study cutoff: events after this instant are excluded from classification
+# even when the API returns them (collection ran days after the cutoff, so
+# late merges/reviews would otherwise leak in — METHODS §0). Residual: census
+# cells do not carry per-commit timestamps, so a marker-bearing commit pushed
+# to a still-open PR after the cutoff is not filterable; PRs are
+# creation-windowed, so the exposure is days and affects layer A only.
+CUTOFF = "2026-06-30T23:59:59Z"
+
 # ---------------------------------------------------------------- layer A
 
 @dataclass(frozen=True)
@@ -143,12 +151,15 @@ INSIDER = {"MEMBER", "OWNER", "COLLABORATOR"}
 
 
 def split_reviews(pr: dict) -> tuple[list[dict], list[dict], list[dict]]:
-    """-> (human_other, human_self, bot) formal review objects."""
+    """-> (human_other, human_self, bot) formal review objects submitted on
+    or before the study CUTOFF."""
     author = (pr.get("author") or {}).get("login")
     human_other, human_self, bot = [], [], []
     for r in (pr.get("reviews") or {}).get("nodes") or []:
         ra = r.get("author")
         if not ra:
+            continue
+        if (r.get("submittedAt") or "") > CUTOFF:
             continue
         if ra["__typename"] == "User":
             (human_self if ra.get("login") == author else human_other).append(r)
@@ -196,15 +207,16 @@ def classify_pr(pr: dict, markers: dict[str, ToolSpec] = MARKERS_V1) -> PRClass:
     ai_rev = [r for r in bot
               if (r["author"].get("login") or "").removesuffix("[bot]") in AI_REVIEWERS]
     author = (pr.get("author") or {}).get("login")
+    merged = bool(pr.get("mergedAt")) and (pr.get("mergedAt") or "") <= CUTOFF
     merged_by = pr.get("mergedBy")
     self_merged = None
-    if pr.get("mergedAt") and merged_by is not None:
+    if merged and merged_by is not None:
         self_merged = (merged_by or {}).get("login") == author and author is not None
     return PRClass(
         marker_tools=frozenset(pr_ai_tools(pr, markers)),
         agent_author=pr_agent_author(pr),
         branch_tool=pr_branch_tool(pr),
-        merged=bool(pr.get("mergedAt")),
+        merged=merged,
         self_merged=self_merged,
         insider=pr.get("authorAssociation") in INSIDER,
         human_reviewed=bool(human_other),

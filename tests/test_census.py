@@ -58,7 +58,8 @@ def test_page_size_is_interpolated_into_query():
 def test_pull_cell_checkpoints_and_skips_refetch(monkeypatch):
     calls = []
     monkeypatch.setattr(census, "graphql_nodes",
-                        lambda *a, **k: calls.append(1) or [{"number": 1}])
+                        lambda *a, **k: calls.append(1) or
+                        {"nodes": [{"number": 1}], "pageInfo": {"hasNextPage": False}})
     assert pull_cell("o/r", "2026-01-01..2026-01-31") == ([{"number": 1}], False)
     assert pull_cell("o/r", "2026-01-01..2026-01-31") == ([{"number": 1}], True)
     assert len(calls) == 1                # second call served from cell
@@ -67,10 +68,22 @@ def test_pull_cell_checkpoints_and_skips_refetch(monkeypatch):
 def test_pull_cell_repulls_corrupt_cell(monkeypatch):
     p = ghx.cell_path(census.STAGE, "o/r", "2026-01-01..2026-01-31")
     p.write_text(json.dumps({"errors": [{"type": "RATE_LIMIT"}]}))
-    monkeypatch.setattr(census, "graphql_nodes", lambda *a, **k: [{"number": 2}])
+    monkeypatch.setattr(census, "graphql_nodes",
+                        lambda *a, **k: {"nodes": [{"number": 2}],
+                                         "pageInfo": {"hasNextPage": False}})
     nodes, cached = pull_cell("o/r", "2026-01-01..2026-01-31")
     assert nodes == [{"number": 2}] and not cached
     assert json.loads(p.read_text()) == [{"number": 2}]
+
+
+def test_pull_cell_paginates_within_window(monkeypatch):
+    pages = [{"nodes": [{"number": i}], "pageInfo": {"hasNextPage": i < 2,
+                                                     "endCursor": f"c{i}"}}
+             for i in (1, 2)]
+    monkeypatch.setattr(census.time, "sleep", lambda s: None)
+    monkeypatch.setattr(census, "graphql_nodes", lambda *a, **k: pages.pop(0))
+    nodes, cached = pull_cell("o/r", "2026-03-01..2026-03-01")
+    assert [n["number"] for n in nodes] == [1, 2] and not cached
 
 
 def test_pull_cell_failure_writes_nothing(monkeypatch):
@@ -92,9 +105,10 @@ def test_census_big_repo_subwindowed(monkeypatch):
     monkeypatch.setattr(census, "rest_count", lambda *a, **k: 500)
     pulled = []
     monkeypatch.setattr(census, "pull_cell",
-                        lambda repo, rng: (pulled.append(rng) or [{}] * 50, False))
+                        lambda repo, rng: (pulled.append(rng) or [{}] * 42, False))
     n = census_repo_period("o/r", "Q1-2026", k=10)
-    assert n == 500 and len(pulled) == 10
+    # adaptive: 500 PRs need ceil(500*1.1/45)=13 windows, not the k=10 floor
+    assert len(pulled) == 13 and n == 13 * 42
 
 
 def test_census_cached_full_cell_skips_denominator_call(monkeypatch):
@@ -108,14 +122,25 @@ def test_census_cached_full_cell_skips_denominator_call(monkeypatch):
     assert census_repo_period("o/r", "Q1-2026", k=10) == 3
 
 
-def test_census_warns_on_undercount(monkeypatch, capsys):
-    """Review finding: sub-window saturation silently undercounted."""
-    monkeypatch.setattr(census, "rest_count", lambda *a, **k: 900)
+def test_census_fails_hard_on_saturation(monkeypatch, capsys):
+    """External review finding 4: saturation must FAIL, not warn-succeed.
+    Even adaptive windows can saturate on sub-day PR bursts."""
+    monkeypatch.setattr(census, "rest_count", lambda *a, **k: 6000)
     monkeypatch.setattr(census, "pull_cell",
                         lambda repo, rng: ([{}] * PAGE_SIZE, False))
+    # windows are capped at one per day (90), so 6000 PRs cannot fit
     n = census_repo_period("o/r", "Q1-2026", k=10)
-    assert n == 500
-    assert "collected 500/900" in capsys.readouterr().err
+    assert n is None
+    assert "FAIL" in capsys.readouterr().err
+
+
+def test_census_adaptive_windows_scale_with_volume(monkeypatch):
+    monkeypatch.setattr(census, "rest_count", lambda *a, **k: 3000)
+    pulled = []
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, rng: (pulled.append(rng) or [{}] * 40, False))
+    census_repo_period("o/r", "Q1-2026", k=10)
+    assert len(pulled) >= 70          # ceil(3300/45)=74 windows, not 10
 
 
 def test_census_denominator_failure_propagates(monkeypatch):
