@@ -67,12 +67,13 @@ Methodology: [`docs/METHODS.md`](docs/METHODS.md)**
 ## Reproduction
 
 ```bash
-uv sync && source .venv/bin/activate
-pytest -q
-python -m pipeline.org_set --verify         # population reconciliation
-# with the durable store present ($AIRD_DATA_DIR, ~26,800 census cells):
-python -m pipeline.analyze --contributors data/derived/repo_contributors_v2.csv
-python -m pipeline.integrate                # layered involvement table
+uv sync
+uv run pytest -q
+uv run python -m pipeline.org_set --verify   # population reconciliation
+# The raw census store ($AIRD_DATA_DIR) is not in this repo (large; contains
+# commit metadata) — available on request; analyze/integrate FAIL loudly
+# without it rather than printing empty reports. With the store present:
+uv run python scripts/regenerate.py          # full pipeline -> artifacts/report_generated.md
 ```
 
 Collection from scratch is ~36h wall-clock (GitHub API rate-limit bound) via

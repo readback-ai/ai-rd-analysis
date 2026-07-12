@@ -40,6 +40,7 @@ groupings (studies.slices) use top5_ai, not why.
 
 Usage:
   python -m pipeline.org_set            # write population.tsv, print summary
+  python -m pipeline.org_set --verify   # source/rule reconciliation report
   python -m pipeline.org_set --explain ORG
 """
 from __future__ import annotations
@@ -205,10 +206,33 @@ def population(scope: str | None = None) -> list[str]:
     return out
 
 
+def verify() -> None:
+    """Reconciliation report: source sizes, rule pass counts, scope split."""
+    cand = candidate_sources()
+    from collections import Counter
+    src_counts = Counter(t for tags in cand.values() for t in tags)
+    print("source tags:", dict(src_counts))
+    print(f"candidates (union): {len(cand)}")
+    pop = build()
+    scopes = Counter(s for s, *_ in pop.values())
+    whys = Counter(w for _, w, *_ in pop.values())
+    print(f"population: {len(pop)} = {dict(scopes)}; admission reasons: {dict(whys)}")
+    disk = set(population())
+    if disk != set(pop):
+        print(f"WARN population.tsv is STALE: +{sorted(set(pop) - disk)[:5]} "
+              f"-{sorted(disk - set(pop))[:5]} (rerun `python -m pipeline.org_set`)")
+    else:
+        print("population.tsv matches a fresh build")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--explain", metavar="ORG")
+    ap.add_argument("--verify", action="store_true")
     a = ap.parse_args()
+    if a.verify:
+        verify()
+        return
     pop = build()
     if a.explain:
         lo = a.explain.lower()

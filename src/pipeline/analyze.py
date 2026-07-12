@@ -102,10 +102,13 @@ def weighted_mean(pairs: list[tuple[float, float]]) -> float:
     return sum(v * w for v, w in pairs) / tot if tot else float("nan")
 
 
+_RNG = random.Random(20260630)      # seeded: reruns reproduce identical CIs
+
+
 def bootstrap_ci(pairs: list[tuple[float, float]], n: int = 2000) -> tuple[float, float]:
     if len(pairs) < 2:
         return (float("nan"), float("nan"))
-    stats = sorted(weighted_mean(random.choices(pairs, k=len(pairs))) for _ in range(n))
+    stats = sorted(weighted_mean(_RNG.choices(pairs, k=len(pairs))) for _ in range(n))
     return stats[int(0.025 * n)], stats[int(0.975 * n)]
 
 
@@ -131,6 +134,10 @@ def main() -> None:
                     pass
 
     grouped = group_by_period(load_cells(), QUARTER_RANGES)
+    if not grouped:
+        raise SystemExit("no census cells found in $AIRD_DATA_DIR — the "
+                         "external store is required (docs/METHODS.md §5); "
+                         "refusing to print an empty report")
     if a.repos:
         keep = {ln.split("\t")[0].strip() for ln in Path(a.repos).read_text().splitlines()
                 if ln.strip() and not ln.startswith("#")}
@@ -140,9 +147,12 @@ def main() -> None:
           "".join(f"{m:>18}" for m in METRICS))
     for per in QUARTER_RANGES:
         rows = []
+        unweighted = set()
         for (repo, p), prs in grouped.items():
             if p != per or len(prs) < a.min_prs:
                 continue
+            if repo not in weights:
+                unweighted.add(repo)
             ms = [pr_metrics(pr, markers) for pr in prs]
             rates = {}
             for m in METRICS:
@@ -151,6 +161,10 @@ def main() -> None:
             rows.append((repo, rates))
         if not rows:
             continue
+        if unweighted:
+            print(f"WARN {per}: {len(unweighted)} qualifying repos lack "
+                  f"contributor weights (default 1.0) — e.g. "
+                  f"{sorted(unweighted)[:3]}", flush=True)
         for label, wfn in (("equal-weight", lambda r: 1.0),
                            ("contrib-weight", lambda r: weights.get(r, 1.0))):
             line = f"{per:9}{label:16}{len(rows):>6}"

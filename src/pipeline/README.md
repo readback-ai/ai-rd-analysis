@@ -8,16 +8,18 @@ outside the worktree (`$AIRD_DATA_DIR`, default `~/devel/ai-rd-analysis-data`)
 so session/scratchpad loss never costs collected data. Re-running any stage
 skips cells that already validate; failed cells are retried on the next run.
 
+The end-to-end path is `scripts/regenerate.py` (staged, resumable). The
+stages it drives, runnable individually:
+
 ```
-PYTHONPATH=src python3 -m pipeline.org_set    --verify
-PYTHONPATH=src python3 -m pipeline.scan_orgs  --orgs data/derived/population.tsv \
-    --quarters Q1-2024 Q4-2025 Q1-2026 Q2-2026 --out scan.tsv
-PYTHONPATH=src python3 -m pipeline.enum_repos --orgs active_orgs.txt --out repos.tsv
-PYTHONPATH=src python3 -m pipeline.census     --repos repos.tsv
-PYTHONPATH=src python3 -m pipeline.branch_scan
-PYTHONPATH=src python3 -m pipeline.pull_prs   --prefix codex/ --out-dir data/derived/branch_samples/codex
-PYTHONPATH=src python3 -m pipeline.analyze    --bootstrap 2000
-PYTHONPATH=src python3 -m pipeline.integrate
+uv run python -m pipeline.org_set                   # -> data/derived/population.tsv
+uv run python -m pipeline.enum_strata               # repo-scoped orgs' AI repos
+uv run python -m pipeline.precount --repos data/derived/population_repos.txt
+uv run python -m pipeline.census   --repos data/derived/population_repos.txt
+uv run python -m pipeline.branch_scan               # layer-C org counts (evidence)
+uv run python -m pipeline.analyze  --repos data/derived/population_repos.txt \
+    --contributors data/derived/repo_contributors_v2.csv --bootstrap 2000
+uv run python -m pipeline.integrate                 # exact layer decomposition
 ```
 
 | stage | what | raw cells |

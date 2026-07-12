@@ -121,6 +121,9 @@ def layered_table() -> None:
     """Exact per-PR layer decomposition over the population manifest."""
     keep = set((V2 / "population_repos.txt").read_text().split())
     grouped = group_by_period(load_cells(), QUARTER_RANGES)
+    if not grouped:
+        raise SystemExit("no census cells in $AIRD_DATA_DIR — refusing to "
+                         "print an empty decomposition")
     agg: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
     for (repo, per), prs in grouped.items():
         if repo not in keep:

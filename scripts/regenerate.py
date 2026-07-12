@@ -8,9 +8,11 @@ modules, so rerunning after interruption is safe and cheap.
                       -> data/derived/population_repos.txt
   C. precount+census  fill cells for repos never censused (4 quarters)
   D. contributors     core-contributor weights for new repos
-  E. convergence      recompute census-based evidence; re-run org_set; warn
-                      if the population changed (uniform-evidence check)
-  F. report           analyze (contributor-weighted) on population_repos
+  E. convergence      recompute census-based evidence; re-run org_set; if
+                      the population changed, LOOP back to A (bounded) so new
+                      members are collected before reporting
+  F. report           analyze + integrate + slices written to
+                      artifacts/report_generated.md, plus a census manifest
 
 Run:  PYTHONPATH=src python scripts/regenerate.py
 """
@@ -90,6 +92,7 @@ def stage_d(repos_file: Path) -> None:
     print(f"pulling contributors for {len(todo)} repos", flush=True)
     with weights.open("a") as out:
         w = csv.writer(out)
+        failed = 0
         for repo in todo:
             r = subprocess.run(
                 ["gh", "api", f"repos/{repo}/contributors?per_page=100",
@@ -97,11 +100,17 @@ def stage_d(repos_file: Path) -> None:
                  '[.[] | select((.type != "Bot") and (.contributions >= 10))] | length'],
                 capture_output=True, text=True)
             counts = [int(x) for x in r.stdout.split() if x.strip().isdigit()]
-            w.writerow([repo, sum(counts) if r.returncode == 0 and counts else 1])
-            time.sleep(0.4)
+            if r.returncode == 0 and counts:
+                w.writerow([repo, sum(counts)])
+            else:
+                failed += 1          # do NOT record: a permanent weight=1 is
+            time.sleep(0.4)          # worse than a retry on the next run
+        if failed:
+            print(f"WARN: {failed} contributor pulls failed; rerun stage D "
+                  f"to retry (weights default to 1.0 until then)", flush=True)
 
 
-def stage_e() -> None:
+def stage_e() -> bool:
     print("=== E: evidence convergence check ===", flush=True)
     from pipeline.analyze import group_by_period, load_cells
     from pipeline.detect import (MARKERS_V2, pr_agent_author, pr_ai_tools,
@@ -121,24 +130,59 @@ def stage_e() -> None:
     run("pipeline.org_set")
     after = set(population())
     if before != after:
-        print(f"WARN population changed on uniform evidence: "
-              f"+{sorted(after - before)} -{sorted(before - after)}", flush=True)
-    else:
-        print("population stable under uniform census evidence", flush=True)
+        print(f"population changed on uniform evidence: "
+              f"+{sorted(after - before)} -{sorted(before - after)} — "
+              f"looping to collect new members", flush=True)
+        return False
+    print("population stable under uniform census evidence", flush=True)
+    return True
 
 
 def stage_f(repos_file: Path) -> None:
-    print("=== F: contributor-weighted report ===", flush=True)
-    run("pipeline.analyze", "--contributors", str(DRV / "repo_contributors_v2.csv"),
-        "--repos", str(repos_file), "--bootstrap", "1000")
+    """Write the generated report artifact + census manifest (the numbers
+    behind artifacts/results.md come from THIS file, not ad-hoc runs)."""
+    print("=== F: report artifact ===", flush=True)
+    import hashlib
+    out = Path("artifacts/report_generated.md")
+    with out.open("w") as fh:
+        fh.write("# GENERATED report — scripts/regenerate.py\n\n")
+        for title, args in (
+            ("Contributor-weighted metrics",
+             ["pipeline.analyze", "--contributors",
+              str(DRV / "repo_contributors_v2.csv"),
+              "--repos", str(repos_file), "--bootstrap", "2000"]),
+            ("Layered decomposition (pooled)", ["pipeline.integrate"]),
+            ("Slices: involvement", ["pipeline.studies.slices",
+                                     "--table", "involvement"]),
+            ("Slices: self-merge", ["pipeline.studies.slices",
+                                    "--table", "selfmerge"]),
+        ):
+            r = subprocess.run([sys.executable, "-m", *args],
+                               capture_output=True, text=True)
+            if r.returncode != 0:
+                raise SystemExit(f"{args[0]} failed:\n{r.stderr[-800:]}")
+            fh.write(f"## {title}\n```\n{r.stdout}\n```\n\n")
+    manifest = {
+        "population_repos": hashlib.sha256(
+            repos_file.read_bytes()).hexdigest()[:16],
+        "population": hashlib.sha256(
+            (DRV / "population.tsv").read_bytes()).hexdigest()[:16],
+        "repos": len(repos_file.read_text().split()),
+    }
+    (DRV / "census_manifest.json").write_text(json.dumps(manifest, indent=1))
+    print(f"wrote {out} + census_manifest.json", flush=True)
 
 
 if __name__ == "__main__":
-    stage_a()
+    for _round in range(3):            # fixed-point loop on the population
+        stage_a()
+        repos = stage_b()
+        stage_c(repos)
+        stage_d(repos)
+        if stage_e():
+            break
+    else:
+        raise SystemExit("population did not converge in 3 rounds")
     repos = stage_b()
-    stage_c(repos)
-    stage_d(repos)
-    stage_e()
-    repos = stage_b()          # strata may have grown if org_set changed
     stage_f(repos)
     print("=== REGENERATION COMPLETE ===", flush=True)
