@@ -83,11 +83,25 @@ def stage_b() -> Path:
     return out
 
 
+def inaccessible() -> set[str]:
+    p = DRV / "inaccessible_repos.txt"
+    return set(p.read_text().split()) if p.exists() else set()
+
+
 def stage_c(repos_file: Path) -> None:
+    """Collect cells for the manifest MINUS documented-inaccessible repos —
+    those stay in the population (coverage waives them) but must not be
+    retried forever nor checkpointed as fake zero-PR observations."""
     print("=== C: precount + census gap fill ===", flush=True)
-    run("pipeline.precount", "--repos", str(repos_file),
+    skip = inaccessible()
+    todo = [r for r in repos_file.read_text().split() if r not in skip]
+    filtered = DRV / "population_repos_collectable.txt"
+    filtered.write_text("\n".join(todo) + "\n")
+    print(f"collecting {len(todo)} repos ({len(skip)} documented "
+          f"inaccessible, waived)", flush=True)
+    run("pipeline.precount", "--repos", str(filtered),
         "--periods", "Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026")
-    run("pipeline.census", "--repos", str(repos_file),
+    run("pipeline.census", "--repos", str(filtered),
         "--periods", "Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026")
 
 
@@ -145,36 +159,65 @@ def stage_e() -> bool:
     return True
 
 
-def coverage_check(repos_file: Path) -> dict:
-    """Cell coverage over the manifest; FAIL unless every repo-period is
-    covered or its repo is documented inaccessible (review P1)."""
-    from pipeline.ghx import cell_path, read_cell
-    from pipeline.scan_orgs import QUARTER_RANGES
-    inaccessible = set()
-    p = DRV / "inaccessible_repos.txt"
-    if p.exists():
-        inaccessible = set(p.read_text().split())
-    repos = repos_file.read_text().split()
+def _quarter_covered(repo: str, rng: str) -> bool:
+    """True iff VALID cells' date ranges union to the full quarter with no
+    gaps (a lone first sub-window from a failed run must not count —
+    review P1). Cells are validated through read_cell (JSON shape)."""
+    from datetime import date, timedelta
+
+    from pipeline.ghx import cell_path, decode_cell_stem, read_cell
+    q_start, q_end = (date.fromisoformat(x) for x in rng.split(".."))
     store = cell_path("census-v2", "x", "y").parent
+    safe = repo.replace("/", "~")
+    spans = []
+    for f in store.glob(f"{safe}@*.json"):
+        parts = decode_cell_stem(f.stem)
+        if len(parts) != 2 or read_cell(f, list) is None:
+            continue
+        try:
+            a, b = (date.fromisoformat(x) for x in parts[1].split(".."))
+        except ValueError:
+            continue
+        if a <= q_end and b >= q_start:
+            spans.append((max(a, q_start), min(b, q_end)))
+    if not spans:
+        return False
+    spans.sort()
+    cursor = q_start
+    for a, b in spans:
+        if a > cursor:
+            return False                 # gap
+        cursor = max(cursor, b + timedelta(days=1))
+        if cursor > q_end:
+            return True
+    return cursor > q_end
+
+
+def coverage_check(repos_file: Path) -> dict:
+    """Cell coverage over the manifest; FAIL unless every repo-period has
+    gap-free valid-cell coverage or its repo is documented inaccessible."""
+    from pipeline.scan_orgs import QUARTER_RANGES
+    skip = inaccessible()
+    repos = repos_file.read_text().split()
     missing = []
-    covered = 0
+    covered = waived = 0
     for repo in repos:
         for per, rng in QUARTER_RANGES.items():
             if per == "Q3-2025":
                 continue
-            safe = repo.replace("/", "~")
-            if read_cell(cell_path("census-v2", repo, rng), list) is not None \
-                    or any(store.glob(f"{safe}@{rng.split('..')[0]}*")):
+            if repo in skip:
+                waived += 1
+            elif _quarter_covered(repo, rng):
                 covered += 1
-            elif repo not in inaccessible:
+            else:
                 missing.append((repo, per))
     total = len(repos) * 4
     if missing:
         raise SystemExit(f"census coverage incomplete: {len(missing)} "
                          f"repo-periods missing and not documented "
                          f"inaccessible, e.g. {missing[:5]}")
-    return {"repo_periods": total, "covered": covered,
-            "documented_inaccessible_repos": len(inaccessible)}
+    return {"repo_periods": total, "covered": covered, "waived": waived,
+            "documented_inaccessible_repos": len(skip)}
 
 
 def stage_f(repos_file: Path) -> None:
