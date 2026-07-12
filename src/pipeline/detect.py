@@ -132,10 +132,20 @@ BRANCH_PREFIXES = {
 def pr_branch_tool(pr: dict) -> str | None:
     """Layer C: the agent whose branch-naming convention the PR's head branch
     matches, if any. Requires headRefName in the PR node (census cells pulled
-    before 2026-07-08 lack it)."""
+    before 2026-07-08 lack it).
+
+    Measured false-positive class excluded: PRs whose commits are ALL
+    committed by github-actions[bot] — CI automation that names branches
+    after the product (e.g. claude/canary-*) without any agent involvement;
+    18.4% of C-only claude/ samples (studies.layer_c_precision)."""
     head = pr.get("headRefName") or ""
     for tool, prefix in BRANCH_PREFIXES.items():
         if head.startswith(prefix):
+            emails = [((c.get("commit") or {}).get("committer") or {}).get("email") or ""
+                      for c in (pr.get("commits") or {}).get("nodes") or []]
+            if emails and all(e.endswith("github-actions[bot]@users.noreply.github.com")
+                              for e in emails):
+                return None
             return tool
     return None
 

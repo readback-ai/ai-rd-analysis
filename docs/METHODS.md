@@ -79,8 +79,8 @@ beats every rule; inclusion asserts R3 only (quality/evidence still apply).
 
 Result (2026-07-10 run): **229 orgs = 182 full-org + 47 repo-scoped** (`population.tsv` is authoritative; docs quote it).
 Consequence for inference: the population is prominence-selected; findings
-describe practices at leading AI organizations, with the Q1-2024 same-repo
-census as the temporal control.
+describe practices at leading AI organizations, with the Q1-2024 census as
+the temporal control.
 
 Repo-level population: full-org members contribute repos passing the same
 R4 evidence rule (`enum_repos.py`); repo-scoped members contribute their
@@ -115,6 +115,22 @@ in this population the signal proved clean and large: exactly 0 prefix-named
 PRs in Q1-2024 (before the products existed — the built-in false-positive
 check) vs 3.8% of population PRs by Q2-2026. Layer C is reported as
 PR-level attribution, never commit-level proof.
+
+**Measured layer-C precision** (org-stratified samples, C-only PRs — no
+marker, no agent author; `studies.layer_c_precision`): the share carrying
+positive provenance signals (GitHub web-flow committer = agent cloud flow,
+or the product's machine-generated slug pattern) is codex/ 95%, copilot/
+98%, cursor/ 49%, claude/ 42%. One false-positive class was MEASURED and is
+EXCLUDED from detection: branches named after the product but committed
+entirely by github-actions[bot] (CI canaries; 18.4% of C-only claude/
+samples). The remainder (cursor/ 51%, claude/ 39%) is INDETERMINATE:
+user-pushed commits on a prefix branch are consistent both with an agent
+branch continued locally (true positive) and a human-named branch (false
+positive); the Q1-2024 zero shows no pre-product baseline of such naming,
+but fame-driven naming can grow with the period. Layer C for cursor/ and
+claude/ should therefore be read as convention-based attribution with
+bounded, stated uncertainty; codex/ and copilot/ are provenance-confirmed
+at the ~95% level.
 
 **Layer overlap** is measured, not assumed, on org-stratified samples
 (`pull_prs.sample_branch_prs`): A∩C ≈ 2% for codex/; B∩C is high for

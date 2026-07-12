@@ -5,6 +5,15 @@ computes it. Companion to `docs/METHODS.md` (population/detection/collection);
 this document covers classification → rates → aggregation → report layout.
 Source of truth for each definition is cited as `module.function`.
 
+## 0. Reading the Q1-2024 column
+
+Q1-2024 rows exist as a DETECTOR-VALIDITY CHECK and review-practice
+baseline, not an AI-usage estimate: none of the three detectable channels
+(trailers, agent bot accounts, agent branch conventions) existed yet, so the
+column is 0% BY CONSTRUCTION even though autocomplete-era assistance
+(Copilot suggestions) was already widespread and is invisible to every
+detection layer. Every generated table carries this caption.
+
 ## 1. Unit of observation and eligibility
 
 The unit is the PULL REQUEST, censused per (repo, quarter):
@@ -29,7 +38,7 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
 |---|---|---|
 | `marker_tools` (layer A) | any commit in the PR carries a tool marker: Claude (`noreply@anthropic.com` co-author / "Generated with [Claude Code]" footer), Cursor (`cursoragent@cursor.com`), aider trailer, Codex (`codex@openai.com` author or `chatgpt-codex-connector` committer) | commit-forensic, strongest evidence; floors — squash strips trailers; only first 12 commits fetched |
 | `agent_author` (layer B) | PR author is a Bot-typed account in `AGENT_PR_AUTHORS` (copilot-swe-agent, devin-ai-integration, cursor, google-labs-jules, codegen-sh, amazon-q-developer, factory-droid, claude) | the author IS the tool; no trailer needed |
-| `branch_tool` (layer C) | head branch matches an agent prefix: `codex/`, `copilot/`, `cursor/`, `claude/` | PR-level attribution only (commits carry user identity); empirically clean (0 pre-product hits in Q1-2024); requires census-v2 cells |
+| `branch_tool` (layer C) | head branch matches an agent prefix: `codex/`, `copilot/`, `cursor/`, `claude/` | PR-level attribution only; measured precision per prefix in METHODS §2 (codex/copilot ~95%+, cursor/claude carry indeterminate mass); all-github-actions-committed branches excluded as measured FPs; requires census-v2 cells |
 | **`ai_involved`** | **A ∪ B ∪ C — the PRIMARY metric** | an explicit lower bound on true AI involvement |
 | `merged` | `mergedAt` present and ≤ cutoff | |
 | `self_merged` | merged and `mergedBy.login == author.login` | None (excluded from rates) when the cell lacks `mergedBy` |

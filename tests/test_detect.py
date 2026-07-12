@@ -158,3 +158,14 @@ def test_events_after_cutoff_are_excluded():
     ok = dict(_pr_reviews(), mergedAt="2026-06-29T01:00:00Z",
               mergedBy={"login": "alice", "__typename": "User"})
     assert classify_pr(ok).merged and classify_pr(ok).self_merged is True
+
+
+def test_ci_committed_prefix_branch_is_not_layer_c():
+    """Measured FP class: CI automation naming branches claude/* commits via
+    github-actions[bot]; must not count as agent attribution."""
+    pr = {"headRefName": "claude/canary-llama_index-1",
+          "commits": {"nodes": [{"commit": {"committer": {
+              "email": "41898282+github-actions[bot]@users.noreply.github.com"}}}]}}
+    assert pr_branch_tool(pr) is None
+    pr["commits"]["nodes"].append({"commit": {"committer": {"email": "dev@x.com"}}})
+    assert pr_branch_tool(pr) == "claude"    # mixed committers still count

@@ -221,6 +221,12 @@ def stage_f(repos_file: Path) -> None:
     out = Path("artifacts/report_generated.md")
     with out.open("w") as fh:
         fh.write("# GENERATED report — scripts/regenerate.py\n\n")
+        fh.write("> Q1-2024 columns are a detector-validity check and "
+                 "review-practice baseline,\n> NOT an AI-usage estimate: the "
+                 "detectable channels (trailers, agent accounts,\n> branch "
+                 "conventions) did not exist yet, while autocomplete-era "
+                 "assistance was\n> already widespread and is invisible to "
+                 "every layer. All rates are floors.\n\n")
         for title, args in (
             ("Contributor-weighted metrics",
              ["pipeline.analyze", "--markers", "v2", "--contributors",

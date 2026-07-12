@@ -12,6 +12,9 @@ is STABLE when the evidence rule is recomputed uniformly from the census
 itself (stage E) — admission does not depend on scan-window quirks.
 
 ## 1. Headline series (contributor-weighted, % of PRs)
+> Caption: the Q1-2024 row is a detector-validity check and review-practice
+> baseline, not an AI-usage estimate — no detectable channel existed yet,
+> while autocomplete-era assistance was already widespread and invisible.
 
 | period | repos | AI-code (markers) | human review (reviewer!=author) | AI review | no review | merged | self-merged* |
 |---|---|---|---|---|---|---|---|
