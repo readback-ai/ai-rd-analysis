@@ -185,3 +185,18 @@ def test_small_absolute_deficit_tolerated_as_precount_drift(monkeypatch):
                         else ([{}] * 26, False))
     n = census_repo_period("o/r", "Q1-2026", k=2)
     assert n == 52          # 52/54: within max(2%, 3) allowance -> success
+
+
+def test_pull_cell_falls_back_to_small_pages_on_502(monkeypatch):
+    """Persistent 502s on 50-PR pages (pathological payloads) must retry the
+    window with small pages instead of failing the repo-period."""
+    calls = []
+    def fake_nodes(query, variables, jq, expect):
+        calls.append("small" if "first:5" in query else "big")
+        if "first:5" in query:
+            return {"nodes": [{"number": 9}], "pageInfo": {"hasNextPage": False}}
+        return None                      # big pages always 502
+    monkeypatch.setattr(census, "graphql_nodes", fake_nodes)
+    monkeypatch.setattr(census.time, "sleep", lambda s: None)
+    nodes, cached = pull_cell("o/r", "2025-12-21..2025-12-21")
+    assert nodes == [{"number": 9}] and "small" in calls

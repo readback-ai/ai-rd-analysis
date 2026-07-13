@@ -74,29 +74,44 @@ def subwindows(rng: str, k: int) -> list[str]:
     return out
 
 
+def _paginate(q: str, page_size: int) -> list | None:
+    """Cursor-paginate one window up to the search API's 1,000-node cap."""
+    query = PR_QUERY if page_size == PAGE_SIZE else \
+        PR_QUERY.replace(f"first:{PAGE_SIZE}", f"first:{page_size}")
+    nodes: list = []
+    cur = None
+    for _ in range(-(-1000 // page_size)):
+        variables = {"q": q, **({"cur": cur} if cur else {})}
+        page = graphql_nodes(query, variables, ".data.search", expect=dict)
+        if page is None:
+            return None
+        nodes.extend(n for n in page.get("nodes") or [])
+        pi = page.get("pageInfo") or {}
+        if not pi.get("hasNextPage"):
+            return nodes
+        cur = pi.get("endCursor")
+        time.sleep(1)
+    return nodes
+
+
 def pull_cell(repo: str, rng: str) -> tuple[list | None, bool]:
     """-> (nodes, was_cached). Cached hits cost no network and need no pacing.
-    Paginates within the window via search cursors (search API hard-caps at
-    1,000 nodes per query, i.e. 20 pages), so a one-day window holds up to
-    1,000 PRs — no realistic repo exceeds that."""
+    Paginates within the window via search cursors. Windows whose 50-PR pages
+    make GraphQL time out server-side (HTTP 502 — pathological payloads such
+    as giant commit messages) are retried with 5-PR pages: slower, but it is
+    the difference between pytorch/pytorch Q4-2025 completing and failing."""
     p = cell_path(STAGE, repo, rng)
     cached = read_cell(p, list)
     if cached is not None:
         return cached, True
     q = f"repo:{repo} is:pr created:{rng} sort:created-desc"
-    nodes: list = []
-    cur = None
-    for _ in range(20):
-        variables = {"q": q, **({"cur": cur} if cur else {})}
-        page = graphql_nodes(PR_QUERY, variables, ".data.search", expect=dict)
-        if page is None:
-            return None, False
-        nodes.extend(n for n in page.get("nodes") or [])
-        pi = page.get("pageInfo") or {}
-        if not pi.get("hasNextPage"):
-            break
-        cur = pi.get("endCursor")
-        time.sleep(1)
+    nodes = _paginate(q, PAGE_SIZE)
+    if nodes is None:
+        print(f"RETRY {repo} {rng}: small pages (502 dodge)",
+              file=sys.stderr, flush=True)
+        nodes = _paginate(q, 5)
+    if nodes is None:
+        return None, False
     tmp = p.with_suffix(".tmp")
     tmp.write_text(json.dumps(nodes))       # json.dumps output is valid JSON;
     tmp.replace(p)                          # atomic rename => complete-or-absent
@@ -150,8 +165,9 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
                 p = cell_path(STAGE, repo, r)
                 if p.exists():
                     p.unlink()
+    reason = "window pull failed" if failed else "count deficit"
     print(f"FAIL {repo} {period}: collected {n}/{total} PRs with "
-          f"{len(ranges)} sub-windows after a fresh re-pull",
+          f"{len(ranges)} sub-windows after a fresh re-pull ({reason})",
           file=sys.stderr, flush=True)
     return None
 
