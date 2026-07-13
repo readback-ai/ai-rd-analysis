@@ -161,6 +161,21 @@ def test_census_uses_precount_cache_over_rest(monkeypatch):
     assert census_repo_period("o/r", "Q1-2026", k=10) == 30
 
 
+def test_deficit_triggers_self_heal_repull(monkeypatch, capsys):
+    """Silently-incomplete cached cells (brownout empties) must be
+    invalidated and re-pulled once before failing."""
+    monkeypatch.setattr(census, "rest_count", lambda *a, **k: 100)
+    calls = {"n": 0}
+    def pull(repo, rng):
+        calls["n"] += 1
+        # first sweep: cached shorts; second sweep: complete
+        first_sweep = calls["n"] <= 3
+        return ([{}] * (10 if first_sweep else 34), first_sweep)
+    monkeypatch.setattr(census, "pull_cell", pull)
+    n = census_repo_period("o/r", "Q1-2026", k=3)
+    assert n == 102 and "HEAL" in capsys.readouterr().err
+
+
 def test_small_absolute_deficit_tolerated_as_precount_drift(monkeypatch):
     """PRs deleted after the precount snapshot leave permanent 1-3 PR gaps;
     those must not fail a 54-PR quarter forever."""

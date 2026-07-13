@@ -127,25 +127,42 @@ def graphql_budget_wait(min_remaining: int = 200) -> None:
         _budget["remaining"] = None      # force re-poll after the reset
 
 
+def _walk(val: object, jq: str) -> object:
+    """Resolve a simple dotted jq path ('.data.search') against a parsed
+    response. Needed because gh does NOT apply --jq when it exits nonzero
+    (node-level errors): stdout is then the raw {data, errors} envelope."""
+    for part in jq.lstrip(".").split("."):
+        if not part:
+            continue
+        if not isinstance(val, dict):
+            return None
+        val = val.get(part)
+    return val
+
+
 def graphql_nodes(query: str, variables: dict[str, object],
                   jq: str, expect: type = list,
                   retries: int = 5) -> object | None:
     """Run a GraphQL query, return the jq-extracted value only if it parses
-    as `expect`. Handles rate limits by sleeping to reset. None = failed."""
+    as `expect`. Handles rate limits by sleeping to reset, and tolerates
+    node-level errors (ghost accounts) by extracting from the raw envelope
+    when gh skipped jq. None = failed."""
     args = ["api", "graphql", "-f", f"query={query}"]
     for k, v in variables.items():
         args += (["-F", f"{k}={v}"] if isinstance(v, int) else ["-f", f"{k}={v}"])
     args += ["--jq", jq]
     for _ in range(retries):
         graphql_budget_wait()
-        out = _gh(args, allow_partial=True)   # shape check below guards garbage
+        out = _gh(args, allow_partial=True)
         if out:
             try:
                 val = json.loads(out)
-                if isinstance(val, expect):
-                    return val
             except json.JSONDecodeError:
-                pass
+                val = None
+            if isinstance(val, dict) and "data" in val and "errors" in val:
+                val = _walk(val, jq)      # raw envelope: jq was not applied
+            if isinstance(val, expect):
+                return val
         time.sleep(5)
     return None
 

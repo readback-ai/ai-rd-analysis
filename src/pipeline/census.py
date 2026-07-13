@@ -123,25 +123,37 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
         return None
     k = max(k, -(-total * 11 // (10 * (PAGE_SIZE - 5))))   # ceil w/ headroom
     ranges = [rng] if total <= PAGE_SIZE else subwindows(rng, k)
-    n = 0
-    for r in ranges:
-        nodes, was_cached = pull_cell(repo, r)
-        if nodes is None:
-            return None
-        n += len(nodes)
-        if not was_cached:
-            time.sleep(1)
-    if n < total * 0.98 and total - n > 3:
-        # Percentage AND absolute allowance: precount denominators are
-        # snapshots, and PRs deleted after the snapshot make small deficits
-        # permanent (cells are cached) — a 2-PR gap on a 54-PR quarter is
-        # drift, not saturation. Larger deficits still fail hard.
-        print(f"FAIL {repo} {period}: collected {n}/{total} PRs with "
-              f"{len(ranges)} sub-windows (saturation or stale precount — "
-              f"refresh the precount cell if capacity was sufficient)",
-              file=sys.stderr, flush=True)
-        return None
-    return n
+    for attempt in (0, 1):
+        n = 0
+        failed = False
+        for r in ranges:
+            nodes, was_cached = pull_cell(repo, r)
+            if nodes is None:
+                failed = True
+                break
+            n += len(nodes)
+            if not was_cached:
+                time.sleep(1)
+        if not failed and (n >= total * 0.98 or total - n <= 3):
+            # percentage AND absolute allowance: PRs deleted after the
+            # precount snapshot make small deficits permanent drift
+            return n
+        if attempt == 0:
+            # SELF-HEAL: cached cells can be silently incomplete (search
+            # brownouts return 200 with empty results, which cache as valid
+            # empties). Invalidate this period's cells and re-pull once
+            # before declaring failure.
+            print(f"HEAL {repo} {period}: collected {n}/{total}; "
+                  f"invalidating {len(ranges)} cells and re-pulling",
+                  file=sys.stderr, flush=True)
+            for r in ranges:
+                p = cell_path(STAGE, repo, r)
+                if p.exists():
+                    p.unlink()
+    print(f"FAIL {repo} {period}: collected {n}/{total} PRs with "
+          f"{len(ranges)} sub-windows after a fresh re-pull",
+          file=sys.stderr, flush=True)
+    return None
 
 
 def main() -> None:

@@ -99,12 +99,14 @@ def test_graphql_tolerates_node_level_errors_with_complete_data(monkeypatch):
     """PRs referencing deleted (ghost) accounts make gh exit nonzero while
     stdout still holds complete extracted data; shape validation accepts it.
     Twelve repo-periods failed deterministically on this."""
-    import subprocess as sp
 
     def fake_run(cmd, **kw):
         class R:
             returncode = 1
-            stdout = '{"nodes": [{"number": 1}], "pageInfo": {"hasNextPage": false}}'
+            # gh does NOT apply --jq on nonzero exit: raw envelope on stdout
+            stdout = ('{"data": {"search": {"nodes": [{"number": 1}], '
+                      '"pageInfo": {"hasNextPage": false}}}, '
+                      '"errors": [{"type": "NOT_FOUND"}]}')
             stderr = "gh: Not Found\n"
         return R()
     monkeypatch.setattr(ghx.subprocess, "run", fake_run)
