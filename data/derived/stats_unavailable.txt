@@ -1,0 +1,9 @@
+# Repos where GitHub never materializes stats/contributors (permanent 202/404);
+# their contributor weight defaults to 1.0 and analyze warns. Documented waiver,
+# mirroring inaccessible_repos.txt for the census.
+agno-agi/pal
+alibaba/SRDiffusion
+apple/ml-interspeech2022-phi_rtn
+firecrawl/openai-structured-outputs-with-firecrawl
+google/agamotto
+sgl-project/ci-data

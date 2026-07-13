@@ -78,7 +78,13 @@ def main() -> None:
     else:
         out.write_text("repo,core_contributors_window\n")
         have = {"repo"}
-    repos = [r for r in Path(a.repos).read_text().split() if r not in have]
+    waived_file = Path("data/derived/stats_unavailable.txt")
+    waived = {ln for ln in waived_file.read_text().split()
+              if not ln.startswith("#")} if waived_file.exists() else set()
+    repos = [r for r in Path(a.repos).read_text().split()
+             if r not in have and r not in waived]
+    if waived:
+        print(f"waived (stats permanently unavailable): {len(waived)}", flush=True)
     failed = 0
     with out.open("a") as fh:
         w = csv.writer(fh)
