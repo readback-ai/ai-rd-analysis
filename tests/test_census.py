@@ -159,3 +159,14 @@ def test_census_uses_precount_cache_over_rest(monkeypatch):
     monkeypatch.setattr(census, "rest_count", boom)
     monkeypatch.setattr(census, "pull_cell", lambda repo, rng: ([{}] * 30, False))
     assert census_repo_period("o/r", "Q1-2026", k=10) == 30
+
+
+def test_small_absolute_deficit_tolerated_as_precount_drift(monkeypatch):
+    """PRs deleted after the precount snapshot leave permanent 1-3 PR gaps;
+    those must not fail a 54-PR quarter forever."""
+    monkeypatch.setattr(census, "rest_count", lambda *a, **k: 54)
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, rng: ([{}] * 26, False) if "01-01" in rng
+                        else ([{}] * 26, False))
+    n = census_repo_period("o/r", "Q1-2026", k=2)
+    assert n == 52          # 52/54: within max(2%, 3) allowance -> success

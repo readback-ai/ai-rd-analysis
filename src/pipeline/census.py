@@ -127,9 +127,14 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
         n += len(nodes)
         if not was_cached:
             time.sleep(1)
-    if n < total * 0.98:            # search totals drift by a PR or two
-        print(f"FAIL {repo} {period}: collected {n}/{total} PRs even with "
-              f"{len(ranges)} sub-windows (sub-day saturation)",
+    if n < total * 0.98 and total - n > 3:
+        # Percentage AND absolute allowance: precount denominators are
+        # snapshots, and PRs deleted after the snapshot make small deficits
+        # permanent (cells are cached) — a 2-PR gap on a 54-PR quarter is
+        # drift, not saturation. Larger deficits still fail hard.
+        print(f"FAIL {repo} {period}: collected {n}/{total} PRs with "
+              f"{len(ranges)} sub-windows (saturation or stale precount — "
+              f"refresh the precount cell if capacity was sufficient)",
               file=sys.stderr, flush=True)
         return None
     return n
