@@ -1,14 +1,14 @@
-OpenBMB/VoxCPM
 agentscope-ai/agentscope-bricks
 agentscope-ai/agentscope-java
+agno-agi/pal
 alibaba/sec-code-bench
 anysphere/relay
 anysphere/whitepaper
 apache/airflow-publish
 apache/burr
-apache/casbin-Talent2026
 apache/casbin-gateway
 apache/casbin-mcp-gateway
+apache/casbin-Talent2026
 apache/cloudberry-devops-release
 apache/cloudberry-go-libs
 apache/cloudberry-gpbackup-s3-plugin
@@ -46,6 +46,7 @@ oceanbase/seekdb
 oceanbase/seekdb-bindings
 onyx-dot-app/agent-wiki
 onyx-dot-app/documentation
+OpenBMB/VoxCPM
 plastic-labs/honcho
 stanfordnlp/pyvene
 stepfun-ai/Step-3.5-Flash
@@ -59,7 +60,6 @@ vllm-project/guidellm
 vllm-project/llm-compressor
 vllm-project/perf-eval
 vllm-project/vllm-xpu-kernels
-weaviate/Verba
 weaviate/csharp-client
 weaviate/csharp-client-managed
 weaviate/docs
@@ -68,3 +68,4 @@ weaviate/github-common-actions
 weaviate/java-client
 weaviate/mcp-server-weaviate
 weaviate/t2v-model2vec-models
+weaviate/Verba
