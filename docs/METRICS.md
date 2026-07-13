@@ -38,7 +38,7 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
 |---|---|---|
 | `marker_tools` (layer A) | any commit in the PR carries a tool marker: Claude (`noreply@anthropic.com` co-author / "Generated with [Claude Code]" footer), Cursor (`cursoragent@cursor.com`), aider trailer, Codex (`codex@openai.com` author or `chatgpt-codex-connector` committer) | commit-forensic, strongest evidence; floors — squash strips trailers; only first 12 commits fetched |
 | `agent_author` (layer B) | PR author is a Bot-typed account in `AGENT_PR_AUTHORS` (copilot-swe-agent, devin-ai-integration, cursor, google-labs-jules, codegen-sh, amazon-q-developer, factory-droid, claude) | the author IS the tool; no trailer needed |
-| `branch_tool` (layer C) | head branch matches an agent prefix: `codex/`, `copilot/`, `cursor/`, `claude/` | PR-level attribution only; measured precision per prefix in METHODS §2 (codex/copilot ~95%+, cursor/claude carry indeterminate mass); all-github-actions-committed branches excluded as measured FPs; requires census-v2 cells |
+| `branch_tool` (layer C) | head branch matches an agent prefix: `codex/`, `copilot/`, `cursor/`, `claude/` | PR-level attribution only; measured precision per prefix in METHODS §2 (codex/copilot ~95%+; cursor/claude indeterminates are the study's only potential overcount, bounded at 0.06pp on the Q2-2026 headline — report section 6); all-github-actions-committed branches excluded as measured FPs; requires census-v2 cells |
 | **`ai_involved`** | **A ∪ B ∪ C — the PRIMARY metric** | an explicit lower bound on true AI involvement |
 | `merged` | `mergedAt` present and ≤ cutoff | |
 | `self_merged` | merged and `mergedBy.login == author.login` | None (excluded from rates) when the cell lacks `mergedBy` |
@@ -112,6 +112,9 @@ inaccessibility waiver. The report has five sections:
    series restricted to repos qualifying in ALL four quarters, next to the
    repeated cross-section, separating adoption growth from cohort
    composition (METHODS §1 estimand note).
+6. **Two-sided bound** (`--table bounds`) — headline `ai_involved` with and
+   without the weak-prefix (cursor/, claude/) indeterminate C-only PRs; the
+   study's single potential overcount, quantified (METHODS §2).
 
 Alongside the report, `data/derived/census_manifest.json` records SHA-256
 prefixes of the population files, repo count, and cell-coverage numbers

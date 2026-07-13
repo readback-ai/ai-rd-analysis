@@ -127,9 +127,31 @@ BRANCH_PREFIXES = {
     "cursor": "cursor/",
     "claude": "claude/",
 }
+# Measured C-only precision is ~95%+ for codex//copilot/ but cursor//claude/
+# carry an INDETERMINATE mass (user-pushed commits on a prefix branch:
+# agent-branch-continued-locally and human-named-branch are observationally
+# identical). These are the study's only potential OVERCOUNT; the headline is
+# therefore reported as a two-sided bound (studies.slices --table bounds).
+WEAK_PREFIXES = {"cursor", "claude"}
+_SLUG = {
+    "codex": __import__("re").compile(r"^codex/[a-z0-9][a-z0-9-]*$"),
+    "cursor": __import__("re").compile(r"^cursor/.+-[0-9a-f]{4}$"),
+    "claude": __import__("re").compile(r"^claude/(issue-\d+|[a-z]+-[a-z]+-[0-9a-f]{4,})"),
+    "copilot": __import__("re").compile(r"^copilot/[a-z0-9][a-z0-9-]*$"),
+}
 
 
-def pr_branch_tool(pr: dict) -> str | None:
+def branch_provenance_confirmed(pr: dict, tool: str) -> bool:
+    """Positive provenance for a prefix branch: an agent-cloud web-flow
+    committer on any commit, or the product's machine-slug pattern."""
+    for c in (pr.get("commits") or {}).get("nodes") or []:
+        email = ((c.get("commit") or {}).get("committer") or {}).get("email")
+        if email == "noreply@github.com":
+            return True
+    return bool(_SLUG[tool].match(pr.get("headRefName") or ""))
+
+
+def pr_branch_tool(pr: dict, strict: bool = False) -> str | None:
     """Layer C: the agent whose branch-naming convention the PR's head branch
     matches, if any. Requires headRefName in the PR node (census cells pulled
     before 2026-07-08 lack it).
@@ -137,7 +159,10 @@ def pr_branch_tool(pr: dict) -> str | None:
     Measured false-positive class excluded: PRs whose commits are ALL
     committed by github-actions[bot] — CI automation that names branches
     after the product (e.g. claude/canary-*) without any agent involvement;
-    18.4% of C-only claude/ samples (studies.layer_c_precision)."""
+    18.4% of C-only claude/ samples (studies.layer_c_precision).
+
+    strict=True additionally requires positive provenance for the WEAK
+    prefixes (cursor/, claude/) — the lower arm of the two-sided bound."""
     head = pr.get("headRefName") or ""
     for tool, prefix in BRANCH_PREFIXES.items():
         if head.startswith(prefix):
@@ -145,6 +170,9 @@ def pr_branch_tool(pr: dict) -> str | None:
                       for c in (pr.get("commits") or {}).get("nodes") or []]
             if emails and all(e.endswith("github-actions[bot]@users.noreply.github.com")
                               for e in emails):
+                return None
+            if strict and tool in WEAK_PREFIXES \
+                    and not branch_provenance_confirmed(pr, tool):
                 return None
             return tool
     return None

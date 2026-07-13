@@ -169,3 +169,20 @@ def test_ci_committed_prefix_branch_is_not_layer_c():
     assert pr_branch_tool(pr) is None
     pr["commits"]["nodes"].append({"commit": {"committer": {"email": "dev@x.com"}}})
     assert pr_branch_tool(pr) == "claude"    # mixed committers still count
+
+
+def test_strict_layer_c_requires_provenance_on_weak_prefixes():
+    """Two-sided-bound lower arm: weak prefixes need web-flow or slug."""
+    human_named = {"headRefName": "claude/eval-ci-docs",
+                   "commits": {"nodes": [{"commit": {"committer": {"email": "dev@x.com"}}}]}}
+    assert pr_branch_tool(human_named) == "claude"          # upper arm counts it
+    assert pr_branch_tool(human_named, strict=True) is None  # lower arm drops it
+    web_flow = {"headRefName": "claude/eval-ci-docs",
+                "commits": {"nodes": [{"commit": {"committer": {"email": "noreply@github.com"}}}]}}
+    assert pr_branch_tool(web_flow, strict=True) == "claude"
+    slugged = {"headRefName": "cursor/fix-redis-2a9c", "commits": {"nodes": [
+        {"commit": {"committer": {"email": "dev@x.com"}}}]}}
+    assert pr_branch_tool(slugged, strict=True) == "cursor"
+    # strong prefixes unaffected by strict
+    codex = {"headRefName": "codex/fix-tests", "commits": {"nodes": []}}
+    assert pr_branch_tool(codex, strict=True) == "codex"

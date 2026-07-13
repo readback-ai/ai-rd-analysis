@@ -25,7 +25,8 @@ from pathlib import Path
 
 from pipeline.analyze import (bootstrap_ci, group_by_period, load_cells,
                               weighted_mean)
-from pipeline.detect import MARKERS_V2, classify_pr
+from pipeline.detect import (MARKERS_V2, classify_pr, pr_agent_author,
+                             pr_ai_tools, pr_branch_tool)
 from pipeline.scan_orgs import QUARTER_RANGES
 
 SRC = Path("data/sources")
@@ -143,6 +144,39 @@ def table(metrics: list[str], header: str) -> None:
             print(line)
 
 
+def bounds() -> None:
+    """The study's single two-sided bound (METHODS §2): headline CW
+    ai_involved WITH the weak-prefix (cursor/, claude/) indeterminate C-only
+    PRs (upper arm, the reported headline) and WITHOUT them (lower arm —
+    weak prefixes count only with positive provenance). Everything else in
+    the study is a one-sided floor."""
+    keep = population_repos()
+    w = weights()
+    per_repo: dict[str, dict[tuple, list]] = {"hi": defaultdict(list), "lo": defaultdict(list)}
+    from pipeline.analyze import group_by_period, load_cells
+    from pipeline.scan_orgs import QUARTER_RANGES
+    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
+        if repo not in keep or len(prs) < MIN_PRS or per not in PERIODS:
+            continue
+        n = len(prs)
+        def involved(p, strict):
+            return bool(pr_ai_tools(p, MARKERS_V2)
+                        or pr_agent_author(p)
+                        or pr_branch_tool(p, strict=strict))
+        per_repo["hi"][per].append((sum(involved(p, False) for p in prs) / n,
+                                    w.get(repo, 1.0)))
+        per_repo["lo"][per].append((sum(involved(p, True) for p in prs) / n,
+                                    w.get(repo, 1.0)))
+    print("headline ai_involved: two-sided bound (CW)")
+    print(f"{'period':9}{'upper (reported)':>20}{'lower (strict C)':>20}{'delta pp':>10}")
+    for per in PERIODS:
+        hi, lo = per_repo["hi"][per], per_repo["lo"][per]
+        if not hi:
+            continue
+        mh, ml = weighted_mean(hi), weighted_mean(lo)
+        print(f"{per:9}{100*mh:>19.2f}%{100*ml:>19.2f}%{100*(mh-ml):>9.2f}")
+
+
 def balanced_panel() -> None:
     """Sensitivity check promised in METHODS §1: the headline series on the
     BALANCED panel — only repos that qualify (>= MIN_PRS PRs) in every
@@ -169,7 +203,8 @@ def balanced_panel() -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--table", choices=["involvement", "selfmerge", "panel"],
+    ap.add_argument("--table",
+                    choices=["involvement", "selfmerge", "panel", "bounds"],
                     default="involvement")
     a = ap.parse_args()
     if a.table == "involvement":
@@ -177,6 +212,8 @@ def main() -> None:
               "AI involvement (A∪B∪C) by slice")
     elif a.table == "panel":
         balanced_panel()
+    elif a.table == "bounds":
+        bounds()
     else:
         table(["self_merged", "ai_of_selfm", "ai_of_otherm",
                "humrev_selfm_ai", "humrev_selfm_non"],

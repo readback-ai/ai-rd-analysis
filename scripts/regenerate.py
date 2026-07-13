@@ -239,6 +239,8 @@ def stage_f(repos_file: Path) -> None:
                                     "--table", "selfmerge"]),
             ("Balanced-panel sensitivity", ["pipeline.studies.slices",
                                             "--table", "panel"]),
+            ("Two-sided bound (weak-prefix indeterminates)",
+             ["pipeline.studies.slices", "--table", "bounds"]),
         ):
             r = subprocess.run([sys.executable, "-m", *args],
                                capture_output=True, text=True)
