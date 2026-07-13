@@ -93,3 +93,34 @@ def test_graphql_nodes_returns_valid_list(monkeypatch):
     monkeypatch.setattr(ghx, "graphql_budget_wait", lambda **k: None)
     monkeypatch.setattr(ghx, "_gh", lambda *a, **k: '[{"number": 1}]')
     assert ghx.graphql_nodes("q", {}, ".data", expect=list) == [{"number": 1}]
+
+
+def test_graphql_tolerates_node_level_errors_with_complete_data(monkeypatch):
+    """PRs referencing deleted (ghost) accounts make gh exit nonzero while
+    stdout still holds complete extracted data; shape validation accepts it.
+    Twelve repo-periods failed deterministically on this."""
+    import subprocess as sp
+
+    def fake_run(cmd, **kw):
+        class R:
+            returncode = 1
+            stdout = '{"nodes": [{"number": 1}], "pageInfo": {"hasNextPage": false}}'
+            stderr = "gh: Not Found\n"
+        return R()
+    monkeypatch.setattr(ghx.subprocess, "run", fake_run)
+    monkeypatch.setattr(ghx, "graphql_budget_wait", lambda **k: None)
+    out = ghx.graphql_nodes("q", {}, ".data.search", expect=dict)
+    assert out == {"nodes": [{"number": 1}], "pageInfo": {"hasNextPage": False}}
+
+
+def test_rest_count_still_rejects_nonzero_exit(monkeypatch):
+    """allow_partial is GraphQL-only; REST counts must not trust error runs."""
+    def fake_run(cmd, **kw):
+        class R:
+            returncode = 1
+            stdout = "12345"
+            stderr = "boom"
+        return R()
+    monkeypatch.setattr(ghx.subprocess, "run", fake_run)
+    monkeypatch.setattr(ghx.time, "sleep", lambda s: None)
+    assert ghx.rest_count("q", retries=2) is None

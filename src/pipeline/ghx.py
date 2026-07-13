@@ -70,10 +70,20 @@ def cell_valid(path: Path, expect: type = list) -> bool:
 
 # ---------------------------------------------------------------- gh wrappers
 
-def _gh(args: list[str], timeout: int = 90) -> str | None:
+def _gh(args: list[str], timeout: int = 90,
+        allow_partial: bool = False) -> str | None:
+    """allow_partial: GraphQL responses may carry node-level errors (deleted
+    "ghost" accounts referenced by a PR) alongside COMPLETE data; gh exits
+    nonzero on any errors array, but the jq-extracted data on stdout is
+    usable. Callers that validate response shape may accept it — dropping
+    whole repo-periods over one ghost user is the worse failure."""
     try:
         r = subprocess.run(["gh"] + args, capture_output=True, text=True, timeout=timeout)
-        return r.stdout if r.returncode == 0 else None
+        if r.returncode == 0:
+            return r.stdout
+        if allow_partial and r.stdout and r.stdout.strip():
+            return r.stdout
+        return None
     except subprocess.TimeoutExpired:
         return None
 
@@ -128,7 +138,7 @@ def graphql_nodes(query: str, variables: dict[str, object],
     args += ["--jq", jq]
     for _ in range(retries):
         graphql_budget_wait()
-        out = _gh(args)
+        out = _gh(args, allow_partial=True)   # shape check below guards garbage
         if out:
             try:
                 val = json.loads(out)
