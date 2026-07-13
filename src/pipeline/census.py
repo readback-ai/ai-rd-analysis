@@ -7,9 +7,13 @@ sub-windows of up to PAGE_SIZE each (uniform-over-time, avoids window-tail
 bias). Collected-vs-total is checked and any undercount is WARNed — silent
 truncation is how a census quietly becomes a biased sample.
 
-Every cell is checkpointed to raw/census/ and only counted done if it parses
-as a JSON array (rate-limit error objects are never written — see ghx).
-Cached cells cost no network calls and no sleeps, so resume runs are fast.
+Every cell is checkpointed and only counted done if it parses as a JSON
+array (rate-limit error objects are never written — see ghx); writes are
+atomic. Cached cells cost no network calls and no sleeps, so resume runs are
+fast. Known cache-poisoning mode: during degraded search moments GitHub can
+return HTTP 200 with EMPTY result sets, which are valid JSON and get cached;
+the per-repo-period completeness gate catches this as a deterministic
+deficit — the remedy is wiping that period's cells so they re-pull.
 
 Usage:
   python -m pipeline.census --repos repos.tsv \
