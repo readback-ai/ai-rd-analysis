@@ -111,7 +111,24 @@ def repo_rates() -> dict[tuple[str, str], dict[str, float | None]]:
 
         def rate(hits: int, base: int) -> float | None:
             return hits / base if base >= _floor() else None
+        rev2x2 = {}
+        if len(merged) >= _floor():
+            m = len(merged)
+            rev2x2 = {
+                "m_hum_only": sum(c.human_reviewed and not c.ai_reviewed
+                                  for c in merged) / m,
+                "m_ai_only": sum(c.ai_reviewed and not c.human_reviewed
+                                 for c in merged) / m,
+                "m_both": sum(c.human_reviewed and c.ai_reviewed
+                              for c in merged) / m,
+                "m_neither": sum(not c.human_reviewed and not c.ai_reviewed
+                                 for c in merged) / m,
+            }
         out[(repo, per)] = {
+            "m_hum_only": rev2x2.get("m_hum_only"),
+            "m_ai_only": rev2x2.get("m_ai_only"),
+            "m_both": rev2x2.get("m_both"),
+            "m_neither": rev2x2.get("m_neither"),
             "ai_involved": len(ai) / n,
             "hum_rev": sum(c.human_reviewed for c in cls) / n,
             "ai_rev": sum(c.ai_reviewed for c in cls) / n,
@@ -218,7 +235,8 @@ def main() -> None:
     global GRANULARITY
     ap = argparse.ArgumentParser()
     ap.add_argument("--table",
-                    choices=["involvement", "selfmerge", "panel", "bounds"],
+                    choices=["involvement", "selfmerge", "panel", "bounds",
+                             "reviewers"],
                     default="involvement")
     ap.add_argument("--granularity", choices=["quarter", "month"],
                     default="quarter")
@@ -231,6 +249,9 @@ def main() -> None:
         balanced_panel()
     elif a.table == "bounds":
         bounds()
+    elif a.table == "reviewers":
+        table(["m_hum_only", "m_ai_only", "m_both", "m_neither"],
+              "reviewer profile of MERGED PRs by slice")
     else:
         table(["self_merged", "ai_of_selfm", "ai_of_otherm",
                "humrev_selfm_ai", "humrev_selfm_non"],

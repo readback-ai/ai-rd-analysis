@@ -52,6 +52,15 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
 Disjoint layer decomposition (for the layered table only): B wins over A wins
 over C, so each PR counts once (`integrate.layered_table`).
 
+### 2b. Merged-conditioned review metrics
+Unmerged PRs are implicitly reviewed-and-rejected (merge triage), so reviewer
+coverage OF WHAT SHIPS is reported separately: `m_hum_rev`, `m_ai_rev`,
+`m_no_rev` (analyze columns, None-skip conditioning on merged) and the
+2x2 reviewer profile (`slices --table reviewers`: human-only / AI-only /
+both / neither, per slice). Key property: conditioned on merging, any-human
+review coverage ROSE vs the 2024 baseline while all-PRs coverage fell —
+both framings are reported.
+
 ## 3. From PRs to rates (per repo-quarter)
 
 - **`analyze.pr_metrics`**: per-repo-quarter rate = share of that repo's

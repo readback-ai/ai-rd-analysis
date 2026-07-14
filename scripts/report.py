@@ -42,6 +42,8 @@ def sections(granularity: str, repos: Path) -> list[tuple[str, list[str]]]:
          ["pipeline.studies.slices", *g, "--table", "selfmerge"]),
         ("Balanced-panel sensitivity",
          ["pipeline.studies.slices", *g, "--table", "panel"]),
+        ("Reviewer profile of merged PRs (unmerged = implicitly rejected)",
+         ["pipeline.studies.slices", *g, "--table", "reviewers"]),
         ("Two-sided bound (weak-prefix indeterminates)",
          ["pipeline.studies.slices", *g, "--table", "bounds"]),
     ]

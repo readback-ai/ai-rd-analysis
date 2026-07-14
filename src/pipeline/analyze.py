@@ -129,11 +129,19 @@ def pr_metrics(pr: dict, markers: dict) -> dict:
         "insider": c.insider,
         # None (field absent in pre-2026-07-08 cells) -> skipped by rate calc
         "self_merged": c.self_merged,
+        # merged-conditioned rates (None on unmerged PRs -> conditioning by
+        # skip): unmerged PRs are implicitly reviewed-and-rejected, so
+        # reviewer coverage OF WHAT SHIPS is its own question (METRICS §2b)
+        "m_hum_rev": c.human_reviewed if c.merged else None,
+        "m_ai_rev": c.ai_reviewed if c.merged else None,
+        "m_no_rev": (not c.human_reviewed and not c.ai_reviewed
+                     and not c.other_bot_reviewed) if c.merged else None,
     }
 
 
 METRICS = ["ai_code", "ai_involved", "merged", "human_review", "human_rev_other",
-           "ai_review", "other_bot_review", "no_review", "insider", "self_merged"]
+           "ai_review", "other_bot_review", "no_review", "insider", "self_merged",
+           "m_hum_rev", "m_ai_rev", "m_no_rev"]
 
 
 def weighted_mean(pairs: list[tuple[float, float]]) -> float:
