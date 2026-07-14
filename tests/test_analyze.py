@@ -152,8 +152,6 @@ def test_weights_reader_accepts_window_column(tmp_path):
     """The window weights file's header differs; silently dropping every
     weight made contrib-weight identical to equal-weight in a generated
     report."""
-    import subprocess
-    import sys
     f = tmp_path / "w.csv"
     f.write_text("repo,core_contributors_window\no/r,7\n")
     # exercise the same parsing path
@@ -163,3 +161,16 @@ def test_weights_reader_accepts_window_column(tmp_path):
         val = row.get("core_contributors_window", row.get("core_contributors"))
         weights[row["repo"]] = max(float(val), 1.0)
     assert weights == {"o/r": 7.0}
+
+
+def test_month_granularity_buckets_by_created_at():
+    from pipeline.analyze import group_by_period
+    cells = {("o/r", "2026-04-01..2026-06-30"): [
+        {"number": 1, "createdAt": "2026-04-15T00:00:00Z"},
+        {"number": 2, "createdAt": "2026-05-02T00:00:00Z"},
+        {"number": 3, "createdAt": "2026-05-30T00:00:00Z"}]}
+    g = group_by_period(cells, QUARTER_RANGES, "month")
+    assert len(g[("o/r", "2026-04")]) == 1 and len(g[("o/r", "2026-05")]) == 2
+    # quarter mode unchanged
+    q = group_by_period(cells, QUARTER_RANGES)
+    assert len(q[("o/r", "Q2-2026")]) == 3

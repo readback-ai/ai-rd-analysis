@@ -24,6 +24,25 @@ from pathlib import Path
 from pipeline.detect import MARKERS_V1, MARKERS_V2
 from pipeline.ghx import cell_path, read_cell, rest_count
 
+def month_range(tok: str) -> str:
+    """'2026-07' -> '2026-07-01..2026-07-31' (calendar month, inclusive)."""
+    import calendar
+    y, m = int(tok[:4]), int(tok[5:7])
+    return f"{tok}-01..{tok}-{calendar.monthrange(y, m)[1]:02d}"
+
+
+def resolve_period(tok: str) -> str:
+    """Period token -> inclusive date range. Quarter keys (Q2-2026) come from
+    QUARTER_RANGES; month tokens (YYYY-MM) are computed — months are
+    first-class periods for incremental updates."""
+    if tok in QUARTER_RANGES:
+        return QUARTER_RANGES[tok]
+    import re
+    if re.fullmatch(r"20\d\d-\d\d", tok):
+        return month_range(tok)
+    raise ValueError(f"unknown period token: {tok}")
+
+
 QUARTER_RANGES = {
     "Q1-2024": "2024-01-01..2024-03-31",
     "Q3-2025": "2025-07-01..2025-09-30",

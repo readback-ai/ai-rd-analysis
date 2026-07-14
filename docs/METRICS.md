@@ -57,10 +57,16 @@ over C, so each PR counts once (`integrate.layered_table`).
 - **`analyze.pr_metrics`**: per-repo-quarter rate = share of that repo's
   censused PRs with the property. Metrics whose field is unavailable on a PR
   (e.g. `self_merged` on a legacy cell) are skipped, not zeroed.
-- **Repo qualification floor**: **≥5 PRs/quarter everywhere** (`analyze
-  --min-prs` default and `studies.slices.MIN_PRS`); slice CONDITIONAL
-  metrics additionally require ≥5 PRs in the conditioning denominator
-  (e.g. ≥5 self-merged AI PRs before a review-rate of that cell is emitted).
+- **Repo qualification floor**: **≥5 PRs/quarter, ≥2 PRs/month** —
+  comparable thresholds per unit time (`analyze --min-prs` defaults by
+  `--granularity`; `studies.slices` likewise). Slice CONDITIONAL metrics
+  additionally require the same floor in the conditioning denominator.
+- **Granularity**: quarters are the headline unit (precision); months are
+  the trend unit (`--granularity month` in analyze/slices). Month buckets
+  re-partition the sampled quarters exactly (bucketing is by each PR's
+  createdAt, which always lies inside its cell's range) — no separate
+  collection. The newest month in an incremental update is PROVISIONAL
+  (reviews/merges lag; see METHODS runbook).
 - Census sampling: repo-quarters are collected completely (adaptive windows
   + pagination + fail-hard saturation); rates are over ALL of a repo's PRs
   in the window, coverage-gated at report time.

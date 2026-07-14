@@ -106,3 +106,14 @@ def test_keep_rule_rejects_below_both(monkeypatch):
     monkeypatch.setattr(enum_repos, "rest_count", lambda q, **k: 10000)
     assert enum_repos.keep_reason("o/r", 3, "w", 5) is None      # 0.03% < 0.1%
     assert enum_repos.keep_reason("o/r", 0, "w", 5) is None      # no evidence
+
+
+def test_resolve_period_quarters_and_months():
+    from pipeline.scan_orgs import QUARTER_RANGES, resolve_period
+    assert resolve_period("Q2-2026") == QUARTER_RANGES["Q2-2026"]
+    assert resolve_period("2026-07") == "2026-07-01..2026-07-31"
+    assert resolve_period("2026-02") == "2026-02-01..2026-02-28"
+    assert resolve_period("2024-02") == "2024-02-01..2024-02-29"   # leap
+    import pytest
+    with pytest.raises(ValueError):
+        resolve_period("nonsense")

@@ -30,7 +30,7 @@ from pathlib import Path
 
 from pipeline.ghx import cell_path, graphql_nodes, read_cell, rest_count
 from pipeline.precount import get_precount
-from pipeline.scan_orgs import QUARTER_RANGES
+from pipeline.scan_orgs import QUARTER_RANGES, resolve_period
 
 PAGE_SIZE = 50   # per-call PR fetch; the census cap per cell (single page, no pagination)
 # Cell-store stage name. Versioned because the PR_QUERY changed (headRefName +
@@ -125,7 +125,7 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
     adaptive windows still saturate (sub-day burstiness), the repo-period
     FAILS — an incomplete census must be visible, not a warning
     (external review finding 4)."""
-    rng = QUARTER_RANGES[period]
+    rng = resolve_period(period)
     # fully-cached fast path: a valid full-range cell needs no denominator call
     cached = read_cell(cell_path(STAGE, repo, rng), list)
     if cached is not None:
@@ -177,7 +177,7 @@ def main() -> None:
     ap.add_argument("--repos", required=True,
                     help="TSV from enum_repos (col 1 = repo) or plain repo list")
     ap.add_argument("--periods", nargs="+", default=list(QUARTER_RANGES),
-                    choices=list(QUARTER_RANGES))
+                    help="quarter keys (Q2-2026) and/or months (2026-07)")
     ap.add_argument("--subwindows", type=int, default=10)
     a = ap.parse_args()
     repos = []

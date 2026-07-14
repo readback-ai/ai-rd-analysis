@@ -86,3 +86,10 @@ def test_inaccessible_repos_waived_and_excluded_from_collection(tmp_path):
         regenerate.run = regenerate_run
     collectable = (regenerate.DRV / "population_repos_collectable.txt").read_text().split()
     assert collectable == ["o/alive"]
+
+
+def test_monthly_update_previous_month():
+    sys.path.insert(0, "scripts")
+    from monthly_update import previous_month
+    assert previous_month("2026-07") == "2026-06"
+    assert previous_month("2026-01") == "2025-12"

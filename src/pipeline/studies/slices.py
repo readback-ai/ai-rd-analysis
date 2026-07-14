@@ -32,7 +32,12 @@ from pipeline.scan_orgs import QUARTER_RANGES
 SRC = Path("data/sources")
 DRV = Path("data/derived")
 PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
-MIN_PRS = 5
+MIN_PRS = 5            # per quarter; month floor is 2 (comparable threshold)
+GRANULARITY = "quarter"  # set by main() --granularity
+
+
+def _floor() -> int:
+    return MIN_PRS if GRANULARITY == "quarter" else 2
 
 
 def _lines(p: Path) -> list[str]:
@@ -91,8 +96,9 @@ def repo_rates() -> dict[tuple[str, str], dict[str, float | None]]:
     metric's denominator is under MIN_PRS or the field is unavailable."""
     keep = population_repos()
     out: dict[tuple[str, str], dict[str, float | None]] = {}
-    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
-        if repo not in keep or len(prs) < MIN_PRS:
+    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES,
+                                            GRANULARITY).items():
+        if repo not in keep or len(prs) < _floor():
             continue
         cls = [classify_pr(p, MARKERS_V2) for p in prs]
         n = len(cls)
@@ -103,8 +109,8 @@ def repo_rates() -> dict[tuple[str, str], dict[str, float | None]]:
         sm_ai = [c for c in sm if c.ai_involved]
         sm_non = [c for c in sm if not c.ai_involved]
 
-        def rate(hits: int, base: int, floor: int = MIN_PRS) -> float | None:
-            return hits / base if base >= floor else None
+        def rate(hits: int, base: int) -> float | None:
+            return hits / base if base >= _floor() else None
         out[(repo, per)] = {
             "ai_involved": len(ai) / n,
             "hum_rev": sum(c.human_reviewed for c in cls) / n,
@@ -126,7 +132,9 @@ def table(metrics: list[str], header: str) -> None:
     for name, orgs in slices().items():
         print(f"\n=== {name} ===")
         print(f"{'period':9}{'repos':>6}" + "".join(f"{m:>22}" for m in metrics))
-        for per in PERIODS:
+        periods = PERIODS if GRANULARITY == "quarter" else \
+            sorted({p for (_, p) in rates})
+        for per in periods:
             rows = [(repo, r) for (repo, p), r in rates.items()
                     if p == per and repo.split("/")[0].lower() in orgs]
             if not rows:
@@ -202,11 +210,15 @@ def balanced_panel() -> None:
 
 
 def main() -> None:
+    global GRANULARITY
     ap = argparse.ArgumentParser()
     ap.add_argument("--table",
                     choices=["involvement", "selfmerge", "panel", "bounds"],
                     default="involvement")
+    ap.add_argument("--granularity", choices=["quarter", "month"],
+                    default="quarter")
     a = ap.parse_args()
+    GRANULARITY = a.granularity
     if a.table == "involvement":
         table(["ai_involved", "hum_rev", "ai_rev", "merged"],
               "AI involvement (A∪B∪C) by slice")

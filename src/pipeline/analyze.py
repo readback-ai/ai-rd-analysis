@@ -55,9 +55,18 @@ def period_of(rng: str, quarters: dict[str, str]) -> str | None:
     return None
 
 
+def month_of(pr: dict) -> str | None:
+    m = (pr.get("createdAt") or "")[:7]
+    return m or None
+
+
 def group_by_period(cells: dict[tuple[str, str], list[dict]],
-                    quarters: dict[str, str]) -> dict[tuple[str, str], list[dict]]:
+                    quarters: dict[str, str],
+                    granularity: str = "quarter") -> dict[tuple[str, str], list[dict]]:
     """(repo, period) -> PRs, deduped by PR number across cell generations.
+    granularity='month' buckets PRs by createdAt month (every PR's createdAt
+    lies inside its cell's range, so month buckets are exact re-partitions of
+    the sampled quarters — no recollection needed).
     When the same PR appears in overlapping cells (legacy full-quarter +
     census-v2 sub-window), the RICHER record wins: a node carrying
     headRefName (the v2 query marker field) replaces one that lacks it,
@@ -66,11 +75,14 @@ def group_by_period(cells: dict[tuple[str, str], list[dict]],
     grouped: dict[tuple[str, str], list[dict]] = defaultdict(list)
     index: dict[tuple[str, str], dict] = defaultdict(dict)
     for (repo, rng), nodes in cells.items():
-        per = period_of(rng, quarters)
-        if not per:
+        quarter = period_of(rng, quarters)
+        if not quarter:
             continue
-        key = (repo, per)
         for pr in nodes:
+            per = quarter if granularity == "quarter" else month_of(pr)
+            if per is None:
+                continue
+            key = (repo, per)
             num = pr.get("number")
             if num is None:
                 grouped[key].append(pr)
@@ -130,7 +142,11 @@ def main() -> None:
                     help="optional repo-list file: restrict metrics to this "
                          "population (e.g. v2.1 rebaseline)")
     ap.add_argument("--markers", choices=["v1", "v2"], default="v1")
-    ap.add_argument("--min-prs", type=int, default=5)   # unified floor (METRICS §3)
+    ap.add_argument("--granularity", choices=["quarter", "month"],
+                    default="quarter")
+    ap.add_argument("--min-prs", type=int, default=None,
+                    help="repo floor per period; default 5/quarter, 2/month "
+                         "(comparable thresholds — METRICS §3)")
     ap.add_argument("--bootstrap", type=int, default=2000)
     a = ap.parse_args()
     markers = MARKERS_V1 if a.markers == "v1" else MARKERS_V2
@@ -145,7 +161,9 @@ def main() -> None:
                 except (TypeError, ValueError):
                     pass
 
-    grouped = group_by_period(load_cells(), QUARTER_RANGES)
+    if a.min_prs is None:
+        a.min_prs = 5 if a.granularity == "quarter" else 2
+    grouped = group_by_period(load_cells(), QUARTER_RANGES, a.granularity)
     if not grouped:
         raise SystemExit("no census cells found in $AIRD_DATA_DIR — the "
                          "external store is required (docs/METHODS.md §5); "
@@ -155,9 +173,11 @@ def main() -> None:
                 if ln.strip() and not ln.startswith("#")}
         grouped = {k: v for k, v in grouped.items() if k[0] in keep}
 
+    periods = list(QUARTER_RANGES) if a.granularity == "quarter" else \
+        sorted({p for (_, p) in grouped})
     print(f"{'period':9}{'weighting':16}{'repos':>6}" +
           "".join(f"{m:>18}" for m in METRICS))
-    for per in QUARTER_RANGES:
+    for per in periods:
         rows = []
         unweighted = set()
         for (repo, p), prs in grouped.items():

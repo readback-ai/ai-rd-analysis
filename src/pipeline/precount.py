@@ -21,7 +21,7 @@ import time
 from pathlib import Path
 
 from pipeline.ghx import cell_path, graphql_nodes, read_cell
-from pipeline.scan_orgs import QUARTER_RANGES
+from pipeline.scan_orgs import QUARTER_RANGES, resolve_period
 
 BATCH = 20
 
@@ -44,7 +44,7 @@ def batch_counts(pairs: list[tuple[str, str]]) -> int:
         return 0
     parts = []
     for i, (repo, per) in enumerate(todo):
-        q = f"repo:{repo} is:pr created:{QUARTER_RANGES[per]}"
+        q = f"repo:{repo} is:pr created:{resolve_period(per)}"
         parts.append(f'a{i}: search(query:"{q}", type:ISSUE){{ issueCount }}')
     query = "query{ " + " ".join(parts) + " }"
     data = graphql_nodes(query, {}, ".data", expect=dict)
@@ -64,7 +64,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--repos", required=True)
     ap.add_argument("--periods", nargs="+", default=list(QUARTER_RANGES),
-                    choices=list(QUARTER_RANGES))
+                    help="quarters and/or YYYY-MM months")
     a = ap.parse_args()
     repos = []
     for line in Path(a.repos).read_text().splitlines():

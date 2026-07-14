@@ -87,6 +87,21 @@ R4 evidence rule (`enum_repos.py`); repo-scoped members contribute their
 AI-topic repos. Appendix cuts (org-type public/private/community via
 `org_type.tsv`; adoption-intensity groups) re-use these same source files.
 
+## 1c. Incremental monthly updates (runbook)
+
+`scripts/monthly_update.py YYYY-MM` adds a month of activity data:
+1. RE-COLLECTS the previous month first (wipes its census cells) — the
+   provisional-month revision: reviews and merges lag PR creation, so the
+   newest month is always preliminary until the following update.
+2. Collects the new month (precount + census; months are first-class period
+   tokens via `scan_orgs.resolve_period`).
+3. Prints the monthly trend tables (`analyze --granularity month`,
+   2-PR/month floor ≈ the 5-PR/quarter threshold per unit time).
+Population and classification metadata stay FROZEN between deliberate
+revisions so month-over-month movement reflects practice, not population
+churn. Quarterly regeneration (`scripts/regenerate.py`) remains the
+canonical headline path.
+
 ## 2. Detection: three independent layers (`detect.py`)
 
 **Layer A — commit markers** (commit-forensic, strongest evidence). Co-author
