@@ -174,3 +174,13 @@ def test_month_granularity_buckets_by_created_at():
     # quarter mode unchanged
     q = group_by_period(cells, QUARTER_RANGES)
     assert len(q[("o/r", "Q2-2026")]) == 3
+
+
+def test_partial_quarter_months_excluded_from_month_grouping():
+    """Stray cells from the never-fully-censused Q3-2025 must not surface
+    as reportable months."""
+    from pipeline.analyze import group_by_period
+    cells = {("o/r", "2025-08-01..2025-08-31"): [
+        {"number": 1, "createdAt": "2025-08-10T00:00:00Z"}]}
+    g = group_by_period(cells, QUARTER_RANGES, "month")
+    assert ("o/r", "2025-08") not in g

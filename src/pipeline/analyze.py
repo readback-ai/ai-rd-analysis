@@ -55,6 +55,22 @@ def period_of(rng: str, quarters: dict[str, str]) -> str | None:
     return None
 
 
+CENSUSED_QUARTERS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
+
+
+def censused_months(quarters: dict[str, str]) -> set[str]:
+    """Months lying inside FULLY censused quarters. Stray cells from
+    partially-pulled windows (Q3-2025) must not surface as reportable
+    months — ~60-repo coverage is not the population."""
+    out = set()
+    for q in CENSUSED_QUARTERS:
+        start = quarters[q].split("..")[0]
+        y, m = int(start[:4]), int(start[5:7])
+        for i in range(3):
+            out.add(f"{y}-{m + i:02d}")
+    return out
+
+
 def month_of(pr: dict) -> str | None:
     m = (pr.get("createdAt") or "")[:7]
     return m or None
@@ -78,9 +94,10 @@ def group_by_period(cells: dict[tuple[str, str], list[dict]],
         quarter = period_of(rng, quarters)
         if not quarter:
             continue
+        ok_months = censused_months(quarters) if granularity == "month" else None
         for pr in nodes:
             per = quarter if granularity == "quarter" else month_of(pr)
-            if per is None:
+            if per is None or (ok_months is not None and per not in ok_months):
                 continue
             key = (repo, per)
             num = pr.get("number")
@@ -173,7 +190,7 @@ def main() -> None:
                 if ln.strip() and not ln.startswith("#")}
         grouped = {k: v for k, v in grouped.items() if k[0] in keep}
 
-    periods = list(QUARTER_RANGES) if a.granularity == "quarter" else \
+    periods = CENSUSED_QUARTERS if a.granularity == "quarter" else \
         sorted({p for (_, p) in grouped})
     print(f"{'period':9}{'weighting':16}{'repos':>6}" +
           "".join(f"{m:>18}" for m in METRICS))
