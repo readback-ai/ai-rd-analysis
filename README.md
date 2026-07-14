@@ -2,7 +2,7 @@
 
 An empirical study of how the organizations building AI use AI to build
 software — measured from public GitHub metadata over 229 leading AI
-organizations (182 full-org + 47 repo-scoped; ~2,060 repositories) across
+organizations (182 full-org + 47 repo-scoped; 2,142 repositories) across
 four quarters: Q1-2024 baseline, Q4-2025, Q1-2026, Q2-2026. **Study cutoff: 2026-06-30** — all activity data is windowed to the
 cutoff; classification metadata is pinned as close to it as the API allows
 (see METHODS §0).
@@ -18,9 +18,10 @@ detected in three independent layers: commit-forensic markers (co-author
 trailers, generation footers, tool committer identities), agent bot
 authorship, and agent branch-naming conventions. Findings (contributor-
 weighted unless noted): The primary metric is AI INVOLVEMENT — the union of
-the three layers per PR — which rose from 0% (Q1-2024) to roughly 14%
-contributor-weighted / 17% pooled of PRs (Q2-2026, interim pending the
-remediation re-collection); commit markers alone reach ~11%. Among these (by construction AI-active) organizations, adoption is
+the three layers per PR — which rose from 0% (Q1-2024) to 16.6%
+contributor-weighted (16.6% pooled) of PRs by Q2-2026; commit markers alone
+reach 13.6%. A balanced-panel sensitivity (15.3%) shows the growth is
+adoption, not cohort composition. Among these (by construction AI-active) organizations, adoption is
 broad, led by private companies (18.5%) over public (11.9%) and community
 (10.0%). Human review declined ~10pp everywhere while its LEVEL follows
 governance (community 62% > public 53% > private 47%); AI review deployment
