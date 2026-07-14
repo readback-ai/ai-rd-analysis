@@ -118,10 +118,10 @@ def sample_stats(sample_dir: Path, markers=MARKERS_V2) -> dict[str, dict[str, fl
 
 # ------------------------------------------------------------------- report
 
-def layered_table() -> None:
+def layered_table(granularity: str = "quarter") -> None:
     """Exact per-PR layer decomposition over the population manifest."""
     keep = set((V2 / "population_repos.txt").read_text().split())
-    grouped = group_by_period(load_cells(), QUARTER_RANGES)
+    grouped = group_by_period(load_cells(), QUARTER_RANGES, granularity)
     if not grouped:
         raise SystemExit("no census cells in $AIRD_DATA_DIR — refusing to "
                          "print an empty decomposition")
@@ -139,9 +139,11 @@ def layered_table() -> None:
                 d["a"] += 1
             elif c.branch_tool:
                 d["c"] += 1
+    periods = PERIODS if granularity == "quarter" else \
+        sorted({p for (_, p) in grouped})
     print(f"{'period':9}{'PRs':>8}{'A marker%':>10}{'B agent%':>9}"
           f"{'C branch%':>10}{'union%':>8}")
-    for per in PERIODS:
+    for per in periods:
         d = agg.get(per)
         if not d or not d["n"]:
             continue
@@ -205,13 +207,15 @@ def threshold_table(contrib_csv: Path = V2 / "repo_contributors_v2.csv",
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--thresholds", action="store_true")
+    ap.add_argument("--granularity", choices=["quarter", "month"],
+                    default="quarter")
     a = ap.parse_args()
     sample_dirs = {f"{tag}/": raw_dir("branch_samples") / tag
                    for tag in ("codex", "copilot", "cursor", "claude")}
     if a.thresholds:
         threshold_table(sample_dirs=sample_dirs)
     else:
-        layered_table()
+        layered_table(a.granularity)
 
 
 if __name__ == "__main__":

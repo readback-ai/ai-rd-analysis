@@ -163,8 +163,9 @@ def bounds() -> None:
     per_repo: dict[str, dict[tuple, list]] = {"hi": defaultdict(list), "lo": defaultdict(list)}
     from pipeline.analyze import group_by_period, load_cells
     from pipeline.scan_orgs import QUARTER_RANGES
-    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
-        if repo not in keep or len(prs) < MIN_PRS or per not in PERIODS:
+    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES,
+                                            GRANULARITY).items():
+        if repo not in keep or len(prs) < _floor():
             continue
         n = len(prs)
         def involved(p, strict):
@@ -175,9 +176,11 @@ def bounds() -> None:
                                     w.get(repo, 1.0)))
         per_repo["lo"][per].append((sum(involved(p, True) for p in prs) / n,
                                     w.get(repo, 1.0)))
+    periods = PERIODS if GRANULARITY == "quarter" else \
+        sorted({p for p in per_repo["hi"]})
     print("headline ai_involved: two-sided bound (CW)")
     print(f"{'period':9}{'upper (reported)':>20}{'lower (strict C)':>20}{'delta pp':>10}")
-    for per in PERIODS:
+    for per in periods:
         hi, lo = per_repo["hi"][per], per_repo["lo"][per]
         if not hi:
             continue
@@ -192,14 +195,16 @@ def balanced_panel() -> None:
     Separates the adoption trend from cohort-composition change."""
     rates = repo_rates()
     w = weights()
+    periods = PERIODS if GRANULARITY == "quarter" else \
+        sorted({p for (_, p) in rates})
     by_repo: dict[str, set[str]] = defaultdict(set)
     for (repo, per) in rates:
         by_repo[repo].add(per)
-    panel = {r for r, pers in by_repo.items() if set(PERIODS) <= pers}
+    panel = {r for r, pers in by_repo.items() if set(periods) <= pers}
     print(f"balanced panel: {len(panel)} repos qualify in all "
-          f"{len(PERIODS)} quarters")
+          f"{len(periods)} {GRANULARITY}s")
     print(f"{'period':9}{'panel ai_involved':>22}{'cross-section':>22}")
-    for per in PERIODS:
+    for per in periods:
         rows_p = [(rates[(r, per)]["ai_involved"], w.get(r, 1.0)) for r in panel]
         rows_x = [(v["ai_involved"], w.get(repo, 1.0))
                   for (repo, p), v in rates.items() if p == per]

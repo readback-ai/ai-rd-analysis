@@ -212,41 +212,16 @@ def coverage_check(repos_file: Path) -> dict:
 
 
 def stage_f(repos_file: Path) -> None:
-    """Write the generated report artifact + census manifest (the numbers
-    behind artifacts/results.md come from THIS file, not ad-hoc runs)."""
+    """Coverage-gate, then generate the canonical quarterly report via
+    scripts/report.py (single source of the report layout), plus the hashed
+    census manifest."""
     print("=== F: report artifact ===", flush=True)
     import hashlib
     coverage = coverage_check(repos_file)
     print(f"coverage: {coverage}", flush=True)
-    out = Path("artifacts/report_generated.md")
-    with out.open("w") as fh:
-        fh.write("# GENERATED report — scripts/regenerate.py\n\n")
-        fh.write("> Q1-2024 columns are a detector-validity check and "
-                 "review-practice baseline,\n> NOT an AI-usage estimate: the "
-                 "detectable channels (trailers, agent accounts,\n> branch "
-                 "conventions) did not exist yet, while autocomplete-era "
-                 "assistance was\n> already widespread and is invisible to "
-                 "every layer. All rates are floors.\n\n")
-        for title, args in (
-            ("Contributor-weighted metrics",
-             ["pipeline.analyze", "--markers", "v2", "--contributors",
-              str(DRV / "repo_contributors_window.csv"),
-              "--repos", str(repos_file), "--bootstrap", "2000"]),
-            ("Layered decomposition (pooled)", ["pipeline.integrate"]),
-            ("Slices: involvement", ["pipeline.studies.slices",
-                                     "--table", "involvement"]),
-            ("Slices: self-merge", ["pipeline.studies.slices",
-                                    "--table", "selfmerge"]),
-            ("Balanced-panel sensitivity", ["pipeline.studies.slices",
-                                            "--table", "panel"]),
-            ("Two-sided bound (weak-prefix indeterminates)",
-             ["pipeline.studies.slices", "--table", "bounds"]),
-        ):
-            r = subprocess.run([sys.executable, "-m", *args],
-                               capture_output=True, text=True)
-            if r.returncode != 0:
-                raise SystemExit(f"{args[0]} failed:\n{r.stderr[-800:]}")
-            fh.write(f"## {title}\n```\n{r.stdout}\n```\n\n")
+    sys.path.insert(0, "scripts")
+    from report import generate
+    generate("quarter", Path("artifacts/report_generated.md"), repos_file)
     manifest = {
         "population_repos": hashlib.sha256(
             repos_file.read_bytes()).hexdigest()[:16],
@@ -256,7 +231,8 @@ def stage_f(repos_file: Path) -> None:
         "coverage": coverage,
     }
     (DRV / "census_manifest.json").write_text(json.dumps(manifest, indent=1))
-    print(f"wrote {out} + census_manifest.json", flush=True)
+    print("wrote artifacts/report_generated.md + census_manifest.json",
+          flush=True)
 
 
 if __name__ == "__main__":
