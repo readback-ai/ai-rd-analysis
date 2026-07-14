@@ -46,6 +46,10 @@ def sections(granularity: str, repos: Path) -> list[tuple[str, list[str]]]:
          ["pipeline.studies.slices", *g, "--table", "reviewers"]),
         ("Two-sided bound (weak-prefix indeterminates)",
          ["pipeline.studies.slices", *g, "--table", "bounds"]),
+        ("Productivity decomposition (authors vs output/author)",
+         ["pipeline.studies.productivity", "--cut", "decomposition"]),
+        ("Persistent-author productivity (same person, same repo)",
+         ["pipeline.studies.productivity", "--cut", "persistent"]),
     ]
 
 
