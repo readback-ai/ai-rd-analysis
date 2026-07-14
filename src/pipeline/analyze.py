@@ -138,9 +138,11 @@ def main() -> None:
     if Path(a.contributors).is_file():
         with open(a.contributors) as fh:
             for row in csv.DictReader(fh):
+                val = row.get("core_contributors_window",
+                              row.get("core_contributors"))
                 try:
-                    weights[row["repo"]] = max(float(row["core_contributors"]), 1.0)
-                except (KeyError, ValueError):
+                    weights[row["repo"]] = max(float(val), 1.0)
+                except (TypeError, ValueError):
                     pass
 
     grouped = group_by_period(load_cells(), QUARTER_RANGES)

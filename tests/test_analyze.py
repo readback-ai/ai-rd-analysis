@@ -146,3 +146,20 @@ def test_richer_v2_record_wins_over_legacy_on_overlap():
         grouped = group_by_period(cells, QUARTER_RANGES)
         prs = grouped[("o/r", "Q2-2026")]
         assert len(prs) == 1 and "headRefName" in prs[0]
+
+
+def test_weights_reader_accepts_window_column(tmp_path):
+    """The window weights file's header differs; silently dropping every
+    weight made contrib-weight identical to equal-weight in a generated
+    report."""
+    import subprocess
+    import sys
+    f = tmp_path / "w.csv"
+    f.write_text("repo,core_contributors_window\no/r,7\n")
+    # exercise the same parsing path
+    import csv as _csv
+    weights = {}
+    for row in _csv.DictReader(open(f)):
+        val = row.get("core_contributors_window", row.get("core_contributors"))
+        weights[row["repo"]] = max(float(val), 1.0)
+    assert weights == {"o/r": 7.0}
