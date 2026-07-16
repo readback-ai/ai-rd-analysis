@@ -186,3 +186,14 @@ def test_strict_layer_c_requires_provenance_on_weak_prefixes():
     # strong prefixes unaffected by strict
     codex = {"headRefName": "codex/fix-tests", "commits": {"nodes": []}}
     assert pr_branch_tool(codex, strict=True) == "codex"
+
+
+def test_user_typed_bot_accounts_are_not_human_reviewers():
+    """Bots registered as User accounts (PaddlePaddle-bot) must not count as
+    human review — they inflated the human-comment numerator."""
+    pr = _pr_reviews(reviews=[_rev("PaddlePaddle-bot", state="APPROVED"),
+                              _rev("qwen-code-ci-bot", state="COMMENTED")])
+    c = classify_pr(pr)
+    assert not c.human_reviewed and c.other_bot_reviewed
+    ok = _pr_reviews(reviews=[_rev("talbot", state="APPROVED")])
+    assert classify_pr(ok).human_reviewed          # human name, no false positive

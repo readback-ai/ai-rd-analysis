@@ -180,6 +180,18 @@ def pr_branch_tool(pr: dict, strict: bool = False) -> str | None:
 
 # ---------------------------------------------------------------- review
 
+# Bots registered as regular User accounts (invisible to __typename=Bot):
+# suffix heuristic, hyphen/underscore-anchored so human names like
+# "talbot" never match. Found by comment-volume audit (PaddlePaddle-bot,
+# all-hands-bot, qwen-code-ci-bot).
+_USER_BOT_SUFFIXES = ("-bot", "_bot", "[bot]", "-ci", "-robot")
+
+
+def is_bot_login(login: str | None) -> bool:
+    lo = (login or "").lower()
+    return lo.endswith(_USER_BOT_SUFFIXES) or lo.startswith("bot-")
+
+
 AI_REVIEWERS = {  # dedicated AI code-review bots seen in the data (extend as found)
     "gemini-code-assist", "copilot-pull-request-reviewer", "coderabbitai",
     "greptile-apps", "qodo-merge-pro", "cursor", "chatgpt-codex-connector",
@@ -199,9 +211,9 @@ def split_reviews(pr: dict) -> tuple[list[dict], list[dict], list[dict]]:
             continue
         if (r.get("submittedAt") or "") > CUTOFF:
             continue
-        if ra["__typename"] == "User":
+        if ra["__typename"] == "User" and not is_bot_login(ra.get("login")):
             (human_self if ra.get("login") == author else human_other).append(r)
-        elif ra["__typename"] == "Bot":
+        else:
             bot.append(r)
     return human_other, human_self, bot
 
