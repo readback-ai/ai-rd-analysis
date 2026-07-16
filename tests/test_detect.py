@@ -122,7 +122,7 @@ def test_ai_reviewer_decomposed_from_ci_bots():
 # ------------------------------------------------------------ classify_pr
 
 def test_self_merged_requires_mergedby_field():
-    base = _pr_reviews()
+    base = dict(_pr_reviews(), createdAt="2026-04-10T00:00:00Z")
     assert classify_pr(base).self_merged is None      # not merged
     merged = dict(base, mergedAt="2026-05-01T00:00:00Z")
     assert classify_pr(merged).self_merged is None    # old cell: no mergedBy
@@ -152,10 +152,12 @@ def test_events_after_cutoff_are_excluded():
     pr["reviews"]["nodes"][1]["submittedAt"] = "2026-07-03T00:00:00Z"
     c = classify_pr(pr)
     assert c.human_reviewed                      # in-window review counts
-    late = dict(_pr_reviews(), mergedAt="2026-07-02T01:00:00Z",
+    late = dict(_pr_reviews(), createdAt="2026-06-20T00:00:00Z",
+                mergedAt="2026-07-02T01:00:00Z",
                 mergedBy={"login": "alice", "__typename": "User"})
     assert not classify_pr(late).merged          # post-cutoff merge excluded
-    ok = dict(_pr_reviews(), mergedAt="2026-06-29T01:00:00Z",
+    ok = dict(_pr_reviews(), createdAt="2026-04-10T00:00:00Z",
+              mergedAt="2026-04-29T01:00:00Z",
               mergedBy={"login": "alice", "__typename": "User"})
     assert classify_pr(ok).merged and classify_pr(ok).self_merged is True
 
@@ -197,3 +199,22 @@ def test_user_typed_bot_accounts_are_not_human_reviewers():
     assert not c.human_reviewed and c.other_bot_reviewed
     ok = _pr_reviews(reviews=[_rev("talbot", state="APPROVED")])
     assert classify_pr(ok).human_reviewed          # human name, no false positive
+
+
+def test_w8_censoring_rule():
+    """Frozen convention: outcomes at 8 weeks post-creation; immature PRs
+    carry no fate."""
+    base = {"reviews": {"nodes": []}, "commits": {"nodes": []}}
+    fast = dict(base, createdAt="2026-01-01T00:00:00Z",
+                mergedAt="2026-01-20T00:00:00Z")
+    assert classify_pr(fast).merged and classify_pr(fast).w8_mature
+    late = dict(base, createdAt="2026-01-01T00:00:00Z",
+                mergedAt="2026-04-01T00:00:00Z")     # merged at w13
+    c = classify_pr(late)
+    assert not c.merged and c.merged_ever and c.w8_mature
+    rejected = dict(base, createdAt="2026-01-01T00:00:00Z",
+                    closedAt="2026-01-10T00:00:00Z")
+    assert classify_pr(rejected).rejected
+    immature = dict(base, createdAt="2026-06-20T00:00:00Z",
+                    mergedAt="2026-06-21T00:00:00Z")
+    assert not classify_pr(immature).w8_mature       # provisional

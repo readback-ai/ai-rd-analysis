@@ -40,7 +40,8 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
 | `agent_author` (layer B) | PR author is a Bot-typed account in `AGENT_PR_AUTHORS` (copilot-swe-agent, devin-ai-integration, cursor, google-labs-jules, codegen-sh, amazon-q-developer, factory-droid, claude) | the author IS the tool; no trailer needed |
 | `branch_tool` (layer C) | head branch matches an agent prefix: `codex/`, `copilot/`, `cursor/`, `claude/` | PR-level attribution only; measured precision per prefix in METHODS §2 (codex/copilot ~95%+; cursor/claude indeterminates are the study's only potential overcount, bounded at 0.06pp on the Q2-2026 headline — report section 6); all-github-actions-committed branches excluded as measured FPs; requires census-v2 cells |
 | **`ai_involved`** | **A ∪ B ∪ C — the PRIMARY metric** | an explicit lower bound on true AI involvement |
-| `merged` | `mergedAt` present and ≤ cutoff | |
+| `merged` | merged WITHIN 8 WEEKS of creation (frozen censoring rule; METHODS §1d) | `merged_ever` retains the ≤-cutoff-anytime variant; fate metrics are None on w8-immature PRs |
+| `rejected` | closed unmerged within 8 weeks | limbo = w8-mature, neither |
 | `self_merged` | merged and `mergedBy.login == author.login` | None (excluded from rates) when the cell lacks `mergedBy` |
 | `insider` | `authorAssociation ∈ {MEMBER, OWNER, COLLABORATOR}` | misses staff with private org membership |
 | `human_reviewed` | ≥1 formal review by a User **other than the PR author**, submitted ≤ cutoff | the corrected definition; conversation comments never count |

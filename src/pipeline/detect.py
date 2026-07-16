@@ -36,6 +36,26 @@ from dataclasses import dataclass
 # creation-windowed, so the exposure is days and affects layer A only.
 CUTOFF = "2026-06-30T23:59:59Z"
 
+# FROZEN CENSORING RULE (METHODS conventions): all per-PR outcomes are
+# measured at 8 WEEKS after PR creation. The maturity curves show merges
+# quiesce by w8 (98-99% of eventual merges in every cohort), so a uniform
+# w8 horizon removes right-censoring bias from cross-period comparisons.
+# A PR is w8-MATURE iff its 8-week window closed on or before the cutoff;
+# fate metrics are undefined (None -> skipped) on immature PRs, which is
+# what makes trailing-edge quarters PROVISIONAL until re-observed.
+W8_DAYS = 56
+
+
+def _iso(ts: str):
+    from datetime import datetime
+    return datetime.fromisoformat(ts.replace("Z", "+00:00"))
+
+
+def _within_w8(created: str, event: str | None) -> bool:
+    if not event or event > CUTOFF:
+        return False
+    return (_iso(event) - _iso(created)).days < W8_DAYS
+
 # ---------------------------------------------------------------- layer A
 
 @dataclass(frozen=True)
@@ -236,7 +256,10 @@ class PRClass:
     marker_tools: frozenset[str]      # layer A
     agent_author: str | None          # layer B
     branch_tool: str | None           # layer C (None when headRefName absent)
-    merged: bool
+    merged: bool                      # merged WITHIN 8 WEEKS of creation
+    merged_ever: bool                 # merged any time <= cutoff (secondary)
+    rejected: bool                    # closed unmerged within 8 weeks
+    w8_mature: bool                   # 8-week window closed by the cutoff
     self_merged: bool | None          # None when the cell lacks mergedBy
     insider: bool
     human_reviewed: bool              # User reviewer != PR author (corrected)
@@ -257,7 +280,13 @@ def classify_pr(pr: dict, markers: dict[str, ToolSpec] = MARKERS_V1) -> PRClass:
     ai_rev = [r for r in bot
               if (r["author"].get("login") or "").removesuffix("[bot]") in AI_REVIEWERS]
     author = (pr.get("author") or {}).get("login")
-    merged = bool(pr.get("mergedAt")) and (pr.get("mergedAt") or "") <= CUTOFF
+    created = pr.get("createdAt") or ""
+    merged_ever = bool(pr.get("mergedAt")) and (pr.get("mergedAt") or "") <= CUTOFF
+    merged = bool(created) and _within_w8(created, pr.get("mergedAt"))
+    rejected = (not merged_ever and bool(created)
+                and _within_w8(created, pr.get("closedAt")))
+    w8_mature = bool(created) and \
+        (_iso(CUTOFF) - _iso(created)).days >= W8_DAYS
     merged_by = pr.get("mergedBy")
     self_merged = None
     if merged and merged_by is not None:
@@ -267,6 +296,9 @@ def classify_pr(pr: dict, markers: dict[str, ToolSpec] = MARKERS_V1) -> PRClass:
         agent_author=pr_agent_author(pr),
         branch_tool=pr_branch_tool(pr),
         merged=merged,
+        merged_ever=merged_ever,
+        rejected=rejected,
+        w8_mature=w8_mature,
         self_merged=self_merged,
         insider=pr.get("authorAssociation") in INSIDER,
         human_reviewed=bool(human_other),

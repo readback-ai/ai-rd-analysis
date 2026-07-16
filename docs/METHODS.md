@@ -102,6 +102,34 @@ revisions so month-over-month movement reflects practice, not population
 churn. Quarterly regeneration (`scripts/regenerate.py`) remains the
 canonical headline path.
 
+## 1d. FROZEN methodology conventions (every paper number obeys these)
+
+1. **Censoring rule**: all per-PR outcomes are measured at 8 WEEKS from PR
+   creation (`detect.W8_DAYS`; maturity curves show merges quiesce at w8,
+   98-99% of eventual). Fates close at w8, with w26 as appendix sensitivity
+   (`studies.fates`). Immature PRs carry no fate (None-skip) — trailing
+   quarters are PROVISIONAL and labeled; Q2-2026 finalizes with a re-pull
+   on/after 2026-09-01 (8 weeks past quarter end; runbook §1c).
+2. **Matched-horizon-only fate comparisons**: "ever resolved" is a
+   different quantity per cohort and must never be compared across cohorts.
+3. **Primary attention measure = HUMAN comments/kLOC** (bot comments
+   excluded by construction: `detect.split_reviews` drops Bot-typed AND
+   User-typed bot accounts, `is_bot_login`, pinning test). Window
+   hours/kLOC corroborates, never leads. Size-band decomposition separates
+   within-size thinning from composition (`studies.attention`).
+4. **Weighting labeled on every number**: contributor-weighted primary
+   (active-window weights), pooled secondary. Marker set v2 everywhere.
+5. **Layer-C hygiene**: CI-canary false-positive class excluded (pinning
+   test); per-prefix provenance precision stated (§2); the ai_involved
+   series carries its two-sided weak-prefix bound as a standing report
+   section — the single quantified exception to the floors framing.
+6. **Q1-2024 caption** on every table where the column appears:
+   detector-validity check and review-practice baseline, not an AI-usage
+   estimate.
+7. **Determinism & completeness**: seeded bootstrap (20260630, 2,000
+   draws), seeded samples, SHA-256 manifest, fail-hard on incomplete or
+   invalid cells, gap-free coverage gate with documented waivers.
+
 ## 2. Detection: three independent layers (`detect.py`)
 
 **Layer A — commit markers** (commit-forensic, strongest evidence). Co-author

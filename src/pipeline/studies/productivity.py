@@ -105,12 +105,87 @@ def persistent() -> None:
           "contributors in 2024; descriptive, not causal)")
 
 
+def core_loc() -> None:
+    """Paper point 1: merged LOC per CORE (insider) contributor, per-repo
+    contributor-weighted; externals excluded from both numerator and
+    denominator (their influx dilutes pooled averages)."""
+    from pipeline.analyze import weighted_mean
+    from pipeline.studies.slices import weights
+    pa = per_author()
+    w = weights()
+    from pipeline.analyze import group_by_period, load_cells
+    from pipeline.scan_orgs import QUARTER_RANGES
+    ins_of = defaultdict(set)
+    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
+        for p in prs:
+            a = p.get("author") or {}
+            if a.get("login") and p.get("authorAssociation") in                     ("MEMBER", "OWNER", "COLLABORATOR"):
+                ins_of[(repo, per)].add(a["login"])
+    print(f"{'period':9}{'repos':>6}{'CW merged kLOC / core author':>30}")
+    for per in PERIODS:
+        pairs = []
+        for (repo, p), authors in pa.items():
+            if p != per:
+                continue
+            core = {login: v for login, v in authors.items()
+                    if login in ins_of[(repo, p)]}
+            if len(core) >= 2:
+                mrg = sum(v[2] for v in core.values())
+                pairs.append((mrg / len(core), w.get(repo, 1.0)))
+        if pairs:
+            print(f"{per:9}{len(pairs):>6}{weighted_mean(pairs)/1000:>30.2f}")
+
+
+def channels() -> None:
+    """Paper points 2 & 5: merged LOC by approval channel (human-reviewed /
+    bot-only-reviewed / self-merged unreviewed / other-merged unreviewed),
+    pooled shares per quarter."""
+    from pipeline.analyze import group_by_period, load_cells
+    from pipeline.scan_orgs import QUARTER_RANGES
+    from pipeline.studies.slices import population_repos
+    keep = population_repos()
+    ch = defaultdict(lambda: defaultdict(int))
+    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
+        if repo not in keep or per not in PERIODS:
+            continue
+        for p in prs:
+            if (p.get("author") or {}).get("__typename") == "Bot":
+                continue
+            c = classify_pr(p, MARKERS_V2)
+            if not c.merged:
+                continue
+            loc = min((p.get("additions") or 0) + (p.get("deletions") or 0),
+                      LINE_CAP)
+            if c.human_reviewed:
+                k = "humanRev"
+            elif c.ai_reviewed or c.other_bot_reviewed:
+                k = "botOnly"
+            elif c.self_merged is True:
+                k = "selfUnrev"
+            elif c.self_merged is False:
+                k = "otherUnrev"
+            else:
+                k = "unknown"
+            ch[per][k] += loc
+            ch[per]["total"] += loc
+    print(f"{'period':9}{'merged MLOC':>12}{'humanRev%':>10}{'botOnly%':>9}"
+          f"{'selfUnrev%':>11}{'otherUnrev%':>12}")
+    for per in PERIODS:
+        d = ch[per]
+        t = d["total"] or 1
+        print(f"{per:9}{t/1e6:>12.1f}{100*d['humanRev']/t:>9.1f}%"
+              f"{100*d['botOnly']/t:>8.1f}%{100*d['selfUnrev']/t:>10.1f}%"
+              f"{100*d['otherUnrev']/t:>11.1f}%")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cut", choices=["decomposition", "persistent"],
+    ap.add_argument("--cut", choices=["decomposition", "persistent",
+                                      "core", "channels"],
                     default="decomposition")
     a = ap.parse_args()
-    (decomposition if a.cut == "decomposition" else persistent)()
+    {"decomposition": decomposition, "persistent": persistent,
+     "core": core_loc, "channels": channels}[a.cut]()
 
 
 if __name__ == "__main__":

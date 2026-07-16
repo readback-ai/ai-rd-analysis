@@ -50,6 +50,14 @@ def sections(granularity: str, repos: Path) -> list[tuple[str, list[str]]]:
          ["pipeline.studies.productivity", "--cut", "decomposition"]),
         ("Persistent-author productivity (same person, same repo)",
          ["pipeline.studies.productivity", "--cut", "persistent"]),
+        ("Core-contributor merged LOC (CW)",
+         ["pipeline.studies.productivity", "--cut", "core"]),
+        ("Merged LOC by approval channel",
+         ["pipeline.studies.productivity", "--cut", "channels"]),
+        ("Attention per line (comments/kLOC primary, bot-clean)",
+         ["pipeline.studies.attention"]),
+        ("PR fates at matched horizons (w8 primary, w26 sensitivity)",
+         ["pipeline.studies.fates"]),
     ]
 
 

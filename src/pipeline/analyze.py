@@ -119,7 +119,11 @@ def pr_metrics(pr: dict, markers: dict) -> dict:
     return {
         "ai_code": bool(c.marker_tools),
         "ai_involved": c.ai_involved,          # all 3 layers (needs headRefName)
-        "merged": c.merged,
+        # FROZEN CENSORING RULE: outcomes at 8 weeks post-creation, defined
+        # only on w8-mature PRs (immature -> None -> skipped)
+        "merged": c.merged if c.w8_mature else None,
+        "rejected_w8": c.rejected if c.w8_mature else None,
+        "limbo_w8": (not c.merged and not c.rejected) if c.w8_mature else None,
         "human_review": c.human_reviewed_any,  # legacy (published §1/§4/§5)
         "human_rev_other": c.human_reviewed,   # corrected reviewer != author
         "ai_review": c.ai_reviewed,
@@ -139,8 +143,9 @@ def pr_metrics(pr: dict, markers: dict) -> dict:
     }
 
 
-METRICS = ["ai_code", "ai_involved", "merged", "human_review", "human_rev_other",
-           "ai_review", "other_bot_review", "no_review", "insider", "self_merged",
+METRICS = ["ai_code", "ai_involved", "merged", "rejected_w8", "limbo_w8",
+           "human_review", "human_rev_other", "ai_review", "other_bot_review",
+           "no_review", "insider", "self_merged",
            "m_hum_rev", "m_ai_rev", "m_no_rev"]
 
 

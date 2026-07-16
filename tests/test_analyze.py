@@ -189,7 +189,8 @@ def test_partial_quarter_months_excluded_from_month_grouping():
 def test_merged_conditioned_metrics_none_on_unmerged():
     from pipeline.analyze import pr_metrics
     from pipeline.detect import MARKERS_V2
-    unmerged = {"reviews": {"nodes": []}, "commits": {"nodes": []}}
+    unmerged = {"reviews": {"nodes": []}, "commits": {"nodes": []},
+                "createdAt": "2026-04-10T00:00:00Z"}
     m = pr_metrics(unmerged, MARKERS_V2)
     assert m["m_hum_rev"] is None and m["m_no_rev"] is None
     merged = dict(unmerged, mergedAt="2026-05-01T00:00:00Z")
