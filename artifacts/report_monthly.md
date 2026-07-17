@@ -38,6 +38,30 @@ WARN 2026-06: 1 qualifying repos lack contributor weights (default 1.0) — e.g.
 
 ```
 
+## Table 6: Traceable AI usage over time (CW, 95% CI)
+```
+Table 6: Traceable AI usage over time
+contributor-weighted repo means, bootstrap 95% CI; merged = w8 rule; LOC capped 20k/PR; all values are floors
+period    repos  AI% of submitted PRs    AI% of merged PRs   AI-PR% of subm LOC  AI-PR% of merged LOC
+Q1-2024     465      0.0% [ 0.0, 0.0]     0.0% [ 0.0, 0.0]     0.0% [ 0.0, 0.0]      0.0% [ 0.0, 0.0]
+Q4-2025     825      2.9% [ 2.3, 3.6]     2.1% [ 1.6, 2.8]     4.2% [ 3.3, 5.2]      2.6% [ 1.8, 3.5]
+Q1-2026    1008     10.0% [ 8.8,11.4]     8.7% [ 7.3,10.2]    13.4% [11.6,15.1]     10.9% [ 9.2,12.6]
+Q2-2026    1154     16.6% [14.7,18.4]    15.9% [13.9,17.9]    22.1% [19.1,24.7]     20.0% [17.4,22.7]
+
+```
+
+## Table 7: Merged LOC per core contributor over time (CW, 95% CI)
+```
+Table 7: Merged LOC per core contributor over time
+contributor-weighted repo means, bootstrap 95% CI; merged = w8 rule; core = insider PR authors; repos with >=2 insider authors
+period    repos    CW merged kLOC/core author  x baseline
+Q1-2024     254            6.61 [ 4.79, 8.90]       1.00x
+Q4-2025     471           10.02 [ 6.55,15.86]       1.52x
+Q1-2026     535           10.68 [ 8.37,13.55]       1.62x
+Q2-2026     588           17.59 [11.79,26.15]       2.66x
+
+```
+
 ## Layered decomposition (pooled)
 ```
 period        PRs A marker% B agent% C branch%  union%
@@ -408,6 +432,17 @@ Q1-2024     254                          6.61
 Q4-2025     471                         10.02
 Q1-2026     535                         10.68
 Q2-2026     588                         17.59
+
+```
+
+## Core-contributor merged LOC split by AI involvement (CW, 95% CI)
+```
+core-contributor merged (w8) kLOC split by AI involvement (CW, bootstrap 95% CI; floors: undetected AI counts as nonAI)
+period    repos      noAI-author kLOC     AI-PR kLOC/author  nonAI-PR kLOC/author
+Q1-2024     254    6.61 [ 4.79, 8.90]    0.00 [ 0.00, 0.00]    6.61 [ 4.73, 8.86]
+Q4-2025     471    6.77 [ 5.47, 8.39]    0.41 [ 0.12, 0.93]    9.61 [ 6.29,15.13]
+Q1-2026     535    6.45 [ 4.93, 8.37]    1.41 [ 0.89, 2.09]    9.28 [ 7.19,11.54]
+Q2-2026     588    5.48 [ 4.44, 6.67]    4.85 [ 2.38, 8.67]   12.74 [ 9.33,17.49]
 
 ```
 

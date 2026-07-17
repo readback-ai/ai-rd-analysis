@@ -178,14 +178,85 @@ def channels() -> None:
               f"{100*d['otherUnrev']/t:>11.1f}%")
 
 
+def ai_split() -> None:
+    """Core-contributor merged (w8) LOC split by AI involvement, CW with
+    bootstrap 95% CIs. Three columns per quarter, core (insider) authors
+    only, repos with >=2 core authors (same rule as --cut core):
+
+    - noAI-author kLOC: merged kLOC per core author, restricted to authors
+      with ZERO AI-tracked PRs (submitted or merged) in the repo-quarter —
+      the non-adopter output level.
+    - AI-PR kLOC/author: merged LOC arriving in AI-tracked PRs, per core
+      author (all core authors in the denominator).
+    - nonAI-PR kLOC/author: merged LOC in non-AI-tracked PRs, per core
+      author. The last two sum to the --cut core / Table 7 total.
+
+    Detection is a floor, so the split is conservative: undetected AI LOC
+    lands in the nonAI columns."""
+    from pipeline.analyze import bootstrap_ci, weighted_mean
+    from pipeline.studies.slices import population_repos, weights
+    keep = population_repos()
+    w = weights()
+    # (repo, per) -> login -> [ai_merged_loc, nonai_merged_loc, ai_prs]
+    acc: dict = defaultdict(lambda: defaultdict(lambda: [0, 0, 0]))
+    ins_of = defaultdict(set)
+    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
+        if repo not in keep or per not in PERIODS:
+            continue
+        for p in prs:
+            a = p.get("author") or {}
+            if a.get("__typename") == "Bot" or not a.get("login"):
+                continue
+            if p.get("authorAssociation") in ("MEMBER", "OWNER",
+                                              "COLLABORATOR"):
+                ins_of[(repo, per)].add(a["login"])
+            c = classify_pr(p, MARKERS_V2)
+            row = acc[(repo, per)][a["login"]]
+            if c.ai_involved:
+                row[2] += 1
+            if c.merged:
+                loc = min((p.get("additions") or 0)
+                          + (p.get("deletions") or 0), LINE_CAP)
+                row[0 if c.ai_involved else 1] += loc
+
+    def fmt(pairs):
+        m = weighted_mean(pairs)
+        lo, hi = bootstrap_ci(pairs)
+        return f"{m:6.2f} [{lo:5.2f},{hi:5.2f}]"
+
+    print("core-contributor merged (w8) kLOC split by AI involvement "
+          "(CW, bootstrap 95% CI; floors: undetected AI counts as nonAI)")
+    print(f"{'period':9}{'repos':>6}{'noAI-author kLOC':>22}"
+          f"{'AI-PR kLOC/author':>22}{'nonAI-PR kLOC/author':>22}")
+    for per in PERIODS:
+        pa_, pb, pc = [], [], []
+        for (repo, p), authors in acc.items():
+            if p != per:
+                continue
+            core = {login: v for login, v in authors.items()
+                    if login in ins_of[(repo, p)]}
+            if len(core) < 2:
+                continue
+            wt = w.get(repo, 1.0)
+            noai = [v for v in core.values() if v[2] == 0]
+            if noai:
+                pa_.append((sum(v[0] + v[1] for v in noai)
+                            / len(noai) / 1000, wt))
+            n = len(core)
+            pb.append((sum(v[0] for v in core.values()) / n / 1000, wt))
+            pc.append((sum(v[1] for v in core.values()) / n / 1000, wt))
+        print(f"{per:9}{len(pb):>6}  {fmt(pa_):>20}  {fmt(pb):>20}"
+              f"  {fmt(pc):>20}")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cut", choices=["decomposition", "persistent",
-                                      "core", "channels"],
+                                      "core", "channels", "aisplit"],
                     default="decomposition")
     a = ap.parse_args()
     {"decomposition": decomposition, "persistent": persistent,
-     "core": core_loc, "channels": channels}[a.cut]()
+     "core": core_loc, "channels": channels, "aisplit": ai_split}[a.cut]()
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ version = "0.2.0"
 description = "Empirical study of AI-assisted development practices at leading AI organizations, from public GitHub metadata"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = ["matplotlib>=3.9"]  # figures only (scripts/plot_paper_tables.py)
 
 [dependency-groups]
 dev = [
