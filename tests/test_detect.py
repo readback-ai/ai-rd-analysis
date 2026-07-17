@@ -185,6 +185,21 @@ def test_strict_layer_c_requires_provenance_on_weak_prefixes():
     slugged = {"headRefName": "cursor/fix-redis-2a9c", "commits": {"nodes": [
         {"commit": {"committer": {"email": "dev@x.com"}}}]}}
     assert pr_branch_tool(slugged, strict=True) == "cursor"
+
+
+def test_droid_prefix_is_weak_with_date_slug_confirmation():
+    """droid/ (Factory) added from the fleet audit: weak prefix; the
+    YYYYMMDD suffix Factory appends is the confirming machine slug."""
+    dated = {"headRefName": "droid/harden-bootstrap-api-20260504",
+             "commits": {"nodes": [
+                 {"commit": {"committer": {"email": "dev@x.com"}}}]}}
+    assert pr_branch_tool(dated) == "droid"
+    assert pr_branch_tool(dated, strict=True) == "droid"
+    undated = {"headRefName": "droid/finding-quality-cleanup",
+               "commits": {"nodes": [
+                   {"commit": {"committer": {"email": "dev@x.com"}}}]}}
+    assert pr_branch_tool(undated) == "droid"            # upper arm
+    assert pr_branch_tool(undated, strict=True) is None  # lower arm
     # strong prefixes unaffected by strict
     codex = {"headRefName": "codex/fix-tests", "commits": {"nodes": []}}
     assert pr_branch_tool(codex, strict=True) == "codex"

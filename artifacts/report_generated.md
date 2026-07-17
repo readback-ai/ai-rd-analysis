@@ -262,6 +262,35 @@ Q2-2026     525           442    5.48 [ 4.41, 6.70]    8.99 [ 5.27,14.12]    21.
 
 ```
 
+## Figure 4: Merged LOC per core author by adoption cohort (pooled, 95% CI on total)
+```
+merged (w8) kLOC per CORE author by fixed adoption cohort (pooled author-level means over quarter-active members; bootstrap 95% CI on total)
+  early: first AI-tracked PR by 2026-02
+  medium: first AI-tracked PR 2026-03..2026-04
+  late: first AI-tracked PR 2026-05 or later
+  never: no AI-tracked PR through 2026-06
+Q2-2026 w8-deflated for May/June PRs; undetected AI counts as nonAI (floors)
+
+period   cohort   authors  AI kLOC nonAI kLOC total kLOC          95% CI
+Q1-2024  early        191     0.00      12.22      12.22   [ 8.65, 16.21]
+Q1-2024  medium       135     0.00       9.18       9.18   [ 5.61, 13.35]
+Q1-2024  late         101     0.00       8.79       8.79   [ 4.54, 14.18]
+Q1-2024  never       1011     0.00       4.30       4.30   [ 3.61,  5.10]
+Q4-2025  early        507     1.60      18.72      20.32   [16.76, 24.46]
+Q4-2025  medium       406     0.00      10.44      10.44   [ 8.50, 12.68]
+Q4-2025  late         252     0.00       7.54       7.54   [ 5.60,  9.91]
+Q4-2025  never       1833     0.00       5.65       5.65   [ 4.69,  7.02]
+Q1-2026  early        582     7.47      20.22      27.69   [23.32, 32.52]
+Q1-2026  medium       574     1.53      12.98      14.52   [11.67, 18.16]
+Q1-2026  late         308     0.00      11.02      11.02   [ 8.71, 13.74]
+Q1-2026  never       1867     0.00       6.31       6.31   [ 5.41,  7.44]
+Q2-2026  early        508    11.92      20.29      32.21   [26.68, 39.09]
+Q2-2026  medium       617    14.99      26.28      41.27   [23.82, 72.41]
+Q2-2026  late         522     3.74      12.19      15.93   [13.47, 18.92]
+Q2-2026  never       1872     0.00       6.19       6.19   [ 5.43,  7.06]
+
+```
+
 ## Merged LOC by approval channel
 ```
 period    merged MLOC humanRev% botOnly% selfUnrev% otherUnrev%

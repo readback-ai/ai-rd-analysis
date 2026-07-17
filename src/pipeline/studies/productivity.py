@@ -24,7 +24,7 @@ import statistics
 from collections import defaultdict
 
 from pipeline.analyze import group_by_period, load_cells
-from pipeline.detect import MARKERS_V2, classify_pr
+from pipeline.detect import MARKERS_V2, classify_pr, is_bot_login
 from pipeline.scan_orgs import QUARTER_RANGES
 from pipeline.studies.slices import population_repos
 
@@ -41,7 +41,8 @@ def per_author() -> dict:
             continue
         for p in prs:
             a = p.get("author") or {}
-            if a.get("__typename") == "Bot" or not a.get("login"):
+            if a.get("__typename") == "Bot" or not a.get("login") \
+                    or is_bot_login(a["login"]):
                 continue
             c = classify_pr(p, MARKERS_V2)
             row = out[(repo, per)][a["login"]]
@@ -208,7 +209,8 @@ def ai_split() -> None:
             continue
         for p in prs:
             a = p.get("author") or {}
-            if a.get("__typename") == "Bot" or not a.get("login"):
+            if a.get("__typename") == "Bot" or not a.get("login") \
+                    or is_bot_login(a["login"]):
                 continue
             if p.get("authorAssociation") in ("MEMBER", "OWNER",
                                               "COLLABORATOR"):
@@ -259,14 +261,155 @@ def ai_split() -> None:
               f"  {fmt(pb):>20}  {fmt(pc):>21}")
 
 
+ADOPTION_COHORTS = [
+    ("early", "first AI-tracked PR by 2026-02"),
+    ("medium", "first AI-tracked PR 2026-03..2026-04"),
+    ("late", "first AI-tracked PR 2026-05 or later"),
+    ("never", "no AI-tracked PR through 2026-06"),
+    ("fleet", ">=300 merged PRs in one quarter (fleet/automation "
+              "operators; assigned before the AI-timing cohorts)"),
+]
+FLEET_MIN = 300   # merged PRs in a single quarter; ~0.3% of core authors
+
+
+def adoption_rows() -> dict:
+    """Fixed adoption cohorts of CORE authors, tracked in calendar time.
+
+    Cohort = author's FIRST month with an AI-tracked PR (submitted, any
+    repo): early (<= 2026-02), medium (2026-03..04), late (>= 2026-05),
+    never — EXCEPT authors with >= FLEET_MIN merged PRs in any single
+    quarter, who form the separate FLEET cohort regardless of AI timing
+    (agent-fleet / automation operators: a 45%-of-cell-LOC whale audit,
+    then a population sweep, found ~43 such accounts merging 300-4,400
+    PRs/quarter, roughly half with no AI markers — isolating them replaces
+    top-1% trimming). Core = insider association on >=1 censused PR in any
+    period.
+    Per quarter x cohort, over cohort members ACTIVE that quarter (>=1 PR):
+    author-level (pooled, unweighted) mean merged (w8) kLOC in AI-tracked
+    PRs, in non-AI PRs, and their sum, with a seeded bootstrap 95% CI,
+    MEDIAN, and top-1%-trimmed mean of the sum. Means are whale-sensitive:
+    a top-5 author audit of the medium/Q2-2026 cell found 45% of cohort
+    LOC from five agent-fleet accounts (thousands of merged PRs/quarter
+    each, partly unmarked) — quote medians or trimmed means for
+    typical-contributor claims. Caveats: Q2-2026 merged LOC is
+    w8-deflated for May/June PRs
+    (hits late adopters hardest); late adopters' pre-Q2 rows are clean
+    pre-adoption output; detection floors put undetected AI in nonAI.
+
+    Returns {(period, cohort): {n, ai, nonai, total, lo, hi}}."""
+    from pipeline.analyze import bootstrap_ci, weighted_mean
+    keep = population_repos()
+    q_of = {}
+    for m in range(1, 4):
+        q_of[f"2024-{m:02d}"] = "Q1-2024"
+        q_of[f"2026-{m:02d}"] = "Q1-2026"
+        q_of[f"2026-{m + 3:02d}"] = "Q2-2026"
+    for m in (10, 11, 12):
+        q_of[f"2025-{m}"] = "Q4-2025"
+    # login -> month -> [ai_kloc, nonai_kloc, ai_prs, prs, mrg_prs]
+    acc: dict = defaultdict(lambda: defaultdict(lambda: [0.0, 0.0, 0, 0, 0]))
+    insiders = set()
+    for (repo, mon), prs in group_by_period(load_cells(), QUARTER_RANGES,
+                                            "month").items():
+        if repo not in keep or mon not in q_of:
+            continue
+        for p in prs:
+            a = p.get("author") or {}
+            if a.get("__typename") == "Bot" or not a.get("login") \
+                    or is_bot_login(a["login"]):
+                continue
+            login = a["login"]
+            if p.get("authorAssociation") in ("MEMBER", "OWNER",
+                                              "COLLABORATOR"):
+                insiders.add(login)
+            c = classify_pr(p, MARKERS_V2)
+            row = acc[login][mon]
+            row[3] += 1
+            if c.ai_involved:
+                row[2] += 1
+            if c.merged:
+                row[4] += 1
+                kloc = min((p.get("additions") or 0)
+                           + (p.get("deletions") or 0), LINE_CAP) / 1000
+                row[0 if c.ai_involved else 1] += kloc
+
+    def cohort_of(months: dict) -> str:
+        for per in PERIODS:
+            mons = [m for m, q in q_of.items() if q == per]
+            if sum(months.get(m, [0, 0, 0, 0, 0])[4] for m in mons) \
+                    >= FLEET_MIN:
+                return "fleet"
+        first = min((m for m, v in months.items() if v[2] > 0),
+                    default=None)
+        if first is None:
+            return "never"
+        if first <= "2026-02":
+            return "early"
+        return "medium" if first <= "2026-04" else "late"
+
+    out = {}
+    per_author_cohort = {login: cohort_of(m) for login, m in acc.items()
+                         if login in insiders}
+    for per in PERIODS:
+        mons = [m for m, q in q_of.items() if q == per]
+        for coh, _desc in ADOPTION_COHORTS:
+            ai_v, nonai_v = [], []
+            for login, coh_ in per_author_cohort.items():
+                if coh_ != coh:
+                    continue
+                rows = [acc[login][m] for m in mons if m in acc[login]]
+                if not any(r[3] for r in rows):
+                    continue                       # inactive this quarter
+                ai_v.append(sum(r[0] for r in rows))
+                nonai_v.append(sum(r[1] for r in rows))
+            tot = [(a + b, 1.0) for a, b in zip(ai_v, nonai_v)]
+            if not tot:
+                out[(per, coh)] = None
+                continue
+            lo, hi = bootstrap_ci(tot)
+            out[(per, coh)] = {
+                "n": len(tot),
+                "ai": sum(ai_v) / len(ai_v),
+                "nonai": sum(nonai_v) / len(nonai_v),
+                "total": weighted_mean(tot), "lo": lo, "hi": hi,
+                "median": statistics.median(t for t, _ in tot)}
+    return out
+
+
+def adoption() -> None:
+    rows = adoption_rows()
+    print("merged (w8) kLOC per CORE author by fixed adoption cohort "
+          "(pooled author-level means over quarter-active members; "
+          "bootstrap 95% CI on total)")
+    for coh, desc in ADOPTION_COHORTS:
+        print(f"  {coh}: {desc}")
+    print("Q2-2026 w8-deflated for May/June PRs; undetected AI counts "
+          "as nonAI (floors)")
+    print(f"\n{'period':9}{'cohort':8}{'authors':>8}{'AI kLOC':>9}"
+          f"{'nonAI kLOC':>11}{'total kLOC':>11}{'95% CI':>16}"
+          f"{'median':>8}")
+    for per in PERIODS:
+        for coh, _ in ADOPTION_COHORTS:
+            r = rows[(per, coh)]
+            if r is None:
+                print(f"{per:9}{coh:8}{'—':>8}")
+                continue
+            print(f"{per:9}{coh:8}{r['n']:>8}{r['ai']:>9.2f}"
+                  f"{r['nonai']:>11.2f}{r['total']:>11.2f}"
+                  f"   [{r['lo']:5.2f},{r['hi']:6.2f}]"
+                  f"{r['median']:>8.2f}")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cut", choices=["decomposition", "persistent",
-                                      "core", "channels", "aisplit"],
+                                      "core", "channels", "aisplit",
+                                      "adoption"],
                     default="decomposition")
     a = ap.parse_args()
     {"decomposition": decomposition, "persistent": persistent,
-     "core": core_loc, "channels": channels, "aisplit": ai_split}[a.cut]()
+     "core": core_loc, "channels": channels, "aisplit": ai_split,
+     "adoption": adoption}[a.cut]()
 
 
 if __name__ == "__main__":

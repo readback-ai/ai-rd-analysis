@@ -181,6 +181,18 @@ quarters — the weak-prefix volumes (462 claude/ + 73 cursor/ C-only sampled)
 are dwarfed by codex/ (4,698, 95% confirmed) and layers A/B. With that one
 quantified exception stated, every other rate in the study is a floor.
 
+**droid/ (Factory Droid), added 2026-07-17 as a WEAK prefix** after the
+agent-fleet audit surfaced it as a measured detection gap. Measurement
+before inclusion (all census cells): 271 droid/ PRs, 270 in Q2-2026, 269
+from a single fleet-operator account (writer/cerebro); on-PR layer-A/B
+confirmation 4.8%; exactly one pre-AI-era PR (Q1-2024, unrelated repo)
+demonstrates the droid!=Factory naming collision, giving ~0.4% measured
+contamination. Confirmation slug for the strict arm: the `-YYYYMMDD`
+suffix Factory appends to generated branches. Consequences: droid/ enters
+the headline via the weak-prefix upper arm and the two-sided bound absorbs
+its indeterminate mass; the Q1-2024 caption gains one known FP-class PR
+(excluded by the strict arm, invisible at reported precision).
+
 **Layer overlap** is measured, not assumed, on org-stratified samples
 (`pull_prs.sample_branch_prs`): A∩C ≈ 2% for codex/; B∩C is high for
 copilot/ (the bot authors those PRs). `integrate.py` combines layers

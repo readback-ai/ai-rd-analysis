@@ -58,6 +58,9 @@ def sections(granularity: str, repos: Path) -> list[tuple[str, list[str]]]:
          ["pipeline.studies.productivity", "--cut", "core"]),
         ("Core-contributor merged LOC split by AI involvement (CW, 95% CI)",
          ["pipeline.studies.productivity", "--cut", "aisplit"]),
+        ("Figure 4: Merged LOC per core author by adoption cohort "
+         "(pooled, 95% CI on total)",
+         ["pipeline.studies.productivity", "--cut", "adoption"]),
         ("Merged LOC by approval channel",
          ["pipeline.studies.productivity", "--cut", "channels"]),
         ("Attention per line (comments/kLOC primary, bot-clean)",

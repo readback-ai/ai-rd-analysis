@@ -146,18 +146,21 @@ BRANCH_PREFIXES = {
     "copilot": "copilot/",
     "cursor": "cursor/",
     "claude": "claude/",
+    "droid": "droid/",   # Factory Droid; added 2026-07-17 (fleet audit)
 }
 # Measured C-only precision is ~95%+ for codex//copilot/ but cursor//claude/
 # carry an INDETERMINATE mass (user-pushed commits on a prefix branch:
 # agent-branch-continued-locally and human-named-branch are observationally
 # identical). These are the study's only potential OVERCOUNT; the headline is
 # therefore reported as a two-sided bound (studies.slices --table bounds).
-WEAK_PREFIXES = {"cursor", "claude"}
+WEAK_PREFIXES = {"cursor", "claude", "droid"}
 _SLUG = {
     "codex": __import__("re").compile(r"^codex/[a-z0-9][a-z0-9-]*$"),
     "cursor": __import__("re").compile(r"^cursor/.+-[0-9a-f]{4}$"),
     "claude": __import__("re").compile(r"^claude/(issue-\d+|[a-z]+-[a-z]+-[0-9a-f]{4,})"),
     "copilot": __import__("re").compile(r"^copilot/[a-z0-9][a-z0-9-]*$"),
+    # Factory appends a YYYYMMDD slug to generated branches
+    "droid": __import__("re").compile(r"^droid/.+-20\d{6}$"),
 }
 
 
