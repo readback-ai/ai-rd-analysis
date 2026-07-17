@@ -149,6 +149,8 @@ def _author_edits_after(d: dict, anchor: str) -> tuple[int, int]:
     """(post_anchor_author_loc, total_commit_loc), bot committers excluded."""
     post = total = 0
     for c in d["commits"]:
+        if not c:
+            continue                       # ghost-commit nodes arrive as null
         cm = c.get("commit") or {}
         loc = (cm.get("additions") or 0) + (cm.get("deletions") or 0)
         total += loc
