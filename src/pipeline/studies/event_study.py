@@ -11,10 +11,12 @@ Identification logic: if volume JUMPS at t0 rather than trending up before
 it, trend-selection (heavier contributors were on steeper trajectories
 anyway) is dead as an explanation for the adopter/non-adopter divergence.
 
-Censoring rule: only w8-MATURE calendar months contribute observations —
-2026-04 is the last month whose PRs all had a full 8-week window before the
-cutoff (Apr 30 + 56d = Jun 25), so observations landing in 2026-05/06 are
-EXCLUDED from every cell rather than reported deflated.
+Censoring rule (outcome A, merged): only w8-MATURE calendar months
+contribute observations — 2026-04 is the last month whose PRs all had a full
+8-week window before the cutoff (Apr 30 + 56d = Jun 25), so observations
+landing in 2026-05/06 are EXCLUDED from every cell rather than reported
+deflated. Outcome B (SUBMITTED kLOC — all PRs created in the month, merged
+or not) needs no maturity gate and runs on the full window through 2026-06.
 
 Composition control: alongside the all-observations table, a BALANCED cohort
 (authors observed at every offset in [-2..+2]) removes entry/exit drift; its
@@ -47,9 +49,10 @@ MATURE_MAX = WINDOW.index("2026-04")
 
 
 def author_months():
-    """login -> month -> [merged_kloc, ai_pr_count, insider_any]."""
+    """login -> month -> [merged_kloc, ai_pr_count, insider_any,
+    submitted_kloc]."""
     keep = population_repos()
-    out = defaultdict(lambda: defaultdict(lambda: [0.0, 0, False]))
+    out = defaultdict(lambda: defaultdict(lambda: [0.0, 0, False, 0.0]))
     for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES,
                                             "month").items():
         if repo not in keep:
@@ -60,9 +63,11 @@ def author_months():
                 continue
             c = classify_pr(p, MARKERS_V2)
             row = out[a["login"]][per]
+            kloc = min((p.get("additions") or 0)
+                       + (p.get("deletions") or 0), CAP) / 1000
+            row[3] += kloc
             if c.merged:
-                row[0] += min((p.get("additions") or 0)
-                              + (p.get("deletions") or 0), CAP) / 1000
+                row[0] += kloc
             if c.ai_involved:
                 row[1] += 1
             if p.get("authorAssociation") in ("MEMBER", "OWNER",
@@ -84,31 +89,44 @@ def main() -> None:
         if first is not None and first > 0:            # need a pre-period
             events[login] = first
     print(f"alignable adopters (core, clean pre-period): {len(events)}")
-    print("outcome = MERGED kLOC (w8) of PRs created in the month; "
-          "months after 2026-04 (w8-immature) excluded from all cells")
+    print("outcome A = MERGED kLOC (w8); months after 2026-04 (w8-immature) "
+          "excluded. outcome B = SUBMITTED kLOC; full window.")
 
-    def table(cohort, label):
+    def table(cohort, label, field=0, max_idx=MATURE_MAX):
         print(f"\n{label}")
         print(f"{'event month':12}{'authors':>8}{'mean kLOC/mo':>13}{'median':>8}")
         for e in range(-4, 5):
             vals = []
             for login, t0 in cohort.items():
                 idx = t0 + e
-                if 0 <= idx <= MATURE_MAX:
-                    vals.append(am[login].get(WINDOW[idx], [0, 0, 0])[0])
+                if 0 <= idx <= max_idx:
+                    vals.append(am[login].get(
+                        WINDOW[idx], [0.0, 0, False, 0.0])[field])
             if len(vals) >= 30:
                 print(f"{('t' + format(e, '+d')):12}{len(vals):>8}"
                       f"{mean(vals):>13.2f}{median(vals):>8.2f}")
 
-    table(events, "ALL alignable adopters (unbalanced event panel)")
     balanced = {login: t0 for login, t0 in events.items()
                 if 2 <= t0 <= MATURE_MAX}
-    table(balanced, "BALANCED cohort (observed at every offset in [-2..+2]; "
-                    "post-t0 offsets past 2026-04 excluded)")
     mature = {login: t0 for login, t0 in events.items()
               if 2 <= t0 <= WINDOW.index("2026-02")}
+
+    print("\n=== outcome A: MERGED kLOC (w8) ===")
+    table(events, "ALL alignable adopters (unbalanced event panel)")
+    table(balanced, "BALANCED cohort (observed at every offset in [-2..+2]; "
+                    "post-t0 offsets past 2026-04 excluded)")
     table(mature, "FULLY-MATURE balanced cohort (t0 <= 2026-02: every offset "
                   "in [-2..+2] w8-mature)")
+
+    print("\n=== outcome B: SUBMITTED kLOC (all PRs created in the month; "
+          "no censoring, full window through 2026-06) ===")
+    last = len(WINDOW) - 1
+    table(events, "ALL alignable adopters (unbalanced event panel)",
+          field=3, max_idx=last)
+    table(balanced, "BALANCED cohort (observed at every offset in [-2..+2])",
+          field=3, max_idx=last)
+    table(mature, "t0 <= 2026-02 cohort (same authors as fully-mature "
+                  "merged panel)", field=3, max_idx=last)
 
 
 if __name__ == "__main__":

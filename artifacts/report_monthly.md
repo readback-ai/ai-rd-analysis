@@ -511,10 +511,12 @@ Q2-2026 all-cause       1111      51.1%               36.9%
 
 ```
 
-## Adoption event-study (MERGED kLOC w8 in event time; w8-immature months excluded)
+## Adoption event-study (merged kLOC w8 + submitted kLOC in event time)
 ```
 alignable adopters (core, clean pre-period): 1693
-outcome = MERGED kLOC (w8) of PRs created in the month; months after 2026-04 (w8-immature) excluded from all cells
+outcome A = MERGED kLOC (w8); months after 2026-04 (w8-immature) excluded. outcome B = SUBMITTED kLOC; full window.
+
+=== outcome A: MERGED kLOC (w8) ===
 
 ALL alignable adopters (unbalanced event panel)
 event month  authors mean kLOC/mo  median
@@ -551,6 +553,44 @@ t+1              460         7.96    1.26
 t+2              460         8.50    1.09
 t+3              185         7.18    1.27
 t+4               49         6.63    0.12
+
+=== outcome B: SUBMITTED kLOC (all PRs created in the month; no censoring, full window through 2026-06) ===
+
+ALL alignable adopters (unbalanced event panel)
+event month  authors mean kLOC/mo  median
+t-4             1454         3.71    0.00
+t-3             1590         3.89    0.01
+t-2             1639         4.60    0.09
+t-1             1693         6.08    0.32
+t+0             1693        13.91    4.15
+t+1             1471        14.16    2.35
+t+2             1171        16.89    1.79
+t+3              840        13.94    1.98
+t+4              514        11.15    1.16
+
+BALANCED cohort (observed at every offset in [-2..+2])
+event month  authors mean kLOC/mo  median
+t-4              932         4.38    0.03
+t-3             1068         4.39    0.06
+t-2             1117         4.58    0.13
+t-1             1117         6.11    0.43
+t+0             1117        14.75    4.44
+t+1             1117        15.42    2.64
+t+2             1117        17.05    1.85
+t+3              786        13.88    2.08
+t+4              460        10.80    1.04
+
+t0 <= 2026-02 cohort (same authors as fully-mature merged panel)
+event month  authors mean kLOC/mo  median
+t-4              275         7.23    0.20
+t-3              411         5.41    0.30
+t-2              460         6.15    0.26
+t-1              460         7.18    0.69
+t+0              460        15.46    4.73
+t+1              460        12.91    2.82
+t+2              460        12.58    2.31
+t+3              460        11.74    2.44
+t+4              460        10.80    1.04
 
 ```
 

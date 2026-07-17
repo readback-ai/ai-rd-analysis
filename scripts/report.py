@@ -60,8 +60,8 @@ def sections(granularity: str, repos: Path) -> list[tuple[str, list[str]]]:
          ["pipeline.studies.fates"]),
         ("Responsiveness to human asks (clean lane identified)",
          ["pipeline.studies.review_action"]),
-        ("Adoption event-study (MERGED kLOC w8 in event time; "
-         "w8-immature months excluded)",
+        ("Adoption event-study (merged kLOC w8 + submitted kLOC "
+         "in event time)",
          ["pipeline.studies.event_study"]),
     ]
 
