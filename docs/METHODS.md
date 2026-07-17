@@ -186,13 +186,45 @@ quantified exception stated, every other rate in the study is a floor.
 copilot/ (the bot authors those PRs). `integrate.py` combines layers
 disjointly: total AI involvement = A + B + (C minus measured overlaps).
 
-**Review classification.** A PR is HUMAN-REVIEWED only if a User-typed
-account other than the PR author submitted a formal review object (GitHub
-permits self-review-comments; counting them inflated the self-merge lane —
-correction documented in v2_results §11c, aggregate impact ≤2.2pp). AI review
-= reviewer in the `AI_REVIEWERS` bot list (gemini-code-assist, coderabbitai,
-greptile-apps, copilot-pull-request-reviewer, ...), decomposed from other CI
-bots. Substantive review = inline comments or a non-approve state.
+**Review classification** (`detect.split_reviews` — the single choke point
+every review-based metric flows through). Each formal review object is
+classified by its author into exactly one of three reviewer types:
+
+1. **Human**: account `__typename == "User"` AND the login does not match
+   the user-bot heuristic (below) AND, for the human-review flag, login !=
+   the PR author (GitHub permits self-review-comments; counting them
+   inflated the self-merge lane — correction §11c of the working log,
+   aggregate impact <=2.2pp). Reviews submitted after the study cutoff are
+   excluded before classification.
+2. **AI reviewer**: Bot-typed (or user-bot) account whose login (with any
+   `[bot]` suffix stripped) is in the curated `AI_REVIEWERS` allowlist —
+   dedicated AI code-review products observed in the data:
+   gemini-code-assist, copilot-pull-request-reviewer, coderabbitai,
+   greptile-apps, qodo-merge-pro, cursor, chatgpt-codex-connector,
+   copilot-swe-agent, claude. The list is extend-as-found; it deliberately
+   errs toward under-counting AI review (an unlisted AI product lands in
+   class 3, not class 1 or 2).
+3. **Other bot**: any remaining Bot-typed or user-bot account — CI,
+   automation, dependency bots. Kept as its own class so AI review is never
+   conflated with CI noise.
+
+**The user-typed-bot problem** (`detect.is_bot_login`): GitHub's
+`__typename` distinguishes App-installed bots, but organizations also run
+bots as ordinary User accounts (found by a comment-volume audit:
+PaddlePaddle-bot, all-hands-bot, qwen-code-ci-bot), which would otherwise
+count as human reviewers and pollute the human-attention numerator exactly
+in the AI era. The heuristic is anchored to avoid false positives on human
+names: a login is a bot iff it ends with `-bot`, `_bot`, `[bot]`, `-ci`,
+`-robot`, or starts with `bot-` (so "talbot" is human; pinning tests cover
+both directions). Residual risk: an unmarked User bot with a plain name
+passes as human — mitigated by the audit (top comment producers reviewed by
+hand) and by the direction of the bias (any residual bot inflates the human
+numerator, making the reported human-attention decline conservative).
+
+Substantive review = a human (reviewer != author) review with inline
+comments or a non-APPROVED state. All comment counts in attention metrics
+sum ONLY over class-1 reviews — bot comments can never share a numerator
+with human comments (frozen convention §1d.3).
 
 **What is undetectable** (all rates are floors): squash-merge strips trailers
 (asymmetrically — Claude's footer survives squash more often, so non-Claude

@@ -379,3 +379,110 @@ period       upper (reported)    lower (strict C)  delta pp
 
 ```
 
+## Productivity decomposition (authors vs output/author)
+```
+balanced repo panel: 398 repos (pooled)
+period        PRs  authors PRs/auth merged/auth klines/auth
+Q1-2024     64098    10940     5.86        4.46        1.66
+Q4-2025     82066    13885     5.91        4.21        2.03
+Q1-2026    102579    18849     5.44        3.45        1.92
+Q2-2026    119808    23160     5.17        2.90        1.75
+
+```
+
+## Persistent-author productivity (same person, same repo)
+```
+persistent same-repo authors (active Q1-2024 AND Q2-2026): 1419
+  PRs/quarter            2024 mean  19.03 median  7.0 | 2026 mean  22.35 median  7.0
+  merged/quarter         2024 mean  15.03 median  5.0 | 2026 mean  15.91 median  4.0
+  AI-using in 2026       n=  429  merged/q 22.70->30.37 (1.34x)  klines/q 9.09->21.92 (2.41x)
+  non-AI in 2026         n=  990  merged/q 11.71->9.64 (0.82x)  klines/q 4.39->5.40 (1.23x)
+  (adopter selection caveat: AI-users were already ~2x heavier contributors in 2024; descriptive, not causal)
+
+```
+
+## Core-contributor merged LOC (CW)
+```
+period    repos  CW merged kLOC / core author
+Q1-2024     254                          6.61
+Q4-2025     471                         10.02
+Q1-2026     535                         10.68
+Q2-2026     588                         17.59
+
+```
+
+## Merged LOC by approval channel
+```
+period    merged MLOC humanRev% botOnly% selfUnrev% otherUnrev%
+Q1-2024          19.4     72.9%     0.7%      20.0%        6.1%
+Q4-2025          47.8     70.9%     9.4%      15.2%        3.9%
+Q1-2026          72.5     69.4%    11.4%      15.6%        3.2%
+Q2-2026         100.0     59.2%    15.0%      22.0%        3.7%
+
+```
+
+## Attention per line (comments/kLOC primary, bot-clean)
+```
+attention per line — merged, human-reviewed PRs (pooled)
+cohort             PRs     kLOC comments/kLOC window h/kLOC
+Q1-2024 all      38712   14,138          3.98         220.7
+Q1-2024 ins      12316    4,960          3.52         165.4
+Q1-2024 ext      26396    9,178          4.22         250.6
+Q4-2025 all      69637   33,857          2.68         192.6
+Q4-2025 ins      27634   14,439          2.08         149.4
+Q4-2025 ext      42003   19,418          3.12         224.7
+Q1-2026 all      84244   50,337          2.03         154.6
+Q1-2026 ins      33363   21,767          1.59         114.5
+Q1-2026 ext      50881   28,570          2.36         185.1
+Q2-2026 all      95866   59,167          1.72         129.0
+Q2-2026 ins      37654   26,428          1.36          93.4
+Q2-2026 ext      58212   32,740          2.01         157.7
+
+comments/kLOC within FIXED size bands (composition-controlled)
+band         Q1-2024    Q4-2025    Q1-2026    Q2-2026
+<=10           39.74      33.25      29.13      23.98
+11-100         19.58      15.39      12.99       9.13
+101-1k          8.38       6.14       5.03       3.85
+>1k             1.18       1.03       0.85       0.84
+
+```
+
+## PR fates at matched horizons (w8 primary, w26 sensitivity)
+```
+--- fates at w8 (matched horizon; immature PRs excluded) ---
+cohort                 n  merged% rejected%  limbo%
+Q1-2024 all        67020    76.4%     17.5%    6.1%
+Q1-2024 ins        21879    83.0%     13.4%    3.6%
+Q1-2024 ext        45141    73.2%     19.5%    7.3%
+Q1-2024 nonAI      67020    76.4%     17.5%    6.1%
+Q4-2025 all       122585    72.8%     17.7%    9.5%
+Q4-2025 ins        47846    81.4%     13.3%    5.2%
+Q4-2025 ext        74739    67.3%     20.4%   12.3%
+Q4-2025 AI          3518    56.5%     29.8%   13.7%
+Q4-2025 nonAI     119067    73.3%     17.3%    9.4%
+Q1-2026 all       179101    64.4%     23.6%   12.0%
+Q1-2026 ins        63802    79.8%     14.7%    5.4%
+Q1-2026 ext       115299    55.8%     28.5%   15.6%
+Q1-2026 AI         20058    57.8%     27.4%   14.8%
+Q1-2026 nonAI     159043    65.2%     23.1%   11.7%
+Q2-2026 all        93094    57.5%     26.7%   15.9%
+Q2-2026 ins        29579    78.4%     16.1%    5.4%
+Q2-2026 ext        63515    47.7%     31.6%   20.7%
+Q2-2026 AI         14943    57.3%     27.1%   15.6%
+Q2-2026 nonAI      78151    57.5%     26.6%   15.9%
+
+--- fates at w26 (matched horizon; immature PRs excluded) ---
+cohort                 n  merged% rejected%  limbo%
+Q1-2024 all        67020    77.2%     20.0%    2.8%
+Q1-2024 ins        21879    83.6%     15.1%    1.3%
+Q1-2024 ext        45141    74.1%     22.4%    3.5%
+Q1-2024 nonAI      67020    77.2%     20.0%    2.8%
+Q4-2025 all       121710    73.8%     22.1%    4.1%
+Q4-2025 ins        47515    82.1%     15.8%    2.0%
+Q4-2025 ext        74195    68.5%     26.1%    5.4%
+Q4-2025 AI          3479    57.8%     35.4%    6.8%
+Q4-2025 nonAI     118231    74.3%     21.7%    4.0%
+
+
+```
+
