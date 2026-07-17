@@ -218,3 +218,18 @@ def test_w8_censoring_rule():
     immature = dict(base, createdAt="2026-06-20T00:00:00Z",
                     mergedAt="2026-06-21T00:00:00Z")
     assert not classify_pr(immature).w8_mature       # provisional
+
+
+def test_first_human_ask_requires_changes_or_comments():
+    """An APPROVED review with zero inline comments is not an ask."""
+    import sys
+    sys.path.insert(0, "src")
+    from pipeline.studies.review_action import first_human_ask
+    pr = _pr_reviews(reviews=[
+        _rev("bob", state="APPROVED") | {"submittedAt": "2026-01-05T00:00:00Z"},
+        _rev("carol", state="COMMENTED", comments=2) | {"submittedAt": "2026-01-07T00:00:00Z"}])
+    pr["reviews"]["nodes"][0]["submittedAt"] = "2026-01-05T00:00:00Z"
+    pr["reviews"]["nodes"][1]["submittedAt"] = "2026-01-07T00:00:00Z"
+    assert first_human_ask(pr) == "2026-01-07T00:00:00Z"   # skips bare approve
+    silent = _pr_reviews(reviews=[_rev("bob", state="APPROVED")])
+    assert first_human_ask(silent) is None

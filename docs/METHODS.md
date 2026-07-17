@@ -274,11 +274,15 @@ numbers come only from that artifact.
 
 - Talk: HUMAN comments/kLOC (`studies.attention`, primary attention measure).
 - How much talk: comment length — requires a body pull; not yet collected.
-- ACTION: post-review edits (`studies.review_action`) — lines changed in
-  commits committedDate-after the FIRST human review event, authored by the
-  PR author, bot committers excluded. Caveats: committedDate rewritten by
-  rebase/amend (drifts late — inflates post-review attribution); squash
-  branches keep original dates. Sampled, LOC-weighted, seeded.
+- ACTION: conditional responsiveness to HUMAN ASKS
+  (`studies.review_action`) — among PRs where a human reviewer requested
+  changes or left inline comments, author edits after the first ask.
+  IDENTIFIED estimate = the CLEAN lane (no AI-reviewer activity on the PR);
+  the mixed lane is descriptive (post-ask edits are causally ambiguous when
+  human and AI comments interleave); all-cause post-review edits are a
+  descriptive companion only. Caveats: committedDate rewritten by
+  rebase/amend (drifts late — inflates attribution); squash branches keep
+  original dates. Sampled, LOC-weighted, seeded.
 
 ## 5b. LOC hygiene sensitivity (generated content)
 

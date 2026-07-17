@@ -5,13 +5,27 @@ The measurement triangle for review effectiveness:
   comment length       -> how much talk                  (needs body pull)
   POST-REVIEW EDITS    -> did review produce action      (this study)
 
-PINNED DEFINITION (do not vary): lines changed (additions+deletions) in
-commits whose committedDate is AFTER the PR's FIRST human review event
-(first review by a User, reviewer != author, bot logins excluded,
-submittedAt <= cutoff), where the commit's AUTHOR is the PR author (matched
-by author email set / login), excluding commits committed by bots. Reported
-as (a) action rate: share of reviewed-merged PRs with >=1 qualifying
-post-review commit; (b) post-review LOC share of the PR's total LOC.
+IDENTIFIED DESIGN (2026-07-16): an edit after both a human comment and an
+AI-reviewer comment is causally ambiguous, and that interleaving is the
+2025-26 norm — so the estimand anchors on EXPLICIT HUMAN ASKS and the clean
+lane:
+
+1. CONDITIONAL RESPONSIVENESS (primary): among PRs with a human ASK — a
+   reviewer!=author human review with state CHANGES_REQUESTED or >=1 inline
+   comment — the share with subsequent author edits (commits
+   committedDate-after the FIRST ask, authored by the PR author, bot
+   committers excluded) and the lines involved.
+2. CLEAN LANE (the identified estimate): responsiveness restricted to PRs
+   with human review activity and NO AI-reviewer activity (ai_reviewed
+   False). The MIXED lane (human + AI reviewers) is reported descriptively
+   only.
+3. ALL-CAUSE post-review edits (any-review anchor) survives as a
+   descriptive companion (comparable to merged-without-modification
+   metrics), never as evidence about human review specifically.
+
+Paired with the changes-requested share (how often humans ask), this
+decomposes the action channel: how often review asks, and whether asking
+still works.
 
 Known proxy caveats (documented, not corrected): committedDate is rewritten
 by rebase/amend (drifts toward push time — direction inflates post-review
@@ -57,6 +71,18 @@ def first_human_review(pr: dict) -> str | None:
     human_other, _, _ = split_reviews(pr)
     times = [r.get("submittedAt") for r in human_other
              if r.get("submittedAt") and r["submittedAt"] <= CUTOFF]
+    return min(times) if times else None
+
+
+def first_human_ask(pr: dict) -> str | None:
+    """First explicit human ask: reviewer!=author review that requested
+    changes or carried inline comments (an APPROVED with zero comments is
+    not an ask)."""
+    human_other, _, _ = split_reviews(pr)
+    times = [r.get("submittedAt") for r in human_other
+             if r.get("submittedAt") and r["submittedAt"] <= CUTOFF
+             and (r.get("state") == "CHANGES_REQUESTED"
+                  or (r.get("comments") or {}).get("totalCount", 0) > 0)]
     return min(times) if times else None
 
 
@@ -119,44 +145,73 @@ def pull() -> None:
     print("REVIEW-ACTION PULL DONE", flush=True)
 
 
+def _author_edits_after(d: dict, anchor: str) -> tuple[int, int]:
+    """(post_anchor_author_loc, total_commit_loc), bot committers excluded."""
+    post = total = 0
+    for c in d["commits"]:
+        cm = c.get("commit") or {}
+        loc = (cm.get("additions") or 0) + (cm.get("deletions") or 0)
+        total += loc
+        committer = (cm.get("committer") or {})
+        cl = ((committer.get("user") or {}).get("login")
+              or committer.get("email") or "")
+        if "[bot]" in cl or cl.endswith("-bot"):
+            continue
+        author_logins = {((x or {}).get("user") or {}).get("login")
+                         for x in (cm.get("authors") or {}).get("nodes") or []}
+        if d["author"] not in author_logins:
+            continue
+        if (cm.get("committedDate") or "") > anchor:
+            post += loc
+    return min(post, CAP), min(max(total, d["loc"]), CAP)
+
+
 def compute() -> None:
     from collections import defaultdict
-    agg = defaultdict(lambda: defaultdict(float))
+    # join anchors + lane flags from census cells (the sample stores commits)
+    keep = population_repos()
+    anchors: dict = {}
+    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
+        if repo not in keep or per not in PERIODS:
+            continue
+        for p in prs:
+            c = classify_pr(p, MARKERS_V2)
+            anchors[(repo, p.get("number"))] = (
+                first_human_ask(p), c.ai_reviewed)
+    lanes = defaultdict(lambda: defaultdict(float))
     for ln in SAMPLE.read_text().splitlines():
         d = json.loads(ln)
-        post = total = 0
-        for c in d["commits"]:
-            cm = c.get("commit") or {}
-            loc = (cm.get("additions") or 0) + (cm.get("deletions") or 0)
-            total += loc
-            committer = (cm.get("committer") or {})
-            cl = ((committer.get("user") or {}).get("login")
-                  or committer.get("email") or "")
-            if "[bot]" in cl or cl.endswith("-bot"):
-                continue
-            author_logins = {((x or {}).get("user") or {}).get("login")
-                             for x in (cm.get("authors") or {}).get("nodes") or []}
-            if d["author"] not in author_logins:
-                continue
-            if (cm.get("committedDate") or "") > d["first_review"]:
-                post += loc
-        for coh in ("all", "AI" if d["ai"] else "nonAI",
-                    "ins" if d["ins"] else "ext"):
-            a = agg[(d["per"], coh)]
+        ask, ai_rev = anchors.get((d["repo"], d["num"]), (None, None))
+        # descriptive companion: all-cause (any-review anchor)
+        post, total = _author_edits_after(d, d["first_review"])
+        a = lanes[(d["per"], "all-cause")]
+        a["n"] += 1
+        a["acted"] += post > 0
+        a["post"] += post
+        a["total"] += total
+        if not ask:
+            continue                      # no explicit human ask on this PR
+        post, total = _author_edits_after(d, ask)
+        lane = "mixed" if ai_rev else "CLEAN"
+        for coh in (lane, lane + ("+AI" if d["ai"] else "+nonAI")):
+            a = lanes[(d["per"], coh)]
             a["n"] += 1
             a["acted"] += post > 0
-            a["post"] += min(post, CAP)
-            a["total"] += min(max(total, d["loc"]), CAP)
-    print("post-review action — merged, human-reviewed PRs (LOC-weighted sample)")
-    print(f"{'cohort':14}{'PRs':>6}{'action rate%':>13}{'post-review LOC share%':>23}")
+            a["post"] += post
+            a["total"] += total
+    print("conditional responsiveness to HUMAN ASKS (changes-requested or "
+          "inline comments)")
+    print("CLEAN lane = no AI-reviewer activity (identified); "
+          "mixed = descriptive; all-cause = companion only")
+    print(f"{'lane':22}{'PRs':>6}{'responded%':>11}{'post-ask LOC share%':>20}")
     for per in PERIODS:
-        for coh in ("all", "AI", "nonAI", "ins", "ext"):
-            a = agg[(per, coh)]
-            if not a["n"]:
+        for coh in ("CLEAN", "CLEAN+AI", "CLEAN+nonAI", "mixed", "all-cause"):
+            a = lanes[(per, coh)]
+            if a["n"] < 20:
                 continue
-            print(f"{per + ' ' + coh:14}{int(a['n']):>6}"
-                  f"{100*a['acted']/a['n']:>12.1f}%"
-                  f"{100*a['post']/a['total']:>22.1f}%")
+            print(f"{per + ' ' + coh:22}{int(a['n']):>6}"
+                  f"{100*a['acted']/a['n']:>10.1f}%"
+                  f"{100*a['post']/a['total']:>19.1f}%")
 
 
 def main() -> None:
