@@ -21,9 +21,9 @@ Q2-2026  contrib-weight    1154   13.6 [12.0,15.4]   16.6 [14.6,18.5]   64.4 [60
 
 ```
 
-## Table 6: Traceable AI usage over time (CW, 95% CI)
+## Figure 2: Traceable AI usage over time (CW, 95% CI)
 ```
-Table 6: Traceable AI usage over time
+Figure 2: Traceable AI usage over time
 contributor-weighted repo means, bootstrap 95% CI; merged = w8 rule; LOC capped 20k/PR; all values are floors
 period    repos  AI% of submitted PRs    AI% of merged PRs   AI-PR% of subm LOC  AI-PR% of merged LOC
 Q1-2024     465      0.0% [ 0.0, 0.0]     0.0% [ 0.0, 0.0]     0.0% [ 0.0, 0.0]      0.0% [ 0.0, 0.0]
@@ -33,9 +33,9 @@ Q2-2026    1154     16.6% [14.7,18.4]    15.9% [13.9,17.9]    22.1% [19.1,24.7] 
 
 ```
 
-## Table 7: Merged LOC per core contributor over time (CW, 95% CI)
+## Figure 3: Merged LOC per core contributor over time (CW, 95% CI)
 ```
-Table 7: Merged LOC per core contributor over time
+Figure 3: Merged LOC per core contributor over time
 contributor-weighted repo means, bootstrap 95% CI; merged = w8 rule; core = insider PR authors; repos with >=2 insider authors
 period    repos    CW merged kLOC/core author  x baseline
 Q1-2024     254            6.61 [ 4.79, 8.90]       1.00x
@@ -253,11 +253,12 @@ Q2-2026     588                         17.59
 ## Core-contributor merged LOC split by AI involvement (CW, 95% CI)
 ```
 core-contributor merged (w8) kLOC split by AI involvement (CW, bootstrap 95% CI; floors: undetected AI counts as nonAI)
-period    repos      noAI-author kLOC     AI-PR kLOC/author  nonAI-PR kLOC/author
-Q1-2024     254    6.61 [ 4.79, 8.90]    0.00 [ 0.00, 0.00]    6.61 [ 4.73, 8.86]
-Q4-2025     471    6.77 [ 5.47, 8.39]    0.41 [ 0.12, 0.93]    9.61 [ 6.29,15.13]
-Q1-2026     535    6.45 [ 4.93, 8.37]    1.41 [ 0.89, 2.09]    9.28 [ 7.19,11.54]
-Q2-2026     588    5.48 [ 4.44, 6.67]    4.85 [ 2.38, 8.67]   12.74 [ 9.33,17.49]
+AI-user columns are per AI-USING core author and sum to their total; noAI-author LOC never enters them
+period    repos AI-user repos      noAI-author kLOC    AI-user AI-PR kLOC  AI-user nonAI-PR kLOC
+Q1-2024     254             0    6.61 [ 4.79, 8.90]         (no AI users)          (no AI users)
+Q4-2025     466            84    6.77 [ 5.52, 8.28]    4.04 [ 1.35, 8.35]    33.73 [ 9.92,78.76]
+Q1-2026     517           318    6.45 [ 4.90, 8.56]    4.14 [ 2.89, 5.72]    17.46 [12.29,23.42]
+Q2-2026     525           442    5.48 [ 4.41, 6.70]    8.99 [ 5.27,14.12]    21.12 [15.11,28.13]
 
 ```
 

@@ -186,13 +186,16 @@ def ai_split() -> None:
     - noAI-author kLOC: merged kLOC per core author, restricted to authors
       with ZERO AI-tracked PRs (submitted or merged) in the repo-quarter —
       the non-adopter output level.
-    - AI-PR kLOC/author: merged LOC arriving in AI-tracked PRs, per core
-      author (all core authors in the denominator).
-    - nonAI-PR kLOC/author: merged LOC in non-AI-tracked PRs, per core
-      author. The last two sum to the --cut core / Table 7 total.
+    - AI-user AI-PR kLOC: merged LOC arriving in AI-tracked PRs, per
+      AI-USING core author (authors with >=1 AI-tracked PR in the
+      repo-quarter).
+    - AI-user nonAI-PR kLOC: merged LOC in the AI users' NON-AI-tracked
+      PRs, per AI-using author. The last two sum to total merged kLOC per
+      AI-using author; non-adopters' LOC never enters either.
 
-    Detection is a floor, so the split is conservative: undetected AI LOC
-    lands in the nonAI columns."""
+    Repos need >=2 core authors; the AI-user columns additionally need >=1
+    AI-using core author in the repo-quarter. Detection is a floor, so the
+    split is conservative: undetected AI LOC lands in the nonAI columns."""
     from pipeline.analyze import bootstrap_ci, weighted_mean
     from pipeline.studies.slices import population_repos, weights
     keep = population_repos()
@@ -220,14 +223,19 @@ def ai_split() -> None:
                 row[0 if c.ai_involved else 1] += loc
 
     def fmt(pairs):
+        if not pairs:
+            return "     (no AI users)"
         m = weighted_mean(pairs)
         lo, hi = bootstrap_ci(pairs)
         return f"{m:6.2f} [{lo:5.2f},{hi:5.2f}]"
 
     print("core-contributor merged (w8) kLOC split by AI involvement "
           "(CW, bootstrap 95% CI; floors: undetected AI counts as nonAI)")
-    print(f"{'period':9}{'repos':>6}{'noAI-author kLOC':>22}"
-          f"{'AI-PR kLOC/author':>22}{'nonAI-PR kLOC/author':>22}")
+    print("AI-user columns are per AI-USING core author and sum to their "
+          "total; noAI-author LOC never enters them")
+    print(f"{'period':9}{'repos':>6}{'AI-user repos':>14}"
+          f"{'noAI-author kLOC':>22}{'AI-user AI-PR kLOC':>22}"
+          f"{'AI-user nonAI-PR kLOC':>23}")
     for per in PERIODS:
         pa_, pb, pc = [], [], []
         for (repo, p), authors in acc.items():
@@ -242,11 +250,13 @@ def ai_split() -> None:
             if noai:
                 pa_.append((sum(v[0] + v[1] for v in noai)
                             / len(noai) / 1000, wt))
-            n = len(core)
-            pb.append((sum(v[0] for v in core.values()) / n / 1000, wt))
-            pc.append((sum(v[1] for v in core.values()) / n / 1000, wt))
-        print(f"{per:9}{len(pb):>6}  {fmt(pa_):>20}  {fmt(pb):>20}"
-              f"  {fmt(pc):>20}")
+            ai_users = [v for v in core.values() if v[2] > 0]
+            if ai_users:
+                n = len(ai_users)
+                pb.append((sum(v[0] for v in ai_users) / n / 1000, wt))
+                pc.append((sum(v[1] for v in ai_users) / n / 1000, wt))
+        print(f"{per:9}{len(pa_):>6}{len(pb):>14}  {fmt(pa_):>20}"
+              f"  {fmt(pb):>20}  {fmt(pc):>21}")
 
 
 def main() -> None:

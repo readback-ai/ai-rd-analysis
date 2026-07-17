@@ -1,6 +1,6 @@
-"""Paper tables 6 & 7 — headline tables in publication form.
+"""Paper figures 2 & 3 — headline tables in publication form.
 
-Table 6 (Traceable AI usage over time): per quarter, contributor-weighted
+Figure 2 (Traceable AI usage over time): per quarter, contributor-weighted
 with bootstrap 95% CIs —
   - share of SUBMITTED PRs with traceable AI usage (ai_involved),
   - share of MERGED (w8) PRs with traceable AI usage,
@@ -10,7 +10,7 @@ LOC = additions+deletions capped at 20k/PR. All four are floors (detection
 is a lower bound; see METHODS §2). Q1-2024 is the detector-validity
 baseline, 0% by construction.
 
-Table 7 (Merged LOC per core contributor): per quarter, CW mean of per-repo
+Figure 3 (Merged LOC per core contributor): per quarter, CW mean of per-repo
 merged (w8) kLOC per CORE (insider) PR author, bootstrap 95% CI, and the
 multiple over the Q1-2024 baseline. Repos need >=2 insider authors in the
 quarter (same rule as productivity --cut core). Q2-2026 is deflated by w8
@@ -52,7 +52,7 @@ def _fmt(est: tuple[float, float, float], pct: bool = True) -> str:
 
 
 def usage_rows() -> list[dict]:
-    """Table 6 rows: per period {period, repos, sub_pr, mrg_pr, sub_loc,
+    """Figure 2 rows: per period {period, repos, sub_pr, mrg_pr, sub_loc,
     mrg_loc} — each estimate a (mean, lo, hi) tuple of shares in [0,1]."""
     keep = population_repos()
     w = weights()
@@ -101,7 +101,7 @@ def usage_rows() -> list[dict]:
 
 
 def core_rows() -> list[dict]:
-    """Table 7 rows: per period {period, repos, kloc: (mean, lo, hi),
+    """Figure 3 rows: per period {period, repos, kloc: (mean, lo, hi),
     mult} — kLOC merged (w8) per core author, CW."""
     pa = per_author()
     w = weights()
@@ -133,7 +133,7 @@ def core_rows() -> list[dict]:
 
 
 def usage() -> None:
-    print("Table 6: Traceable AI usage over time")
+    print("Figure 2: Traceable AI usage over time")
     print("contributor-weighted repo means, bootstrap 95% CI; "
           "merged = w8 rule; LOC capped 20k/PR; all values are floors")
     print(f"{'period':9}{'repos':>6}{'AI% of submitted PRs':>22}"
@@ -146,7 +146,7 @@ def usage() -> None:
 
 
 def core() -> None:
-    print("Table 7: Merged LOC per core contributor over time")
+    print("Figure 3: Merged LOC per core contributor over time")
     print("contributor-weighted repo means, bootstrap 95% CI; merged = w8 "
           "rule; core = insider PR authors; repos with >=2 insider authors")
     print(f"{'period':9}{'repos':>6}{'CW merged kLOC/core author':>30}"

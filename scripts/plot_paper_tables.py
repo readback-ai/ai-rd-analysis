@@ -1,4 +1,4 @@
-"""Render paper tables 6 & 7 as line graphs with a broken x-axis.
+"""Render paper figures 2 & 3 as line graphs with a broken x-axis.
 
 Q1-2024 (the detector-validity baseline) sits ~7 quarters before the
 continuous Q4-2025..Q2-2026 window, so each figure uses two panels sharing
@@ -6,7 +6,7 @@ the y-axis — a narrow left panel for Q1-2024 and a right panel for the
 window — joined with standard axis-break marks. Shaded bands are the
 bootstrap 95% CIs from pipeline.studies.paper_tables (CW, seeded).
 
-Outputs: artifacts/fig_table6_ai_usage.png, artifacts/fig_table7_core_loc.png
+Outputs: artifacts/fig2_ai_usage.png, artifacts/fig3_core_loc.png
 
 Usage:  PYTHONPATH=src python scripts/plot_paper_tables.py
 """
@@ -57,10 +57,10 @@ def series(axl, axr, ests, label, color):
     axr.fill_between(x, lo[1:], hi[1:], alpha=0.15, color=color)
 
 
-def fig_table6(rows):
+def fig2(rows):
     fig, axl, axr = broken_axes(
         "share with traceable AI usage (%)",
-        "Table 6: Traceable AI usage over time (CW, 95% CI; floors)")
+        "Figure 2: Traceable AI usage over time (CW, 95% CI; floors)")
     pct = [("sub_pr", "AI% of submitted PRs", "tab:blue"),
            ("mrg_pr", "AI% of merged PRs", "tab:orange"),
            ("sub_loc", "AI-PR share of submitted LOC", "tab:green"),
@@ -70,15 +70,15 @@ def fig_table6(rows):
         series(axl, axr, ests, label, color)
     axl.set_ylim(bottom=0)
     axr.legend(fontsize=8, loc="upper left")
-    fig.savefig("artifacts/fig_table6_ai_usage.png", dpi=200,
+    fig.savefig("artifacts/fig2_ai_usage.png", dpi=200,
                 bbox_inches="tight")
-    print("wrote artifacts/fig_table6_ai_usage.png")
+    print("wrote artifacts/fig2_ai_usage.png")
 
 
-def fig_table7(rows):
+def fig3(rows):
     fig, axl, axr = broken_axes(
         "merged kLOC per core contributor (w8)",
-        "Table 7: Merged LOC per core contributor (CW, 95% CI)")
+        "Figure 3: Merged LOC per core contributor (CW, 95% CI)")
     series(axl, axr, [r["kloc"] for r in rows], "merged kLOC / core author",
            "tab:blue")
     for i, r in enumerate(rows):
@@ -86,11 +86,11 @@ def fig_table7(rows):
         ax.annotate(f"{r['mult']:.2f}x", (x, r["kloc"][0]),
                     textcoords="offset points", xytext=(6, 8), fontsize=8)
     axl.set_ylim(bottom=0)
-    fig.savefig("artifacts/fig_table7_core_loc.png", dpi=200,
+    fig.savefig("artifacts/fig3_core_loc.png", dpi=200,
                 bbox_inches="tight")
-    print("wrote artifacts/fig_table7_core_loc.png")
+    print("wrote artifacts/fig3_core_loc.png")
 
 
 if __name__ == "__main__":
-    fig_table6(usage_rows())
-    fig_table7(core_rows())
+    fig2(usage_rows())
+    fig3(core_rows())
