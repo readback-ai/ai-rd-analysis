@@ -270,6 +270,21 @@ sentinels, gap-free coverage with explicit waivers), then a generated report
 (`artifacts/report_generated.md`) plus a hashed census manifest — canonical
 numbers come only from that artifact.
 
+## 5b. LOC hygiene sensitivity (generated content)
+
+Objection pre-empted: if AI-era PRs carried more generated content
+(lockfiles, vendored code, build artifacts), LOC denominators would inflate
+and per-line attention would thin mechanically. Measured on an LOC-weighted
+sample of merged PRs with per-file paths (~950 PRs/quarter,
+`data/derived/loc_hygiene_sample.jsonl`; pattern list covers lockfiles,
+vendor/dist/third_party, minified, protobuf-generated, snapshots, svg,
+notebooks): generated share of merged LOC is **18.3% (Q1-2024) -> 8.5% ->
+11.2% -> 17.1% (Q2-2026)** — the endpoint is BELOW the 2024 baseline.
+Excluding generated content, merged-volume growth is marginally LARGER
+(x4.2 vs x4.1) and the attention decline is unchanged (-56% vs -57%).
+The volume and attention series are therefore not artifacts of generated
+content.
+
 ## 6. Known limitations
 
 - **Floors, asymmetric across tools** (§2). The Codex marker floor (0.15% of
