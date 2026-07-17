@@ -270,6 +270,16 @@ sentinels, gap-free coverage with explicit waivers), then a generated report
 (`artifacts/report_generated.md`) plus a hashed census manifest — canonical
 numbers come only from that artifact.
 
+## 5a2. Review-effectiveness triangle (pinned definitions)
+
+- Talk: HUMAN comments/kLOC (`studies.attention`, primary attention measure).
+- How much talk: comment length — requires a body pull; not yet collected.
+- ACTION: post-review edits (`studies.review_action`) — lines changed in
+  commits committedDate-after the FIRST human review event, authored by the
+  PR author, bot committers excluded. Caveats: committedDate rewritten by
+  rebase/amend (drifts late — inflates post-review attribution); squash
+  branches keep original dates. Sampled, LOC-weighted, seeded.
+
 ## 5b. LOC hygiene sensitivity (generated content)
 
 Objection pre-empted: if AI-era PRs carried more generated content
