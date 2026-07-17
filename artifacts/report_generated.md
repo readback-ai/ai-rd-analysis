@@ -326,33 +326,46 @@ Q2-2026 all-cause       1111      51.1%               36.9%
 
 ```
 
-## Adoption event-study (volume in event time)
+## Adoption event-study (MERGED kLOC w8 in event time; w8-immature months excluded)
 ```
 alignable adopters (core, clean pre-period): 1693
+outcome = MERGED kLOC (w8) of PRs created in the month; months after 2026-04 (w8-immature) excluded from all cells
 
 ALL alignable adopters (unbalanced event panel)
 event month  authors mean kLOC/mo  median
 t-4             1454         2.76    0.00
 t-3             1590         2.68    0.00
 t-2             1639         3.16    0.01
-t-1             1693         4.36    0.11
-t+0             1693         8.86    1.79
-t+1             1471         9.72    1.02
-t+2             1171        12.69    0.73
-t+3              840         9.79    0.69
-t+4              514         6.96    0.34
+t-1             1471         4.51    0.15
+t+0             1171         9.55    1.97
+t+1              840         8.62    1.32
+t+2              514         8.71    0.94
+t+3              239         7.91    0.97
+t+4              103         7.33    0.40
 
-BALANCED cohort (observed at every offset in [-2..+2])
+BALANCED cohort (observed at every offset in [-2..+2]; post-t0 offsets past 2026-04 excluded)
 event month  authors mean kLOC/mo  median
 t-4              932         3.30    0.00
 t-3             1068         2.98    0.01
 t-2             1117         3.11    0.03
 t-1             1117         4.37    0.20
 t+0             1117         9.47    1.94
-t+1             1117        10.74    1.23
-t+2             1117        12.79    0.74
-t+3              786         9.75    0.70
-t+4              460         6.84    0.31
+t+1              786         8.68    1.39
+t+2              460         8.50    1.09
+t+3              185         7.18    1.27
+t+4               49         6.63    0.12
+
+FULLY-MATURE balanced cohort (t0 <= 2026-02: every offset in [-2..+2] w8-mature)
+event month  authors mean kLOC/mo  median
+t-4              275         5.76    0.07
+t-3              411         3.90    0.09
+t-2              460         4.17    0.13
+t-1              460         4.95    0.44
+t+0              460         9.61    2.20
+t+1              460         7.96    1.26
+t+2              460         8.50    1.09
+t+3              185         7.18    1.27
+t+4               49         6.63    0.12
 
 ```
 

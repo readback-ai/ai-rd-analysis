@@ -3,18 +3,24 @@
 Each CORE author (insider in >=1 population repo in the month) is aligned to
 their FIRST observed AI-marker month t0 (first censused month with an
 AI-involved PR they authored, no earlier observed AI activity including the
-2024 baseline months). Merged kLOC/author/month is then read in EVENT TIME
-(months relative to t0) over the continuous observation window
-(2025-10..2026-06).
+2024 baseline months). MERGED kLOC/author/month (w8 rule: LOC of PRs created
+in the month that merged within 8 weeks) is then read in EVENT TIME (months
+relative to t0) over the continuous observation window (2025-10..2026-06).
 
 Identification logic: if volume JUMPS at t0 rather than trending up before
 it, trend-selection (heavier contributors were on steeper trajectories
 anyway) is dead as an explanation for the adopter/non-adopter divergence.
 
+Censoring rule: only w8-MATURE calendar months contribute observations —
+2026-04 is the last month whose PRs all had a full 8-week window before the
+cutoff (Apr 30 + 56d = Jun 25), so observations landing in 2026-05/06 are
+EXCLUDED from every cell rather than reported deflated.
+
 Composition control: alongside the all-observations table, a BALANCED cohort
-(authors observed at every offset in [-2..+2]) removes entry/exit drift.
-Late event-times near June are w8-censoring-deflated (works against finding
-a jump). Adoptions in the first observed month (2025-10) are excluded — no
+(authors observed at every offset in [-2..+2]) removes entry/exit drift; its
+FULLY-MATURE variant further requires t0 <= 2026-02 so every offset in
+[-2..+2] falls in a mature month (no censoring anywhere in the panel).
+Adoptions in the first observed month (2025-10) are excluded — no
 pre-period; left-censored adopters (active in 2024 with AI already in
 2025-10) cannot be aligned.
 
@@ -34,6 +40,10 @@ WINDOW = ["2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03",
           "2026-04", "2026-05", "2026-06"]
 BASELINE = ["2024-01", "2024-02", "2024-03"]
 CAP = 20_000
+# Last calendar month whose PRs all reached w8 maturity by the cutoff
+# (2026-04-30 + 56d = 2026-06-25 <= 2026-06-30). Later months are excluded
+# from the tables, not reported deflated.
+MATURE_MAX = WINDOW.index("2026-04")
 
 
 def author_months():
@@ -74,6 +84,8 @@ def main() -> None:
         if first is not None and first > 0:            # need a pre-period
             events[login] = first
     print(f"alignable adopters (core, clean pre-period): {len(events)}")
+    print("outcome = MERGED kLOC (w8) of PRs created in the month; "
+          "months after 2026-04 (w8-immature) excluded from all cells")
 
     def table(cohort, label):
         print(f"\n{label}")
@@ -82,7 +94,7 @@ def main() -> None:
             vals = []
             for login, t0 in cohort.items():
                 idx = t0 + e
-                if 0 <= idx < len(WINDOW):
+                if 0 <= idx <= MATURE_MAX:
                     vals.append(am[login].get(WINDOW[idx], [0, 0, 0])[0])
             if len(vals) >= 30:
                 print(f"{('t' + format(e, '+d')):12}{len(vals):>8}"
@@ -90,8 +102,13 @@ def main() -> None:
 
     table(events, "ALL alignable adopters (unbalanced event panel)")
     balanced = {login: t0 for login, t0 in events.items()
-                if t0 >= 2 and t0 + 2 < len(WINDOW)}
-    table(balanced, "BALANCED cohort (observed at every offset in [-2..+2])")
+                if 2 <= t0 <= MATURE_MAX}
+    table(balanced, "BALANCED cohort (observed at every offset in [-2..+2]; "
+                    "post-t0 offsets past 2026-04 excluded)")
+    mature = {login: t0 for login, t0 in events.items()
+              if 2 <= t0 <= WINDOW.index("2026-02")}
+    table(mature, "FULLY-MATURE balanced cohort (t0 <= 2026-02: every offset "
+                  "in [-2..+2] w8-mature)")
 
 
 if __name__ == "__main__":
