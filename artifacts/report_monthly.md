@@ -255,12 +255,12 @@ period        panel ai_involved         cross-section
 2024-03      0.0 [ 0.0, 0.0]    0.0 [ 0.0, 0.0]
 2025-10      1.9 [ 1.3, 2.9]    2.4 [ 1.7, 3.5]
 2025-11      2.5 [ 1.7, 3.5]    2.7 [ 2.1, 3.4]
-2025-12      3.9 [ 2.7, 5.2]    3.7 [ 2.9, 4.6]
-2026-01      4.7 [ 3.6, 6.2]    5.4 [ 4.4, 6.5]
-2026-02      9.7 [ 8.0,11.7]   10.3 [ 8.8,12.0]
-2026-03     11.7 [ 9.8,13.8]   12.0 [10.4,13.6]
-2026-04     13.0 [10.7,15.2]   13.9 [12.0,15.5]
-2026-05     15.1 [12.4,17.7]   15.8 [13.9,17.8]
+2025-12      3.9 [ 2.7, 5.1]    3.7 [ 2.9, 4.6]
+2026-01      4.7 [ 3.6, 6.1]    5.4 [ 4.4, 6.5]
+2026-02      9.7 [ 7.9,11.8]   10.3 [ 8.8,12.0]
+2026-03     11.7 [ 9.7,13.8]   12.0 [10.4,13.6]
+2026-04     13.0 [10.7,15.1]   13.9 [12.0,15.5]
+2026-05     15.1 [12.3,17.7]   15.8 [13.9,17.8]
 2026-06     16.5 [13.6,19.3]   19.3 [17.6,21.2]
 
 ```
@@ -483,6 +483,61 @@ Q4-2025 ext        74195    68.5%     26.1%    5.4%
 Q4-2025 AI          3479    57.8%     35.4%    6.8%
 Q4-2025 nonAI     118231    74.3%     21.7%    4.0%
 
+
+```
+
+## Responsiveness to human asks (clean lane identified)
+```
+conditional responsiveness to HUMAN ASKS (changes-requested or inline comments)
+CLEAN lane = no AI-reviewer activity (identified); mixed = descriptive; all-cause = companion only
+lane                     PRs responded% post-ask LOC share%
+Q1-2024 CLEAN            516      78.3%               46.7%
+Q1-2024 CLEAN+nonAI      516      78.3%               46.7%
+Q1-2024 all-cause        953      52.3%               32.7%
+Q4-2025 CLEAN            292      79.5%               49.7%
+Q4-2025 CLEAN+nonAI      284      80.3%               50.0%
+Q4-2025 mixed            217      86.2%               56.6%
+Q4-2025 all-cause       1071      53.6%               36.1%
+Q1-2026 CLEAN            234      77.4%               50.8%
+Q1-2026 CLEAN+AI          26      76.9%               51.6%
+Q1-2026 CLEAN+nonAI      208      77.4%               50.7%
+Q1-2026 mixed            237      84.0%               55.2%
+Q1-2026 all-cause       1098      50.5%               34.4%
+Q2-2026 CLEAN            251      79.7%               52.8%
+Q2-2026 CLEAN+AI          44      81.8%               42.8%
+Q2-2026 CLEAN+nonAI      207      79.2%               55.4%
+Q2-2026 mixed            233      87.1%               65.4%
+Q2-2026 all-cause       1111      51.1%               36.9%
+
+```
+
+## Adoption event-study (volume in event time)
+```
+alignable adopters (core, clean pre-period): 1693
+
+ALL alignable adopters (unbalanced event panel)
+event month  authors mean kLOC/mo  median
+t-4             1454         2.76    0.00
+t-3             1590         2.68    0.00
+t-2             1639         3.16    0.01
+t-1             1693         4.36    0.11
+t+0             1693         8.86    1.79
+t+1             1471         9.72    1.02
+t+2             1171        12.69    0.73
+t+3              840         9.79    0.69
+t+4              514         6.96    0.34
+
+BALANCED cohort (observed at every offset in [-2..+2])
+event month  authors mean kLOC/mo  median
+t-4              932         3.30    0.00
+t-3             1068         2.98    0.01
+t-2             1117         3.11    0.03
+t-1             1117         4.37    0.20
+t+0             1117         9.47    1.94
+t+1             1117        10.74    1.23
+t+2             1117        12.79    0.74
+t+3              786         9.75    0.70
+t+4              460         6.84    0.31
 
 ```
 
