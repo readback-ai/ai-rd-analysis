@@ -176,8 +176,8 @@ therefore reported as a TWO-SIDED BOUND (`studies.slices --table bounds`,
 a standing section of the generated report): the headline ai_involved series
 with the weak-prefix indeterminates (upper arm, the reported number) and
 with weak prefixes requiring positive provenance (lower arm). Measured
-width: **0.06pp in Q2-2026** (17.66 vs 17.60 CW), <=0.01pp in earlier
-quarters — the weak-prefix volumes (462 claude/ + 73 cursor/ C-only sampled)
+width: **0.05pp in Q2-2026** (16.62 vs 16.57 CW, droid/ included),
+<=0.01pp in earlier quarters — the weak-prefix volumes (462 claude/ + 73 cursor/ C-only sampled)
 are dwarfed by codex/ (4,698, 95% confirmed) and layers A/B. With that one
 quantified exception stated, every other rate in the study is a floor.
 
