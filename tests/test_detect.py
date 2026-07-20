@@ -368,3 +368,34 @@ def test_w8_events_after_frame_end_count_within_window():
     # 3) review_action anchors see the same review as an ask
     from pipeline.studies.review_action import first_human_ask
     assert first_human_ask(pr2) == "2026-07-05T00:00:00Z"
+
+
+def test_committer_audit_identities_detected():
+    """Committer audit 2026-07-20 (RED first): OpenHands, the second
+    Cursor cloud identity, and vetted self-identified homegrown agents
+    must be layer-A detectable; CI bots must NOT be."""
+    def committer(email, login=None):
+        pr = _pr(messages=["normal"])
+        pr["commits"]["nodes"][0]["commit"]["committer"] = {
+            "email": email, "user": {"login": login} if login else None}
+        return pr
+    assert pr_ai_tools(committer("openhands@all-hands.dev",
+                                 "openhands-agent")) == {"openhands"}
+    assert pr_ai_tools(committer("agent@cursor.com")) == {"cursor"}
+    assert pr_ai_tools(committer("hermes-agent@local")) == {"agent"}
+    assert pr_ai_tools(committer("hermes-agent@revenueholdings.ai")) == {"agent"}
+    assert pr_ai_tools(committer("agent@modal.com")) == {"agent"}
+    assert pr_ai_tools(committer("pragma-agent@modular.com")) == {"agent"}
+    # CI/automation identities from the same audit stay UNdetected
+    assert pr_ai_tools(committer("xnnpack-github-robot@google.com")) == set()
+    assert pr_ai_tools(committer("snyk-bot@snyk.io")) == set()
+    assert pr_ai_tools(committer("bot@renovateapp.com")) == set()
+
+
+def test_agent_suffixed_user_logins_are_bots():
+    """openhands-agent commits under a User-typed account; '-agent' joins
+    the user-bot suffixes so author/reviewer hygiene catches this class."""
+    from pipeline.detect import is_bot_login
+    assert is_bot_login("openhands-agent")
+    assert is_bot_login("hermes_agent")
+    assert not is_bot_login("reagent")        # suffix is hyphen-anchored

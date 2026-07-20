@@ -154,9 +154,23 @@ trailers and generation footers (Claude Code: `noreply@anthropic.com`,
 `Generated with [Claude Code]`; Cursor: `cursoragent@cursor.com`; aider
 trailer), and tool author/committer identities (Codex cloud's
 `chatgpt-codex-connector[bot]` committer, `codex@openai.com`). One canonical
-marker set (`detect.MARKERS`: Claude, Cursor, aider, Codex — the earlier
-v1/v2 versioning was collapsed 2026-07-20; adding aider+Codex had moved the
-headline +0.1pp). Search-side rule: co-author trailers
+marker set (`detect.MARKERS`: Claude, Cursor, aider, Codex, OpenHands, and
+a vetted self-identified-agent list — the earlier v1/v2 versioning was
+collapsed 2026-07-20; adding aider+Codex had moved the headline +0.1pp).
+
+**Committer-identity audit (2026-07-20)**: a full-store sweep for
+agent-like committer identities not matched by the needles found (a)
+OpenHands (`openhands@all-hands.dev`, 2,400 commits Q1–Q2 2026) — added
+as a tool; (b) a second Cursor cloud identity (`agent@cursor.com`) —
+added to cursor; (c) self-identified HOMEGROWN agent identities
+(`hermes-agent@*`, `agent@modal.com`, `agent@deepagents.dev`,
+`pragma-agent@modular.com`, `bot@imbue.com`, …) — added as the vetted
+"agent" marker, each identity hand-checked; CI/release bots surfaced by
+the same sweep (snyk, renovate, xnnpack, airflow, …) are deliberately
+excluded. The audit also confirmed the structural floor: fleet operators
+overwhelmingly commit under PERSONAL identities, which no needle can
+catch. `-agent`/`_agent` joined the user-typed-bot login suffixes
+(author/reviewer hygiene). Search-side rule: co-author trailers
 are only findable by BARE-TERM commit search — the `author-email:` qualifier
 matches primary authors only and returns zero for co-authored commits
 (measured ~10–16× undercount). Qualifier terms remain correct for tools that

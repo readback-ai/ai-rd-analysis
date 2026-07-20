@@ -84,8 +84,8 @@ MARKERS = {
         search_terms=("noreply@anthropic.com", '"Generated with [Claude Code]"'),
         needles=("noreply@anthropic.com", "Generated with [Claude Code]")),
     "cursor": ToolSpec(
-        search_terms=("cursoragent@cursor.com",),
-        needles=("cursoragent@cursor.com",)),
+        search_terms=("cursoragent@cursor.com", "agent@cursor.com"),
+        needles=("cursoragent@cursor.com", "agent@cursor.com")),
 }
 # Codex cloud commits VIA the bot committer, needing qualifier search + the
 # committer field in the census GraphQL query (bare terms only match message
@@ -98,6 +98,22 @@ MARKERS |= {
         search_terms=("committer:chatgpt-codex-connector[bot]",
                       "author-email:codex@openai.com"),
         needles=("codex@openai.com", "chatgpt-codex-connector")),
+}
+# Committer-identity audit additions (2026-07-20; full-store sweep of
+# agent-like committers not matched above — METHODS §2). "openhands" is a
+# commercial coding agent; "agent" is the VETTED list of self-identified
+# homegrown agent identities (each hand-checked — CI/release bots from the
+# same audit, e.g. snyk-bot/renovate/xnnpack, are deliberately absent).
+MARKERS |= {
+    "openhands": ToolSpec(
+        search_terms=("openhands@all-hands.dev",),
+        needles=("openhands@all-hands.dev", "openhands-agent")),
+    "agent": ToolSpec(
+        search_terms=('"hermes-agent@"',),
+        needles=("hermes-agent@", "agent@hermes", "agent@modal.com",
+                 "agent@deepagents.dev", "pragma-agent@modular.com",
+                 "agent@qwenpaw.local", "agent@example.com",
+                 "bot@imbue.com")),
 }
 
 
@@ -215,7 +231,8 @@ def pr_branch_tool(pr: dict, strict: bool = False) -> str | None:
 # suffix heuristic, hyphen/underscore-anchored so human names like
 # "talbot" never match. Found by comment-volume audit (PaddlePaddle-bot,
 # all-hands-bot, qwen-code-ci-bot).
-_USER_BOT_SUFFIXES = ("-bot", "_bot", "[bot]", "-ci", "-robot")
+_USER_BOT_SUFFIXES = ("-bot", "_bot", "[bot]", "-ci", "-robot",
+                      "-agent", "_agent")
 
 
 def is_bot_login(login: str | None) -> bool:

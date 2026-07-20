@@ -109,7 +109,8 @@ The single canonical home of ALL detection. Nothing else defines a marker,
 a bot list, or a review rule.
 
 - **Layer A** `pr_ai_tools()` — commit-forensic markers (`MARKERS`:
-  Claude, Cursor, aider, Codex incl. committer identities). Floors: only
+  Claude, Cursor, aider, Codex, OpenHands, vetted self-identified
+  agents; incl. committer identities). Floors: only
   first 12 commits per PR; squash strips trailers.
 - **Layer B** `pr_agent_author()` — PR author is a Bot-typed account in
   `AGENT_PR_AUTHORS`. Requires `__typename == "Bot"`.

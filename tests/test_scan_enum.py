@@ -36,8 +36,8 @@ def test_scan_org_checkpoints_and_skips(monkeypatch):
 
 
 def test_scan_count_is_max_over_terms_not_sum(monkeypatch):
-    # 6 terms total: claude x2, cursor x1, aider x1, codex x2
-    seq = iter([10, 8, 3, 2, 1, 1])
+    n_terms = sum(len(sp.search_terms) for sp in MARKERS.values())
+    seq = iter([10, 8] + [1] * (n_terms - 2))     # claude first: 2 terms
     monkeypatch.setattr(scan_orgs, "rest_count", lambda q, **k: next(seq))
     res = scan_orgs.scan_org("acme", None, MARKERS, "v1")
     assert res["claude"]["count"] == 10           # max(10, 8), NOT 18
@@ -69,7 +69,7 @@ def test_enum_org_tallies_max_over_terms(monkeypatch):
     monkeypatch.setattr(enum_repos, "_paginate_repos",
                         lambda q, **k: ["acme/big", "acme/big", "acme/small"])
     res = enum_repos.enum_org("acme", "2025-07-01..2026-06-30", MARKERS, "v1")
-    expect_big = {t: 2 for t in ("claude", "cursor", "aider", "codex")}
+    expect_big = {t: 2 for t in MARKERS}
     assert res["acme/big"] == expect_big                     # max, not 4
     assert res["acme/small"] == {t: 1 for t in expect_big}
     p = cell_path("enum_repos", "acme", "2025-07-01..2026-06-30", "v1")

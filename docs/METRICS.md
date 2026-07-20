@@ -112,8 +112,10 @@ both framings are reported.
 - **Uncertainty**: bootstrap 95% CIs over repos, 2,000 resamples, seeded RNG
   (`analyze._RNG`, seed 20260630) — identical reruns give identical CIs.
 - **Marker set**: one canonical set (`detect.MARKERS`: Claude, Cursor,
-  aider, Codex) — the v1/v2 versioning was removed 2026-07-20; historical
-  scan/enum cache files keep their "v2" filename tag.
+  aider, Codex, OpenHands, and the vetted self-identified-agent
+  identities from the 2026-07-20 committer audit — METHODS §2); the
+  v1/v2 versioning was removed 2026-07-20; historical scan/enum cache
+  files keep their "v2" filename tag.
 
 ## 5. The generated report (`artifacts/report_generated.md`)
 
