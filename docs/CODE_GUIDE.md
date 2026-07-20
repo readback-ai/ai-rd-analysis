@@ -238,9 +238,11 @@ are floors (one quantified exception: the two-sided bound).
   (agent fleets, partly unmarked). Author-level means are whale-sensitive
   — the adoption study isolates them as their own cohort; any new
   author-level analysis should consider the same.
-- **PPS sample ≠ uniform sample**: anything computed on
-  `review_action_sample.jsonl` must use the HT weights (`_inv_pi`), not
-  raw counts.
+- **PPS sample ≠ uniform sample**: anything computed on the review-action
+  sample (`review_action_sample_v2.jsonl`, selection bound by the
+  frame-fingerprinted `review_action_manifest_v2.json`) must use the HT
+  weights (`_inv_pi`), not raw counts; compute() fails hard on frame
+  mismatch or incomplete coverage.
 
 ## Tests as documentation — `tests/`
 

@@ -443,8 +443,7 @@ def test_every_needle_family_is_searchable():
     not just hermes."""
     from pipeline.detect import MARKERS
     spec = MARKERS["agent"]
-    for ident in ("agent@modal.com", "agent@deepagents.dev",
-                  "pragma-agent@modular.com", "bot@imbue.com"):
+    for ident in spec.identity_needles:            # ALL of them (round 6)
         assert any(ident in t for t in spec.search_terms), ident
 
 

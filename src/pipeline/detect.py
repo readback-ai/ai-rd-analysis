@@ -28,12 +28,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-# Study cutoff: events after this instant are excluded from classification
-# even when the API returns them (collection ran days after the cutoff, so
-# late merges/reviews would otherwise leak in — METHODS §0). Residual: census
-# cells do not carry per-commit timestamps, so a marker-bearing commit pushed
-# to a still-open PR after the cutoff is not filterable; PRs are
-# creation-windowed, so the exposure is days and affects layer A only.
+# CUTOFF is the FRAME end (last PR-creation date; never changes). Events
+# — merges, closes, reviews — are NOT bounded by it: they count within
+# each PR's 56-day window (METHODS §0/§2). Residual: census cells do not
+# carry per-commit timestamps, so a marker-bearing commit pushed to a
+# still-open in-window PR after collection is not filterable (layer A
+# only; exposure grows with re-collection lag).
 CUTOFF = "2026-06-30T23:59:59Z"
 # AS_OF: the data-collection stamp — when the census cells were last
 # (re-)pulled. Governs w8 MATURITY only (a PR's fate is reportable once
@@ -129,6 +129,8 @@ MARKERS |= {
     # author/committer fields) is the authoritative classifier.
     "agent": ToolSpec(
         search_terms=("author-email:hermes-agent@local",
+                      "author-email:agent@hermes",
+                      "author-email:agent@qwenpaw.local",
                       "author-email:agent@modal.com",
                       "author-email:agent@deepagents.dev",
                       "author-email:pragma-agent@modular.com",

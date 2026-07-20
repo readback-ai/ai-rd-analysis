@@ -12,16 +12,16 @@ it, trend-selection (heavier contributors were on steeper trajectories
 anyway) is dead as an explanation for the adopter/non-adopter divergence.
 
 Censoring rule (outcome A, merged): only w8-MATURE calendar months
-contribute observations — 2026-04 is the last month whose PRs all had a full
-8-week window before the cutoff (Apr 30 + 56d = Jun 25), so observations
-landing in 2026-05/06 are EXCLUDED from every cell rather than reported
-deflated. Outcome B (SUBMITTED kLOC — all PRs created in the month, merged
-or not) needs no maturity gate and runs on the full window through 2026-06.
+contribute observations — mature_max() derives the last month whose PRs
+all closed their 8-week windows by the data AS_OF; later observations are
+EXCLUDED from every cell rather than reported deflated. Outcome B
+(SUBMITTED kLOC — all PRs created in the month, merged or not) needs no
+maturity gate and runs on the full window.
 
 Composition control: alongside the all-observations table, a BALANCED cohort
 (authors observed at every offset in [-2..+2]) removes entry/exit drift; its
-FULLY-MATURE variant further requires t0 <= 2026-02 so every offset in
-[-2..+2] falls in a mature month (no censoring anywhere in the panel).
+FULLY-MATURE variant further requires t0 <= mature_max()-2 so every
+offset in [-2..+2] falls in a mature month (no censoring in the panel).
 Adoptions in the first observed month (2025-10) are excluded — no
 pre-period; left-censored adopters (active in 2024 with AI already in
 2025-10) cannot be aligned.
@@ -90,6 +90,14 @@ def author_months():
     return out
 
 
+def mature_month_label() -> str:
+    return WINDOW[mature_max()]
+
+
+def mature_cap_label() -> str:
+    return "t0 <= " + WINDOW[mature_cap()]
+
+
 def balanced_cap() -> int:
     """Calendar balance is a property of the FIXED window: an adopter needs
     t0+2 inside WINDOW regardless of maturity (round-5 review P1)."""
@@ -142,9 +150,9 @@ def main() -> None:
     print("\n=== outcome A: MERGED kLOC (w8) ===")
     table(events, "ALL alignable adopters (unbalanced event panel)")
     table(balanced, "BALANCED cohort (observed at every offset in [-2..+2]; "
-                    "post-t0 offsets past 2026-04 excluded)")
-    table(mature, "FULLY-MATURE balanced cohort (t0 <= 2026-02: every offset "
-                  "in [-2..+2] w8-mature)")
+                    f"post-t0 offsets past {mature_month_label()} excluded)")
+    table(mature, f"FULLY-MATURE balanced cohort ({mature_cap_label()}: "
+                  "every offset in [-2..+2] w8-mature)")
 
     print("\n=== outcome B: SUBMITTED kLOC (all PRs created in the month; "
           "no censoring, full window through 2026-06) ===")
@@ -153,8 +161,8 @@ def main() -> None:
           field=3, max_idx=last)
     table(balanced, "BALANCED cohort (observed at every offset in [-2..+2])",
           field=3, max_idx=last)
-    table(mature, "t0 <= 2026-02 cohort (same authors as fully-mature "
-                  "merged panel)", field=3, max_idx=last)
+    table(mature, f"{mature_cap_label()} cohort (same authors as "
+                  "fully-mature merged panel)", field=3, max_idx=last)
 
 
 if __name__ == "__main__":

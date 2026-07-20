@@ -33,7 +33,10 @@ attribution); squash-merged branches retain original branch-commit dates.
 
 Data: census cells lack per-commit dates/LOC, so this study owns a SAMPLED
 pull (PPS: 1,200 LOC-proportional draws/quarter with replacement, distinct
-PRs retained, checkpointed to data/derived/review_action_sample.jsonl).
+PRs retained). The selection lives in review_action_manifest_v2.json
+(frame-fingerprinted, atomically replaced on any frame change); hydrated
+records in review_action_sample_v2.jsonl; the v1 file is a read-only
+hydration cache.
 
 ESTIMATION (external review P1 fixes, 2026-07-20):
 - PR-WEIGHTED PRIMARY via Horvitz-Thompson: each sampled PR i with LOC
@@ -76,6 +79,12 @@ CAP = 20_000
 # (commit data is frame-independent PR fact; selection is not).
 SAMPLE = Path("data/derived/review_action_sample_v2.jsonl")
 OLD_SAMPLE = Path("data/derived/review_action_sample.jsonl")
+# Selection manifest: binds the drawn keys to a FRAME FINGERPRINT so a
+# frame change (AS_OF bump, eligibility, weights, population) atomically
+# REPLACES the selection instead of unioning two draws, and coverage can
+# be verified fail-hard (external review round 6).
+MANIFEST = Path("data/derived/review_action_manifest_v2.json")
+SEED = 20260630
 PER_QUARTER = 1200
 
 Q = """
@@ -160,51 +169,134 @@ def eligible() -> dict[str, list]:
     return pool
 
 
+def _complete(d: dict) -> bool:
+    """STRICT completeness: explicit metadata only. Legacy records without
+    it are never reusable — a pre-metadata partial response has no
+    page-boundary signature (external review round 6)."""
+    total = d.get("commits_total")
+    return (d.get("commits_complete") is True and isinstance(total, int)
+            and len(d.get("commits") or []) == total)
+
+
 def _hydration_cache() -> dict:
-    """(repo, num) -> COMPLETE commit records from any prior sample file —
-    reusable because commit data is a PR-level fact independent of the
-    sampling frame; only the DRAW must come from the current frame."""
+    """(repo, num) -> verified-COMPLETE commit records from any prior
+    sample file — reusable because commit data is a PR-level fact
+    independent of the sampling frame; only the DRAW must come from the
+    current frame."""
     cache = {}
     for path in (OLD_SAMPLE, SAMPLE):
         if not path.exists():
             continue
         for ln in path.read_text().splitlines():
             d = json.loads(ln)
-            if not _suspect(d):
+            if _complete(d):
                 cache[(d["repo"], d["num"])] = d
     return cache
 
 
-def pull() -> None:
-    random.seed(20260630)
-    pool = eligible()
-    done = set()
-    if SAMPLE.exists():
-        for ln in SAMPLE.read_text().splitlines():
-            d = json.loads(ln)
-            done.add((d["repo"], d["num"]))
-    reuse = _hydration_cache()
-    out = SAMPLE.open("a")
+def frame_fingerprint(items) -> str:
+    """Hash of everything that determines the draw: config + the eligible
+    (period, repo, num, loc) tuples."""
+    import hashlib
+    from pipeline.detect import AS_OF, CUTOFF
+    blob = json.dumps([AS_OF, CUTOFF, PER_QUARTER, SEED,
+                       sorted(items)], separators=(",", ":"))
+    return hashlib.sha256(blob.encode()).hexdigest()[:16]
+
+
+def _pool_items(pool: dict) -> list:
+    return [(per, x[0], x[1], x[2]) for per, xs in pool.items() for x in xs]
+
+
+def draw(pool: dict) -> dict[str, list]:
+    """Deterministic PPS draw (seeded, LOC-proportional, distinct)."""
+    rng = random.Random(SEED)
+    out = {}
     for per, items in pool.items():
         weights = [x[2] for x in items]
         chosen = {items[i] for i in
-                  random.choices(range(len(items)), weights=weights,
-                                 k=PER_QUARTER)}
-        fresh = [x for x in chosen if (x[0], x[1]) not in done]
-        todo = []
-        reused = 0
-        for x in fresh:
+                  rng.choices(range(len(items)), weights=weights,
+                              k=PER_QUARTER)} if items else set()
+        out[per] = sorted(chosen)
+    return out
+
+
+def ensure_manifest(pool: dict) -> tuple[dict, bool]:
+    """Load the manifest if its fingerprint matches the CURRENT frame;
+    otherwise draw fresh and atomically replace it. Returns
+    (manifest, fresh)."""
+    fp = frame_fingerprint(_pool_items(pool))
+    if MANIFEST.exists():
+        m = json.loads(MANIFEST.read_text())
+        if m.get("fingerprint") == fp:
+            return m, False
+        print(f"FRAME CHANGED: manifest {m.get('fingerprint')} -> {fp}; "
+              "redrawing selection", flush=True)
+    m = {"fingerprint": fp,
+         "selected": {per: [list(x) for x in xs]
+                      for per, xs in draw(pool).items()}}
+    tmp = MANIFEST.with_suffix(".tmp")
+    tmp.write_text(json.dumps(m))
+    tmp.replace(MANIFEST)
+    return m, True
+
+
+def _selected_keys(manifest: dict) -> dict:
+    """(repo, num) -> (per, item) over the manifest selection."""
+    out = {}
+    for per, xs in manifest["selected"].items():
+        for x in xs:
+            out[(x[0], x[1])] = (per, x)
+    return out
+
+
+def rebuild_sample(manifest: dict, cache: dict) -> set:
+    """Atomically rewrite SAMPLE to exactly the manifest-selected keys
+    with verified-complete records (from cache). Returns the covered
+    keys; everything else must be pulled."""
+    sel = _selected_keys(manifest)
+    tmp = SAMPLE.with_suffix(".tmp")
+    done = set()
+    with tmp.open("w") as out:
+        for key, (per, x) in sel.items():
+            d = cache.get(key)
+            if d is None or not _complete(d):
+                continue
             repo, num, loc, frt, login, ai, ins = x
-            d = reuse.get((repo, num))
-            if d is not None:
-                out.write(json.dumps({**d, "per": per, "loc": loc,
-                                      "first_review": frt, "author": login,
-                                      "ai": ai, "ins": ins}) + "\n")
-                reused += 1
-            else:
-                todo.append(x)
-        print(f"{per}: {reused} reused from hydration cache, "
-              f"{len(todo)} to pull", flush=True)
+            out.write(json.dumps({**d, "per": per, "loc": loc,
+                                  "first_review": frt, "author": login,
+                                  "ai": ai, "ins": ins}) + "\n")
+            done.add(key)
+    tmp.replace(SAMPLE)
+    return done
+
+
+def coverage_gaps(manifest: dict, records: dict) -> list:
+    """Selected keys without a verified-complete record."""
+    return [k for k in _selected_keys(manifest)
+            if k not in records or not _complete(records[k])]
+
+
+def require_complete_sample(manifest: dict, records: dict) -> None:
+    gaps = coverage_gaps(manifest, records)
+    if gaps:
+        raise SystemExit(
+            f"PPS sample incomplete: {len(gaps)} selected PRs lack "
+            f"verified-complete records (e.g. {gaps[:3]}) — rerun "
+            "--pull/--repair; refusing to publish a non-probability "
+            "subset (external review round 6)")
+
+
+def pull() -> None:
+    pool = eligible()
+    manifest, fresh = ensure_manifest(pool)
+    cache = _hydration_cache()
+    done = rebuild_sample(manifest, cache)   # idempotent, prunes stale
+    out = SAMPLE.open("a")
+    for per, xs in manifest["selected"].items():
+        todo = [tuple(x) for x in xs if (x[0], x[1]) not in done]
+        print(f"{per}: {sum(1 for x in xs if (x[0], x[1]) in done)} "
+              f"covered, {len(todo)} to pull", flush=True)
         for i in range(0, len(todo), 8):
             chunk = todo[i:i + 8]
             parts = []
@@ -236,7 +328,13 @@ def pull() -> None:
                         "commits_total": total, "commits_complete": True,
                     }) + "\n")
             time.sleep(1)
-    print("REVIEW-ACTION PULL DONE", flush=True)
+    out.close()
+    records = {}
+    for ln in SAMPLE.read_text().splitlines():
+        d = json.loads(ln)
+        records[(d["repo"], d["num"])] = d
+    require_complete_sample(manifest, records)   # fail-hard, nonzero
+    print("REVIEW-ACTION PULL DONE (coverage verified)", flush=True)
 
 
 def _inv_pi(loc: float, W: float, k: int = PER_QUARTER) -> float:
@@ -353,16 +451,27 @@ def compute() -> None:
         per, loc = frame[key]
         return _inv_pi(loc, W[per])
 
+    # BIND to the selection manifest: the sample is only a valid PPS draw
+    # of THIS frame if the fingerprints match, and only publishable if
+    # every selected key has a verified-complete record (round 6).
+    if not MANIFEST.exists():
+        raise SystemExit("no selection manifest — run --pull first")
+    manifest = json.loads(MANIFEST.read_text())
+    fp = frame_fingerprint([(per, r, n, loc)
+                            for (r, n), (per, loc) in frame.items()])
+    if manifest.get("fingerprint") != fp:
+        raise SystemExit(
+            f"sampling frame changed (manifest {manifest.get('fingerprint')}"
+            f" != current {fp}) — rerun --pull to redraw before computing")
     recs: dict = {}                      # newest record per PR wins (repair)
     for ln in SAMPLE.read_text().splitlines():
         d = json.loads(ln)
         recs[(d["repo"], d["num"])] = d
+    require_complete_sample(manifest, recs)
+    selected = _selected_keys(manifest)
     lanes = defaultdict(lambda: defaultdict(float))
-    dropped = 0
-    for key, d in recs.items():
-        if key not in frame:
-            dropped += 1                 # frame drift (re-classification)
-            continue
+    for key in selected:
+        d = recs[key]
         ipw = inv_pi(key)
         ask, ai_rev = anchors.get(key, (None, None))
         # descriptive companion: all-cause (any-review anchor)
@@ -384,9 +493,6 @@ def compute() -> None:
             a["wacted"] += ipw * (post > 0)
             a["post"] += ipw * post
             a["total"] += ipw * total
-    if dropped:
-        print(f"note: {dropped} sampled PRs no longer in the eligible frame "
-              "(reclassified since pull); excluded")
     print("conditional responsiveness to HUMAN ASKS (changes-requested or "
           "inline comments)")
     print("CLEAN lane = no AI-reviewer activity (identified); "

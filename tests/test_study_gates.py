@@ -119,3 +119,82 @@ def test_event_study_cohort_caps(monkeypatch):
     monkeypatch.setattr(detect, "AS_OF", "2026-09-05T00:00:00Z")
     assert es.balanced_cap() == len(es.WINDOW) - 3   # unchanged by AS_OF
     assert es.mature_cap() == es.WINDOW.index("2026-06") - 2
+
+
+def _rec(repo, num, complete=True, ncommits=5):
+    d = {"per": "Q1-2026", "repo": repo, "num": num, "loc": 100,
+         "first_review": "2026-01-02T00:00:00Z", "author": "alice",
+         "ai": False, "ins": True, "commits": [{}] * ncommits}
+    if complete:
+        d["commits_total"] = ncommits
+        d["commits_complete"] = True
+    return d
+
+
+def _item(repo, num, per="Q1-2026", loc=100):
+    return (repo, num, loc, "2026-01-02T00:00:00Z", "alice", False, True)
+
+
+def test_pps_manifest_replaces_sample_on_frame_change(tmp_path, monkeypatch):
+    """Review round 6 P1 (RED first): a frame change (AS_OF bump,
+    eligibility, weights) must atomically REPLACE the selection — never
+    union two draws. Reproduces the reviewer's A+B case."""
+    import json as _json
+    from pipeline.studies import review_action as ra
+    monkeypatch.setattr(ra, "SAMPLE", tmp_path / "s_v2.jsonl")
+    monkeypatch.setattr(ra, "MANIFEST", tmp_path / "manifest.json")
+    monkeypatch.setattr(ra, "OLD_SAMPLE", tmp_path / "s_v1.jsonl")
+    cache = {("o/a", 1): _rec("o/a", 1), ("o/b", 2): _rec("o/b", 2)}
+    pool_a = {"Q1-2026": [_item("o/a", 1)]}
+    m1, fresh1 = ra.ensure_manifest(pool_a)
+    assert fresh1
+    done = ra.rebuild_sample(m1, cache)
+    assert done == {("o/a", 1)}
+    pool_b = {"Q1-2026": [_item("o/b", 2)]}      # frame changed
+    m2, fresh2 = ra.ensure_manifest(pool_b)
+    assert fresh2 and m2["fingerprint"] != m1["fingerprint"]
+    done = ra.rebuild_sample(m2, cache)
+    assert done == {("o/b", 2)}                  # A is GONE, not unioned
+    kept = [_json.loads(ln) for ln in
+            (tmp_path / "s_v2.jsonl").read_text().splitlines()]
+    assert [(d["repo"], d["num"]) for d in kept] == [["o/b", 2]] or \
+           [(d["repo"], d["num"]) for d in kept] == [("o/b", 2)]
+    # same frame again: manifest reused, not redrawn
+    m3, fresh3 = ra.ensure_manifest(pool_b)
+    assert not fresh3 and m3["fingerprint"] == m2["fingerprint"]
+
+
+def test_hydration_reuse_requires_completeness_metadata():
+    """Review round 6 P1 (RED first): legacy records without completeness
+    metadata (476 in the drawn v2 file) are NOT reusable — a pre-fix
+    partial response (20 of 50 commits) has no page-boundary signature."""
+    from pipeline.studies import review_action as ra
+    assert ra._complete(_rec("o/a", 1))
+    legacy = _rec("o/a", 1, complete=False, ncommits=20)
+    assert not ra._complete(legacy)
+    assert not ra._complete(_rec("o/a", 1, complete=False, ncommits=100))
+
+
+def test_pps_coverage_gaps_fail_hard(tmp_path, monkeypatch):
+    """Review round 6 P1 (RED first): a selected PR with no complete
+    record must fail pull/compute nonzero — a transient API failure can
+    never silently publish a non-probability subset."""
+    import pytest
+    from pipeline.studies import review_action as ra
+    manifest = {"fingerprint": "f", "selected":
+                {"Q1-2026": [list(_item("o/a", 1)), list(_item("o/b", 2))]}}
+    records = {("o/a", 1): _rec("o/a", 1)}
+    gaps = ra.coverage_gaps(manifest, records)
+    assert gaps == [("o/b", 2)]
+    with pytest.raises(SystemExit):
+        ra.require_complete_sample(manifest, records)
+    records[("o/b", 2)] = _rec("o/b", 2, complete=False)   # incomplete
+    assert ra.coverage_gaps(manifest, records) == [("o/b", 2)]
+
+
+def test_event_study_labels_are_dynamic(monkeypatch):
+    """Review round 6 P2 (RED first): table labels must follow the caps."""
+    from pipeline.studies import event_study as es
+    monkeypatch.setattr(detect, "AS_OF", "2026-09-05T00:00:00Z")
+    assert "2026-06" in es.mature_month_label()
+    assert es.mature_cap_label().endswith(es.WINDOW[es.mature_cap()])
