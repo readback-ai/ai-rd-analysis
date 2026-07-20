@@ -149,3 +149,335 @@ Q2-2026     343   52.5 [48.0,56.8]   12.8 [ 9.8,16.1]   11.6 [ 9.6,13.9]   80.8 
 
 ```
 
+## Balanced-panel sensitivity
+```
+balanced panel: 332 repos qualify in all 4 quarters
+period        panel ai_involved         cross-section
+Q1-2024      0.0 [ 0.0, 0.0]    0.0 [ 0.0, 0.0]
+Q4-2025      3.0 [ 2.2, 4.0]    3.0 [ 2.3, 3.7]
+Q1-2026      9.9 [ 8.3,11.7]   10.3 [ 8.9,11.6]
+Q2-2026     15.6 [13.2,17.9]   16.9 [15.0,18.7]
+
+```
+
+## Reviewer profile of merged PRs (unmerged = implicitly rejected)
+```
+
+=== repo-scoped ===
+period    repos            m_hum_only             m_ai_only                m_both             m_neither
+Q1-2024     147   70.2 [51.6,82.7]    0.3 [ 0.0, 1.3]    0.1 [ 0.0, 0.3]   29.4 [16.0,46.2]
+Q4-2025     178   55.3 [44.6,67.7]    3.3 [ 1.8, 5.1]   19.2 [ 9.4,30.8]   22.2 [13.5,33.9]
+Q1-2026     196   49.8 [39.4,60.4]    6.7 [ 2.4,13.7]   24.0 [15.5,33.0]   19.5 [13.5,27.3]
+Q2-2026     210   52.3 [42.8,60.7]    4.8 [ 2.5, 7.6]   23.8 [15.4,31.8]   19.2 [13.7,25.2]
+
+=== AI-heavy ===
+period    repos            m_hum_only             m_ai_only                m_both             m_neither
+Q1-2024      77   57.0 [41.1,71.5]    0.0 [ 0.0, 0.0]    0.0 [ 0.0, 0.0]   43.0 [27.0,56.1]
+Q4-2025     119   51.8 [42.2,58.8]    4.9 [ 2.0,11.5]    6.6 [ 2.7,13.1]   36.8 [24.6,44.1]
+Q1-2026     144   51.3 [39.7,58.5]    5.4 [ 2.5,10.6]    6.1 [ 3.0,11.7]   37.2 [30.5,44.7]
+Q2-2026     162   57.5 [34.2,73.9]   11.4 [ 5.3,21.7]    7.9 [ 3.8,14.1]   23.3 [16.7,36.2]
+
+=== AI-majority ===
+period    repos            m_hum_only             m_ai_only                m_both             m_neither
+Q1-2024     241   71.2 [60.9,80.3]    0.6 [ 0.0, 2.2]    0.3 [ 0.0, 0.8]   27.8 [19.1,37.9]
+Q4-2025     528   52.8 [45.7,61.2]    4.7 [ 3.1, 7.4]   25.3 [16.2,33.6]   17.1 [12.5,23.6]
+Q1-2026     668   46.3 [39.1,53.6]    5.9 [ 3.8, 8.4]   28.0 [20.7,35.8]   19.9 [15.2,25.3]
+Q2-2026     782   48.4 [43.0,53.8]    4.9 [ 3.5, 6.5]   25.2 [19.2,32.0]   21.5 [17.5,25.9]
+
+=== private ===
+period    repos            m_hum_only             m_ai_only                m_both             m_neither
+Q1-2024     223   61.9 [51.8,70.7]    1.0 [ 0.0, 3.1]    0.4 [ 0.0, 1.1]   36.7 [28.2,47.8]
+Q4-2025     444   48.5 [41.4,56.8]    5.1 [ 3.5, 7.4]   20.6 [12.5,30.0]   25.8 [18.7,34.6]
+Q1-2026     565   42.1 [35.4,49.2]    8.0 [ 4.6,12.1]   21.4 [14.3,29.7]   28.6 [22.4,37.6]
+Q2-2026     665   44.0 [38.5,50.3]    7.2 [ 5.2, 9.6]   20.8 [14.2,28.2]   28.0 [23.2,34.7]
+
+=== community ===
+period    repos            m_hum_only             m_ai_only                m_both             m_neither
+Q1-2024      68   75.1 [55.5,90.5]    0.0 [ 0.0, 0.0]    0.0 [ 0.0, 0.1]   24.9 [ 9.5,45.3]
+Q4-2025     110   54.8 [41.8,70.2]    4.2 [ 1.0, 8.8]   24.5 [10.0,44.2]   16.4 [ 7.9,25.6]
+Q1-2026     138   51.8 [38.0,65.7]    4.6 [ 1.6, 8.5]   26.2 [11.2,43.1]   17.4 [10.3,24.2]
+Q2-2026     146   59.7 [45.8,73.5]    5.0 [ 2.3, 8.5]   22.4 [11.5,34.5]   13.0 [ 9.1,18.9]
+
+=== public ===
+period    repos            m_hum_only             m_ai_only                m_both             m_neither
+Q1-2024     174   77.1 [65.7,84.8]    0.0 [ 0.0, 0.0]    0.0 [ 0.0, 0.0]   22.9 [14.5,33.6]
+Q4-2025     271   59.8 [53.4,66.3]    3.7 [ 2.4, 5.2]   19.9 [14.2,26.5]   16.6 [12.2,21.1]
+Q1-2026     305   53.6 [47.3,59.7]    3.5 [ 2.4, 4.9]   27.7 [21.3,34.1]   15.3 [11.4,20.0]
+Q2-2026     343   52.0 [46.2,57.3]    3.8 [ 2.6, 5.1]   26.4 [21.2,32.7]   17.9 [14.0,22.4]
+
+```
+
+## Two-sided bound (weak-prefix indeterminates)
+```
+headline ai_involved: two-sided bound (CW)
+period       upper (reported)    lower (strict C)  delta pp
+Q1-2024                 0.00%               0.00%     0.00
+Q4-2025                 2.98%               2.98%     0.01
+Q1-2026                10.30%              10.29%     0.01
+Q2-2026                16.85%              16.74%     0.11
+
+```
+
+## Productivity decomposition (authors vs output/author)
+```
+balanced repo panel: 396 repos (pooled)
+period        PRs  authors PRs/auth merged/auth klines/auth
+Q1-2024     63447    10915     5.81        4.42        1.63
+Q4-2025     81621    13850     5.89        4.20        2.03
+Q1-2026    101828    18802     5.42        3.43        1.92
+Q2-2026    118362    23087     5.13        2.97        1.82
+
+```
+
+## Persistent-author productivity (same person, same repo)
+```
+persistent same-repo authors (active Q1-2024 AND Q2-2026): 1411
+  PRs/quarter            2024 mean  18.92 median  7.0 | 2026 mean  22.31 median  7.0
+  merged/quarter         2024 mean  14.96 median  5.0 | 2026 mean  16.28 median  4.0
+  AI-using in 2026       n=  434  merged/q 22.68->30.88 (1.36x)  klines/q 9.11->22.46 (2.46x)
+  non-AI in 2026         n=  977  merged/q 11.52->9.80 (0.85x)  klines/q 4.33->5.67 (1.31x)
+  (adopter selection caveat: AI-users were already ~2x heavier contributors in 2024; descriptive, not causal)
+
+```
+
+## Core-contributor merged LOC (CW)
+```
+period    repos  CW merged kLOC / core author
+Q1-2024     251                          6.45
+Q4-2025     469                         10.04
+Q1-2026     532                         10.71
+Q2-2026     581                         19.08
+
+```
+
+## Core-contributor merged LOC split by AI involvement (CW, 95% CI)
+```
+core-contributor merged (w8) kLOC split by AI involvement (CW, bootstrap 95% CI; floors: undetected AI counts as nonAI)
+AI-user columns are per AI-USING core author and sum to their total; noAI-author LOC never enters them
+period    repos AI-user repos      noAI-author kLOC    AI-user AI-PR kLOC  AI-user nonAI-PR kLOC
+Q1-2024     251             0    6.45 [ 4.66, 8.63]         (no AI users)          (no AI users)
+Q4-2025     463            83    6.75 [ 5.46, 8.28]    4.11 [ 1.42, 8.71]    33.84 [ 9.70,77.51]
+Q1-2026     512           318    6.41 [ 4.92, 8.51]    4.17 [ 2.97, 5.64]    17.57 [12.50,23.53]
+Q2-2026     519           440    5.90 [ 4.82, 7.06]    9.68 [ 5.55,15.13]    20.99 [14.68,27.73]
+
+```
+
+## Figure 4: Merged LOC per core author by adoption cohort (pooled, 95% CI on total)
+```
+merged (w8) kLOC per CORE author by fixed adoption cohort (pooled author-level means over quarter-active members; bootstrap 95% CI on total)
+  early: first AI-tracked PR by 2026-02
+  medium: first AI-tracked PR 2026-03..2026-04
+  late: first AI-tracked PR 2026-05 or later
+  never: no AI-tracked PR through 2026-06
+  fleet: >=300 merged PRs in one quarter (fleet/automation operators; assigned before the AI-timing cohorts)
+Q2-2026 w8-deflated for May/June PRs; undetected AI counts as nonAI (floors)
+
+period   cohort   authors  AI kLOC nonAI kLOC total kLOC          95% CI  median
+Q1-2024  early        188     0.00      11.89      11.89   [ 8.35, 16.01]    2.15
+Q1-2024  medium       136     0.00       9.23       9.23   [ 5.75, 13.56]    2.29
+Q1-2024  late          99     0.00       8.73       8.73   [ 4.52, 14.69]    1.35
+Q1-2024  never        999     0.00       3.76       3.76   [ 3.22,  4.35]    0.48
+Q1-2024  fleet         11     0.00      41.14      41.14   [18.80, 64.39]   34.68
+Q4-2025  early        502     1.32      15.50      16.81   [14.30, 19.62]    4.73
+Q4-2025  medium       399     0.00       9.90       9.90   [ 8.03, 12.11]    2.74
+Q4-2025  late         249     0.00       7.46       7.46   [ 5.59,  9.87]    1.41
+Q4-2025  never       1816     0.00       5.53       5.53   [ 4.56,  6.92]    0.71
+Q4-2025  fleet         21    10.72     106.35     117.07   [68.80,175.06]   68.18
+Q1-2026  early        572     6.36      16.53      22.89   [19.95, 26.31]    8.45
+Q1-2026  medium       564     1.15      11.14      12.30   [10.21, 14.66]    3.26
+Q1-2026  late         303     0.00      10.31      10.31   [ 8.15, 12.76]    2.35
+Q1-2026  never       1841     0.00       6.03       6.03   [ 5.23,  7.09]    0.89
+Q1-2026  fleet         32    32.98     123.67     156.64   [100.89,226.69]  106.36
+Q2-2026  early        498     9.88      16.94      26.83   [22.28, 31.26]    7.79
+Q2-2026  medium       605     6.27      15.31      21.59   [18.67, 24.76]    7.05
+Q2-2026  late         517     3.92      11.31      15.23   [13.11, 17.51]    3.99
+Q2-2026  never       1844     0.00       6.17       6.17   [ 5.45,  7.00]    0.87
+Q2-2026  fleet         33   225.66     305.03     530.68   [219.63,1023.04]  202.28
+
+```
+
+## Merged LOC by approval channel
+```
+period    merged MLOC humanRev% botOnly% selfUnrev% otherUnrev%
+Q1-2024          19.4     72.8%     0.8%      20.0%        6.1%
+Q4-2025          47.8     70.9%     9.4%      15.4%        3.9%
+Q1-2026          72.1     69.3%    11.5%      15.8%        3.3%
+Q2-2026         103.0     59.7%    15.1%      21.5%        3.6%
+
+```
+
+## Attention per line (comments/kLOC primary, bot-clean)
+```
+attention per line — merged, human-reviewed PRs (pooled)
+cohort             PRs     kLOC comments/kLOC window h/kLOC
+Q1-2024 all      38703   14,127          3.98         220.9
+Q1-2024 ins      12314    4,954          3.52         165.6
+Q1-2024 ext      26389    9,173          4.22         250.8
+Q4-2025 all      69628   33,833          2.68         192.7
+Q4-2025 ins      27632   14,437          2.08         149.4
+Q4-2025 ext      41996   19,396          3.12         224.9
+Q1-2026 all      84120   49,977          2.04         155.6
+Q1-2026 ins      33340   21,751          1.59         114.6
+Q1-2026 ext      50780   28,226          2.38         187.2
+Q2-2026 all      99072   61,560          1.74         140.5
+Q2-2026 ins      38680   27,587          1.36          99.3
+Q2-2026 ext      60392   33,973          2.04         174.0
+
+comments/kLOC within FIXED size bands (composition-controlled)
+band         Q1-2024    Q4-2025    Q1-2026    Q2-2026
+<=10           39.73      33.24      29.02      23.60
+11-100         19.56      15.38      12.92       9.04
+101-1k          8.37       6.14       5.02       3.84
+>1k             1.18       1.03       0.86       0.87
+
+```
+
+## PR fates at matched horizons (w8 primary, w26 sensitivity)
+```
+--- fates at w8 (matched horizon; immature PRs excluded) ---
+cohort                 n  merged% rejected%  limbo%
+Q1-2024 all        67013    76.4%     17.5%    6.1%
+Q1-2024 ins        21879    83.0%     13.4%    3.6%
+Q1-2024 ext        45134    73.2%     19.4%    7.3%
+Q1-2024 nonAI      67013    76.4%     17.5%    6.1%
+Q4-2025 all       122572    72.8%     17.7%    9.5%
+Q4-2025 ins        47846    81.4%     13.3%    5.2%
+Q4-2025 ext        74726    67.3%     20.4%   12.3%
+Q4-2025 AI          3755    56.8%     30.0%   13.2%
+Q4-2025 nonAI     118817    73.3%     17.3%    9.4%
+Q1-2026 all       178951    64.4%     23.6%   12.0%
+Q1-2026 ins        63795    79.8%     14.7%    5.4%
+Q1-2026 ext       115156    55.8%     28.6%   15.7%
+Q1-2026 AI         20739    57.6%     27.9%   14.5%
+Q1-2026 nonAI     158212    65.2%     23.1%   11.7%
+Q2-2026 all        92945    57.4%     26.7%   15.9%
+Q2-2026 ins        29575    78.4%     16.1%    5.4%
+Q2-2026 ext        63370    47.6%     31.6%   20.8%
+Q2-2026 AI         15347    57.2%     27.3%   15.4%
+Q2-2026 nonAI      77598    57.5%     26.6%   16.0%
+
+--- fates at w26 (matched horizon; immature PRs excluded) ---
+cohort                 n  merged% rejected%  limbo%
+Q1-2024 all        67013    77.2%     20.0%    2.8%
+Q1-2024 ins        21879    83.6%     15.1%    1.3%
+Q1-2024 ext        45134    74.1%     22.4%    3.5%
+Q1-2024 nonAI      67013    77.2%     20.0%    2.8%
+Q4-2025 all       121699    73.8%     22.1%    4.1%
+Q4-2025 ins        47515    82.1%     15.8%    2.0%
+Q4-2025 ext        74184    68.5%     26.1%    5.4%
+Q4-2025 AI          3716    58.2%     35.4%    6.5%
+Q4-2025 nonAI     117983    74.3%     21.7%    4.0%
+
+
+```
+
+## Responsiveness to human asks (clean lane identified)
+```
+note: 24 sampled PRs no longer in the eligible frame (reclassified since pull); excluded
+conditional responsiveness to HUMAN ASKS (changes-requested or inline comments)
+CLEAN lane = no AI-reviewer activity (identified); mixed = descriptive; all-cause = companion only
+HT inclusion-probability weighted (PPS sample -> population estimands): responded% is PR-weighted; LOC share% is the population post-ask LOC ratio
+lane                     PRs responded% post-ask LOC share%
+Q1-2024 CLEAN            515      68.9%               53.9%
+Q1-2024 CLEAN+nonAI      515      68.9%               53.9%
+Q1-2024 all-cause        953      31.4%               39.7%
+Q4-2025 CLEAN            292      82.8%               61.9%
+Q4-2025 CLEAN+nonAI      284      83.2%               62.5%
+Q4-2025 mixed            217      77.9%               65.0%
+Q4-2025 all-cause       1070      47.2%               47.5%
+Q1-2026 CLEAN            233      63.5%               57.2%
+Q1-2026 CLEAN+AI          26      23.0%               61.1%
+Q1-2026 CLEAN+nonAI      207      79.3%               56.4%
+Q1-2026 mixed            237      73.4%               83.3%
+Q1-2026 all-cause       1089      28.2%               58.5%
+Q2-2026 CLEAN            251      83.7%               41.9%
+Q2-2026 CLEAN+AI          44      90.0%               44.9%
+Q2-2026 CLEAN+nonAI      207      82.3%               41.5%
+Q2-2026 mixed            232      91.2%               65.7%
+Q2-2026 all-cause       1097      45.9%               40.6%
+
+```
+
+## Adoption event-study (merged kLOC w8 + submitted kLOC in event time)
+```
+alignable adopters (core, clean pre-period): 1692
+outcome A = MERGED kLOC (w8); months after 2026-04 (w8-immature) excluded. outcome B = SUBMITTED kLOC; full window.
+
+=== outcome A: MERGED kLOC (w8) ===
+
+ALL alignable adopters (unbalanced event panel)
+event month  authors mean kLOC/mo  median
+t-4             1452         2.76    0.00
+t-3             1588         2.67    0.00
+t-2             1636         3.15    0.00
+t-1             1470         4.39    0.14
+t+0             1173         9.54    1.92
+t+1              845         8.62    1.31
+t+2              516         8.75    1.02
+t+3              240         7.85    0.90
+t+4              104         7.25    0.40
+
+BALANCED cohort (observed at every offset in [-2..+2]; post-t0 offsets past 2026-04 excluded)
+event month  authors mean kLOC/mo  median
+t-4              933         3.32    0.00
+t-3             1069         2.97    0.01
+t-2             1117         3.12    0.03
+t-1             1117         4.35    0.19
+t+0             1117         9.47    1.92
+t+1              789         8.69    1.38
+t+2              460         8.57    1.14
+t+3              184         7.15    1.14
+t+4               48         6.72    0.08
+
+FULLY-MATURE balanced cohort (t0 <= 2026-02: every offset in [-2..+2] w8-mature)
+event month  authors mean kLOC/mo  median
+t-4              276         5.75    0.07
+t-3              412         3.88    0.09
+t-2              460         4.18    0.14
+t-1              460         4.94    0.44
+t+0              460         9.62    2.16
+t+1              460         8.03    1.26
+t+2              460         8.57    1.14
+t+3              184         7.15    1.14
+t+4               48         6.72    0.08
+
+=== outcome B: SUBMITTED kLOC (all PRs created in the month; no censoring, full window through 2026-06) ===
+
+ALL alignable adopters (unbalanced event panel)
+event month  authors mean kLOC/mo  median
+t-4             1452         3.71    0.00
+t-3             1588         3.86    0.01
+t-2             1636         4.58    0.07
+t-1             1692         5.93    0.30
+t+0             1692        13.90    4.13
+t+1             1470        14.15    2.33
+t+2             1173        16.90    1.82
+t+3              845        13.84    1.91
+t+4              516        11.12    1.16
+
+BALANCED cohort (observed at every offset in [-2..+2])
+event month  authors mean kLOC/mo  median
+t-4              933         4.40    0.03
+t-3             1069         4.37    0.05
+t-2             1117         4.59    0.13
+t-1             1117         6.06    0.41
+t+0             1117        14.75    4.44
+t+1             1117        15.42    2.63
+t+2             1117        17.08    1.87
+t+3              789        13.79    1.96
+t+4              460        10.80    1.03
+
+t0 <= 2026-02 cohort (same authors as fully-mature merged panel)
+event month  authors mean kLOC/mo  median
+t-4              276         7.23    0.20
+t-3              412         5.39    0.28
+t-2              460         6.16    0.26
+t-1              460         7.17    0.69
+t+0              460        15.49    4.79
+t+1              460        12.98    2.75
+t+2              460        12.66    2.34
+t+3              460        11.70    2.39
+t+4              460        10.80    1.03
+
+```
+

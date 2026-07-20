@@ -32,16 +32,17 @@ from pipeline.ghx import cell_path, graphql_nodes, read_cell, rest_count
 from pipeline.precount import get_precount
 from pipeline.scan_orgs import QUARTER_RANGES, resolve_period
 
-PAGE_SIZE = 50   # per-call PR fetch; the census cap per cell (single page, no pagination)
-# Cell-store stage name. Versioned because the PR_QUERY changed (headRefName +
-# mergedBy added): a cell's content depends on the query, so the cache key
-# must too (ghx lesson). Cells pulled with the old query live in "census";
-# analyze merges both stores, preferring census-v2.
+PAGE_SIZE = 50   # PRs per GraphQL call; _paginate cursors to the API's
+                 # 1,000-node cap per search window
+# Cell-store stage name. The "-v2" suffix is historical: it encodes the
+# query version, because a cell's CONTENT depends on the query that pulled
+# it — under-keyed caches once served stale results, so every
+# content-determining parameter belongs in the cache key. The pre-v2 store
+# ("census", pulled without headRefName/mergedBy) was retired 2026-07-20
+# after its remaining repo-quarters were re-collected; this is the single
+# store now (analyze.load_cells reads only census-v2).
 STAGE = "census-v2"
 
-# headRefName (detection layer C) and mergedBy (self-merge/accountability)
-# were added 2026-07-08; cells pulled earlier lack them and downstream code
-# must treat the fields as optional (detect.classify_pr does).
 PR_QUERY = """
 query($q:String!, $cur:String){ search(query:$q, type:ISSUE, first:%d, after:$cur){
   pageInfo{ hasNextPage endCursor }
