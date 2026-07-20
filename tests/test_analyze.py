@@ -196,3 +196,42 @@ def test_merged_conditioned_metrics_none_on_unmerged():
     merged = dict(unmerged, mergedAt="2026-05-01T00:00:00Z")
     m = pr_metrics(merged, MARKERS_V2)
     assert m["m_hum_rev"] is False and m["m_no_rev"] is True
+
+
+def test_incremental_month_registry_is_cumulative(tmp_path, monkeypatch):
+    """External review P1 round 2: a September update must not drop July —
+    extended_quarters reads ALL registered months, not the invocation's."""
+    from pipeline import analyze
+    reg = tmp_path / "incremental_months.txt"
+    reg.write_text("2026-07\n2026-08\n2026-09\n")
+    monkeypatch.setattr(analyze, "INCREMENTAL_REGISTRY", reg)
+    q = analyze.extended_quarters()
+    assert {"2026-07", "2026-08", "2026-09"} <= set(q)
+    # quarters precede month tokens: period_of priority at range overlap
+    keys = list(q)
+    assert keys.index("Q2-2026") < keys.index("2026-07")
+    assert {"2026-07", "2026-08", "2026-09"} <= analyze.censused_months(q)
+
+
+def test_overlapping_cells_fresher_record_wins_at_equal_richness():
+    """External review P1 round 2: a re-collected monthly cell must
+    supersede a stale quarter cell for the same PR (later-loaded wins when
+    both carry headRefName)."""
+    from pipeline.analyze import group_by_period
+    from pipeline.scan_orgs import QUARTER_RANGES
+    stale = {"number": 7, "createdAt": "2026-06-10T00:00:00Z",
+             "headRefName": "old/value"}
+    fresh = {"number": 7, "createdAt": "2026-06-10T00:00:00Z",
+             "headRefName": "new/value"}
+    cells = {("o/r", QUARTER_RANGES["Q2-2026"]): [stale],
+             ("o/r", "2026-06-01..2026-06-30"): [fresh]}  # loaded later
+    out = group_by_period(cells, dict(QUARTER_RANGES))
+    (prs,) = [v for k, v in out.items() if k == ("o/r", "Q2-2026")]
+    assert [p["headRefName"] for p in prs] == ["new/value"]
+    # and the richer record still wins regardless of order
+    poor = {"number": 7, "createdAt": "2026-06-10T00:00:00Z"}
+    cells = {("o/r", "2026-06-01..2026-06-30"): [fresh],
+             ("o/r", QUARTER_RANGES["Q2-2026"]): [poor]}  # poorer, later
+    out = group_by_period(cells, dict(QUARTER_RANGES))
+    (prs,) = [v for k, v in out.items() if k == ("o/r", "Q2-2026")]
+    assert [p.get("headRefName") for p in prs] == ["new/value"]

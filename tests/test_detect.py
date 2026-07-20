@@ -248,3 +248,40 @@ def test_first_human_ask_requires_changes_or_comments():
     assert first_human_ask(pr) == "2026-01-07T00:00:00Z"   # skips bare approve
     silent = _pr_reviews(reviews=[_rev("bob", state="APPROVED")])
     assert first_human_ask(silent) is None
+
+
+def test_review_action_pagination_completeness(monkeypatch):
+    """External review P1 round 2: incomplete pagination must return None
+    (never checkpoint a truncated record as complete)."""
+    from pipeline.studies import review_action as ra
+    # missing endCursor with hasNextPage: would loop -> must bail
+    monkeypatch.setattr(ra, "graphql_nodes", lambda *a, **k: {
+        "nodes": [{}] * 100, "totalCount": 250,
+        "pageInfo": {"hasNextPage": True, "endCursor": None}})
+    assert ra._all_commits("o/r", 1) is None
+    # short result vs totalCount: incomplete -> None
+    monkeypatch.setattr(ra, "graphql_nodes", lambda *a, **k: {
+        "nodes": [{}] * 90, "totalCount": 250,
+        "pageInfo": {"hasNextPage": False, "endCursor": None}})
+    assert ra._all_commits("o/r", 1) is None
+    # complete single page -> (nodes, total)
+    monkeypatch.setattr(ra, "graphql_nodes", lambda *a, **k: {
+        "nodes": [{}] * 90, "totalCount": 90,
+        "pageInfo": {"hasNextPage": False, "endCursor": None}})
+    assert ra._all_commits("o/r", 1) == ([{}] * 90, 90)
+
+
+def test_review_action_suspect_and_ht_weights():
+    from pipeline.studies.review_action import _inv_pi, _suspect
+    # legacy 60-cap record: suspect; complete-metadata record: not
+    assert _suspect({"commits": [{}] * 60})
+    assert _suspect({"commits": [{}] * 200, "commits_total": 250,
+                     "commits_complete": True}) is True
+    assert not _suspect({"commits": [{}] * 90, "commits_total": 90,
+                         "commits_complete": True})
+    assert not _suspect({"commits": [{}] * 3})   # small legacy: fine
+    # HT: tiny PR nearly never drawn -> huge weight; W-sized PR -> weight 1
+    assert _inv_pi(1.0, 1.0, k=1) == 1.0
+    big = _inv_pi(1, 1_000_000)
+    small = _inv_pi(10_000, 1_000_000)
+    assert big > small > 1.0

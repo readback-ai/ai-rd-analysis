@@ -84,11 +84,16 @@ FIELDS = ("{ pullRequest(number:%d){ commits(first:100){ "
           + COMMIT_FIELDS + " } } }")
 
 
-def _all_commits(repo: str, num: int) -> list[dict] | None:
-    """Paginated fetch of ALL commits for one PR (saturation follow-up)."""
+def _all_commits(repo: str, num: int) -> tuple[list[dict], int] | None:
+    """Paginated fetch of ALL commits for one PR (saturation follow-up).
+    Returns (nodes, totalCount) only when COMPLETE (len >= totalCount);
+    None on any failure — a missing endCursor, a failed page, or a short
+    result must never checkpoint as a complete record (external review
+    P1: silent fallback created permanently truncated records)."""
     o, n = repo.split("/", 1)
     nodes: list[dict] = []
     cursor = ""
+    total = None
     while True:
         after = ', after:"%s"' % cursor if cursor else ""
         q = ('query{ repository(owner:"%s", name:"%s"){ '
@@ -99,11 +104,17 @@ def _all_commits(repo: str, num: int) -> list[dict] | None:
         if conn is None:
             return None
         nodes.extend(conn.get("nodes") or [])
+        total = conn.get("totalCount")
         pi = conn.get("pageInfo") or {}
         if not pi.get("hasNextPage"):
-            return nodes
-        cursor = pi.get("endCursor") or ""
+            break
+        cursor = pi.get("endCursor")
+        if not cursor:
+            return None                  # would loop on the first page
         time.sleep(1)
+    if total is None or len(nodes) < total:
+        return None                      # short result is not complete
+    return nodes, total
 
 
 def first_human_review(pr: dict) -> str | None:
@@ -176,33 +187,61 @@ def pull() -> None:
                 if prq:
                     conn = prq.get("commits") or {}
                     commits = conn.get("nodes") or []
+                    total = conn.get("totalCount") or len(commits)
                     if (conn.get("pageInfo") or {}).get("hasNextPage"):
-                        commits = _all_commits(repo, num) or commits
+                        full = _all_commits(repo, num)
+                        if full is None:
+                            print(f"DEFER {repo}#{num}: pagination failed, "
+                                  "not checkpointed", flush=True)
+                            continue     # left out of `done`: retried later
+                        commits, total = full
                     out.write(json.dumps({
                         "per": per, "repo": repo, "num": num, "loc": loc,
                         "first_review": frt, "author": login, "ai": ai,
                         "ins": ins, "commits": commits,
+                        "commits_total": total, "commits_complete": True,
                     }) + "\n")
             time.sleep(1)
     print("REVIEW-ACTION PULL DONE", flush=True)
 
 
+def _inv_pi(loc: float, W: float, k: int = PER_QUARTER) -> float:
+    """Horvitz-Thompson weight under k PPS draws with replacement:
+    1 / (1 - (1 - loc/W)^k)."""
+    return 1.0 / (1.0 - (1.0 - loc / W) ** k)
+
+
+def _suspect(d: dict) -> bool:
+    """Record possibly truncated: legacy (no completeness metadata) at a
+    page-boundary length, or metadata says incomplete/short."""
+    if d.get("commits_complete") and \
+            len(d["commits"]) >= (d.get("commits_total") or 0):
+        return False
+    n = len(d["commits"])
+    return n >= 60 and (n == 60 or n % 100 == 0
+                        or n < (d.get("commits_total") or 0))
+
+
 def repair() -> None:
-    """Re-pull records truncated by the old commits(first:60) cap; appended
-    records supersede (compute keeps the newest per PR)."""
+    """Re-pull suspect records (old first:60 cap, page-boundary lengths
+    without completeness metadata, or metadata-flagged short); appended
+    records supersede (compute keeps the newest per PR). Failed re-pulls
+    stay suspect and are retried on the next run."""
     recs = {}
     for ln in SAMPLE.read_text().splitlines():
         d = json.loads(ln)
         recs[(d["repo"], d["num"])] = d
-    trunc = [d for d in recs.values() if len(d["commits"]) == 60]
-    print(f"{len(trunc)} truncated records to repair", flush=True)
+    trunc = [d for d in recs.values() if _suspect(d)]
+    print(f"{len(trunc)} suspect records to repair", flush=True)
     out = SAMPLE.open("a")
     for i, d in enumerate(trunc):
-        commits = _all_commits(d["repo"], d["num"])
-        if commits is None:
-            print(f"SKIP {d['repo']}#{d['num']}: pull failed", flush=True)
+        full = _all_commits(d["repo"], d["num"])
+        if full is None:
+            print(f"SKIP {d['repo']}#{d['num']}: pull failed/incomplete",
+                  flush=True)
             continue
-        d["commits"] = commits
+        d["commits"], d["commits_total"] = full
+        d["commits_complete"] = True
         out.write(json.dumps(d) + "\n")
         if i % 25 == 0:
             print(f"  {i}/{len(trunc)}", flush=True)
@@ -258,10 +297,8 @@ def compute() -> None:
                 W[per] += loc
 
     def inv_pi(key) -> float:
-        """Horvitz-Thompson weight under k PPS draws with replacement."""
         per, loc = frame[key]
-        pi = 1.0 - (1.0 - loc / W[per]) ** PER_QUARTER
-        return 1.0 / pi
+        return _inv_pi(loc, W[per])
 
     recs: dict = {}                      # newest record per PR wins (repair)
     for ln in SAMPLE.read_text().splitlines():

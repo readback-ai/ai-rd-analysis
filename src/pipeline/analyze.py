@@ -34,10 +34,15 @@ from pipeline.ghx import decode_cell_stem, raw_dir, read_cell
 
 def load_cells() -> dict[tuple[str, str], list[dict]]:
     """(repo, date-range) -> PR nodes, merged across cell-store generations:
-    census-v2 (query with headRefName+mergedBy) wins over census per cell."""
+    census-v2 (query with headRefName+mergedBy) wins over census per cell.
+    Within a stage, files are visited OLDEST-mtime-first so that later
+    (fresher) cells land later in the dict — group_by_period's dedup lets
+    the fresher record win at equal richness (monthly re-collection vs a
+    stale overlapping quarter cell; external review P1)."""
     cells: dict[tuple[str, str], list[dict]] = {}
     for stage in ("census", "census-v2"):          # later stage overwrites
-        for f in raw_dir(stage).glob("*.json"):
+        for f in sorted(raw_dir(stage).glob("*.json"),
+                        key=lambda p: p.stat().st_mtime):
             nodes = read_cell(f, list)
             if nodes is None:
                 continue
@@ -57,6 +62,29 @@ def period_of(rng: str, quarters: dict[str, str]) -> str | None:
 
 
 CENSUSED_QUARTERS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
+INCREMENTAL_REGISTRY = Path("data/derived/incremental_months.txt")
+
+
+def incremental_months() -> list[str]:
+    """Month tokens collected by monthly_update AFTER the frozen quarters —
+    persisted in a registry so every later analysis (not just the updating
+    invocation) keeps them (external review P1: a September update must not
+    silently drop July)."""
+    if not INCREMENTAL_REGISTRY.is_file():
+        return []
+    return sorted({ln.strip() for ln in
+                   INCREMENTAL_REGISTRY.read_text().splitlines()
+                   if re.fullmatch(r"\d{4}-\d{2}", ln.strip())})
+
+
+def extended_quarters(extra: list[str] | None = None) -> dict[str, str]:
+    """Frozen quarters + registered incremental months (+ any explicit
+    extras). Frozen quarters stay first, so they keep period_of priority."""
+    from pipeline.scan_orgs import QUARTER_RANGES, resolve_period
+    quarters = dict(QUARTER_RANGES)
+    for tok in [*incremental_months(), *(extra or [])]:
+        quarters.setdefault(tok, resolve_period(tok))
+    return quarters
 
 
 def censused_months(quarters: dict[str, str]) -> set[str]:
@@ -93,7 +121,10 @@ def group_by_period(cells: dict[tuple[str, str], list[dict]],
     census-v2 sub-window), the RICHER record wins: a node carrying
     headRefName (the v2 query marker field) replaces one that lacks it,
     regardless of iteration order — otherwise a stale legacy record silently
-    strips branch attribution and mergedBy (external review P1)."""
+    strips branch attribution and mergedBy (external review P1). At EQUAL
+    richness the LATER-loaded record wins; load_cells feeds cells in mtime
+    order, so a monthly re-collection supersedes a stale overlapping
+    quarter cell for the same PR (external review P1, round 2)."""
     grouped: dict[tuple[str, str], list[dict]] = defaultdict(list)
     index: dict[tuple[str, str], dict] = defaultdict(dict)
     for (repo, rng), nodes in cells.items():
@@ -114,7 +145,8 @@ def group_by_period(cells: dict[tuple[str, str], list[dict]],
             if prev is None:
                 index[key][num] = pr
                 grouped[key].append(pr)
-            elif "headRefName" in pr and "headRefName" not in prev:
+            elif ("headRefName" in pr) >= ("headRefName" in prev):
+                # richer wins; at equal richness, fresher (later-loaded) wins
                 grouped[key][grouped[key].index(prev)] = pr
                 index[key][num] = pr
     return grouped
@@ -171,7 +203,6 @@ def bootstrap_ci(pairs: list[tuple[float, float]], n: int = 2000) -> tuple[float
 
 
 def main() -> None:
-    from pipeline.scan_orgs import QUARTER_RANGES
     ap = argparse.ArgumentParser()
     ap.add_argument("--contributors", default="data/repo_contributors.csv")
     ap.add_argument("--repos", default=None,
@@ -202,10 +233,7 @@ def main() -> None:
 
     if a.min_prs is None:
         a.min_prs = 5 if a.granularity == "quarter" else 2
-    from pipeline.scan_orgs import resolve_period
-    quarters = dict(QUARTER_RANGES)
-    for tok in a.periods:
-        quarters[tok] = resolve_period(tok)   # frozen quarters keep priority
+    quarters = extended_quarters(a.periods)
     grouped = group_by_period(load_cells(), quarters, a.granularity)
     if not grouped:
         raise SystemExit("no census cells found in $AIRD_DATA_DIR — the "
@@ -216,7 +244,8 @@ def main() -> None:
                 if ln.strip() and not ln.startswith("#")}
         grouped = {k: v for k, v in grouped.items() if k[0] in keep}
 
-    periods = (CENSUSED_QUARTERS + sorted(a.periods)) \
+    extra = sorted(set(incremental_months()) | set(a.periods))
+    periods = (CENSUSED_QUARTERS + extra) \
         if a.granularity == "quarter" else sorted({p for (_, p) in grouped})
     print(f"{'period':9}{'weighting':16}{'repos':>6}" +
           "".join(f"{m:>18}" for m in METRICS))

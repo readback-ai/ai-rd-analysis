@@ -30,7 +30,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-from pipeline.analyze import group_by_period, load_cells
+from pipeline.analyze import extended_quarters, group_by_period, load_cells
 from pipeline.ghx import raw_dir
 from pipeline.detect import (MARKERS_V2, classify_pr, pr_agent_author,
                              pr_ai_tools)
@@ -121,7 +121,7 @@ def sample_stats(sample_dir: Path, markers=MARKERS_V2) -> dict[str, dict[str, fl
 def layered_table(granularity: str = "quarter") -> None:
     """Exact per-PR layer decomposition over the population manifest."""
     keep = set((V2 / "population_repos.txt").read_text().split())
-    grouped = group_by_period(load_cells(), QUARTER_RANGES, granularity)
+    grouped = group_by_period(load_cells(), extended_quarters(), granularity)
     if not grouped:
         raise SystemExit("no census cells in $AIRD_DATA_DIR — refusing to "
                          "print an empty decomposition")

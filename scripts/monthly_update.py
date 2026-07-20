@@ -20,9 +20,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, "src")
+from pipeline.analyze import INCREMENTAL_REGISTRY  # noqa: E402
 from pipeline.ghx import raw_dir  # noqa: E402
 from pipeline.org_set import DRV  # noqa: E402
-from pipeline.scan_orgs import month_range, resolve_period  # noqa: E402
+from pipeline.scan_orgs import QUARTER_RANGES, month_range, resolve_period  # noqa: E402
 
 
 def previous_month(tok: str) -> str:
@@ -82,8 +83,22 @@ if __name__ == "__main__":
     print(f"revising provisional month {prev}: wiped {wipe_month(prev)} cells")
     run("pipeline.precount", "--repos", str(coll), "--periods", prev, new)
     run("pipeline.census", "--repos", str(coll), "--periods", prev, new)
+    # register the months PERSISTENTLY: later analyses (and later monthly
+    # updates) must keep every incremental month, not just this invocation's
+    reg = set()
+    if INCREMENTAL_REGISTRY.is_file():
+        reg = {ln.strip() for ln in
+               INCREMENTAL_REGISTRY.read_text().splitlines() if ln.strip()}
+    for tok in (prev, new):
+        start = resolve_period(tok).split("..")[0]
+        inside_frozen = any(qr.split("..")[0] <= start <= qr.split("..")[1]
+                            for qr in QUARTER_RANGES.values())
+        if not inside_frozen:
+            reg.add(tok)
+    INCREMENTAL_REGISTRY.parent.mkdir(parents=True, exist_ok=True)
+    INCREMENTAL_REGISTRY.write_text("\n".join(sorted(reg)) + "\n")
+    print(f"incremental-month registry: {sorted(reg)}")
     print(f"\n=== monthly trend (newest month {new} is PROVISIONAL) ===")
     run("pipeline.analyze", "--granularity", "month", "--markers", "v2",
         "--contributors", str(DRV / "repo_contributors_window.csv"),
-        "--repos", str(repos), "--bootstrap", "1000",
-        "--periods", prev, new)
+        "--repos", str(repos), "--bootstrap", "1000")

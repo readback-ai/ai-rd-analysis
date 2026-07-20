@@ -23,11 +23,11 @@ import csv
 from collections import defaultdict
 from pathlib import Path
 
-from pipeline.analyze import (bootstrap_ci, group_by_period, load_cells,
+from pipeline.analyze import (bootstrap_ci, extended_quarters,
+                              group_by_period, load_cells,
                               weighted_mean)
 from pipeline.detect import (MARKERS_V2, classify_pr, pr_agent_author,
                              pr_ai_tools, pr_branch_tool)
-from pipeline.scan_orgs import QUARTER_RANGES
 
 SRC = Path("data/sources")
 DRV = Path("data/derived")
@@ -96,7 +96,7 @@ def repo_rates() -> dict[tuple[str, str], dict[str, float | None]]:
     metric's denominator is under MIN_PRS or the field is unavailable."""
     keep = population_repos()
     out: dict[tuple[str, str], dict[str, float | None]] = {}
-    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES,
+    for (repo, per), prs in group_by_period(load_cells(), extended_quarters(),
                                             GRANULARITY).items():
         if repo not in keep or len(prs) < _floor():
             continue
@@ -179,8 +179,7 @@ def bounds() -> None:
     w = weights()
     per_repo: dict[str, dict[tuple, list]] = {"hi": defaultdict(list), "lo": defaultdict(list)}
     from pipeline.analyze import group_by_period, load_cells
-    from pipeline.scan_orgs import QUARTER_RANGES
-    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES,
+    for (repo, per), prs in group_by_period(load_cells(), extended_quarters(),
                                             GRANULARITY).items():
         if repo not in keep or len(prs) < _floor():
             continue
