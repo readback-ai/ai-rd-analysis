@@ -101,6 +101,14 @@ Population and classification metadata stay FROZEN between deliberate
 revisions so month-over-month movement reflects practice, not population
 churn. Quarterly regeneration (`scripts/regenerate.py`) remains the
 canonical headline path.
+Plumbing (fixed 2026-07-20, external review): collection is restricted to
+the collectable population (documented-inaccessible repos waived, same
+rule as regenerate stage C), and the update passes its month tokens to
+`analyze --periods`, which extends the frozen quarter map — previously a
+newly collected month's cells were silently discarded by the
+static-quarter filter. Cached full-range census cells are re-validated
+against the precount (same drift allowance as fresh pulls) before being
+trusted, so brownout-poisoned empty caches self-heal on the next run.
 
 ## 1d. FROZEN methodology conventions (every paper number obeys these)
 
@@ -161,9 +169,12 @@ PR-level attribution, never commit-level proof.
 
 **Measured layer-C precision** (org-stratified samples, C-only PRs — no
 marker, no agent author; `studies.layer_c_precision`): the share carrying
-positive provenance signals (GitHub web-flow committer = agent cloud flow,
-or the product's machine-generated slug pattern) is codex/ 95%, copilot/
-98%, cursor/ 49%, claude/ 42%. One false-positive class was MEASURED and is
+positive provenance signals (GitHub web-flow committer, or the product's
+machine-generated slug pattern) is codex/ 95%, copilot/ 98%, cursor/ 49%,
+claude/ 42%. The web-flow identity (`noreply@github.com` committer) is any
+web-UI/API commit and is NOT standalone agent evidence — it confirms only
+CONDITIONED on the agent-named branch; these precision figures measure
+exactly that combination. One false-positive class was MEASURED and is
 EXCLUDED from detection: branches named after the product but committed
 entirely by github-actions[bot] (CI canaries; 18.4% of C-only claude/
 samples). The remainder (cursor/ 51%, claude/ 39%) is INDETERMINATE:
@@ -326,7 +337,16 @@ numbers come only from that artifact.
   human and AI comments interleave); all-cause post-review edits are a
   descriptive companion only. Caveats: committedDate rewritten by
   rebase/amend (drifts late — inflates attribution); squash branches keep
-  original dates. Sampled, LOC-weighted, seeded.
+  original dates.
+  Estimation (revised 2026-07-20, external review): the sample is PPS
+  (1,200 LOC-proportional draws/quarter, seeded, distinct PRs retained),
+  so rates are Horvitz-Thompson weighted by inverse inclusion probability
+  pi_i = 1-(1-w_i/W)^1200 — responded% is the PR-weighted population
+  per-ask probability; post-ask LOC share is the ratio of HT LOC totals.
+  Commit lists are paginated (100/page + follow-ups); the earlier
+  first:60 cap chronologically truncated 261/4,233 sampled PRs, biasing
+  responsiveness downward on high-commit PRs — those records were
+  re-pulled in full (`review_action --repair`).
 
 ## 5b. LOC hygiene sensitivity (generated content)
 
