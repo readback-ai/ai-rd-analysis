@@ -224,15 +224,25 @@ INSIDER = {"MEMBER", "OWNER", "COLLABORATOR"}
 
 
 def split_reviews(pr: dict) -> tuple[list[dict], list[dict], list[dict]]:
-    """-> (human_other, human_self, bot) formal review objects submitted on
-    or before the study CUTOFF."""
+    """-> (human_other, human_self, bot) formal review objects. Review
+    events follow the SAME w8 rule as fates (frozen convention, adopted
+    2026-07-20): a review counts only if submitted within 8 weeks of PR
+    creation AND on or before the as-of — so every per-PR quantity
+    finalizes at w8 and advancing the as-of never changes mature numbers.
+    PRs lacking createdAt (legacy fixtures) fall back to the as-of bound
+    alone."""
     author = (pr.get("author") or {}).get("login")
+    created = pr.get("createdAt") or ""
     human_other, human_self, bot = [], [], []
     for r in (pr.get("reviews") or {}).get("nodes") or []:
         ra = r.get("author")
         if not ra:
             continue
-        if (r.get("submittedAt") or "") > CUTOFF:
+        sub = r.get("submittedAt") or ""
+        if created:
+            if not _within_w8(created, sub or None):
+                continue
+        elif sub > CUTOFF:
             continue
         if ra["__typename"] == "User" and not is_bot_login(ra.get("login")):
             (human_self if ra.get("login") == author else human_other).append(r)

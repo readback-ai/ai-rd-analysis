@@ -25,7 +25,10 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
   are measured at **8 weeks from PR creation** (`PRClass.merged/rejected`,
   frozen convention §1d): a merge counts iff it happened within 56 days of
   creation AND on or before the as-of; fate metrics are None (skipped) on
-  w8-immature PRs. Reviews submitted after the as-of are ignored. PRs
+  w8-immature PRs. Review events follow the SAME w8 rule (adopted
+  2026-07-20): a review counts only if submitted within 56 days of PR
+  creation and on or before the as-of — so mature PRs are immutable under
+  as-of advances. PRs
   created after ~2026-05-05 have open w8 windows at the current as-of, so
   Q2-2026 fate cells are PROVISIONAL until the scheduled **Sept 1, 2026
   re-pull** (re-collect Q2 cells, bump CUTOFF), after which every Q2 window
@@ -56,7 +59,7 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
 | `rejected` | closed unmerged within 8 weeks | limbo = w8-mature, neither |
 | `self_merged` | merged and `mergedBy.login == author.login` | None (excluded from rates) when the cell lacks `mergedBy` |
 | `insider` | `authorAssociation ∈ {MEMBER, OWNER, COLLABORATOR}` | misses staff with private org membership |
-| `human_reviewed` | ≥1 formal review by a User **other than the PR author** (bot-logins excluded), submitted ≤ as-of | conversation comments never count; the legacy any-User variant was removed 2026-07-20 |
+| `human_reviewed` | ≥1 formal review by a User **other than the PR author** (bot-logins excluded), submitted within w8 of creation and ≤ as-of | conversation comments never count; the legacy any-User variant was removed 2026-07-20 |
 | `substantive_review` | a reviewer≠author review with inline comments or state COMMENTED/CHANGES_REQUESTED | "more than a rubber-stamp APPROVED"; only first 15 reviews fetched |
 | `ai_reviewed` | ≥1 review by a Bot in `AI_REVIEWERS` (gemini-code-assist, copilot-pull-request-reviewer, coderabbitai, greptile-apps, qodo-merge-pro, cursor, chatgpt-codex-connector, copilot-swe-agent, claude) | decomposed from CI bots |
 | `other_bot_reviewed` | ≥1 Bot review not in `AI_REVIEWERS` | CI/automation noise kept separate |

@@ -117,12 +117,15 @@ trusted, so brownout-poisoned empty caches self-heal on the next run.
 
 ## 1d. FROZEN methodology conventions (every paper number obeys these)
 
-1. **Censoring rule**: all per-PR outcomes are measured at 8 WEEKS from PR
-   creation (`detect.W8_DAYS`; maturity curves show merges quiesce at w8,
-   98-99% of eventual). Fates close at w8, with w26 as appendix sensitivity
-   (`studies.fates`). Immature PRs carry no fate (None-skip) — trailing
-   quarters are PROVISIONAL and labeled; Q2-2026 finalizes with a re-pull
-   on/after 2026-09-01 (8 weeks past quarter end; runbook §1c).
+1. **Censoring rule**: ALL per-PR events — merges, closes, AND review
+   submissions — count only within 8 WEEKS of PR creation
+   (`detect.W8_DAYS`; review events adopted into the rule 2026-07-20;
+   maturity curves show merges quiesce at w8, 98-99% of eventual). Fates
+   close at w8, with w26 as appendix sensitivity (`studies.fates`).
+   Immature PRs carry no fate (None-skip) — trailing quarters are
+   PROVISIONAL and labeled; Q2-2026 finalizes with a re-pull on/after
+   2026-09-01 (8 weeks past quarter end; runbook §1c). Corollary: mature
+   PRs are immutable under as-of advances.
 2. **Matched-horizon-only fate comparisons**: "ever resolved" is a
    different quantity per cohort and must never be compared across cohorts.
 3. **Primary attention measure = HUMAN comments/kLOC** (bot comments
@@ -224,12 +227,16 @@ classified by its author into exactly one of three reviewer types:
    the user-bot heuristic (below) AND, for the human-review flag, login !=
    the PR author (GitHub permits self-review-comments; counting them
    inflated the self-merge lane — correction §11c of the working log,
-   aggregate impact <=2.2pp). Reviews are bounded by the GLOBAL AS-OF
-   (`detect.CUTOFF`), not by a per-PR window: a review submitted any time
-   up to the as-of counts, even years after the PR (review events are NOT
-   w8-windowed — only fate outcomes are; see §0). Consequence: review-rate
-   metrics on old quarters can still grow if the as-of ever advances,
-   which is why the as-of is frozen between deliberate revisions.
+   aggregate impact <=2.2pp). Review events follow the SAME w8 rule as
+   fates (adopted 2026-07-20): a review counts only if submitted within
+   8 weeks of PR creation AND on or before the as-of
+   (`detect.split_reviews`). Every per-PR quantity therefore FINALIZES at
+   w8, and advancing the as-of (monthly updates, the Q2 finalization
+   re-pull) can never change a mature PR's classification — fates and
+   review metrics alike. Measured impact of adopting the rule (pooled
+   any-human-review rate): -0.47pp Q1-2024, -0.60pp Q4-2025, -0.40pp
+   Q1-2026, -0.06pp Q2-2026 — late reviews past 8 weeks are rare, and
+   the trailing quarter (whose PRs had no time for them) barely moves.
 2. **AI reviewer**: Bot-typed (or user-bot) account whose login (with any
    `[bot]` suffix stripped) is in the curated `AI_REVIEWERS` allowlist —
    dedicated AI code-review products observed in the data:

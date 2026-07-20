@@ -318,3 +318,25 @@ def test_batch_connection_validation_requires_exact_totalcount():
                           "pageInfo": {"hasNextPage": True}}) is None
     # missing pageInfo entirely (partial GraphQL response) -> defer
     assert _conn_commits({"nodes": [{}] * 3, "totalCount": 3}) is None
+
+
+def test_reviews_are_w8_windowed_like_fates():
+    """Frozen-convention change 2026-07-20 (repro RED first): review events
+    count only within 8 weeks of PR creation, same rule as fates —
+    otherwise review rates on old quarters drift whenever the as-of
+    advances. A review 9 weeks after creation must NOT count."""
+    pr = _pr_reviews(reviews=[
+        _rev("bob", state="CHANGES_REQUESTED", comments=2)
+        | {"submittedAt": "2024-03-20T00:00:00Z"}])   # 9+ weeks after
+    pr["createdAt"] = "2024-01-10T00:00:00Z"
+    assert not classify_pr(pr).human_reviewed
+    # inside the window it counts
+    pr["reviews"]["nodes"][0]["submittedAt"] = "2024-02-20T00:00:00Z"
+    c = classify_pr(pr)
+    assert c.human_reviewed and c.substantive_review
+    # AI reviewers are windowed by the same rule
+    late_ai = _pr_reviews(reviews=[
+        _rev("coderabbitai[bot]", typename="Bot")
+        | {"submittedAt": "2024-04-01T00:00:00Z"}])
+    late_ai["createdAt"] = "2024-01-10T00:00:00Z"
+    assert not classify_pr(late_ai).ai_reviewed
