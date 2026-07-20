@@ -140,7 +140,6 @@ def test_census_heal_backs_off_before_repull(monkeypatch):
     """Repro RED first: an immediate heal re-pull likely hits the SAME
     search brownout; the heal branch must back off (sleep >=30s) before
     re-pulling."""
-    rng = QUARTER_RANGES["Q1-2026"]
     ghx.cell_path("precount", "o/r", "Q1-2026").write_text(json.dumps({"total": 30}))
     sleeps = []
     monkeypatch.setattr(census.time, "sleep", lambda s: sleeps.append(s))
