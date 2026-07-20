@@ -90,6 +90,18 @@ def author_months():
     return out
 
 
+def balanced_cap() -> int:
+    """Calendar balance is a property of the FIXED window: an adopter needs
+    t0+2 inside WINDOW regardless of maturity (round-5 review P1)."""
+    return len(WINDOW) - 3
+
+
+def mature_cap() -> int:
+    """Fully mature outcome panel: every offset in [-2..+2] must be a
+    mature month, i.e. t0 <= mature_max() - 2."""
+    return mature_max() - 2
+
+
 def main() -> None:
     am = author_months()
     events = {}
@@ -103,8 +115,9 @@ def main() -> None:
         if first is not None and first > 0:            # need a pre-period
             events[login] = first
     print(f"alignable adopters (core, clean pre-period): {len(events)}")
-    print("outcome A = MERGED kLOC (w8); months after 2026-04 (w8-immature) "
-          "excluded. outcome B = SUBMITTED kLOC; full window.")
+    print(f"outcome A = MERGED kLOC (w8); months after "
+          f"{WINDOW[mature_max()]} (w8-immature at AS_OF) excluded. "
+          "outcome B = SUBMITTED kLOC; full window.")
 
     def table(cohort, label, field=0, max_idx=None):
         max_idx = mature_max() if max_idx is None else max_idx
@@ -122,9 +135,9 @@ def main() -> None:
                       f"{mean(vals):>13.2f}{median(vals):>8.2f}")
 
     balanced = {login: t0 for login, t0 in events.items()
-                if 2 <= t0 <= mature_max()}
+                if 2 <= t0 <= min(balanced_cap(), mature_max())}
     mature = {login: t0 for login, t0 in events.items()
-              if 2 <= t0 <= WINDOW.index("2026-02")}
+              if 2 <= t0 <= min(balanced_cap(), mature_cap())}
 
     print("\n=== outcome A: MERGED kLOC (w8) ===")
     table(events, "ALL alignable adopters (unbalanced event panel)")

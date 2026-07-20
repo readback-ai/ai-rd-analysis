@@ -117,15 +117,23 @@ MARKERS |= {
 # same audit, e.g. snyk-bot/renovate/xnnpack, are deliberately absent).
 MARKERS |= {
     "openhands": ToolSpec(
-        search_terms=("openhands@all-hands.dev",
+        search_terms=("author-email:openhands@all-hands.dev",
                       "committer:openhands-agent"),
         needles=(),
         identity_needles=("openhands@all-hands.dev", "openhands-agent")),
+    # SEARCH-SIDE CAVEAT: GitHub commit search has no committer-email
+    # qualifier, and these are committer identities — author-email: terms
+    # under-recall them (only commits AUTHORED under the identity match).
+    # Search terms here are discovery/admission heuristics and a FLOOR;
+    # census-side pr_ai_tools (identity_needles against actual
+    # author/committer fields) is the authoritative classifier.
     "agent": ToolSpec(
-        search_terms=('"hermes-agent@"', '"agent@hermes"',
-                      '"agent@modal.com"', '"agent@deepagents.dev"',
-                      '"pragma-agent@modular.com"', '"agent@qwenpaw.local"',
-                      '"agent@example.com"', '"bot@imbue.com"'),
+        search_terms=("author-email:hermes-agent@local",
+                      "author-email:agent@modal.com",
+                      "author-email:agent@deepagents.dev",
+                      "author-email:pragma-agent@modular.com",
+                      "author-email:agent@example.com",
+                      "author-email:bot@imbue.com"),
         needles=(),
         identity_needles=("hermes-agent@", "agent@hermes", "agent@modal.com",
                           "agent@deepagents.dev", "pragma-agent@modular.com",

@@ -70,7 +70,12 @@ from pipeline.studies.slices import population_repos
 
 PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
 CAP = 20_000
-SAMPLE = Path("data/derived/review_action_sample.jsonl")
+# v2: redrawn under the MATURE-GATED eligibility frame (2026-07-24) — HT
+# inclusion probabilities are only valid for records drawn from the frame
+# they are computed on. The v1 file remains solely as a hydration cache
+# (commit data is frame-independent PR fact; selection is not).
+SAMPLE = Path("data/derived/review_action_sample_v2.jsonl")
+OLD_SAMPLE = Path("data/derived/review_action_sample.jsonl")
 PER_QUARTER = 1200
 
 Q = """
@@ -155,6 +160,21 @@ def eligible() -> dict[str, list]:
     return pool
 
 
+def _hydration_cache() -> dict:
+    """(repo, num) -> COMPLETE commit records from any prior sample file —
+    reusable because commit data is a PR-level fact independent of the
+    sampling frame; only the DRAW must come from the current frame."""
+    cache = {}
+    for path in (OLD_SAMPLE, SAMPLE):
+        if not path.exists():
+            continue
+        for ln in path.read_text().splitlines():
+            d = json.loads(ln)
+            if not _suspect(d):
+                cache[(d["repo"], d["num"])] = d
+    return cache
+
+
 def pull() -> None:
     random.seed(20260630)
     pool = eligible()
@@ -163,14 +183,28 @@ def pull() -> None:
         for ln in SAMPLE.read_text().splitlines():
             d = json.loads(ln)
             done.add((d["repo"], d["num"]))
+    reuse = _hydration_cache()
     out = SAMPLE.open("a")
     for per, items in pool.items():
         weights = [x[2] for x in items]
         chosen = {items[i] for i in
                   random.choices(range(len(items)), weights=weights,
                                  k=PER_QUARTER)}
-        todo = [x for x in chosen if (x[0], x[1]) not in done]
-        print(f"{per}: {len(todo)} to pull", flush=True)
+        fresh = [x for x in chosen if (x[0], x[1]) not in done]
+        todo = []
+        reused = 0
+        for x in fresh:
+            repo, num, loc, frt, login, ai, ins = x
+            d = reuse.get((repo, num))
+            if d is not None:
+                out.write(json.dumps({**d, "per": per, "loc": loc,
+                                      "first_review": frt, "author": login,
+                                      "ai": ai, "ins": ins}) + "\n")
+                reused += 1
+            else:
+                todo.append(x)
+        print(f"{per}: {reused} reused from hydration cache, "
+              f"{len(todo)} to pull", flush=True)
         for i in range(0, len(todo), 8):
             chunk = todo[i:i + 8]
             parts = []

@@ -258,7 +258,8 @@ classified by its author into exactly one of three reviewer types:
    CREATION (the frame), not events — an event inside a PR's window
    counts even when it lands after CUTOFF (implicitly capped at
    CUTOFF + 56d since created <= CUTOFF), which is exactly what lets the
-   Sept 2026 re-pull finalize Q2 without changing any constant. Every
+   Sept 2026 re-pull finalize Q2 without changing the frame or any rule —
+   only the AS_OF data stamp advances. Every
    per-PR quantity FINALIZES at w8; re-collection can never change a
    mature PR's classification — fates and review metrics alike. Measured impact of adopting the rule (pooled
    any-human-review rate): -0.47pp Q1-2024, -0.60pp Q4-2025, -0.40pp

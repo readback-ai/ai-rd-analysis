@@ -143,6 +143,24 @@ def core_loc() -> None:
             print(f"{per:9}{len(pairs):>6}{weighted_mean(pairs)/1000:>30.2f}")
 
 
+def merged_channel(c) -> str | None:
+    """Approval channel of a merged PR, or None when not merged OR not yet
+    w8-mature — channel shares depend on review/self-merge flags that are
+    provisional until maturity and can move in EITHER direction (round-5
+    review P1), unlike the one-sided volume deflation documented above."""
+    if not (c.merged and c.w8_mature):
+        return None
+    if c.human_reviewed:
+        return "humanRev"
+    if c.ai_reviewed or c.other_bot_reviewed:
+        return "botOnly"
+    if c.self_merged is True:
+        return "selfUnrev"
+    if c.self_merged is False:
+        return "otherUnrev"
+    return "unknown"
+
+
 def channels() -> None:
     """Paper points 2 & 5: merged LOC by approval channel (human-reviewed /
     bot-only-reviewed / self-merged unreviewed / other-merged unreviewed),
@@ -159,20 +177,11 @@ def channels() -> None:
             if (p.get("author") or {}).get("__typename") == "Bot":
                 continue
             c = classify_pr(p, MARKERS)
-            if not c.merged:
+            k = merged_channel(c)
+            if k is None:
                 continue
             loc = min((p.get("additions") or 0) + (p.get("deletions") or 0),
                       LINE_CAP)
-            if c.human_reviewed:
-                k = "humanRev"
-            elif c.ai_reviewed or c.other_bot_reviewed:
-                k = "botOnly"
-            elif c.self_merged is True:
-                k = "selfUnrev"
-            elif c.self_merged is False:
-                k = "otherUnrev"
-            else:
-                k = "unknown"
             ch[per][k] += loc
             ch[per]["total"] += loc
     print(f"{'period':9}{'merged MLOC':>12}{'humanRev%':>10}{'botOnly%':>9}"

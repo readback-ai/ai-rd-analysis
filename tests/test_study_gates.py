@@ -3,6 +3,7 @@ gate and the AS_OF migration — analyze gating alone is not 'every paper
 number obeys the frozen rule'."""
 
 from pipeline import detect
+from pipeline.detect import MARKERS, classify_pr
 
 
 def _pr(created, merged=None, num=1, reviews=(), merged_by="bob"):
@@ -81,3 +82,40 @@ def test_paper_tables_merged_columns_mature_only(monkeypatch):
     q2 = [r for r in rows if r["period"] == "Q2-2026"][0]
     assert q2["mrg_pr"][0] == 0.0      # immature AI merges excluded
     assert q2["repos"] == 1
+
+
+def test_review_action_sample_is_versioned_for_the_mature_frame():
+    """Review round 5 P1 (RED first): the PPS sample must be redrawn under
+    the mature-gated eligibility frame — inclusion probabilities from the
+    new frame do not apply to records drawn under the old one. A versioned
+    sample file forces the clean redraw (old draws never union in via
+    `done`)."""
+    from pipeline.studies import review_action
+    assert "v2" in review_action.SAMPLE.name
+    assert review_action.OLD_SAMPLE.name == "review_action_sample.jsonl"
+
+
+def test_channels_gate_on_maturity():
+    """Review round 5 P1 (RED first): channel SHARES are not covered by
+    the deflation argument — immature review/self-merge classifications
+    move in either direction as events arrive. Immature merges carry no
+    channel."""
+    from pipeline.studies.productivity import merged_channel
+    imm = classify_pr(IMMATURE, MARKERS)
+    assert merged_channel(imm) is None
+    mat = classify_pr(MATURE, MARKERS)
+    assert merged_channel(mat) == "otherUnrev"      # merged by bob, no review
+
+
+def test_event_study_cohort_caps(monkeypatch):
+    """Review round 5 P1 (RED first): calendar balance is a property of
+    the FIXED window (cap len(WINDOW)-3 regardless of AS_OF); the fully
+    mature panel additionally needs t0 <= mature_max()-2. At a September
+    AS_OF the old code admitted May/June adopters whose t+2 lies outside
+    the window."""
+    from pipeline.studies import event_study as es
+    assert es.balanced_cap() == len(es.WINDOW) - 3
+    assert es.mature_cap() == es.mature_max() - 2
+    monkeypatch.setattr(detect, "AS_OF", "2026-09-05T00:00:00Z")
+    assert es.balanced_cap() == len(es.WINDOW) - 3   # unchanged by AS_OF
+    assert es.mature_cap() == es.WINDOW.index("2026-06") - 2

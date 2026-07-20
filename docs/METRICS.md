@@ -20,8 +20,10 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
 - **Window**: PRs are selected by CREATION date inside the quarter
   (`census.pull_cell` query `created:<range>`); quarters are Q1-2024,
   Q4-2025, Q1-2026, Q2-2026.
-- **As-of bound and the w8 rule** (`detect.CUTOFF = 2026-06-30T23:59:59Z`):
-  CUTOFF is the data AS-OF stamp, not the outcome horizon. Per-PR outcomes
+- **Frame, as-of, and the w8 rule**: `detect.CUTOFF = 2026-06-30` is the
+  FRAME end — the last PR-creation date in the study; it never changes.
+  `detect.AS_OF` is the DATA-COLLECTION stamp (== the initial collection
+  for now; bumped at each re-pull) and governs w8 maturity only. Per-PR outcomes
   are measured at **8 weeks from PR creation** (`PRClass.merged/rejected`,
   frozen convention §1d): a merge counts iff it happened within 56 days of
   creation AND on or before the as-of; fate metrics are None (skipped) on
