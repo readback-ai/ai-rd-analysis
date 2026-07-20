@@ -26,7 +26,7 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
-from pipeline.detect import MARKERS_V1, MARKERS_V2
+from pipeline.detect import MARKERS
 from pipeline.ghx import cell_path, read_cell, rest_count
 
 RATE_KEEP = 0.001                       # 0.1% of PRs (keep-rule OR-branch)
@@ -100,17 +100,16 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--orgs", required=True)
     ap.add_argument("--window", default="2025-07-01..2026-06-30")
-    ap.add_argument("--markers", choices=["v1", "v2"], default="v1")
     ap.add_argument("--min-commits", type=int, default=5)
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
-    markers = MARKERS_V1 if a.markers == "v1" else MARKERS_V2
+    markers = MARKERS
     orgs = [ln.strip() for ln in Path(a.orgs).read_text().splitlines() if ln.strip()]
     sink = open(a.out, "w", newline="") if a.out else sys.stdout
     w = csv.writer(sink, delimiter="\t")
     w.writerow(["repo", "ai_commits", "keep_rule"] + list(markers))
     for org in orgs:
-        res = enum_org(org, a.window, markers, a.markers)
+        res = enum_org(org, a.window, markers, "v2")  # historical cache tag
         if res is None:
             print(f"WARN {org}: enumeration failed — re-run to retry",
                   file=sys.stderr, flush=True)

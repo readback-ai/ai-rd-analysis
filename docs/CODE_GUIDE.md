@@ -16,12 +16,12 @@ src/pipeline/org_set.py   population: 5 rules + override table
         │                       → data/derived/population.tsv, population_repos.txt
         ▼
 precount.py → census.py   PR census per (repo, period) into the CELL STORE
-        │                       $AIRD_DATA_DIR/raw/{census,census-v2}/*.json
+        │                       $AIRD_DATA_DIR/raw/census-v2/*.json (single store)
         ▼
 detect.py                 per-PR classification (the ONLY place detection lives)
         ▼
 analyze.py                cells → per-repo rates → CW means + bootstrap CIs
-integrate.py              exact layered decomposition (A/B/C disjoint)
+studies/layers.py         exact layered decomposition (A/B/C disjoint)
 studies/*.py              one analysis = one module, all reproducible
         ▼
 scripts/report.py         runs every section → artifacts/report_generated.md
@@ -48,7 +48,7 @@ byte-for-byte from the same cells.
 The single canonical home of ALL detection. Nothing else defines a marker,
 a bot list, or a review rule.
 
-- **Layer A** `pr_ai_tools()` — commit-forensic markers (`MARKERS_V2`:
+- **Layer A** `pr_ai_tools()` — commit-forensic markers (`MARKERS`:
   Claude, Cursor, aider, Codex incl. committer identities). Floors: only
   first 12 commits per PR; squash strips trailers.
 - **Layer B** `pr_agent_author()` — PR author is a Bot-typed account in
@@ -74,7 +74,7 @@ Review invariant worth checking: an unlisted AI review product falls into
 contaminated by an unrecognized AI reviewer.
 
 ### Metrics engine — `src/pipeline/analyze.py`
-- `load_cells()` — merges cell generations (census → census-v2, v2 wins),
+- `load_cells()` — reads the single census store (`raw/census-v2/`),
   visiting files **oldest-mtime-first** so fresher cells land later.
 - `group_by_period()` — dedup by PR number within (repo, period): richer
   record (has `headRefName`) beats poorer; at equal richness the
@@ -117,6 +117,7 @@ history; the report section title names the module. Highlights:
 
 | module | claim it produces | key design point |
 |---|---|---|
+| `layers.py` | exact A/B/C decomposition (report §4) | disjoint by precedence B > A > C |
 | `paper_tables.py` | Figures 2–3 (AI usage; merged kLOC/core author ×2.66) | CW + seeded CIs; LOC capped 20k/PR |
 | `productivity.py` | decomposition, persistent authors, aisplit, **adoption cohorts** (Figure 4) | fleet cohort (≥300 merged PRs/quarter) isolated BEFORE AI-timing cohorts; user-typed bot authors excluded |
 | `event_study.py` | volume jump at first AI-marker month | w8-mature months only for merged outcome; submitted-LOC outcome needs no censoring |
@@ -155,9 +156,10 @@ are floors (one quantified exception: the two-sided bound).
 
 ## Gotchas a reviewer should know before reading code
 
-- **Two cell-store generations** coexist (census, census-v2); only v2 has
-  `headRefName`/`mergedBy`. Studies must tolerate their absence — that is
-  why `self_merged` can be None and layer C returns None on old cells.
+- **One cell store** (`raw/census-v2/` — the name is historical; the
+  legacy generation was retired 2026-07-20 after re-collection). Studies
+  still tolerate absent `headRefName`/`mergedBy` per-record (`self_merged`
+  None, layer C None) for robustness.
 - **`gh` swallows `--jq` on error** — never call `gh api --jq` directly
   for GraphQL that can partially fail; use `ghx.graphql_nodes`.
 - **Bot filtering is two-sided**: `__typename == "Bot"` catches App bots;

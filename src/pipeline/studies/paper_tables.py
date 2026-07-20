@@ -32,7 +32,7 @@ from collections import defaultdict
 
 from pipeline.analyze import (bootstrap_ci, group_by_period, load_cells,
                               weighted_mean)
-from pipeline.detect import MARKERS_V2, classify_pr
+from pipeline.detect import MARKERS, classify_pr
 from pipeline.scan_orgs import QUARTER_RANGES
 from pipeline.studies.productivity import LINE_CAP, PERIODS, per_author
 from pipeline.studies.slices import population_repos, weights
@@ -65,7 +65,7 @@ def usage_rows() -> list[dict]:
             continue
         row = acc[(repo, per)]
         for p in prs:
-            c = classify_pr(p, MARKERS_V2)
+            c = classify_pr(p, MARKERS)
             loc = min((p.get("additions") or 0)
                       + (p.get("deletions") or 0), LINE_CAP)
             ai = c.ai_involved

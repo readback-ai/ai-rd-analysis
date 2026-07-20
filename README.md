@@ -60,7 +60,7 @@ cohorts incl. fleet).
 | How is data collected? | `src/pipeline/` stages 0–3c (below); every stage checkpoints raw cells to `$AIRD_DATA_DIR` and is idempotent/resumable |
 | How is the population defined? | [`src/pipeline/org_set.py`](src/pipeline/org_set.py) + METHODS §1: five rules (candidates → quality → AI-developer identity → evidence → scope) + one override table. Inputs in `data/sources/`, outputs in `data/derived/population.tsv` |
 | How is AI contribution & review detected? | [`src/pipeline/detect.py`](src/pipeline/detect.py) — the single home: three detection layers + review classification |
-| How are metrics created? | [`src/pipeline/analyze.py`](src/pipeline/analyze.py) (census metrics, weighting, bootstrap CIs) and [`src/pipeline/integrate.py`](src/pipeline/integrate.py) (cross-layer union) |
+| How are metrics created? | [`src/pipeline/analyze.py`](src/pipeline/analyze.py) (census metrics, weighting, bootstrap CIs) and [`src/pipeline/studies/layers.py`](src/pipeline/studies/layers.py) (exact cross-layer decomposition) |
 | How are orgs classified for appendix cuts? | METHODS §1b: developer-of-AI groups (topics-only + published adjudications in `data/sources/org_overrides.tsv`) and org-type (`data/sources/org_type.tsv`: public/private/community, ownership as-of cutoff) |
 
 ## Pipeline
@@ -75,7 +75,7 @@ cohorts incl. fleet).
 | 3c | `pipeline.branch_scan` | branch-prefix PR counts per org×quarter (layer C) |
 | — | `pipeline.pull_prs` | targeted hydration (mergedBy, comment authors, commit dates) + branch-PR sampling |
 | 4 | `pipeline.analyze` | per-repo rates → contributor-weighted means + bootstrap CIs |
-| 5 | `pipeline.integrate` | layered union (marker ∪ agent-author ∪ branch-only) with measured overlap corrections |
+| 5 | `pipeline.studies.layers` | exact per-PR layered decomposition (B > A > C disjoint; union = ai_involved) |
 | studies | `pipeline.studies.*` | one analysis = one module: paper figures, productivity/adoption cohorts, attention, fates, event study, responsiveness (HT-weighted), slices, layer-C precision |
 | figures | `scripts/plot_paper_tables.py`, `scripts/plot_adoption_cohorts.py` | Figures 2–4 (broken x-axis) |
 | monthly | `scripts/monthly_update.py` | incremental month ingestion (provisional-month revision + persistent month registry) |
@@ -87,7 +87,7 @@ uv sync
 uv run pytest -q
 uv run python -m pipeline.org_set --verify   # population reconciliation
 # The raw census store ($AIRD_DATA_DIR) is not in this repo (large; contains
-# commit metadata) — available on request; analyze/integrate FAIL loudly
+# commit metadata) — available on request; analyze/studies FAIL loudly
 # without it rather than printing empty reports. With the store present:
 uv run python scripts/regenerate.py          # full pipeline -> artifacts/report_generated.md
 PYTHONPATH=src uv run python scripts/report.py --granularity month   # monthly twin

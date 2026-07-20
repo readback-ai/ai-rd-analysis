@@ -6,10 +6,10 @@ import json
 import pytest
 
 from pipeline import enum_repos, scan_orgs
-from pipeline.detect import MARKERS_V1, MARKERS_V2
+from pipeline.detect import MARKERS
 from pipeline.ghx import cell_path
 
-N_TERMS_V1 = sum(len(s.search_terms) for s in MARKERS_V1.values())
+N_TERMS_V1 = sum(len(s.search_terms) for s in MARKERS.values())
 
 
 @pytest.fixture(autouse=True)
@@ -24,9 +24,9 @@ def test_scan_org_checkpoints_and_skips(monkeypatch):
     calls = []
     monkeypatch.setattr(scan_orgs, "rest_count",
                         lambda q, **k: calls.append(q) or 7)
-    res = scan_orgs.scan_org("acme", "Q1-2026", MARKERS_V1, "v1")
+    res = scan_orgs.scan_org("acme", "Q1-2026", MARKERS, "v1")
     assert res["claude"]["count"] == 7 and res["cursor"]["count"] == 7
-    assert scan_orgs.scan_org("acme", "Q1-2026", MARKERS_V1, "v1") == res
+    assert scan_orgs.scan_org("acme", "Q1-2026", MARKERS, "v1") == res
     assert len(calls) == N_TERMS_V1              # second call fully cached
     # bare-term + date qualifier, never author-email:
     assert calls[0] == "org:acme noreply@anthropic.com author-date:2026-01-01..2026-03-31"
@@ -36,9 +36,10 @@ def test_scan_org_checkpoints_and_skips(monkeypatch):
 
 
 def test_scan_count_is_max_over_terms_not_sum(monkeypatch):
-    seq = iter([10, 8, 3])                        # claude email, claude footer, cursor
+    # 6 terms total: claude x2, cursor x1, aider x1, codex x2
+    seq = iter([10, 8, 3, 2, 1, 1])
     monkeypatch.setattr(scan_orgs, "rest_count", lambda q, **k: next(seq))
-    res = scan_orgs.scan_org("acme", None, MARKERS_V1, "v1")
+    res = scan_orgs.scan_org("acme", None, MARKERS, "v1")
     assert res["claude"]["count"] == 10           # max(10, 8), NOT 18
     assert res["claude"]["terms"] == [10, 8]
 
@@ -47,18 +48,18 @@ def test_scan_cache_key_includes_range_and_markers(monkeypatch):
     """Review finding: under-keyed caches served stale results. A different
     marker set (or quarter definition) must MISS the cache, not hit it."""
     monkeypatch.setattr(scan_orgs, "rest_count", lambda q, **k: 1)
-    scan_orgs.scan_org("acme", "Q1-2026", MARKERS_V1, "v1")
+    scan_orgs.scan_org("acme", "Q1-2026", MARKERS, "v1")
     assert cell_path("scan_orgs", "acme", "2026-01-01..2026-03-31", "v1").exists()
     calls = []
     monkeypatch.setattr(scan_orgs, "rest_count", lambda q, **k: calls.append(q) or 2)
-    res = scan_orgs.scan_org("acme", "Q1-2026", MARKERS_V2, "v2")
+    res = scan_orgs.scan_org("acme", "Q1-2026", MARKERS, "v2")
     assert calls, "v2 run must not be served from the v1 cell"
     assert "codex" in res and "aider" in res
 
 
 def test_scan_org_failure_not_recorded_as_zero(monkeypatch):
     monkeypatch.setattr(scan_orgs, "rest_count", lambda q, **k: None)
-    assert scan_orgs.scan_org("acme", None, MARKERS_V1, "v1") is None
+    assert scan_orgs.scan_org("acme", None, MARKERS, "v1") is None
     assert not cell_path("scan_orgs", "acme", "all-time", "v1").exists()
 
 
@@ -67,16 +68,17 @@ def test_enum_org_tallies_max_over_terms(monkeypatch):
     not twice (sum)."""
     monkeypatch.setattr(enum_repos, "_paginate_repos",
                         lambda q, **k: ["acme/big", "acme/big", "acme/small"])
-    res = enum_repos.enum_org("acme", "2025-07-01..2026-06-30", MARKERS_V1, "v1")
-    assert res["acme/big"] == {"claude": 2, "cursor": 2}     # max, not 4
-    assert res["acme/small"] == {"claude": 1, "cursor": 1}
+    res = enum_repos.enum_org("acme", "2025-07-01..2026-06-30", MARKERS, "v1")
+    expect_big = {t: 2 for t in ("claude", "cursor", "aider", "codex")}
+    assert res["acme/big"] == expect_big                     # max, not 4
+    assert res["acme/small"] == {t: 1 for t in expect_big}
     p = cell_path("enum_repos", "acme", "2025-07-01..2026-06-30", "v1")
     assert json.loads(p.read_text()) == res
 
 
 def test_enum_org_failure_writes_nothing(monkeypatch):
     monkeypatch.setattr(enum_repos, "_paginate_repos", lambda q, **k: None)
-    assert enum_repos.enum_org("acme", "w", MARKERS_V1, "v1") is None
+    assert enum_repos.enum_org("acme", "w", MARKERS, "v1") is None
     assert not cell_path("enum_repos", "acme", "w", "v1").exists()
 
 
@@ -85,7 +87,7 @@ def test_enum_warns_on_search_cap(monkeypatch, capsys):
     monkeypatch.setattr(enum_repos, "_paginate_repos",
                         lambda q, **k: ["acme/huge"] * 1000)
     monkeypatch.setattr(enum_repos, "rest_count", lambda q, **k: 4321)
-    enum_repos.enum_org("acme", "w", MARKERS_V1, "v1")
+    enum_repos.enum_org("acme", "w", MARKERS, "v1")
     assert "search cap hit" in capsys.readouterr().err
 
 

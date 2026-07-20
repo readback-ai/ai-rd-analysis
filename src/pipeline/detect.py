@@ -20,8 +20,8 @@ B∩C high for copilot/ (the bot authors those PRs) — integrate.py corrects.
 Review classification: a PR counts as HUMAN-REVIEWED only if a User-typed
 account OTHER THAN THE PR AUTHOR submitted a formal review (GitHub allows
 self-review-comments; counting them inflated the self-merge lane —
-v2_results §11c). human_reviewed_any keeps the legacy (any-User) definition
-that published tables §1/§4/§5 used. AI review = Bot-typed reviewer in
+v2_results §11c; the legacy any-User variant was removed 2026-07-20).
+AI review = Bot-typed reviewer in
 AI_REVIEWERS (dedicated review bots), decomposed from other CI bots.
 """
 from __future__ import annotations
@@ -73,7 +73,7 @@ class ToolSpec:
 
 
 # v1 marker set: what every published Phase-0 number used (comparability).
-MARKERS_V1 = {
+MARKERS = {
     "claude": ToolSpec(
         search_terms=("noreply@anthropic.com", '"Generated with [Claude Code]"'),
         needles=("noreply@anthropic.com", "Generated with [Claude Code]")),
@@ -85,7 +85,7 @@ MARKERS_V1 = {
 # Codex cloud commits VIA the bot committer need qualifier search + the
 # committer field in the census GraphQL query (bare terms only match message
 # text, and the bot never appears there).
-MARKERS_V2 = MARKERS_V1 | {
+MARKERS |= {
     "aider": ToolSpec(
         search_terms=('"Co-authored-by: aider"',),
         needles=("Co-authored-by: aider",)),
@@ -96,7 +96,7 @@ MARKERS_V2 = MARKERS_V1 | {
 }
 
 
-def pr_ai_tools(pr: dict, markers: dict[str, ToolSpec] = MARKERS_V1,
+def pr_ai_tools(pr: dict, markers: dict[str, ToolSpec] = MARKERS,
                 include_bot_authors: bool = False) -> set[str]:
     """Layer A: which AI tools left commit-marker evidence in this PR
     (search-API PullRequest node with commits{nodes{commit{message
@@ -265,8 +265,7 @@ class PRClass:
     w8_mature: bool                   # 8-week window closed by the cutoff
     self_merged: bool | None          # None when the cell lacks mergedBy
     insider: bool
-    human_reviewed: bool              # User reviewer != PR author (corrected)
-    human_reviewed_any: bool          # any User reviewer (legacy, published §1/§4/§5)
+    human_reviewed: bool              # User reviewer != PR author
     substantive_review: bool          # of the reviewer!=author reviews
     ai_reviewed: bool
     other_bot_reviewed: bool
@@ -278,7 +277,7 @@ class PRClass:
             or self.branch_tool is not None
 
 
-def classify_pr(pr: dict, markers: dict[str, ToolSpec] = MARKERS_V1) -> PRClass:
+def classify_pr(pr: dict, markers: dict[str, ToolSpec] = MARKERS) -> PRClass:
     human_other, human_self, bot = split_reviews(pr)
     ai_rev = [r for r in bot
               if (r["author"].get("login") or "").removesuffix("[bot]") in AI_REVIEWERS]
@@ -305,7 +304,6 @@ def classify_pr(pr: dict, markers: dict[str, ToolSpec] = MARKERS_V1) -> PRClass:
         self_merged=self_merged,
         insider=pr.get("authorAssociation") in INSIDER,
         human_reviewed=bool(human_other),
-        human_reviewed_any=bool(human_other or human_self),
         substantive_review=substantive(human_other),
         ai_reviewed=bool(ai_rev),
         other_bot_reviewed=len(ai_rev) < len(bot),

@@ -25,7 +25,7 @@ from __future__ import annotations
 import json
 import re
 
-from pipeline.detect import MARKERS_V2, pr_agent_author, pr_ai_tools
+from pipeline.detect import MARKERS, pr_agent_author, pr_ai_tools
 from pipeline.ghx import data_dir
 
 SLUG = {
@@ -52,7 +52,7 @@ def main() -> None:
         n = wf = slug = ci = 0
         for f in sorted(store.glob(f"{prefix}/*.json")):
             for p in json.loads(f.read_text()).get("prs") or []:
-                if not p or pr_ai_tools(p, MARKERS_V2) or pr_agent_author(p):
+                if not p or pr_ai_tools(p, MARKERS) or pr_agent_author(p):
                     continue
                 n += 1
                 emails = committer_emails(p)

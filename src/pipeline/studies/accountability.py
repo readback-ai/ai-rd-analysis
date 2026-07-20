@@ -19,7 +19,7 @@ import argparse
 import random
 
 from pipeline.analyze import group_by_period, load_cells
-from pipeline.detect import MARKERS_V1, classify_pr
+from pipeline.detect import MARKERS, classify_pr
 from pipeline.pull_prs import batch_pull
 from pipeline.scan_orgs import QUARTER_RANGES
 
@@ -60,7 +60,7 @@ def run(per_period: int, seed: int) -> None:
             full = hydrated.get((repo, pr["number"]))
             if not full:
                 continue
-            c = classify_pr(full, MARKERS_V1)
+            c = classify_pr(full, MARKERS)
             if c.self_merged is None:
                 continue
             rows.append((c, other_human_commented(full)))

@@ -17,13 +17,13 @@ import argparse
 import random
 
 from pipeline.analyze import group_by_period, load_cells
-from pipeline.detect import MARKERS_V1, classify_pr
+from pipeline.detect import MARKERS, classify_pr
 from pipeline.scan_orgs import QUARTER_RANGES
 from pipeline.studies.review_modes import commit_ai
 
 
 def _flags(pr: dict, n_authors: int) -> str:
-    c = classify_pr(pr, MARKERS_V1)
+    c = classify_pr(pr, MARKERS)
     lines = (pr.get("additions") or 0) + (pr.get("deletions") or 0)
     bits = ["INS" if c.insider else "ext",
             "solo" if n_authors == 1 else f"{n_authors}auth",
@@ -57,7 +57,7 @@ def draw_unreviewed(period: str, n: int, seed: int) -> list[tuple[str, dict, int
         authors[repo] = {(p.get("author") or {}).get("login")
                          for p in prs if (p.get("author") or {}).get("__typename") == "User"}
         for p in prs:
-            c = classify_pr(p, MARKERS_V1)
+            c = classify_pr(p, MARKERS)
             if (p.get("author") or {}).get("__typename") == "Bot":
                 continue
             lines = (p.get("additions") or 0) + (p.get("deletions") or 0)

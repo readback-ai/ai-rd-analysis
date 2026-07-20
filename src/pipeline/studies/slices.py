@@ -26,7 +26,7 @@ from pathlib import Path
 from pipeline.analyze import (bootstrap_ci, extended_quarters,
                               group_by_period, load_cells,
                               weighted_mean)
-from pipeline.detect import (MARKERS_V2, classify_pr, pr_agent_author,
+from pipeline.detect import (MARKERS, classify_pr, pr_agent_author,
                              pr_ai_tools, pr_branch_tool)
 
 SRC = Path("data/sources")
@@ -100,7 +100,7 @@ def repo_rates() -> dict[tuple[str, str], dict[str, float | None]]:
                                             GRANULARITY).items():
         if repo not in keep or len(prs) < _floor():
             continue
-        cls = [classify_pr(p, MARKERS_V2) for p in prs]
+        cls = [classify_pr(p, MARKERS) for p in prs]
         n = len(cls)
         merged = [c for c in cls if c.merged]
         sm = [c for c in merged if c.self_merged]        # needs mergedBy
@@ -185,7 +185,7 @@ def bounds() -> None:
             continue
         n = len(prs)
         def involved(p, strict):
-            return bool(pr_ai_tools(p, MARKERS_V2)
+            return bool(pr_ai_tools(p, MARKERS)
                         or pr_agent_author(p)
                         or pr_branch_tool(p, strict=strict))
         per_repo["hi"][per].append((sum(involved(p, False) for p in prs) / n,

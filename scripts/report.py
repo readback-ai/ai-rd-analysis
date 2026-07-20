@@ -36,14 +36,14 @@ def sections(granularity: str, repos: Path) -> list[tuple[str, list[str]]]:
     g = ["--granularity", granularity]
     return [
         ("Contributor-weighted metrics",
-         ["pipeline.analyze", *g, "--markers", "v2", "--contributors",
+         ["pipeline.analyze", *g, "--contributors",
           str(DRV / "repo_contributors_window.csv"),
           "--repos", str(repos), "--bootstrap", "2000"]),
         ("Figure 2: Traceable AI usage over time (CW, 95% CI)",
          ["pipeline.studies.paper_tables", "--table", "usage"]),
         ("Figure 3: Merged LOC per core contributor over time (CW, 95% CI)",
          ["pipeline.studies.paper_tables", "--table", "core"]),
-        ("Layered decomposition (pooled)", ["pipeline.integrate", *g]),
+        ("Layered decomposition (pooled)", ["pipeline.studies.layers", *g]),
         ("Slices: involvement",
          ["pipeline.studies.slices", *g, "--table", "involvement"]),
         ("Slices: self-merge",

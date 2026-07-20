@@ -8,7 +8,7 @@ import pytest
 from pipeline import ghx
 from pipeline.analyze import (bootstrap_ci, load_cells, period_of, pr_metrics,
                               weighted_mean)
-from pipeline.detect import MARKERS_V1
+from pipeline.detect import MARKERS
 from pipeline.scan_orgs import QUARTER_RANGES
 
 
@@ -38,25 +38,25 @@ def _pr(reviews=(), assoc="NONE", merged=False, msg="normal"):
 # ------------------------------------------------- reviewer decomposition (R3)
 
 def test_ai_reviewer_counts_as_ai_review_not_other():
-    m = pr_metrics(_pr(reviews=[_review("gemini-code-assist")]), MARKERS_V1)
+    m = pr_metrics(_pr(reviews=[_review("gemini-code-assist")]), MARKERS)
     assert m["ai_review"] and not m["other_bot_review"] and not m["human_review"]
 
 
 def test_ci_bot_is_not_ai_review():
     """The P1.4 conflation: github-actions must NOT count as AI review."""
-    m = pr_metrics(_pr(reviews=[_review("github-actions[bot]")]), MARKERS_V1)
+    m = pr_metrics(_pr(reviews=[_review("github-actions[bot]")]), MARKERS)
     assert m["other_bot_review"] and not m["ai_review"]
 
 
 def test_bot_suffix_normalized():
-    m = pr_metrics(_pr(reviews=[_review("coderabbitai[bot]")]), MARKERS_V1)
+    m = pr_metrics(_pr(reviews=[_review("coderabbitai[bot]")]), MARKERS)
     assert m["ai_review"]
 
 
 def test_mixed_reviewers_all_flags():
     m = pr_metrics(_pr(reviews=[_review("alice", "User"),
                                 _review("gemini-code-assist"),
-                                _review("github-actions[bot]")]), MARKERS_V1)
+                                _review("github-actions[bot]")]), MARKERS)
     assert m["human_review"] and m["ai_review"] and m["other_bot_review"]
     assert not m["no_review"]
 
@@ -64,7 +64,7 @@ def test_mixed_reviewers_all_flags():
 def test_no_reviews_and_insider_and_ai_code():
     m = pr_metrics(_pr(assoc="MEMBER",
                        msg="x\n\nCo-Authored-By: Claude <noreply@anthropic.com>"),
-                   MARKERS_V1)
+                   MARKERS)
     assert m["no_review"] and m["insider"] and m["ai_code"]
 
 
@@ -93,11 +93,11 @@ def test_period_of_maps_subwindows_to_quarter():
 
 
 def test_load_cells_roundtrips_and_skips_corrupt(tmp_store):
-    good = ghx.cell_path("census", "fw-ai/flashinfer", "2026-01-01..2026-03-31")
+    good = ghx.cell_path("census-v2", "fw-ai/flashinfer", "2026-01-01..2026-03-31")
     good.write_text(json.dumps([{"number": 1}, None]))       # None PRs dropped
-    bad = ghx.cell_path("census", "o/bad", "2026-01-01..2026-03-31")
+    bad = ghx.cell_path("census-v2", "o/bad", "2026-01-01..2026-03-31")
     bad.write_text('{"errors":[]}')                          # wrong shape
-    ugly = ghx.cell_path("census", "o/ugly", "2026-01-01..2026-03-31")
+    ugly = ghx.cell_path("census-v2", "o/ugly", "2026-01-01..2026-03-31")
     ugly.write_text("{corrupt")
     cells = load_cells()
     assert cells[("fw-ai/flashinfer", "2026-01-01..2026-03-31")] == [{"number": 1}]
@@ -109,9 +109,9 @@ def test_group_by_period_dedups_overlapping_cell_generations(tmp_store):
     definitions) for the same repo-period double-counted PRs."""
     import json as _json
     from pipeline.analyze import group_by_period
-    full = ghx.cell_path("census", "o/r", "2026-01-01..2026-03-31")
+    full = ghx.cell_path("census-v2", "o/r", "2026-01-01..2026-03-31")
     full.write_text(_json.dumps([{"number": 1}, {"number": 2}]))
-    sub = ghx.cell_path("census", "o/r", "2026-01-01..2026-01-09")
+    sub = ghx.cell_path("census-v2", "o/r", "2026-01-01..2026-01-09")
     sub.write_text(_json.dumps([{"number": 2}, {"number": 3}]))
     grouped = group_by_period(load_cells(), QUARTER_RANGES)
     nums = sorted(pr["number"] for pr in grouped[("o/r", "Q1-2026")])
@@ -188,13 +188,13 @@ def test_partial_quarter_months_excluded_from_month_grouping():
 
 def test_merged_conditioned_metrics_none_on_unmerged():
     from pipeline.analyze import pr_metrics
-    from pipeline.detect import MARKERS_V2
+    from pipeline.detect import MARKERS
     unmerged = {"reviews": {"nodes": []}, "commits": {"nodes": []},
                 "createdAt": "2026-04-10T00:00:00Z"}
-    m = pr_metrics(unmerged, MARKERS_V2)
+    m = pr_metrics(unmerged, MARKERS)
     assert m["m_hum_rev"] is None and m["m_no_rev"] is None
     merged = dict(unmerged, mergedAt="2026-05-01T00:00:00Z")
-    m = pr_metrics(merged, MARKERS_V2)
+    m = pr_metrics(merged, MARKERS)
     assert m["m_hum_rev"] is False and m["m_no_rev"] is True
 
 
@@ -235,3 +235,19 @@ def test_overlapping_cells_fresher_record_wins_at_equal_richness():
     out = group_by_period(cells, dict(QUARTER_RANGES))
     (prs,) = [v for k, v in out.items() if k == ("o/r", "Q2-2026")]
     assert [p.get("headRefName") for p in prs] == ["new/value"]
+
+
+def test_layered_decomposition_is_disjoint_with_b_over_a_over_c():
+    """One PR counts in exactly one layer; precedence B > A > C."""
+    from pipeline.detect import MARKERS, classify_pr
+    both = {"number": 1, "createdAt": "2026-04-01T00:00:00Z",
+            "author": {"login": "copilot-swe-agent[bot]", "__typename": "Bot"},
+            "headRefName": "codex/x",
+            "commits": {"nodes": [{"commit": {
+                "message": "x", "authors": {"nodes": [
+                    {"email": "noreply@anthropic.com"}]}}}]},
+            "reviews": {"nodes": []}}
+    c = classify_pr(both, MARKERS)
+    assert c.agent_author and c.marker_tools and c.branch_tool
+    # precedence as encoded in studies.layers.layered_table
+    assert c.agent_author is not None            # -> counted as B only

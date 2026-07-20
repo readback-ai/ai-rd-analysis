@@ -21,7 +21,7 @@ import sys
 import time
 from pathlib import Path
 
-from pipeline.detect import MARKERS_V1, MARKERS_V2
+from pipeline.detect import MARKERS
 from pipeline.ghx import cell_path, read_cell, rest_count
 
 def month_range(tok: str) -> str:
@@ -87,10 +87,9 @@ def main() -> None:
     ap.add_argument("--orgs", required=True, help="file with one org login per line")
     ap.add_argument("--quarters", nargs="*", default=None,
                     choices=list(QUARTER_RANGES), help="omit for all-time")
-    ap.add_argument("--markers", choices=["v1", "v2"], default="v1")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
-    markers = MARKERS_V1 if a.markers == "v1" else MARKERS_V2
+    markers = MARKERS
     orgs = [ln.strip() for ln in Path(a.orgs).read_text().splitlines() if ln.strip()]
     periods = a.quarters or [None]
     sink = open(a.out, "w", newline="") if a.out else sys.stdout
@@ -98,7 +97,7 @@ def main() -> None:
     w.writerow(["org", "period"] + list(markers))
     for org in orgs:
         for per in periods:
-            res = scan_org(org, per, markers, a.markers)
+            res = scan_org(org, per, markers, "v2")  # historical cache tag
             row = [org, per or "all-time"]
             row += [res[t]["count"] if res and t in res else "ERR" for t in markers]
             w.writerow(row)

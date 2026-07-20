@@ -63,7 +63,7 @@ import time
 from pathlib import Path
 
 from pipeline.analyze import group_by_period, load_cells
-from pipeline.detect import CUTOFF, MARKERS_V2, classify_pr, split_reviews
+from pipeline.detect import CUTOFF, MARKERS, classify_pr, split_reviews
 from pipeline.ghx import graphql_nodes
 from pipeline.scan_orgs import QUARTER_RANGES
 from pipeline.studies.slices import population_repos
@@ -146,7 +146,7 @@ def eligible() -> dict[str, list]:
             a = p.get("author") or {}
             if a.get("__typename") == "Bot":
                 continue
-            c = classify_pr(p, MARKERS_V2)
+            c = classify_pr(p, MARKERS)
             frt = first_human_review(p)
             loc = min((p.get("additions") or 0) + (p.get("deletions") or 0), CAP)
             if c.merged and c.human_reviewed and frt and loc:
@@ -303,7 +303,7 @@ def compute() -> None:
         if repo not in keep or per not in PERIODS:
             continue
         for p in prs:
-            c = classify_pr(p, MARKERS_V2)
+            c = classify_pr(p, MARKERS)
             anchors[(repo, p.get("number"))] = (
                 first_human_ask(p), c.ai_reviewed)
             a = p.get("author") or {}

@@ -7,7 +7,7 @@ Detection semantics (marker sets, reviewer taxonomies, the reviewer!=author
 correction) all live in pipeline.detect — nothing here re-defines them.
 
 human_review keeps the LEGACY any-User-reviewer definition so published tables
-reproduce exactly; human_rev_other is the corrected reviewer!=author rate
+reproduce exactly; human_review is the reviewer!=author, bot-clean rate
 (v2_results §11c). self_merged is only available in cells pulled after
 2026-07-08 (mergedBy added to the census query) and reports nan before that.
 
@@ -17,7 +17,7 @@ pulled under an older quarter definition), and summing them double-counted.
 
 Usage:
   python -m pipeline.analyze --contributors data/repo_contributors.csv \
-      --markers v1 --bootstrap 2000
+      --bootstrap 2000
 """
 from __future__ import annotations
 
@@ -28,28 +28,28 @@ import random
 from collections import defaultdict
 from pathlib import Path
 
-from pipeline.detect import MARKERS_V1, MARKERS_V2, classify_pr
+from pipeline.detect import MARKERS, classify_pr
 from pipeline.ghx import decode_cell_stem, raw_dir, read_cell
 
 
 def load_cells() -> dict[tuple[str, str], list[dict]]:
-    """(repo, date-range) -> PR nodes, merged across cell-store generations:
-    census-v2 (query with headRefName+mergedBy) wins over census per cell.
-    Within a stage, files are visited OLDEST-mtime-first so that later
-    (fresher) cells land later in the dict — group_by_period's dedup lets
-    the fresher record win at equal richness (monthly re-collection vs a
-    stale overlapping quarter cell; external review P1)."""
+    """(repo, date-range) -> PR nodes from the census-v2 store (the single
+    store since 2026-07-20: the 187 repo-quarters that existed only as
+    legacy census cells were re-collected, and the legacy read path was
+    removed). Files are visited OLDEST-mtime-first so fresher cells land
+    later in the dict — group_by_period's dedup lets the fresher record
+    win at equal richness (monthly re-collection vs a stale overlapping
+    quarter cell; external review P1)."""
     cells: dict[tuple[str, str], list[dict]] = {}
-    for stage in ("census", "census-v2"):          # later stage overwrites
-        for f in sorted(raw_dir(stage).glob("*.json"),
-                        key=lambda p: p.stat().st_mtime):
-            nodes = read_cell(f, list)
-            if nodes is None:
-                continue
-            parts = decode_cell_stem(f.stem)
-            if len(parts) != 2:
-                continue
-            cells[(parts[0], parts[1])] = [n for n in nodes if n]
+    for f in sorted(raw_dir("census-v2").glob("*.json"),
+                    key=lambda p: p.stat().st_mtime):
+        nodes = read_cell(f, list)
+        if nodes is None:
+            continue
+        parts = decode_cell_stem(f.stem)
+        if len(parts) != 2:
+            continue
+        cells[(parts[0], parts[1])] = [n for n in nodes if n]
     return cells
 
 
@@ -162,11 +162,10 @@ def pr_metrics(pr: dict, markers: dict) -> dict:
         "merged": c.merged if c.w8_mature else None,
         "rejected_w8": c.rejected if c.w8_mature else None,
         "limbo_w8": (not c.merged and not c.rejected) if c.w8_mature else None,
-        "human_review": c.human_reviewed_any,  # legacy (published §1/§4/§5)
-        "human_rev_other": c.human_reviewed,   # corrected reviewer != author
+        "human_review": c.human_reviewed,      # reviewer != author, bot-clean
         "ai_review": c.ai_reviewed,
         "other_bot_review": c.other_bot_reviewed,
-        "no_review": not (c.human_reviewed_any or c.ai_reviewed
+        "no_review": not (c.human_reviewed or c.ai_reviewed
                           or c.other_bot_reviewed),
         "insider": c.insider,
         # None (field absent in pre-2026-07-08 cells) -> skipped by rate calc
@@ -182,7 +181,7 @@ def pr_metrics(pr: dict, markers: dict) -> dict:
 
 
 METRICS = ["ai_code", "ai_involved", "merged", "rejected_w8", "limbo_w8",
-           "human_review", "human_rev_other", "ai_review", "other_bot_review",
+           "human_review", "ai_review", "other_bot_review",
            "no_review", "insider", "self_merged",
            "m_hum_rev", "m_ai_rev", "m_no_rev"]
 
@@ -208,7 +207,6 @@ def main() -> None:
     ap.add_argument("--repos", default=None,
                     help="optional repo-list file: restrict metrics to this "
                          "population (e.g. v2.1 rebaseline)")
-    ap.add_argument("--markers", choices=["v1", "v2"], default="v1")
     ap.add_argument("--granularity", choices=["quarter", "month"],
                     default="quarter")
     ap.add_argument("--min-prs", type=int, default=None,
@@ -219,7 +217,7 @@ def main() -> None:
                     help="extra YYYY-MM tokens beyond the frozen quarters "
                          "(incremental months from monthly_update)")
     a = ap.parse_args()
-    markers = MARKERS_V1 if a.markers == "v1" else MARKERS_V2
+    markers = MARKERS
     weights: dict[str, float] = {}
     if Path(a.contributors).is_file():
         with open(a.contributors) as fh:

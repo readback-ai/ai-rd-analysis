@@ -1,7 +1,7 @@
 """Detection semantics: commit markers (layer A), agent authors (B),
 branch prefixes (C), and review classification incl. the reviewer!=author
 correction (v2_results §11c)."""
-from pipeline.detect import (MARKERS_V1, MARKERS_V2, classify_pr,
+from pipeline.detect import (MARKERS, classify_pr,
                              pr_agent_author, pr_ai_tools, pr_branch_tool)
 
 
@@ -33,25 +33,23 @@ def test_detects_cursor_trailer():
     assert pr_ai_tools(pr) == {"cursor"}
 
 
-def test_v1_ignores_aider_and_codex_but_v2_detects():
+def test_detects_aider_and_codex():
     pr = _pr(messages=["x\n\nCo-authored-by: aider <aider@aider.chat>"],
              emails=["codex@openai.com"])
-    assert pr_ai_tools(pr, MARKERS_V1) == set()
-    assert pr_ai_tools(pr, MARKERS_V2) == {"aider", "codex"}
+    assert pr_ai_tools(pr, MARKERS) == {"aider", "codex"}
 
 
-def test_v2_detects_codex_cloud_via_committer():
+def test_detects_codex_cloud_via_committer():
     """Review finding: Codex cloud only appears as the COMMITTER; the old
     query/classifier never saw it."""
     pr = _pr(messages=["normal"])
     pr["commits"]["nodes"][0]["commit"]["committer"] = {
         "email": "", "user": {"login": "chatgpt-codex-connector"}}
-    assert pr_ai_tools(pr, MARKERS_V2) == {"codex"}
-    assert pr_ai_tools(pr, MARKERS_V1) == set()
+    assert pr_ai_tools(pr, MARKERS) == {"codex"}
 
 
 def test_marker_specs_have_search_terms_and_needles():
-    for spec in MARKERS_V2.values():
+    for spec in MARKERS.values():
         assert spec.search_terms and spec.needles
 
 
@@ -102,8 +100,7 @@ def _rev(login, typename="User", state="APPROVED", comments=0):
 
 def test_self_review_does_not_count_as_human_review():
     pr = _pr_reviews(reviews=[_rev("alice", state="COMMENTED", comments=3)])
-    c = classify_pr(pr)
-    assert c.human_reviewed_any and not c.human_reviewed
+    assert not classify_pr(pr).human_reviewed
 
 
 def test_other_human_review_counts_and_substantive():

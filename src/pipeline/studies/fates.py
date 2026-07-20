@@ -14,7 +14,7 @@ from collections import defaultdict
 from datetime import datetime
 
 from pipeline.analyze import group_by_period, load_cells
-from pipeline.detect import CUTOFF, MARKERS_V2, classify_pr
+from pipeline.detect import CUTOFF, MARKERS, classify_pr
 from pipeline.scan_orgs import QUARTER_RANGES
 from pipeline.studies.slices import population_repos
 
@@ -41,7 +41,7 @@ def fates_at(weeks: int) -> None:
                 continue
             if (_iso(CUTOFF) - _iso(created)).days < horizon:
                 continue                     # immature at this horizon: skip
-            c = classify_pr(p, MARKERS_V2)
+            c = classify_pr(p, MARKERS)
 
             def within(ev):
                 return bool(ev) and ev <= CUTOFF and \

@@ -11,7 +11,7 @@ modules, so rerunning after interruption is safe and cheap.
   E. convergence      recompute census-based evidence; re-run org_set; if
                       the population changed, LOOP back to A (bounded) so new
                       members are collected before reporting
-  F. report           analyze + integrate + slices written to
+  F. report           analyze + layers + slices written to
                       artifacts/report_generated.md, plus a census manifest
 
 Run:  PYTHONPATH=src python scripts/regenerate.py
@@ -114,7 +114,7 @@ def stage_d(repos_file: Path) -> None:
 def stage_e() -> bool:
     print("=== E: evidence convergence check ===", flush=True)
     from pipeline.analyze import group_by_period, load_cells
-    from pipeline.detect import (MARKERS_V2, pr_agent_author, pr_ai_tools,
+    from pipeline.detect import (MARKERS, pr_agent_author, pr_ai_tools,
                                  pr_branch_tool)
     from pipeline.scan_orgs import QUARTER_RANGES
     ev: dict[str, list[int]] = {}
@@ -123,7 +123,7 @@ def stage_e() -> bool:
         e, t = ev.setdefault(org, [0, 0])
         for p in prs:
             t += 1
-            if pr_ai_tools(p, MARKERS_V2) or pr_agent_author(p) or pr_branch_tool(p):
+            if pr_ai_tools(p, MARKERS) or pr_agent_author(p) or pr_branch_tool(p):
                 e += 1
         ev[org] = [e, t]
     json.dump(ev, (DRV / "census_org_evidence.json").open("w"))

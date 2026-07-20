@@ -16,7 +16,7 @@ from collections import defaultdict
 from datetime import datetime
 
 from pipeline.analyze import group_by_period, load_cells
-from pipeline.detect import CUTOFF, MARKERS_V2, classify_pr, split_reviews
+from pipeline.detect import CUTOFF, MARKERS, classify_pr, split_reviews
 from pipeline.scan_orgs import QUARTER_RANGES
 from pipeline.studies.slices import population_repos
 
@@ -42,7 +42,7 @@ def main() -> None:
             a = p.get("author") or {}
             if a.get("__typename") == "Bot":
                 continue
-            c = classify_pr(p, MARKERS_V2)
+            c = classify_pr(p, MARKERS)
             if not (c.merged and c.human_reviewed and p.get("createdAt")
                     and p.get("mergedAt")):
                 continue

@@ -24,7 +24,7 @@ import statistics
 from collections import defaultdict
 
 from pipeline.analyze import group_by_period, load_cells
-from pipeline.detect import MARKERS_V2, classify_pr, is_bot_login
+from pipeline.detect import MARKERS, classify_pr, is_bot_login
 from pipeline.scan_orgs import QUARTER_RANGES
 from pipeline.studies.slices import population_repos
 
@@ -44,7 +44,7 @@ def per_author() -> dict:
             if a.get("__typename") == "Bot" or not a.get("login") \
                     or is_bot_login(a["login"]):
                 continue
-            c = classify_pr(p, MARKERS_V2)
+            c = classify_pr(p, MARKERS)
             row = out[(repo, per)][a["login"]]
             row[0] += 1
             if c.ai_involved:
@@ -152,7 +152,7 @@ def channels() -> None:
         for p in prs:
             if (p.get("author") or {}).get("__typename") == "Bot":
                 continue
-            c = classify_pr(p, MARKERS_V2)
+            c = classify_pr(p, MARKERS)
             if not c.merged:
                 continue
             loc = min((p.get("additions") or 0) + (p.get("deletions") or 0),
@@ -215,7 +215,7 @@ def ai_split() -> None:
             if p.get("authorAssociation") in ("MEMBER", "OWNER",
                                               "COLLABORATOR"):
                 ins_of[(repo, per)].add(a["login"])
-            c = classify_pr(p, MARKERS_V2)
+            c = classify_pr(p, MARKERS)
             row = acc[(repo, per)][a["login"]]
             if c.ai_involved:
                 row[2] += 1
@@ -322,7 +322,7 @@ def adoption_rows() -> dict:
             if p.get("authorAssociation") in ("MEMBER", "OWNER",
                                               "COLLABORATOR"):
                 insiders.add(login)
-            c = classify_pr(p, MARKERS_V2)
+            c = classify_pr(p, MARKERS)
             row = acc[login][mon]
             row[3] += 1
             if c.ai_involved:

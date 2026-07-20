@@ -99,6 +99,6 @@ if __name__ == "__main__":
     INCREMENTAL_REGISTRY.write_text("\n".join(sorted(reg)) + "\n")
     print(f"incremental-month registry: {sorted(reg)}")
     print(f"\n=== monthly trend (newest month {new} is PROVISIONAL) ===")
-    run("pipeline.analyze", "--granularity", "month", "--markers", "v2",
+    run("pipeline.analyze", "--granularity", "month",
         "--contributors", str(DRV / "repo_contributors_window.csv"),
         "--repos", str(repos), "--bootstrap", "1000")

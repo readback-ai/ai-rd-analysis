@@ -20,15 +20,27 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
 - **Window**: PRs are selected by CREATION date inside the quarter
   (`census.pull_cell` query `created:<range>`); quarters are Q1-2024,
   Q4-2025, Q1-2026, Q2-2026.
-- **Cutoff filtering** (`detect.CUTOFF = 2026-06-30T23:59:59Z`): reviews
-  submitted after the cutoff are ignored; a PR merged after the cutoff counts
-  as NOT merged. Residual: per-commit timestamps are not collected, so a
-  marker-bearing commit pushed post-cutoff to a still-open in-window PR is
-  not filterable (exposure ≈ the 1–9 day collection lag, layer A only).
-- **Dedup** (`analyze.group_by_period`): PRs are deduplicated by number
-  within (repo, quarter) across overlapping cell generations; when duplicates
-  differ, the record carrying `headRefName` (the census-v2 query) wins
-  regardless of iteration order.
+- **As-of bound and the w8 rule** (`detect.CUTOFF = 2026-06-30T23:59:59Z`):
+  CUTOFF is the data AS-OF stamp, not the outcome horizon. Per-PR outcomes
+  are measured at **8 weeks from PR creation** (`PRClass.merged/rejected`,
+  frozen convention §1d): a merge counts iff it happened within 56 days of
+  creation AND on or before the as-of; fate metrics are None (skipped) on
+  w8-immature PRs. Reviews submitted after the as-of are ignored. PRs
+  created after ~2026-05-05 have open w8 windows at the current as-of, so
+  Q2-2026 fate cells are PROVISIONAL until the scheduled **Sept 1, 2026
+  re-pull** (re-collect Q2 cells, bump CUTOFF), after which every Q2 window
+  is complete — the pipeline is built for this update (monthly_update /
+  regenerate re-collection; nothing else changes). Residual: per-commit
+  timestamps are not collected, so a marker-bearing commit pushed after the
+  as-of to a still-open in-window PR is not filterable (layer A only;
+  exposure grows with re-collection lag).
+- **Dedup & freshness** (`analyze.group_by_period`): PRs are deduplicated
+  by number within (repo, period) across overlapping cells (full-quarter +
+  sub-window, or quarter + re-collected month); the richer record (carrying
+  `headRefName`) wins, and at equal richness the fresher cell (later file
+  mtime) wins. Single cell store since 2026-07-20 (`raw/census-v2/`); the
+  legacy `census` store was retired after its 187 remaining repo-quarters
+  were re-collected.
 - **Bot-authored PRs are included** in denominators and classified via layer
   B. (Studies that need human-authored subsets filter explicitly and say so.)
 
@@ -44,8 +56,7 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
 | `rejected` | closed unmerged within 8 weeks | limbo = w8-mature, neither |
 | `self_merged` | merged and `mergedBy.login == author.login` | None (excluded from rates) when the cell lacks `mergedBy` |
 | `insider` | `authorAssociation ∈ {MEMBER, OWNER, COLLABORATOR}` | misses staff with private org membership |
-| `human_reviewed` | ≥1 formal review by a User **other than the PR author**, submitted ≤ cutoff | the corrected definition; conversation comments never count |
-| `human_reviewed_any` | as above but including the author's self-review-comments | legacy definition, reported for comparability only |
+| `human_reviewed` | ≥1 formal review by a User **other than the PR author** (bot-logins excluded), submitted ≤ as-of | conversation comments never count; the legacy any-User variant was removed 2026-07-20 |
 | `substantive_review` | a reviewer≠author review with inline comments or state COMMENTED/CHANGES_REQUESTED | "more than a rubber-stamp APPROVED"; only first 15 reviews fetched |
 | `ai_reviewed` | ≥1 review by a Bot in `AI_REVIEWERS` (gemini-code-assist, copilot-pull-request-reviewer, coderabbitai, greptile-apps, qodo-merge-pro, cursor, chatgpt-codex-connector, copilot-swe-agent, claude) | decomposed from CI bots |
 | `other_bot_reviewed` | ≥1 Bot review not in `AI_REVIEWERS` | CI/automation noise kept separate |
@@ -96,8 +107,9 @@ both framings are reported.
   layered decomposition table is pooled and labeled as such).
 - **Uncertainty**: bootstrap 95% CIs over repos, 2,000 resamples, seeded RNG
   (`analyze._RNG`, seed 20260630) — identical reruns give identical CIs.
-- **Marker set**: v2 (Claude, Cursor, aider, Codex) everywhere in the
-  generated report (`--markers v2` is passed explicitly).
+- **Marker set**: one canonical set (`detect.MARKERS`: Claude, Cursor,
+  aider, Codex) — the v1/v2 versioning was removed 2026-07-20; historical
+  scan/enum cache files keep their "v2" filename tag.
 
 ## 5. The generated report (`artifacts/report_generated.md`)
 
@@ -115,16 +127,19 @@ argument — one section = one module invocation):
 1. **Contributor-weighted metrics** (`pipeline.analyze`) — per period ×
    {equal-weight, contrib-weight}; columns = `ai_code` (layer A),
    **`ai_involved`**, w8 fates (`merged`, `rejected_w8`, `limbo_w8`),
-   review columns, `insider`, `self_merged`, merged-conditioned `m_*`;
-   each as `mean [95% CI]`.
+   `human_review` (reviewer≠author, bot-clean), `ai_review`,
+   `other_bot_review`, `no_review`, `insider`, `self_merged`,
+   merged-conditioned `m_*`; each as `mean [95% CI]`.
 2. **Figure 2: Traceable AI usage** (`paper_tables --table usage`) — AI%
    of submitted/merged PRs and AI-PR share of submitted/merged LOC (CW,
    CIs). Rendered as `artifacts/fig2_ai_usage.png`.
 3. **Figure 3: Merged LOC per core contributor** (`paper_tables --table
    core`) — CW merged (w8) kLOC per insider author + baseline multiple
    (×2.66 by Q2-2026). Rendered as `fig3_core_loc.png`.
-4. **Layered decomposition** (`pipeline.integrate`) — pooled disjoint
-   shares: B-agent > A-marker > C-branch-only, plus union.
+4. **Layered decomposition** (`pipeline.studies.layers`) — pooled
+   disjoint shares: B-agent > A-marker > C-branch-only, plus union
+   (exact per-PR; replaced `pipeline.integrate`'s sampled blending,
+   removed 2026-07-20).
 5. **Slices: involvement** (`slices --table involvement`) — six slices
    (adoption groups + org types) × {ai_involved, hum_rev, ai_rev, merged}.
 6. **Slices: self-merge** (`--table selfmerge`).
@@ -167,14 +182,30 @@ prefixes of the population files, repo count, and cell-coverage numbers
 
 ## 6. Auxiliary analyses (not in the generated report)
 
-- `pipeline.integrate --thresholds` — org adoption thresholds using the
-  historical branch-share approximation; superseded in accuracy by per-PR
-  layer C and retained for comparison only.
 - `pipeline.studies.accountability`, `review_modes`, `corpus` — the
   behavioral studies behind the working log (sampled, seeded); re-derive on
   the final population before citing.
 - `data/derived/branch_sample_classifications.tsv` — minimized (identity-free)
   per-PR classifications of the branch-prefix samples.
+
+## 6b. Complete census vs. sampled studies
+
+The PR census is a COMPLETE ENUMERATION, not a sample: every population
+repo-quarter is collected in full (adaptive sub-windows + pagination sized
+from the precount; high-volume repos like pytorch get up to one sub-window
+per day), gated by count-vs-precount reconciliation with a
+max(2%, 3 PRs) drift allowance, one self-heal re-pull, and FAIL-HARD on
+saturation — a repo-quarter is either fully collected or explicitly
+failed/waived, never silently truncated. All report tables run on this
+complete census.
+
+Sampling exists only in three clearly-labeled auxiliary studies, each with
+its own inference machinery: `review_action` (PPS: 1,200 LOC-proportional
+draws/quarter, Horvitz–Thompson weighted back to population estimands),
+the LOC-hygiene sensitivity (~3.7k PRs with file lists), and the layer-C
+precision samples (org-stratified branch-PR pages). Per-PR field
+truncation (first 12 commits / 15 reviews in census cells) is a separate,
+documented downward bias — see §7.
 
 ## 7. Metric-level limitations (beyond METHODS §6)
 

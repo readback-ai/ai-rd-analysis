@@ -34,7 +34,7 @@ from collections import defaultdict
 from statistics import mean, median
 
 from pipeline.analyze import group_by_period, load_cells
-from pipeline.detect import MARKERS_V2, classify_pr, is_bot_login
+from pipeline.detect import MARKERS, classify_pr, is_bot_login
 from pipeline.scan_orgs import QUARTER_RANGES
 from pipeline.studies.slices import population_repos
 
@@ -62,7 +62,7 @@ def author_months():
             if a.get("__typename") == "Bot" or not a.get("login") \
                     or is_bot_login(a["login"]):
                 continue
-            c = classify_pr(p, MARKERS_V2)
+            c = classify_pr(p, MARKERS)
             row = out[a["login"]][per]
             kloc = min((p.get("additions") or 0)
                        + (p.get("deletions") or 0), CAP) / 1000

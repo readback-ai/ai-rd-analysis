@@ -25,7 +25,7 @@ import argparse
 import re
 
 from pipeline.analyze import group_by_period, load_cells
-from pipeline.detect import MARKERS_V1, ToolSpec
+from pipeline.detect import MARKERS, ToolSpec
 from pipeline.scan_orgs import QUARTER_RANGES
 
 FIXWORDS = ("fix", "clean", "tweak", "address", "correct", "adjust",
@@ -48,7 +48,7 @@ MECH = re.compile(
     r"|regenerate|bump|dedupe)", re.I)
 
 
-def commit_ai(c: dict, markers: dict[str, ToolSpec] = MARKERS_V1) -> bool:
+def commit_ai(c: dict, markers: dict[str, ToolSpec] = MARKERS) -> bool:
     commit = c.get("commit") or {}
     hay = commit.get("message") or ""
     for a in (commit.get("authors") or {}).get("nodes") or []:

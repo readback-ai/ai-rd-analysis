@@ -3,7 +3,7 @@
 Checkpointed, idempotent stages organized around three verifiable questions:
 how data is collected (stages 0-3c), how AI contribution/review is detected
 (`detect.py` — the single home), and how metrics are created (`analyze.py`,
-`integrate.py`, `studies/`). All raw pulls go to a durable store
+`studies/`). All raw pulls go to a durable store
 outside the worktree (`$AIRD_DATA_DIR`, default `~/devel/ai-rd-analysis-data`)
 so session/scratchpad loss never costs collected data. Re-running any stage
 skips cells that already validate; failed cells are retried on the next run.
@@ -19,7 +19,7 @@ uv run python -m pipeline.census   --repos data/derived/population_repos.txt
 uv run python -m pipeline.branch_scan               # layer-C org counts (evidence)
 uv run python -m pipeline.analyze  --repos data/derived/population_repos.txt \
     --contributors data/derived/repo_contributors_v2.csv --bootstrap 2000
-uv run python -m pipeline.integrate                 # exact layer decomposition
+uv run python -m pipeline.studies.layers            # exact layer decomposition
 ```
 
 | stage | what | raw cells |
@@ -33,7 +33,7 @@ uv run python -m pipeline.integrate                 # exact layer decomposition
 | `branch_scan` | branch-prefix PR counts per org x quarter (detection layer C) | TSV append |
 | `pull_prs` | targeted PR hydration + org-stratified branch-PR samples | JSON cells |
 | `analyze` | per-repo rates -> equal- & contributor-weighted means + bootstrap 95% CIs; bot review decomposed into `ai_review` vs `other_bot_review` | (reads cells) |
-| `integrate` | exact per-PR layer decomposition (B > A > C, union = ai_involved) on the population manifest | (reads cells) |
+| `studies.layers` | exact per-PR layer decomposition (B > A > C, union = ai_involved) on the population manifest | (reads cells) |
 | `studies/*` | slices (6 populations, self-merge, balanced panel), layer-C precision, behavioral studies | (reads cells + API) |
 
 Encoded lessons (why this code looks the way it does — evidence in

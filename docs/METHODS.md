@@ -206,7 +206,7 @@ its indeterminate mass; the Q1-2024 caption gains one known FP-class PR
 
 **Layer overlap** is measured, not assumed, on org-stratified samples
 (`pull_prs.sample_branch_prs`): A∩C ≈ 2% for codex/; B∩C is high for
-copilot/ (the bot authors those PRs). `integrate.py` combines layers
+copilot/ (the bot authors those PRs). `studies/layers.py` combines layers
 disjointly: total AI involvement = A + B + (C minus measured overlaps).
 
 **Review classification** (`detect.split_reviews` — the single choke point
@@ -260,7 +260,7 @@ residue (v2_results §11d–e).
 
 For every population repo × 4 quarters (Q1-2024, Q4-2025, Q1-2026, Q2-2026
 — full quarters): denominators via batched aliased-GraphQL counts; PR nodes
-via the search API into the versioned census-v2 store (the cell-store name
+via the search API into the census store `raw/census-v2/` (the historical name
 encodes the query version). Repo-quarters are collected COMPLETELY: the
 sub-window count adapts to PR volume (integer-boundary date splits — float
 rounding once produced inverted windows), each window paginates by cursor up
@@ -287,7 +287,7 @@ data — this corrupted 267 cells once); failed calls are never recorded as
 zero; cell keys include every content-determining parameter; the store lives
 outside the worktree in `$AIRD_DATA_DIR`.
 
-## 4. Metrics and weighting (`analyze.py`, `integrate.py`)
+## 4. Metrics and weighting (`analyze.py`, `studies/layers.py`)
 
 Per-repo-period rates over PRs (repos need ≥10 PRs/period to qualify), then
 **contributor-weighted** means across repos: weight = the repo's core human
