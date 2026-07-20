@@ -5,7 +5,7 @@ from datetime import date, timedelta
 
 import pytest
 
-from pipeline import census, ghx
+from pipeline import census, precount, ghx
 from pipeline.census import PAGE_SIZE, census_repo_period, pull_cell, subwindows
 from pipeline.scan_orgs import QUARTER_RANGES
 
@@ -93,7 +93,7 @@ def test_pull_cell_failure_writes_nothing(monkeypatch):
 
 
 def test_census_small_repo_single_cell(monkeypatch):
-    monkeypatch.setattr(census, "rest_count", lambda *a, **k: 30)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: 30)
     pulled = []
     monkeypatch.setattr(census, "pull_cell",
                         lambda repo, rng: (pulled.append(rng) or [{}] * 30, False))
@@ -102,7 +102,7 @@ def test_census_small_repo_single_cell(monkeypatch):
 
 
 def test_census_big_repo_subwindowed(monkeypatch):
-    monkeypatch.setattr(census, "rest_count", lambda *a, **k: 500)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: 500)
     pulled = []
     monkeypatch.setattr(census, "pull_cell",
                         lambda repo, rng: (pulled.append(rng) or [{}] * 42, False))
@@ -120,7 +120,7 @@ def test_census_cached_full_cell_skips_denominator_call(monkeypatch):
     ghx.cell_path("precount", "o/r", "Q1-2026").write_text(json.dumps({"total": 3}))
     def boom(*a, **k):
         raise AssertionError("rest_count must not be called on cached cells")
-    monkeypatch.setattr(census, "rest_count", boom)
+    monkeypatch.setattr(precount, "rest_count", boom)
     assert census_repo_period("o/r", "Q1-2026", k=10) == 3
 
 
@@ -130,7 +130,7 @@ def test_census_poisoned_empty_cache_self_heals(monkeypatch):
     rng = QUARTER_RANGES["Q1-2026"]
     ghx.cell_path(census.STAGE, "o/r", rng).write_text(json.dumps([]))
     ghx.cell_path("precount", "o/r", "Q1-2026").write_text(json.dumps({"total": 30}))
-    monkeypatch.setattr(census, "rest_count", lambda *a, **k: 30)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: 30)
     monkeypatch.setattr(census, "pull_cell",
                         lambda repo, r: ([{"number": i} for i in range(30)], False))
     assert census_repo_period("o/r", "Q1-2026", k=10) == 30
@@ -153,7 +153,7 @@ def test_census_heal_backs_off_before_repull(monkeypatch):
 def test_census_fails_hard_on_saturation(monkeypatch, capsys):
     """External review finding 4: saturation must FAIL, not warn-succeed.
     Even adaptive windows can saturate on sub-day PR bursts."""
-    monkeypatch.setattr(census, "rest_count", lambda *a, **k: 6000)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: 6000)
     monkeypatch.setattr(census, "pull_cell",
                         lambda repo, rng: ([{}] * PAGE_SIZE, False))
     # windows are capped at one per day (90), so 6000 PRs cannot fit
@@ -163,7 +163,7 @@ def test_census_fails_hard_on_saturation(monkeypatch, capsys):
 
 
 def test_census_adaptive_windows_scale_with_volume(monkeypatch):
-    monkeypatch.setattr(census, "rest_count", lambda *a, **k: 3000)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: 3000)
     pulled = []
     monkeypatch.setattr(census, "pull_cell",
                         lambda repo, rng: (pulled.append(rng) or [{}] * 40, False))
@@ -172,7 +172,7 @@ def test_census_adaptive_windows_scale_with_volume(monkeypatch):
 
 
 def test_census_denominator_failure_propagates(monkeypatch):
-    monkeypatch.setattr(census, "rest_count", lambda *a, **k: None)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: None)
     assert census_repo_period("o/r", "Q1-2026", 10) is None
 
 
@@ -184,7 +184,7 @@ def test_census_uses_precount_cache_over_rest(monkeypatch):
     precount_path("o/r", "Q1-2026").write_text(_json.dumps({"total": 30}))
     def boom(*a, **k):
         raise AssertionError("REST denominator must not be called when precounted")
-    monkeypatch.setattr(census, "rest_count", boom)
+    monkeypatch.setattr(precount, "rest_count", boom)
     monkeypatch.setattr(census, "pull_cell", lambda repo, rng: ([{}] * 30, False))
     assert census_repo_period("o/r", "Q1-2026", k=10) == 30
 
@@ -192,7 +192,7 @@ def test_census_uses_precount_cache_over_rest(monkeypatch):
 def test_deficit_triggers_self_heal_repull(monkeypatch, capsys):
     """Silently-incomplete cached cells (brownout empties) must be
     invalidated and re-pulled once before failing."""
-    monkeypatch.setattr(census, "rest_count", lambda *a, **k: 100)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: 100)
     calls = {"n": 0}
     def pull(repo, rng):
         calls["n"] += 1
@@ -207,7 +207,7 @@ def test_deficit_triggers_self_heal_repull(monkeypatch, capsys):
 def test_small_absolute_deficit_tolerated_as_precount_drift(monkeypatch):
     """PRs deleted after the precount snapshot leave permanent 1-3 PR gaps;
     those must not fail a 54-PR quarter forever."""
-    monkeypatch.setattr(census, "rest_count", lambda *a, **k: 54)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: 54)
     monkeypatch.setattr(census, "pull_cell",
                         lambda repo, rng: ([{}] * 26, False) if "01-01" in rng
                         else ([{}] * 26, False))
@@ -235,7 +235,7 @@ def test_census_rest_fallback_backfills_precount_cache(monkeypatch):
     result must be cache-written as the precount so later invocations
     (resume runs, the cached-cell fast path) stop re-querying."""
     from pipeline.precount import get_precount
-    monkeypatch.setattr(census, "rest_count", lambda *a, **k: 30)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: 30)
     monkeypatch.setattr(census, "pull_cell",
                         lambda repo, r: ([{"number": i} for i in range(30)], False))
     monkeypatch.setattr(census.time, "sleep", lambda s: None)

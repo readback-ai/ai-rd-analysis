@@ -20,7 +20,7 @@ import json
 import time
 from pathlib import Path
 
-from pipeline.ghx import cell_path, graphql_nodes, read_cell
+from pipeline.ghx import cell_path, graphql_nodes, read_cell, rest_count
 from pipeline.scan_orgs import QUARTER_RANGES, resolve_period
 
 BATCH = 20
@@ -34,6 +34,27 @@ def get_precount(repo: str, period: str) -> int | None:
     """Census-side lookup: cached denominator or None."""
     val = read_cell(precount_path(repo, period), dict)
     return val.get("total") if val else None
+
+
+def write_precount(repo: str, period: str, total: int) -> None:
+    precount_path(repo, period).write_text(json.dumps({"total": total}))
+
+
+def ensure_precount(repo: str, period: str) -> int | None:
+    """Cached denominator, querying REST search and cache-writing on miss —
+    the ONE home for precount read/query/write (census delegates here).
+    None only when the query itself fails (never recorded, per durability
+    rules)."""
+    total = get_precount(repo, period)
+    if total is not None:
+        return total
+    rng = resolve_period(period)
+    total = rest_count(f"repo:{repo} is:pr created:{rng}",
+                       endpoint="search/issues")
+    time.sleep(2)
+    if total is not None:
+        write_precount(repo, period, total)
+    return total
 
 
 def batch_counts(pairs: list[tuple[str, str]]) -> int:
@@ -54,8 +75,7 @@ def batch_counts(pairs: list[tuple[str, str]]) -> int:
     for i, (repo, per) in enumerate(todo):
         node = data.get(f"a{i}")
         if isinstance(node, dict) and isinstance(node.get("issueCount"), int):
-            precount_path(repo, per).write_text(
-                json.dumps({"total": node["issueCount"]}))
+            write_precount(repo, per, node["issueCount"])
             written += 1
     return written
 

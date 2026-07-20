@@ -28,8 +28,8 @@ import time
 from datetime import date, timedelta
 from pathlib import Path
 
-from pipeline.ghx import cell_path, graphql_nodes, read_cell, rest_count
-from pipeline.precount import get_precount, precount_path
+from pipeline.ghx import cell_path, graphql_nodes, read_cell
+from pipeline.precount import ensure_precount
 from pipeline.scan_orgs import QUARTER_RANGES, resolve_period
 
 PAGE_SIZE = 50   # PRs per GraphQL call; _paginate cursors to the API's
@@ -123,23 +123,16 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
     FAILS — an incomplete census must be visible, not a warning
     (external review finding 4)."""
     rng = resolve_period(period)
-    total = get_precount(repo, period)          # batch-precounted (GraphQL)
+    total = ensure_precount(repo, period)   # cached, or queried+cache-written
+    if total is None:
+        return None
     # fully-cached fast path — only when the cache satisfies the same
     # drift allowance as fresh pulls; a brownout-poisoned empty cached as
     # valid must fall through to the self-heal path (external review P1)
     cached = read_cell(cell_path(STAGE, repo, rng), list)
-    if cached is not None and total is not None \
+    if cached is not None \
             and (len(cached) >= total * 0.98 or total - len(cached) <= 3):
         return len(cached)
-    if total is None:                            # precount never collected or
-        total = rest_count(f"repo:{repo} is:pr created:{rng}",  # its call
-                           endpoint="search/issues")            # failed
-        time.sleep(2)
-        if total is not None:                    # backfill the cache so
-            precount_path(repo, period).write_text(  # resume runs and the
-                json.dumps({"total": total}))        # fast path stop
-    if total is None:                                # re-querying
-        return None
     k = max(k, -(-total * 11 // (10 * (PAGE_SIZE - 5))))   # ceil w/ headroom
     ranges = [rng] if total <= PAGE_SIZE else subwindows(rng, k)
     for attempt in (0, 1):
