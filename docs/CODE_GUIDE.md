@@ -86,6 +86,13 @@ mix of quarter-shaped, month-shaped (monthly updates), and sub-window
 cells; a repo-quarter = one full-range cell or its exact sub-window
 partition.
 
+**Cells are immutable snapshots.** A cell freezes its PRs' event state
+at collection time and is never edited — late events (a June PR merged in
+July) enter only when a monthly update wipes and fully re-queries the
+trailing two months, writing NEW cells whose PRs supersede the stale
+quarter cells' via the freshness rule below. Old cells stay on disk for
+the months not being revised; overlap is safe because dedup is per-PR.
+
 **Cells are storage units, not analysis units.** Periodization happens
 PER PR, not per cell (`analyze.group_by_period`): quarterly tables
 assign a cell's PRs to the quarter containing the cell's range; monthly

@@ -318,6 +318,23 @@ Fields per PR: commits (messages, author emails, committer), formal reviews
 (author, type, state, inline-comment counts), author association, size,
 timestamps, headRefName and mergedBy.
 
+**Cell lifecycle: immutable snapshots, superseded — never edited.** A cell
+freezes the event state (merges, closes, reviews) of its PRs at its
+collection moment; nothing ever updates a cell in place. Late events reach
+the dataset only through RE-COLLECTION: the monthly runbook (§1c) wipes
+the trailing two months and re-queries them in full, producing NEW
+month-shaped cells whose PRs supersede the same PRs in the original
+quarter-shaped cells via the load-order freshness rule
+(`analyze.load_cells` visits files oldest-mtime-first;
+`analyze.group_by_period` lets the later-loaded record win at equal
+richness). The old quarter cells stay on disk — they still serve the PRs
+of un-revised months — so the store accumulates overlapping generations
+by design, and per-PR dedup is what makes that safe. Combined with the
+w8 event window and the AS_OF maturity stamp, this gives the update
+calendar its meaning: a month's fates become final exactly when a
+re-collection runs after its last 8-week window closed (May at the
+~Aug 1 update, June at ~Sept 1), and nothing already mature can move.
+
 Per-PR field caps: the census fetches each PR's first 12 commits and 15 reviews
 (no per-PR pagination — one search call per ~45 PRs is what makes a
 2,000-repo census feasible). Consequence: a marker appearing only after a
