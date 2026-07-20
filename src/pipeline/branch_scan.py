@@ -4,11 +4,12 @@ For every (org, quarter, prefix) in the population, counts PRs whose head
 branch matches an agent naming convention (detect.BRANCH_PREFIXES) via one
 REST search per cell: `org:X is:pr head:<prefix> created:<range>`.
 
-Why counts-first: layer C lives only in headRefName, which pre-2026-07-08
-census cells never fetched, and search is capped at 1000 nodes per query —
-so population-level rates come from counts (this stage) divided by precount
+Why counts-first: search is capped at 1000 nodes per query, so
+population-level rates come from counts (this stage) divided by precount
 denominators, while PR-level metrics come from the org-stratified sample
-(pull_prs.sample_branch_prs). Q1-2024 is scanned too: agent branch prefixes
+(pull_prs.sample_branch_prs). (Historical origin: the census once lacked
+headRefName; today per-PR layer C runs on the census directly and this
+stage remains as admission evidence.) Q1-2024 is scanned too: agent branch prefixes
 did not exist then, so a zero there is the built-in false-positive check
 (measured: exactly 0 across all 210 orgs — v2_results §12).
 

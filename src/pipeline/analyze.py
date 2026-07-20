@@ -167,7 +167,7 @@ def pr_metrics(pr: dict, markers: dict) -> dict:
         "no_review": not (c.human_reviewed or c.ai_reviewed
                           or c.other_bot_reviewed),
         "insider": c.insider,
-        # None (field absent in pre-2026-07-08 cells) -> skipped by rate calc
+        # None (mergedBy absent on the record) -> skipped by rate calc
         "self_merged": c.self_merged,
         # merged-conditioned rates (None on unmerged PRs -> conditioning by
         # skip): unmerged PRs are implicitly reviewed-and-rejected, so

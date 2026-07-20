@@ -1,7 +1,7 @@
 """Study: who is accountable for merged AI code? (v2_results §11–§11c)
 
-Two designs, both hydrating mergedBy + comment authors via pull_prs.batch_pull
-(census cells before 2026-07-08 lack those fields):
+Two designs, both hydrating COMMENT AUTHORS via pull_prs.batch_pull (the
+census carries formal reviews but not conversation-comment authors):
 
 1. self-merge lane (§11b): per period, sample merged human-authored PRs
    UNCONDITIONED on review status; split by mergedBy==author; report AI-code
