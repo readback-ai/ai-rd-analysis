@@ -67,7 +67,7 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
 | `other_bot_reviewed` | ≥1 Bot review not in `AI_REVIEWERS` | CI/automation noise kept separate |
 
 Disjoint layer decomposition (for the layered table only): B wins over A wins
-over C, so each PR counts once (`integrate.layered_table`).
+over C, so each PR counts once (`studies.layers.layered_table`).
 
 ### 2b. Merged-conditioned review metrics
 Unmerged PRs are implicitly reviewed-and-rejected (merge triage), so reviewer

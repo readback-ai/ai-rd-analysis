@@ -46,6 +46,6 @@ Encoded lessons (why this code looks the way it does — evidence in
   fixed short retries just burn attempts against an hourly window.
 - **Uniform date sub-windows** for big repo-periods (most-recent-N has
   window-tail bias); per-month/window caps stop mega-repos dominating.
-- Marker sets are versioned: `v1` (Claude + Cursor; all published Phase-0
-  numbers) and `v2` (adds aider, Codex committer/email) — run both to
-  quantify the detection delta before switching headlines (review gap P1.5).
+- One canonical marker set (`detect.MARKERS`); scan/enum cache keys carry
+  a content fingerprint so marker changes invalidate stale caches
+  automatically.
