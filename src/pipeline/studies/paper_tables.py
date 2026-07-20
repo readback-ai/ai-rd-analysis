@@ -74,7 +74,9 @@ def usage_rows() -> list[dict]:
             if ai:
                 row[1] += 1
                 row[5] += loc
-            if c.merged:
+            # merged columns are outcome-conditioned: mature PRs only
+            # (frozen rule 1d.1; external review P1)
+            if c.merged and c.w8_mature:
                 row[2] += 1
                 row[6] += loc
                 if ai:

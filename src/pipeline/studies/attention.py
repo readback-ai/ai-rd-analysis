@@ -16,7 +16,7 @@ from collections import defaultdict
 from datetime import datetime
 
 from pipeline.analyze import group_by_period, load_cells
-from pipeline.detect import CUTOFF, MARKERS, classify_pr, split_reviews
+from pipeline.detect import MARKERS, classify_pr, split_reviews
 from pipeline.scan_orgs import QUARTER_RANGES
 from pipeline.studies.slices import population_repos
 
@@ -31,6 +31,14 @@ def _hours(a, b):
             - datetime.fromisoformat(a.replace("Z", "+00:00"))).total_seconds() / 3600
 
 
+def human_comment_count(pr: dict) -> int:
+    """Inline comments on reviewer!=author human reviews; split_reviews is
+    bot-clean AND w8-windowed — no extra time filter belongs here."""
+    human_other, _, _ = split_reviews(pr)
+    return sum((r.get("comments") or {}).get("totalCount", 0)
+               for r in human_other)
+
+
 def main() -> None:
     keep = population_repos()
     agg = defaultdict(lambda: defaultdict(float))
@@ -43,16 +51,13 @@ def main() -> None:
             if a.get("__typename") == "Bot":
                 continue
             c = classify_pr(p, MARKERS)
-            if not (c.merged and c.human_reviewed and p.get("createdAt")
-                    and p.get("mergedAt")):
-                continue
+            if not (c.w8_mature and c.merged and c.human_reviewed
+                    and p.get("createdAt") and p.get("mergedAt")):
+                continue          # outcome-conditioned: mature PRs only
             loc = min((p.get("additions") or 0) + (p.get("deletions") or 0), CAP)
             if not loc:
                 continue
-            human_other, _, _ = split_reviews(p)     # bot-clean by construction
-            comments = sum((r.get("comments") or {}).get("totalCount", 0)
-                           for r in human_other
-                           if (r.get("submittedAt") or "") <= CUTOFF)
+            comments = human_comment_count(p)
             win = _hours(p["createdAt"], p["mergedAt"])
             for coh in ("all", "ins" if c.insider else "ext"):
                 d = agg[(per, coh)]

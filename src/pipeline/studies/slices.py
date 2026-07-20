@@ -102,10 +102,14 @@ def repo_rates() -> dict[tuple[str, str], dict[str, float | None]]:
             continue
         cls = [classify_pr(p, MARKERS) for p in prs]
         n = len(cls)
-        merged = [c for c in cls if c.merged]
+        # outcome metrics (merge/review/self-merge) are defined only on
+        # w8-MATURE PRs — immature state is provisional (frozen rule
+        # 1d.1; external review P1: studies must gate like analyze does)
+        mat = [c for c in cls if c.w8_mature]
+        merged = [c for c in mat if c.merged]
         sm = [c for c in merged if c.self_merged]        # needs mergedBy
         sm_known = [c for c in merged if c.self_merged is not None]
-        ai = [c for c in cls if c.ai_involved]
+        ai = [c for c in cls if c.ai_involved]           # intrinsic: all PRs
         sm_ai = [c for c in sm if c.ai_involved]
         sm_non = [c for c in sm if not c.ai_involved]
 
@@ -130,9 +134,9 @@ def repo_rates() -> dict[tuple[str, str], dict[str, float | None]]:
             "m_both": rev2x2.get("m_both"),
             "m_neither": rev2x2.get("m_neither"),
             "ai_involved": len(ai) / n,
-            "hum_rev": sum(c.human_reviewed for c in cls) / n,
-            "ai_rev": sum(c.ai_reviewed for c in cls) / n,
-            "merged": len(merged) / n,
+            "hum_rev": rate(sum(c.human_reviewed for c in mat), len(mat)),
+            "ai_rev": rate(sum(c.ai_reviewed for c in mat), len(mat)),
+            "merged": rate(len(merged), len(mat)),
             "self_merged": rate(len(sm), len(sm_known)),
             "ai_of_selfm": rate(sum(c.ai_involved for c in sm), len(sm)),
             "ai_of_otherm": rate(sum(c.ai_involved for c in sm_known if not c.self_merged),

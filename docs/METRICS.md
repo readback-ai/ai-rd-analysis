@@ -32,9 +32,10 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
   only fill in immature ones. PRs
   created after ~2026-05-05 have open w8 windows at the current as-of, so
   Q2-2026 fate cells are PROVISIONAL until the scheduled **Sept 1, 2026
-  re-pull** (re-collect Q2 cells, bump CUTOFF), after which every Q2 window
-  is complete — the pipeline is built for this update (monthly_update /
-  regenerate re-collection; nothing else changes). Residual: per-commit
+  re-pull** (re-collect trailing months, bump `detect.AS_OF` — the
+  data-collection stamp; CUTOFF itself never changes), after which every
+  Q2 window is complete — the pipeline is built for this update
+  (monthly_update re-collection; nothing else changes). Residual: per-commit
   timestamps are not collected, so a marker-bearing commit pushed after the
   as-of to a still-open in-window PR is not filterable (layer A only;
   exposure grows with re-collection lag).

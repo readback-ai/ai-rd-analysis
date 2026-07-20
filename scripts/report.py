@@ -82,7 +82,11 @@ def sections(granularity: str, repos: Path) -> list[tuple[str, list[str]]]:
 def generate(granularity: str, out: Path,
              repos: Path | None = None) -> None:
     repos = repos or DRV / "population_repos.txt"
-    with out.open("w") as fh:
+    # build in a sibling tmp file and rename only after ALL sections
+    # succeed — a mid-run failure must never leave a truncated/empty
+    # report behind (external review P2)
+    tmp = out.with_suffix(".tmp")
+    with tmp.open("w") as fh:
         fh.write(f"# GENERATED {granularity}ly report — scripts/report.py\n\n")
         fh.write(CAPTION)
         for title, args in sections(granularity, repos):
@@ -91,9 +95,11 @@ def generate(granularity: str, out: Path,
             r = subprocess.run([sys.executable, "-m", *args],
                                capture_output=True, text=True)
             if r.returncode != 0:
+                tmp.unlink(missing_ok=True)
                 raise SystemExit(f"{args[0]} failed:\n{r.stderr[-800:]}")
             fh.write(f"## {title}\n```\n{r.stdout}\n```\n\n")
             print(f"section done: {title}", flush=True)
+    tmp.replace(out)
     print(f"wrote {out}", flush=True)
 
 

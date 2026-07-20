@@ -14,7 +14,8 @@ from collections import defaultdict
 from datetime import datetime
 
 from pipeline.analyze import group_by_period, load_cells
-from pipeline.detect import CUTOFF, MARKERS, classify_pr
+from pipeline import detect
+from pipeline.detect import MARKERS, classify_pr
 from pipeline.scan_orgs import QUARTER_RANGES
 from pipeline.studies.slices import population_repos
 
@@ -25,8 +26,26 @@ def _iso(ts):
     return datetime.fromisoformat(ts.replace("Z", "+00:00"))
 
 
-def fates_at(weeks: int) -> None:
+def classify_at(p: dict, weeks: int) -> str | None:
+    """Fate at a matched horizon: None if immature (horizon still open at
+    the data AS_OF — not the frame-end CUTOFF, so bumping AS_OF after a
+    re-pull finalizes trailing rows); events count within the horizon
+    regardless of the frame end (external review P1)."""
     horizon = weeks * 7
+    created = p.get("createdAt")
+    if not created or (_iso(detect.AS_OF) - _iso(created)).days < horizon:
+        return None
+
+    def within(ev):
+        return bool(ev) and (_iso(ev) - _iso(created)).days < horizon
+    if within(p.get("mergedAt")):
+        return "merged"
+    if not p.get("mergedAt") and within(p.get("closedAt")):
+        return "rejected"
+    return "limbo"
+
+
+def fates_at(weeks: int) -> None:
     keep = population_repos()
     agg = defaultdict(lambda: defaultdict(int))
     for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
@@ -36,20 +55,10 @@ def fates_at(weeks: int) -> None:
             a = p.get("author") or {}
             if a.get("__typename") == "Bot":
                 continue
-            created = p.get("createdAt")
-            if not created:
-                continue
-            if (_iso(CUTOFF) - _iso(created)).days < horizon:
+            fate = classify_at(p, weeks)
+            if fate is None:
                 continue                     # immature at this horizon: skip
             c = classify_pr(p, MARKERS)
-
-            def within(ev):
-                return bool(ev) and ev <= CUTOFF and \
-                    (_iso(ev) - _iso(created)).days < horizon
-            merged = within(p.get("mergedAt"))
-            rejected = (not merged) and (not c.merged_ever) \
-                and within(p.get("closedAt"))
-            fate = "merged" if merged else ("rejected" if rejected else "limbo")
             for coh in ("all", "ins" if c.insider else "ext",
                         "AI" if c.ai_involved else "nonAI"):
                 agg[(per, coh)][fate] += 1

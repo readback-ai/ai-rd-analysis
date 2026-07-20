@@ -82,7 +82,10 @@ class ToolSpec:
     needles: substrings matched against a PR's commit messages + author AND
       committer emails/logins by pr_ai_tools."""
     search_terms: tuple[str, ...]
-    needles: tuple[str, ...]
+    needles: tuple[str, ...]              # matched in message + identity text
+    identity_needles: tuple[str, ...] = ()  # matched ONLY in author/committer
+                                            # fields (a message MENTIONING an
+                                            # identity is not evidence)
 
 
 # The canonical marker set (one set; the v1/v2 versioning was collapsed
@@ -114,15 +117,33 @@ MARKERS |= {
 # same audit, e.g. snyk-bot/renovate/xnnpack, are deliberately absent).
 MARKERS |= {
     "openhands": ToolSpec(
-        search_terms=("openhands@all-hands.dev",),
-        needles=("openhands@all-hands.dev", "openhands-agent")),
+        search_terms=("openhands@all-hands.dev",
+                      "committer:openhands-agent"),
+        needles=(),
+        identity_needles=("openhands@all-hands.dev", "openhands-agent")),
     "agent": ToolSpec(
-        search_terms=('"hermes-agent@"',),
-        needles=("hermes-agent@", "agent@hermes", "agent@modal.com",
-                 "agent@deepagents.dev", "pragma-agent@modular.com",
-                 "agent@qwenpaw.local", "agent@example.com",
-                 "bot@imbue.com")),
+        search_terms=('"hermes-agent@"', '"agent@hermes"',
+                      '"agent@modal.com"', '"agent@deepagents.dev"',
+                      '"pragma-agent@modular.com"', '"agent@qwenpaw.local"',
+                      '"agent@example.com"', '"bot@imbue.com"'),
+        needles=(),
+        identity_needles=("hermes-agent@", "agent@hermes", "agent@modal.com",
+                          "agent@deepagents.dev", "pragma-agent@modular.com",
+                          "agent@qwenpaw.local", "agent@example.com",
+                          "bot@imbue.com")),
 }
+
+
+def marker_fingerprint(markers: dict[str, ToolSpec] = None) -> str:
+    """Content-derived cache tag for scan/enum stages: any change to the
+    marker set (tools, terms, needles) changes the tag, so stale caches
+    can never silently omit new-marker evidence (external review P1)."""
+    import hashlib
+    m = markers if markers is not None else MARKERS
+    blob = "|".join(f"{t}:{','.join(sp.search_terms)}:{','.join(sp.needles)}"
+                    f":{','.join(sp.identity_needles)}"
+                    for t, sp in sorted(m.items()))
+    return "m" + hashlib.sha256(blob.encode()).hexdigest()[:10]
 
 
 def pr_ai_tools(pr: dict, markers: dict[str, ToolSpec] = MARKERS,
@@ -133,14 +154,18 @@ def pr_ai_tools(pr: dict, markers: dict[str, ToolSpec] = MARKERS,
     found: set[str] = set()
     for c in (pr.get("commits") or {}).get("nodes") or []:
         commit = c.get("commit") or {}
-        hay = commit.get("message") or ""
+        ident = ""
         for a in (commit.get("authors") or {}).get("nodes") or []:
-            hay += "\n" + ((a or {}).get("email") or "")
+            ident += "\n" + ((a or {}).get("email") or "")
         committer = commit.get("committer") or {}
-        hay += "\n" + (committer.get("email") or "")
-        hay += "\n" + (((committer.get("user") or {}).get("login")) or "")
+        ident += "\n" + (committer.get("email") or "")
+        ident += "\n" + (((committer.get("user") or {}).get("login")) or "")
+        # trailer/footer needles live in message text (co-author trailers
+        # ARE message text); identity needles match only identity fields
+        hay = (commit.get("message") or "") + ident
         for tool, spec in markers.items():
-            if any(n in hay for n in spec.needles):
+            if any(n in hay for n in spec.needles) \
+                    or any(n in ident for n in spec.identity_needles):
                 found.add(tool)
     if include_bot_authors:
         agent = pr_agent_author(pr)

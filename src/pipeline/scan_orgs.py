@@ -21,7 +21,7 @@ import sys
 import time
 from pathlib import Path
 
-from pipeline.detect import MARKERS
+from pipeline.detect import MARKERS, marker_fingerprint
 from pipeline.ghx import cell_path, read_cell, rest_count
 
 def month_range(tok: str) -> str:
@@ -97,7 +97,7 @@ def main() -> None:
     w.writerow(["org", "period"] + list(markers))
     for org in orgs:
         for per in periods:
-            res = scan_org(org, per, markers, "v2")  # historical cache tag
+            res = scan_org(org, per, markers, marker_fingerprint())
             row = [org, per or "all-time"]
             row += [res[t]["count"] if res and t in res else "ERR" for t in markers]
             w.writerow(row)

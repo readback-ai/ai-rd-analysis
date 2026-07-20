@@ -26,7 +26,7 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
-from pipeline.detect import MARKERS
+from pipeline.detect import MARKERS, marker_fingerprint
 from pipeline.ghx import cell_path, read_cell, rest_count
 
 RATE_KEEP = 0.001                       # 0.1% of PRs (keep-rule OR-branch)
@@ -109,7 +109,7 @@ def main() -> None:
     w = csv.writer(sink, delimiter="\t")
     w.writerow(["repo", "ai_commits", "keep_rule"] + list(markers))
     for org in orgs:
-        res = enum_org(org, a.window, markers, "v2")  # historical cache tag
+        res = enum_org(org, a.window, markers, marker_fingerprint())
         if res is None:
             print(f"WARN {org}: enumeration failed — re-run to retry",
                   file=sys.stderr, flush=True)

@@ -50,7 +50,8 @@ def test_detects_codex_cloud_via_committer():
 
 def test_marker_specs_have_search_terms_and_needles():
     for spec in MARKERS.values():
-        assert spec.search_terms and spec.needles
+        assert spec.search_terms
+        assert spec.needles or spec.identity_needles
 
 
 def test_plain_pr_detects_nothing():
@@ -416,3 +417,45 @@ def test_w8_maturity_follows_data_as_of_not_frame_end(monkeypatch):
     monkeypatch.setattr(detect, "AS_OF", "2026-09-01T00:00:00Z")
     assert classify_pr(pr).w8_mature              # after the Sept re-pull
     assert classify_pr(pr).merged
+
+
+def test_identity_needles_do_not_match_message_text():
+    """Review P2 (RED first): identity markers must match only
+    author/committer fields — a version-bump message MENTIONING
+    openhands-agent (41 such commits in the store) is not evidence."""
+    msg_only = _pr(messages=["chore: bump openhands-agent to 0.9.2"])
+    assert pr_ai_tools(msg_only) == set()
+    msg_only2 = _pr(messages=["docs: how to configure agent@modal.com runs"])
+    assert pr_ai_tools(msg_only2) == set()
+    # identity-field hits still detect
+    ident = _pr(messages=["normal"])
+    ident["commits"]["nodes"][0]["commit"]["committer"] = {
+        "email": "openhands@all-hands.dev", "user": {"login": "openhands-agent"}}
+    assert pr_ai_tools(ident) == {"openhands"}
+    # trailer-based needles (claude co-author) still match message text
+    trailer = _pr(messages=["x\n\nCo-authored-by: Claude <noreply@anthropic.com>"])
+    assert pr_ai_tools(trailer) == {"claude"}
+
+
+def test_every_needle_family_is_searchable():
+    """Review P1 (RED first): stage 1/2 discovery runs on search_terms —
+    every identity in the homegrown 'agent' marker must be discoverable,
+    not just hermes."""
+    from pipeline.detect import MARKERS
+    spec = MARKERS["agent"]
+    for ident in ("agent@modal.com", "agent@deepagents.dev",
+                  "pragma-agent@modular.com", "bot@imbue.com"):
+        assert any(ident in t for t in spec.search_terms), ident
+
+
+def test_scan_cache_key_tracks_marker_fingerprint():
+    """Review P1 (RED first): the scan/enum cache tag must change when the
+    marker set changes, else stale caches silently omit new-marker
+    evidence (reproduced with the OpenHands addition)."""
+    from pipeline.detect import MARKERS, marker_fingerprint
+    fp = marker_fingerprint()
+    assert fp != "v2" and len(fp) >= 6
+    extended = dict(MARKERS)
+    from pipeline.detect import ToolSpec
+    extended["newtool"] = ToolSpec(search_terms=("x@y.z",), needles=("x@y.z",))
+    assert marker_fingerprint(extended) != fp

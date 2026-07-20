@@ -149,7 +149,7 @@ def eligible() -> dict[str, list]:
             c = classify_pr(p, MARKERS)
             frt = first_human_review(p)
             loc = min((p.get("additions") or 0) + (p.get("deletions") or 0), CAP)
-            if c.merged and c.human_reviewed and frt and loc:
+            if c.w8_mature and c.merged and c.human_reviewed and frt and loc:
                 pool[per].append((repo, p["number"], loc, frt, a.get("login"),
                                   bool(c.ai_involved), bool(c.insider)))
     return pool
@@ -311,7 +311,7 @@ def compute() -> None:
                 continue
             frt = first_human_review(p)
             loc = min((p.get("additions") or 0) + (p.get("deletions") or 0), CAP)
-            if c.merged and c.human_reviewed and frt and loc:
+            if c.w8_mature and c.merged and c.human_reviewed and frt and loc:
                 frame[(repo, p["number"])] = (per, loc)
                 W[per] += loc
 

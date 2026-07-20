@@ -30,6 +30,12 @@ from pipeline.studies.slices import population_repos
 
 PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
 LINE_CAP = 20_000        # per-PR cap so one vendored monster can't dominate
+# VOLUME ESTIMAND NOTE (documented provisional treatment, external review
+# P1): merged-LOC sums here count every w8 merge OBSERVED so far,
+# including merges of not-yet-mature PRs — immature PRs that will merge
+# later are missing, so trailing-quarter volume is DEFLATED (conservative
+# for all growth claims) and finalizes with the AS_OF re-pulls. This
+# differs from rate metrics, which are None-gated on maturity.
 
 
 def per_author() -> dict:

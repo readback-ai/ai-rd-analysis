@@ -34,6 +34,7 @@ from collections import defaultdict
 from statistics import mean, median
 
 from pipeline.analyze import group_by_period, load_cells
+from pipeline import detect
 from pipeline.detect import MARKERS, classify_pr, is_bot_login
 from pipeline.scan_orgs import QUARTER_RANGES
 from pipeline.studies.slices import population_repos
@@ -42,10 +43,22 @@ WINDOW = ["2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03",
           "2026-04", "2026-05", "2026-06"]
 BASELINE = ["2024-01", "2024-02", "2024-03"]
 CAP = 20_000
-# Last calendar month whose PRs all reached w8 maturity by the cutoff
-# (2026-04-30 + 56d = 2026-06-25 <= 2026-06-30). Later months are excluded
-# from the tables, not reported deflated.
-MATURE_MAX = WINDOW.index("2026-04")
+def mature_max() -> int:
+    """Index of the last WINDOW month whose PRs ALL reached w8 maturity by
+    the data AS_OF (month_end + 56d <= AS_OF) — derived, not hard-coded,
+    so bumping AS_OF after a re-pull extends the mature range
+    (external review P1). Later months are excluded, not deflated."""
+    from calendar import monthrange
+    from datetime import datetime, timedelta
+    as_of = datetime.fromisoformat(detect.AS_OF.replace("Z", "+00:00"))
+    last = -1
+    for i, tok in enumerate(WINDOW):
+        y, m = int(tok[:4]), int(tok[5:7])
+        end = datetime(y, m, monthrange(y, m)[1], 23, 59,
+                       tzinfo=as_of.tzinfo)
+        if end + timedelta(days=56) <= as_of:
+            last = i
+    return last
 
 
 def author_months():
@@ -93,7 +106,8 @@ def main() -> None:
     print("outcome A = MERGED kLOC (w8); months after 2026-04 (w8-immature) "
           "excluded. outcome B = SUBMITTED kLOC; full window.")
 
-    def table(cohort, label, field=0, max_idx=MATURE_MAX):
+    def table(cohort, label, field=0, max_idx=None):
+        max_idx = mature_max() if max_idx is None else max_idx
         print(f"\n{label}")
         print(f"{'event month':12}{'authors':>8}{'mean kLOC/mo':>13}{'median':>8}")
         for e in range(-4, 5):
@@ -108,7 +122,7 @@ def main() -> None:
                       f"{mean(vals):>13.2f}{median(vals):>8.2f}")
 
     balanced = {login: t0 for login, t0 in events.items()
-                if 2 <= t0 <= MATURE_MAX}
+                if 2 <= t0 <= mature_max()}
     mature = {login: t0 for login, t0 in events.items()
               if 2 <= t0 <= WINDOW.index("2026-02")}
 
