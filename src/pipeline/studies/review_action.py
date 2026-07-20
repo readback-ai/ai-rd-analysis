@@ -221,20 +221,33 @@ def draw(pool: dict) -> dict[str, list]:
     return out
 
 
+def _selection_of(pool: dict) -> dict:
+    """The deterministic draw, reduced to selection IDENTITY only
+    ([repo, num, loc]) — descriptive fields (first_review, ai, ins) are
+    never persisted in the manifest; they are rebound from the current
+    census at use time (round-7 review P1)."""
+    return {per: [[x[0], x[1], x[2]] for x in xs]
+            for per, xs in draw(pool).items()}
+
+
 def ensure_manifest(pool: dict) -> tuple[dict, bool]:
-    """Load the manifest if its fingerprint matches the CURRENT frame;
-    otherwise draw fresh and atomically replace it. Returns
-    (manifest, fresh)."""
+    """Load the manifest if its fingerprint matches the CURRENT frame AND
+    its payload equals the deterministic draw (a truncated/tampered
+    payload with a valid fingerprint must be repaired, never reused
+    vacuously — round-7 review P2); otherwise rewrite atomically."""
     fp = frame_fingerprint(_pool_items(pool))
+    selected = _selection_of(pool)
     if MANIFEST.exists():
         m = json.loads(MANIFEST.read_text())
-        if m.get("fingerprint") == fp:
+        if m.get("fingerprint") == fp and m.get("selected") == selected:
             return m, False
-        print(f"FRAME CHANGED: manifest {m.get('fingerprint')} -> {fp}; "
-              "redrawing selection", flush=True)
-    m = {"fingerprint": fp,
-         "selected": {per: [list(x) for x in xs]
-                      for per, xs in draw(pool).items()}}
+        if m.get("fingerprint") != fp:
+            print(f"FRAME CHANGED: manifest {m.get('fingerprint')} -> {fp}; "
+                  "redrawing selection", flush=True)
+        else:
+            print("MANIFEST PAYLOAD MISMATCH: repairing from the "
+                  "deterministic draw", flush=True)
+    m = {"fingerprint": fp, "selected": selected}
     tmp = MANIFEST.with_suffix(".tmp")
     tmp.write_text(json.dumps(m))
     tmp.replace(MANIFEST)
@@ -242,27 +255,28 @@ def ensure_manifest(pool: dict) -> tuple[dict, bool]:
 
 
 def _selected_keys(manifest: dict) -> dict:
-    """(repo, num) -> (per, item) over the manifest selection."""
-    out = {}
-    for per, xs in manifest["selected"].items():
-        for x in xs:
-            out[(x[0], x[1])] = (per, x)
-    return out
+    """(repo, num) -> per over the manifest selection."""
+    return {(x[0], x[1]): per
+            for per, xs in manifest["selected"].items() for x in xs}
 
 
-def rebuild_sample(manifest: dict, cache: dict) -> set:
+def rebuild_sample(manifest: dict, cache: dict, pool: dict) -> set:
     """Atomically rewrite SAMPLE to exactly the manifest-selected keys
-    with verified-complete records (from cache). Returns the covered
-    keys; everything else must be pulled."""
-    sel = _selected_keys(manifest)
+    with verified-complete records (commits from cache; descriptive
+    fields REBOUND from the current pool — stale ai/first_review from an
+    earlier census pass must not survive a marker or window revision).
+    Returns the covered keys; everything else must be pulled."""
+    current = {(x[0], x[1]): (per, x)
+               for per, xs in pool.items() for x in xs}
     tmp = SAMPLE.with_suffix(".tmp")
     done = set()
     with tmp.open("w") as out:
-        for key, (per, x) in sel.items():
+        for key in _selected_keys(manifest):
             d = cache.get(key)
-            if d is None or not _complete(d):
+            cur = current.get(key)
+            if d is None or cur is None or not _complete(d):
                 continue
-            repo, num, loc, frt, login, ai, ins = x
+            per, (repo, num, loc, frt, login, ai, ins) = cur
             out.write(json.dumps({**d, "per": per, "loc": loc,
                                   "first_review": frt, "author": login,
                                   "ai": ai, "ins": ins}) + "\n")
@@ -291,10 +305,12 @@ def pull() -> None:
     pool = eligible()
     manifest, fresh = ensure_manifest(pool)
     cache = _hydration_cache()
-    done = rebuild_sample(manifest, cache)   # idempotent, prunes stale
+    done = rebuild_sample(manifest, cache, pool)  # idempotent, prunes stale
+    current = {(x[0], x[1]): x for xs in pool.values() for x in xs}
     out = SAMPLE.open("a")
     for per, xs in manifest["selected"].items():
-        todo = [tuple(x) for x in xs if (x[0], x[1]) not in done]
+        todo = [current[(x[0], x[1])] for x in xs
+                if (x[0], x[1]) not in done and (x[0], x[1]) in current]
         print(f"{per}: {sum(1 for x in xs if (x[0], x[1]) in done)} "
               f"covered, {len(todo)} to pull", flush=True)
         for i in range(0, len(todo), 8):
@@ -429,7 +445,11 @@ def compute() -> None:
     # (per-PR LOC weights and quarter LOC totals for inclusion probs)
     keep = population_repos()
     anchors: dict = {}
-    frame: dict = {}                     # (repo, num) -> (per, loc)
+    # (repo, num) -> (per, loc, frt, login, ai, ins): every descriptive
+    # field derives from THIS census pass — sampled records supply only
+    # commit data, so a marker/window revision can never leave stale
+    # ai/first_review values in the analysis (round-7 review P1)
+    frame: dict = {}
     W: dict = defaultdict(float)         # per -> total eligible LOC
     for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
         if repo not in keep or per not in PERIODS:
@@ -444,11 +464,13 @@ def compute() -> None:
             frt = first_human_review(p)
             loc = min((p.get("additions") or 0) + (p.get("deletions") or 0), CAP)
             if c.w8_mature and c.merged and c.human_reviewed and frt and loc:
-                frame[(repo, p["number"])] = (per, loc)
+                frame[(repo, p["number"])] = (per, loc, frt, a.get("login"),
+                                              bool(c.ai_involved),
+                                              bool(c.insider))
                 W[per] += loc
 
     def inv_pi(key) -> float:
-        per, loc = frame[key]
+        per, loc = frame[key][:2]
         return _inv_pi(loc, W[per])
 
     # BIND to the selection manifest: the sample is only a valid PPS draw
@@ -457,8 +479,8 @@ def compute() -> None:
     if not MANIFEST.exists():
         raise SystemExit("no selection manifest — run --pull first")
     manifest = json.loads(MANIFEST.read_text())
-    fp = frame_fingerprint([(per, r, n, loc)
-                            for (r, n), (per, loc) in frame.items()])
+    fp = frame_fingerprint([(v[0], r, n, v[1])
+                            for (r, n), v in frame.items()])
     if manifest.get("fingerprint") != fp:
         raise SystemExit(
             f"sampling frame changed (manifest {manifest.get('fingerprint')}"
@@ -472,6 +494,9 @@ def compute() -> None:
     lanes = defaultdict(lambda: defaultdict(float))
     for key in selected:
         d = recs[key]
+        per, _loc, frt, login, ai, _ins = frame[key]
+        d = {**d, "per": per, "first_review": frt, "author": login,
+             "ai": ai}                    # census-derived, never stale
         ipw = inv_pi(key)
         ask, ai_rev = anchors.get(key, (None, None))
         # descriptive companion: all-cause (any-review anchor)

@@ -64,7 +64,8 @@ def _within_w8(created: str, event: str | None) -> bool:
     (the frame), not events: an event within the window counts even when
     it lands after CUTOFF — implicitly capped at CUTOFF + 56d since every
     in-frame PR has created <= CUTOFF. This is what lets the Sept 2026
-    re-pull finalize Q2 without changing any constant."""
+    re-pull finalize Q2 — only the AS_OF data stamp advances; the frame
+    and every rule stay fixed."""
     if not event:
         return False
     return (_iso(event) - _iso(created)).days < W8_DAYS

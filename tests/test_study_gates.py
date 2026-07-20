@@ -148,12 +148,12 @@ def test_pps_manifest_replaces_sample_on_frame_change(tmp_path, monkeypatch):
     pool_a = {"Q1-2026": [_item("o/a", 1)]}
     m1, fresh1 = ra.ensure_manifest(pool_a)
     assert fresh1
-    done = ra.rebuild_sample(m1, cache)
+    done = ra.rebuild_sample(m1, cache, pool_a)
     assert done == {("o/a", 1)}
     pool_b = {"Q1-2026": [_item("o/b", 2)]}      # frame changed
     m2, fresh2 = ra.ensure_manifest(pool_b)
     assert fresh2 and m2["fingerprint"] != m1["fingerprint"]
-    done = ra.rebuild_sample(m2, cache)
+    done = ra.rebuild_sample(m2, cache, pool_b)
     assert done == {("o/b", 2)}                  # A is GONE, not unioned
     kept = [_json.loads(ln) for ln in
             (tmp_path / "s_v2.jsonl").read_text().splitlines()]
@@ -198,3 +198,48 @@ def test_event_study_labels_are_dynamic(monkeypatch):
     monkeypatch.setattr(detect, "AS_OF", "2026-09-05T00:00:00Z")
     assert "2026-06" in es.mature_month_label()
     assert es.mature_cap_label().endswith(es.WINDOW[es.mature_cap()])
+
+
+
+def test_rebuild_rebinds_descriptive_fields_from_current_pool(tmp_path,
+                                                              monkeypatch):
+    """Review round 7 P1 (RED first): on a fingerprint match the selected
+    KEYS survive, but descriptive fields (first_review, ai, ins) must be
+    rebound from the CURRENT pool — a marker revision flips `ai` without
+    changing eligibility or LOC, and the old value must not survive."""
+    import json as _json
+    from pipeline.studies import review_action as ra
+    monkeypatch.setattr(ra, "SAMPLE", tmp_path / "s_v2.jsonl")
+    monkeypatch.setattr(ra, "MANIFEST", tmp_path / "manifest.json")
+    monkeypatch.setattr(ra, "OLD_SAMPLE", tmp_path / "s_v1.jsonl")
+    old_rec = _rec("o/a", 1)
+    old_rec["ai"] = False
+    old_rec["first_review"] = "2026-01-02T00:00:00Z"
+    cache = {("o/a", 1): old_rec}
+    # current pool: same key/loc (fingerprint unchanged) but ai flipped
+    # and the first-review anchor corrected
+    item = ("o/a", 1, 100, "2026-01-03T00:00:00Z", "alice", True, True)
+    pool = {"Q1-2026": [item]}
+    m, _ = ra.ensure_manifest(pool)
+    ra.rebuild_sample(m, cache, pool)
+    (d,) = [_json.loads(ln) for ln in
+            (tmp_path / "s_v2.jsonl").read_text().splitlines()]
+    assert d["ai"] is True
+    assert d["first_review"] == "2026-01-03T00:00:00Z"
+
+
+def test_manifest_payload_validated_against_deterministic_draw(tmp_path,
+                                                               monkeypatch):
+    """Review round 7 P2 (RED first): a fingerprint-matching manifest with
+    an empty/truncated selection must be repaired, not reused vacuously."""
+    import json as _json
+    from pipeline.studies import review_action as ra
+    monkeypatch.setattr(ra, "MANIFEST", tmp_path / "manifest.json")
+    pool = {"Q1-2026": [_item("o/a", 1)]}
+    m1, _ = ra.ensure_manifest(pool)
+    assert m1["selected"]["Q1-2026"]
+    # truncate the payload but keep the fingerprint
+    (tmp_path / "manifest.json").write_text(_json.dumps(
+        {"fingerprint": m1["fingerprint"], "selected": {"Q1-2026": []}}))
+    m2, fresh = ra.ensure_manifest(pool)
+    assert m2["selected"] == m1["selected"]      # repaired to the true draw
