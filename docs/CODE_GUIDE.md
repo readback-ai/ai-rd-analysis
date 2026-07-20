@@ -75,6 +75,28 @@ several contiguous sub-window cells). Per PR node:
 }
 ```
 
+**How a cell's date range is chosen** (`census.census_repo_period`):
+the period token (a quarter or a YYYY-MM month) resolves to its full
+range; if the precount says the repo has ≤45 PRs in it, one full-range
+cell is pulled. Otherwise the range is split by `census.subwindows` into
+k CONTIGUOUS, gap-free, non-overlapping sub-ranges — k adaptive from the
+precount (ceil(total·1.1/45), capped at one window per day) so a
+repo-period is never silently capped by pagination. So the store holds a
+mix of quarter-shaped, month-shaped (monthly updates), and sub-window
+cells; a repo-quarter = one full-range cell or its exact sub-window
+partition.
+
+**Cells are storage units, not analysis units.** Periodization happens
+PER PR, not per cell (`analyze.group_by_period`): quarterly tables
+assign a cell's PRs to the quarter containing the cell's range; monthly
+tables bucket each PR by its own `createdAt` month — so the monthly
+report reads the SAME cells and re-partitions them exactly (every PR's
+createdAt lies inside its cell's range by construction; a quarter-shaped
+cell contributes its April PRs to April, May PRs to May, …). No separate
+monthly collection exists, and overlapping cells (full-quarter +
+sub-window + re-collected month) cannot double-count: PRs are deduped by
+number within (repo, period), richer-then-fresher record winning.
+
 What is deliberately NOT here: per-commit timestamps (the post-as-of
 marker residual, METHODS §0), review/comment bodies (privacy), issue
 comments (only formal review objects count). The 12-commit/15-review
