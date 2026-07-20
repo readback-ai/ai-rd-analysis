@@ -63,7 +63,7 @@ import time
 from pathlib import Path
 
 from pipeline.analyze import group_by_period, load_cells
-from pipeline.detect import CUTOFF, MARKERS, classify_pr, split_reviews
+from pipeline.detect import MARKERS, classify_pr, split_reviews
 from pipeline.ghx import graphql_nodes
 from pipeline.scan_orgs import QUARTER_RANGES
 from pipeline.studies.slices import population_repos
@@ -118,9 +118,9 @@ def _all_commits(repo: str, num: int) -> tuple[list[dict], int] | None:
 
 
 def first_human_review(pr: dict) -> str | None:
+    """split_reviews already applies the w8 event window — no extra bound."""
     human_other, _, _ = split_reviews(pr)
-    times = [r.get("submittedAt") for r in human_other
-             if r.get("submittedAt") and r["submittedAt"] <= CUTOFF]
+    times = [r.get("submittedAt") for r in human_other if r.get("submittedAt")]
     return min(times) if times else None
 
 
@@ -130,7 +130,7 @@ def first_human_ask(pr: dict) -> str | None:
     not an ask)."""
     human_other, _, _ = split_reviews(pr)
     times = [r.get("submittedAt") for r in human_other
-             if r.get("submittedAt") and r["submittedAt"] <= CUTOFF
+             if r.get("submittedAt")
              and (r.get("state") == "CHANGES_REQUESTED"
                   or (r.get("comments") or {}).get("totalCount", 0) > 0)]
     return min(times) if times else None

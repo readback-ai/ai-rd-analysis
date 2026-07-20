@@ -52,7 +52,12 @@ def _iso(ts: str):
 
 
 def _within_w8(created: str, event: str | None) -> bool:
-    if not event or event > CUTOFF:
+    """Event inside the PR's 56-day window. CUTOFF bounds PR CREATION
+    (the frame), not events: an event within the window counts even when
+    it lands after CUTOFF — implicitly capped at CUTOFF + 56d since every
+    in-frame PR has created <= CUTOFF. This is what lets the Sept 2026
+    re-pull finalize Q2 without changing any constant."""
+    if not event:
         return False
     return (_iso(event) - _iso(created)).days < W8_DAYS
 
@@ -72,7 +77,8 @@ class ToolSpec:
     needles: tuple[str, ...]
 
 
-# v1 marker set: what every published Phase-0 number used (comparability).
+# The canonical marker set (one set; the v1/v2 versioning was collapsed
+# 2026-07-20).
 MARKERS = {
     "claude": ToolSpec(
         search_terms=("noreply@anthropic.com", '"Generated with [Claude Code]"'),
@@ -81,8 +87,7 @@ MARKERS = {
         search_terms=("cursoragent@cursor.com",),
         needles=("cursoragent@cursor.com",)),
 }
-# v2 adds aider + Codex (delta on headline: +0.1pp — see v2_results §1).
-# Codex cloud commits VIA the bot committer need qualifier search + the
+# Codex cloud commits VIA the bot committer, needing qualifier search + the
 # committer field in the census GraphQL query (bare terms only match message
 # text, and the bot never appears there).
 MARKERS |= {
@@ -122,7 +127,9 @@ def pr_ai_tools(pr: dict, markers: dict[str, ToolSpec] = MARKERS,
 
 # ---------------------------------------------------------------- layer B
 
-# PR authors that are coding agents (bot-authored PRs carry no trailer).
+# PR authors that are coding agents. Bot-authored PRs MAY carry no
+# trailer (many do: Claude Code web produces A markers on B-authored
+# PRs — the layered decomposition makes B win; see studies.layers).
 AGENT_PR_AUTHORS = {
     "copilot-swe-agent", "devin-ai-integration", "cursor", "google-labs-jules",
     "codegen-sh", "amazon-q-developer", "factory-droid", "claude",
@@ -176,8 +183,9 @@ def branch_provenance_confirmed(pr: dict, tool: str) -> bool:
 
 def pr_branch_tool(pr: dict, strict: bool = False) -> str | None:
     """Layer C: the agent whose branch-naming convention the PR's head branch
-    matches, if any. Requires headRefName in the PR node (census cells pulled
-    before 2026-07-08 lack it).
+    matches, if any. headRefName is present on every PR in the store
+    (verified over all 712k PRs, 2026-07-20); absence is tolerated
+    defensively and returns None.
 
     Measured false-positive class excluded: PRs whose commits are ALL
     committed by github-actions[bot] — CI automation that names branches
@@ -242,8 +250,8 @@ def split_reviews(pr: dict) -> tuple[list[dict], list[dict], list[dict]]:
         if created:
             if not _within_w8(created, sub or None):
                 continue
-        elif sub > CUTOFF:
-            continue
+        elif sub and (_iso(sub) - _iso(CUTOFF)).days >= W8_DAYS:
+            continue          # no createdAt (legacy fixture): frame end + w8
         if ra["__typename"] == "User" and not is_bot_login(ra.get("login")):
             (human_self if ra.get("login") == author else human_other).append(r)
         else:
@@ -270,7 +278,8 @@ class PRClass:
     agent_author: str | None          # layer B
     branch_tool: str | None           # layer C (None when headRefName absent)
     merged: bool                      # merged WITHIN 8 WEEKS of creation
-    merged_ever: bool                 # merged any time <= cutoff (secondary)
+    merged_ever: bool                 # merged at ANY observed time (secondary;
+                                      #   differs from merged on >56d merges)
     rejected: bool                    # closed unmerged within 8 weeks
     w8_mature: bool                   # 8-week window closed by the cutoff
     self_merged: bool | None          # None when the cell lacks mergedBy
@@ -293,7 +302,7 @@ def classify_pr(pr: dict, markers: dict[str, ToolSpec] = MARKERS) -> PRClass:
               if (r["author"].get("login") or "").removesuffix("[bot]") in AI_REVIEWERS]
     author = (pr.get("author") or {}).get("login")
     created = pr.get("createdAt") or ""
-    merged_ever = bool(pr.get("mergedAt")) and (pr.get("mergedAt") or "") <= CUTOFF
+    merged_ever = bool(pr.get("mergedAt"))
     merged = bool(created) and _within_w8(created, pr.get("mergedAt"))
     rejected = (not merged_ever and bool(created)
                 and _within_w8(created, pr.get("closedAt")))

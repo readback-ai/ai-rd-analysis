@@ -228,12 +228,14 @@ classified by its author into exactly one of three reviewer types:
    the PR author (GitHub permits self-review-comments; counting them
    inflated the self-merge lane — correction §11c of the working log,
    aggregate impact <=2.2pp). Review events follow the SAME w8 rule as
-   fates (adopted 2026-07-20): a review counts only if submitted within
-   8 weeks of PR creation AND on or before the as-of
-   (`detect.split_reviews`). Every per-PR quantity therefore FINALIZES at
-   w8, and advancing the as-of (monthly updates, the Q2 finalization
-   re-pull) can never change a mature PR's classification — fates and
-   review metrics alike. Measured impact of adopting the rule (pooled
+   fates (adopted 2026-07-20): a review counts iff submitted within
+   8 weeks of PR creation (`detect.split_reviews`). CUTOFF bounds PR
+   CREATION (the frame), not events — an event inside a PR's window
+   counts even when it lands after CUTOFF (implicitly capped at
+   CUTOFF + 56d since created <= CUTOFF), which is exactly what lets the
+   Sept 2026 re-pull finalize Q2 without changing any constant. Every
+   per-PR quantity FINALIZES at w8; re-collection can never change a
+   mature PR's classification — fates and review metrics alike. Measured impact of adopting the rule (pooled
    any-human-review rate): -0.47pp Q1-2024, -0.60pp Q4-2025, -0.40pp
    Q1-2026, -0.06pp Q2-2026 — late reviews past 8 weeks are rare, and
    the trailing quarter (whose PRs had no time for them) barely moves.

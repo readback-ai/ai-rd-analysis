@@ -26,9 +26,10 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
   frozen convention §1d): a merge counts iff it happened within 56 days of
   creation AND on or before the as-of; fate metrics are None (skipped) on
   w8-immature PRs. Review events follow the SAME w8 rule (adopted
-  2026-07-20): a review counts only if submitted within 56 days of PR
-  creation and on or before the as-of — so mature PRs are immutable under
-  as-of advances. PRs
+  2026-07-20): a review counts iff submitted within 56 days of PR
+  creation; CUTOFF bounds PR creation, not events (an in-window event
+  past the frame end counts) — so mature PRs are immutable and re-pulls
+  only fill in immature ones. PRs
   created after ~2026-05-05 have open w8 windows at the current as-of, so
   Q2-2026 fate cells are PROVISIONAL until the scheduled **Sept 1, 2026
   re-pull** (re-collect Q2 cells, bump CUTOFF), after which every Q2 window
@@ -55,7 +56,7 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
 | `agent_author` (layer B) | PR author is a Bot-typed account in `AGENT_PR_AUTHORS` (copilot-swe-agent, devin-ai-integration, cursor, google-labs-jules, codegen-sh, amazon-q-developer, factory-droid, claude) | the author IS the tool; no trailer needed |
 | `branch_tool` (layer C) | head branch matches an agent prefix: `codex/`, `copilot/`, `cursor/`, `claude/`, `droid/` (weak, added 2026-07-17) | PR-level attribution only; measured precision per prefix in METHODS §2 (codex/copilot ~95%+; cursor/claude indeterminates are the study's only potential overcount, bounded at 0.06pp on the Q2-2026 headline — report section 6); all-github-actions-committed branches excluded as measured FPs; requires census-v2 cells |
 | **`ai_involved`** | **A ∪ B ∪ C — the PRIMARY metric** | an explicit lower bound on true AI involvement |
-| `merged` | merged WITHIN 8 WEEKS of creation (frozen censoring rule; METHODS §1d) | `merged_ever` retains the ≤-cutoff-anytime variant; fate metrics are None on w8-immature PRs |
+| `merged` | merged WITHIN 8 WEEKS of creation (frozen censoring rule; METHODS §1d); events past the frame-end CUTOFF count if inside the window | `merged_ever` = merged at ANY observed time (no window, no cap) — differs from `merged` exactly on >56-day merges; fate metrics are None on w8-immature PRs |
 | `rejected` | closed unmerged within 8 weeks | limbo = w8-mature, neither |
 | `self_merged` | merged and `mergedBy.login == author.login` | None (excluded from rates) when the cell lacks `mergedBy` |
 | `insider` | `authorAssociation ∈ {MEMBER, OWNER, COLLABORATOR}` | misses staff with private org membership |

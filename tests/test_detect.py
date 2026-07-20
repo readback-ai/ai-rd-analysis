@@ -139,24 +139,23 @@ def test_ai_involved_union_of_layers():
 
 # ------------------------------------------------------------ study cutoff
 
-def test_events_after_cutoff_are_excluded():
-    """Late merges and reviews (collection ran after the cutoff) must not
-    count — METHODS section 0."""
-    pr = _pr_reviews(reviews=[
-        _rev("bob", state="APPROVED") | {"submittedAt": "2026-06-15T00:00:00Z"},
-        _rev("carol", state="APPROVED") | {"submittedAt": "2026-07-03T00:00:00Z"}])
-    pr["reviews"]["nodes"][0]["submittedAt"] = "2026-06-15T00:00:00Z"
-    pr["reviews"]["nodes"][1]["submittedAt"] = "2026-07-03T00:00:00Z"
-    c = classify_pr(pr)
-    assert c.human_reviewed                      # in-window review counts
-    late = dict(_pr_reviews(), createdAt="2026-06-20T00:00:00Z",
-                mergedAt="2026-07-02T01:00:00Z",
-                mergedBy={"login": "alice", "__typename": "User"})
-    assert not classify_pr(late).merged          # post-cutoff merge excluded
+def test_event_windowing_is_w8_from_creation():
+    """Events count within each PR's 56-day window — including past the
+    frame-end CUTOFF (updated 2026-07-20: CUTOFF bounds PR creation, not
+    events). Beyond the window they never count."""
     ok = dict(_pr_reviews(), createdAt="2026-04-10T00:00:00Z",
               mergedAt="2026-04-29T01:00:00Z",
               mergedBy={"login": "alice", "__typename": "User"})
     assert classify_pr(ok).merged and classify_pr(ok).self_merged is True
+    spill = dict(_pr_reviews(), createdAt="2026-06-20T00:00:00Z",
+                 mergedAt="2026-07-02T01:00:00Z",
+                 mergedBy={"login": "alice", "__typename": "User"})
+    assert classify_pr(spill).merged             # within w8, past frame end
+    beyond = dict(_pr_reviews(), createdAt="2026-01-10T00:00:00Z",
+                  mergedAt="2026-04-01T00:00:00Z",
+                  mergedBy={"login": "alice", "__typename": "User"})
+    assert not classify_pr(beyond).merged        # outside w8: never a w8 merge
+    assert classify_pr(beyond).merged_ever       # but observed-ever, yes
 
 
 def test_ci_committed_prefix_branch_is_not_layer_c():
@@ -340,3 +339,32 @@ def test_reviews_are_w8_windowed_like_fates():
         | {"submittedAt": "2024-04-01T00:00:00Z"}])
     late_ai["createdAt"] = "2024-01-10T00:00:00Z"
     assert not classify_pr(late_ai).ai_reviewed
+
+
+def test_w8_events_after_frame_end_count_within_window():
+    """Repro RED first (external review of w8 semantics): CUTOFF is the
+    FRAME end (last PR-creation date), not an event guillotine. A merge or
+    review inside a PR's 56-day window counts even when it lands after
+    CUTOFF (that is the whole point of the Sept 1 finalization re-pull);
+    events are implicitly bounded by CUTOFF + 56d since created <= CUTOFF.
+    Three sites: fates (_within_w8), split_reviews, review_action anchors."""
+    # 1) fates: created in-frame, merged 20 days later but past CUTOFF
+    pr = dict(_pr_reviews(), createdAt="2026-06-20T00:00:00Z",
+              mergedAt="2026-07-10T00:00:00Z",
+              mergedBy={"login": "alice", "__typename": "User"})
+    c = classify_pr(pr)
+    assert c.merged and c.merged_ever
+    # merged_ever has no as-of cap at all (secondary, "ever observed")
+    late = dict(_pr_reviews(), createdAt="2026-04-01T00:00:00Z",
+                mergedAt="2026-12-25T00:00:00Z",
+                mergedBy={"login": "alice", "__typename": "User"})
+    assert classify_pr(late).merged_ever and not classify_pr(late).merged
+    # 2) split_reviews: post-CUTOFF review inside the PR's w8 window counts
+    pr2 = _pr_reviews(reviews=[
+        _rev("bob", state="CHANGES_REQUESTED", comments=1)
+        | {"submittedAt": "2026-07-05T00:00:00Z"}])
+    pr2["createdAt"] = "2026-06-20T00:00:00Z"
+    assert classify_pr(pr2).human_reviewed
+    # 3) review_action anchors see the same review as an ask
+    from pipeline.studies.review_action import first_human_ask
+    assert first_human_ask(pr2) == "2026-07-05T00:00:00Z"
