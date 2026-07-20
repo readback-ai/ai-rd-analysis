@@ -36,11 +36,7 @@ PAGE_SIZE = 50   # PRs per GraphQL call; _paginate cursors to the API's
                  # 1,000-node cap per search window
 # Cell-store stage name. The "-v2" suffix is historical: it encodes the
 # query version, because a cell's CONTENT depends on the query that pulled
-# it — under-keyed caches once served stale results, so every
-# content-determining parameter belongs in the cache key. The pre-v2 store
-# ("census", pulled without headRefName/mergedBy) was retired 2026-07-20
-# after its remaining repo-quarters were re-collected; this is the single
-# store now (analyze.load_cells reads only census-v2).
+# it; this is the single store now (analyze.load_cells reads only census-v2).
 STAGE = "census-v2"
 
 PR_QUERY = """
@@ -127,18 +123,17 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
     FAILS — an incomplete census must be visible, not a warning
     (external review finding 4)."""
     rng = resolve_period(period)
+    total = get_precount(repo, period)          # batch-precounted (GraphQL)
     # fully-cached fast path — only when the cache satisfies the same
     # drift allowance as fresh pulls; a brownout-poisoned empty cached as
     # valid must fall through to the self-heal path (external review P1)
     cached = read_cell(cell_path(STAGE, repo, rng), list)
-    if cached is not None:
-        pre = get_precount(repo, period)
-        if pre is not None and (len(cached) >= pre * 0.98
-                                or pre - len(cached) <= 3):
-            return len(cached)
-    total = get_precount(repo, period)          # batch-precounted (GraphQL)
-    if total is None:                            # fall back to REST search
-        total = rest_count(f"repo:{repo} is:pr created:{rng}", endpoint="search/issues")
+    if cached is not None and total is not None \
+            and (len(cached) >= total * 0.98 or total - len(cached) <= 3):
+        return len(cached)
+    if total is None:                            # precount never collected or
+        total = rest_count(f"repo:{repo} is:pr created:{rng}",  # its call
+                           endpoint="search/issues")            # failed
         time.sleep(2)
     if total is None:
         return None
@@ -171,6 +166,8 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
                 p = cell_path(STAGE, repo, r)
                 if p.exists():
                     p.unlink()
+            time.sleep(60)   # brownouts are minutes-scale; an immediate
+                             # re-pull would likely hit the same one
     reason = "window pull failed" if failed else "count deficit"
     print(f"FAIL {repo} {period}: collected {n}/{total} PRs with "
           f"{len(ranges)} sub-windows after a fresh re-pull ({reason})",

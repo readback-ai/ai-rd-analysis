@@ -136,6 +136,21 @@ def test_census_poisoned_empty_cache_self_heals(monkeypatch):
     assert census_repo_period("o/r", "Q1-2026", k=10) == 30
 
 
+def test_census_heal_backs_off_before_repull(monkeypatch):
+    """Repro RED first: an immediate heal re-pull likely hits the SAME
+    search brownout; the heal branch must back off (sleep >=30s) before
+    re-pulling."""
+    rng = QUARTER_RANGES["Q1-2026"]
+    ghx.cell_path("precount", "o/r", "Q1-2026").write_text(json.dumps({"total": 30}))
+    sleeps = []
+    monkeypatch.setattr(census.time, "sleep", lambda s: sleeps.append(s))
+    calls = iter([[], [{"number": i} for i in range(30)]])   # brownout, then ok
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, r: (next(calls), False))
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 30
+    assert any(s >= 30 for s in sleeps), sleeps
+
+
 def test_census_fails_hard_on_saturation(monkeypatch, capsys):
     """External review finding 4: saturation must FAIL, not warn-succeed.
     Even adaptive windows can saturate on sub-day PR bursts."""
