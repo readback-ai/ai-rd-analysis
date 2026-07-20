@@ -1,15 +1,14 @@
 """Stage 4 — HOW METRICS ARE CREATED from census cells (bootstrap CIs).
 
-Reads raw/census/ cells, classifies each PR once via detect.classify_pr, turns
-the classifications into per-repo-period rates, then reports equal-weight and
-contributor-weighted averages per period with bootstrap 95% CIs over repos.
-Detection semantics (marker sets, reviewer taxonomies, the reviewer!=author
-correction) all live in pipeline.detect — nothing here re-defines them.
+Reads raw/census-v2/ cells, classifies each PR once via detect.classify_pr,
+turns the classifications into per-repo-period rates, then reports
+equal-weight and contributor-weighted averages per period with bootstrap 95%
+CIs over repos. Detection semantics (markers, reviewer taxonomy, the w8
+event window) all live in pipeline.detect — nothing here re-defines them.
 
-human_review keeps the LEGACY any-User-reviewer definition so published tables
-reproduce exactly; human_review is the reviewer!=author, bot-clean rate
-(v2_results §11c). self_merged is only available in cells pulled after
-2026-07-08 (mergedBy added to the census query) and reports nan before that.
+human_review is the reviewer!=author, bot-clean rate (v2_results §11c; the
+legacy any-User variant was removed 2026-07-20). self_merged is only
+available in cells carrying mergedBy and is skipped (None) elsewhere.
 
 PRs are DEDUPED by number within each (repo, period): the durable store can
 hold overlapping cell generations (full-quarter + sub-window cells, or cells
