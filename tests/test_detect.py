@@ -285,3 +285,39 @@ def test_review_action_suspect_and_ht_weights():
     big = _inv_pi(1, 1_000_000)
     small = _inv_pi(10_000, 1_000_000)
     assert big > small > 1.0
+
+
+def test_suspect_flags_metadata_short_records_regardless_of_length():
+    """External review P1 round 3 (repro FIRST): a record whose own
+    metadata declares it short/incomplete is suspect at ANY length —
+    20/50-commit examples previously returned False."""
+    from pipeline.studies.review_action import _suspect
+    assert _suspect({"commits": [{}] * 20, "commits_total": 250,
+                     "commits_complete": True})
+    assert _suspect({"commits": [{}] * 50, "commits_complete": False})
+    assert _suspect({"commits": [{}] * 90, "commits_complete": True})  # no total
+    # complete-and-corroborated stays non-suspect
+    assert not _suspect({"commits": [{}] * 20, "commits_total": 20,
+                         "commits_complete": True})
+
+
+def test_batch_connection_validation_requires_exact_totalcount():
+    """External review P1 round 3 (repro FIRST): the batch pull must
+    validate every connection — integer totalCount and
+    len(nodes) == totalCount when hasNextPage is false; anything else
+    defers (returns None) instead of checkpointing as complete."""
+    from pipeline.studies.review_action import _conn_commits
+    ok = {"nodes": [{}] * 3, "totalCount": 3,
+          "pageInfo": {"hasNextPage": False}}
+    assert _conn_commits(ok) == ([{}] * 3, 3)
+    # missing/non-integer totalCount -> defer
+    assert _conn_commits({"nodes": [{}] * 3,
+                          "pageInfo": {"hasNextPage": False}}) is None
+    # hasNextPage=False but too few nodes -> defer
+    assert _conn_commits({"nodes": [{}] * 50, "totalCount": 250,
+                          "pageInfo": {"hasNextPage": False}}) is None
+    # hasNextPage=True -> caller must paginate, never accept as-is
+    assert _conn_commits({"nodes": [{}] * 100, "totalCount": 250,
+                          "pageInfo": {"hasNextPage": True}}) is None
+    # missing pageInfo entirely (partial GraphQL response) -> defer
+    assert _conn_commits({"nodes": [{}] * 3, "totalCount": 3}) is None

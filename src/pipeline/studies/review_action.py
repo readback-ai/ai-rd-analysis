@@ -186,15 +186,15 @@ def pull() -> None:
                 prq = node.get("pullRequest") if isinstance(node, dict) else None
                 if prq:
                     conn = prq.get("commits") or {}
-                    commits = conn.get("nodes") or []
-                    total = conn.get("totalCount") or len(commits)
-                    if (conn.get("pageInfo") or {}).get("hasNextPage"):
-                        full = _all_commits(repo, num)
-                        if full is None:
-                            print(f"DEFER {repo}#{num}: pagination failed, "
-                                  "not checkpointed", flush=True)
-                            continue     # left out of `done`: retried later
-                        commits, total = full
+                    res = _conn_commits(conn)
+                    if res is None and (conn.get("pageInfo") or {}).get(
+                            "hasNextPage") is True:
+                        res = _all_commits(repo, num)
+                    if res is None:
+                        print(f"DEFER {repo}#{num}: incomplete commit "
+                              "connection, not checkpointed", flush=True)
+                        continue         # left out of `done`: retried later
+                    commits, total = res
                     out.write(json.dumps({
                         "per": per, "repo": repo, "num": num, "loc": loc,
                         "first_review": frt, "author": login, "ai": ai,
@@ -211,15 +211,34 @@ def _inv_pi(loc: float, W: float, k: int = PER_QUARTER) -> float:
     return 1.0 / (1.0 - (1.0 - loc / W) ** k)
 
 
+def _conn_commits(conn: dict) -> tuple[list[dict], int] | None:
+    """Validate a commits connection from the BATCH pull. Complete only
+    when pageInfo is present with hasNextPage false, totalCount is an
+    integer, and len(nodes) == totalCount — partial GraphQL responses
+    (missing pageInfo/totalCount, short node lists) defer instead of
+    checkpointing (external review P1, round 3)."""
+    total = conn.get("totalCount")
+    pi = conn.get("pageInfo")
+    if not isinstance(total, int) or not isinstance(pi, dict) \
+            or pi.get("hasNextPage") is not False:
+        return None
+    nodes = conn.get("nodes") or []
+    return (nodes, total) if len(nodes) == total else None
+
+
 def _suspect(d: dict) -> bool:
-    """Record possibly truncated: legacy (no completeness metadata) at a
-    page-boundary length, or metadata says incomplete/short."""
-    if d.get("commits_complete") and \
-            len(d["commits"]) >= (d.get("commits_total") or 0):
-        return False
+    """Record possibly truncated. Metadata-bearing records: suspect
+    whenever commits_complete is not True, commits_total is missing, or
+    len(commits) < commits_total — REGARDLESS of length (external review
+    P1, round 3). Legacy records (no metadata): the old first:60 cap and
+    exact page-boundary lengths."""
+    if "commits_complete" in d or "commits_total" in d:
+        total = d.get("commits_total")
+        return (d.get("commits_complete") is not True
+                or not isinstance(total, int)
+                or len(d["commits"]) < total)
     n = len(d["commits"])
-    return n >= 60 and (n == 60 or n % 100 == 0
-                        or n < (d.get("commits_total") or 0))
+    return n >= 60 and (n == 60 or n % 100 == 0)
 
 
 def repair() -> None:

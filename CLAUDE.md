@@ -11,6 +11,15 @@ HF top orgs + GitHub topics, quality-gated). Detection methodology = `src/pipeli
 unused by code and disagreed with detect.py). Canonical docs: `README.md`,
 `docs/METHODS.md`, results in `artifacts/results.md`.
 
+## Bug fixes: reproduce with a failing test FIRST
+
+When fixing any defect (including review findings): write a unit test that
+REPRODUCES the issue and confirm it FAILS against the unfixed code, then
+apply the fix and show the test passing. Never land a fix whose test was
+only written (or only run) after the code change — the red run is the
+evidence the test actually captures the bug. Name the review/finding in
+the test docstring so the regression stays traceable.
+
 ## Parallel work via git worktrees
 
 Multiple Claude Code sessions can work features in parallel. Each session runs in
