@@ -246,11 +246,12 @@ def test_manifest_payload_validated_against_deterministic_draw(tmp_path,
 
 
 def test_compute_side_selection_validation(tmp_path, monkeypatch):
-    """Review round 8 P1 (RED first): compute() must independently compare
-    the manifest payload with the deterministic draw — a
-    fingerprint-matching manifest with selected {"Q1-2026": []} and an
-    empty sample previously produced an EMPTY responsiveness table
-    through the real compute() path."""
+    """Review round 8 P1 (RED first): the guard compute() calls
+    (require_selection_matches) must reject a fingerprint-matching
+    manifest whose selection was truncated — that case previously
+    produced an EMPTY responsiveness table through compute(). (This test
+    exercises the guard directly; compute() wires it after the
+    fingerprint check.)"""
     import pytest
     from pipeline.studies import review_action as ra
     pool = {"Q1-2026": [_item("o/a", 1)]}
@@ -261,3 +262,19 @@ def test_compute_side_selection_validation(tmp_path, monkeypatch):
                  "selected": {"Q1-2026": []}}
     with pytest.raises(SystemExit, match="rerun --pull"):
         ra.require_selection_matches(truncated, pool)
+
+
+def test_draw_is_canonical_under_encounter_order(monkeypatch):
+    """Review round 9 P1 (RED first): pull builds the pool in PERIODS
+    dict order, compute in census encounter order — identical FRAMES must
+    yield identical draws regardless of period or item order, and empty
+    periods must normalize away (the fingerprint already sorts; the draw
+    must too)."""
+    from pipeline.studies import review_action as ra
+    a, b, c = _item("o/a", 1), _item("o/b", 2, loc=300), _item("o/c", 3)
+    fwd = {"Q1-2024": [a, b, c], "Q2-2026": [b, a], "Q4-2025": []}
+    rev = {"Q2-2026": [a, b], "Q1-2024": [c, b, a]}   # no empty key at all
+    d1, d2 = ra.draw(fwd), ra.draw(rev)
+    assert d1 == d2
+    assert "Q4-2025" not in d1                        # empty normalized
+    assert ra._selection_of(fwd) == ra._selection_of(rev)

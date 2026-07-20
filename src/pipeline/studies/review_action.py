@@ -209,15 +209,24 @@ def _pool_items(pool: dict) -> list:
 
 
 def draw(pool: dict) -> dict[str, list]:
-    """Deterministic PPS draw (seeded, LOC-proportional, distinct)."""
-    rng = random.Random(SEED)
+    """Deterministic PPS draw (seeded, LOC-proportional, distinct),
+    CANONICAL under encounter order (round-9 review P1): periods iterate
+    sorted, items sort by (repo, num, loc) before weights are assigned,
+    each period gets its own derived RNG stream, and empty periods are
+    normalized away — pull (PERIODS dict order) and compute (census
+    encounter order) reconstruct identical selections from identical
+    frames."""
     out = {}
-    for per, items in pool.items():
+    for per in sorted(pool):
+        items = sorted(pool[per], key=lambda x: (x[0], x[1], x[2]))
+        if not items:
+            continue
+        rng = random.Random(f"{SEED}:{per}")
         weights = [x[2] for x in items]
         chosen = {items[i] for i in
                   rng.choices(range(len(items)), weights=weights,
-                              k=PER_QUARTER)} if items else set()
-        out[per] = sorted(chosen)
+                              k=PER_QUARTER)}
+        out[per] = sorted(chosen, key=lambda x: (x[0], x[1], x[2]))
     return out
 
 
