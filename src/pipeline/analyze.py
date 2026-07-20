@@ -169,8 +169,9 @@ def pr_metrics(pr: dict, markers: dict) -> dict:
                            or c.other_bot_reviewed))
                      if c.w8_mature else None,
         "insider": c.insider,
-        # None (mergedBy absent on the record) -> skipped by rate calc
-        "self_merged": c.self_merged,
+        # None when mergedBy is absent on the record OR the PR is still
+        # w8-immature (an open PR can still merge) -> skipped by rate calc
+        "self_merged": c.self_merged if c.w8_mature else None,
         # merged-conditioned rates (None on unmerged PRs -> conditioning by
         # skip): unmerged PRs are implicitly reviewed-and-rejected, so
         # reviewer coverage OF WHAT SHIPS is its own question (METRICS §2b)

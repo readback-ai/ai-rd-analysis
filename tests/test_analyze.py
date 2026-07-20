@@ -289,3 +289,20 @@ def test_review_metrics_none_until_w8_mature():
     mature = dict(immature, createdAt="2026-04-01T00:00:00Z")
     m = pr_metrics(mature, MARKERS)
     assert m["human_review"] is False and m["no_review"] is True
+
+
+def test_self_merged_none_until_w8_mature():
+    """Repro RED first: an immature PR can still get merged (and thus gain
+    a mergedBy) later, so self_merged is a provisional quantity — None
+    until w8 maturity, same gate as fates and review columns."""
+    from pipeline.analyze import pr_metrics
+    from pipeline.detect import MARKERS
+    immature = {"number": 1, "createdAt": "2026-06-20T00:00:00Z",
+                "mergedAt": "2026-06-25T00:00:00Z",
+                "mergedBy": {"login": "alice", "__typename": "User"},
+                "author": {"login": "alice", "__typename": "User"},
+                "commits": {"nodes": []}, "reviews": {"nodes": []}}
+    assert pr_metrics(immature, MARKERS)["self_merged"] is None
+    mature = dict(immature, createdAt="2026-04-01T00:00:00Z",
+                  mergedAt="2026-04-05T00:00:00Z")
+    assert pr_metrics(mature, MARKERS)["self_merged"] is True
