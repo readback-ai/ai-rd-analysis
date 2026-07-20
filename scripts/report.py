@@ -29,6 +29,10 @@ CAPTION = (
 
 
 def sections(granularity: str, repos: Path) -> list[tuple[str, list[str]]]:
+    """Sections whose module takes --granularity follow the requested unit;
+    the rest are inherently QUARTERLY and, in the monthly report, carry an
+    explicit "[quarterly]" tag instead of silently switching units
+    (external review P2)."""
     g = ["--granularity", granularity]
     return [
         ("Contributor-weighted metrics",
@@ -82,6 +86,8 @@ def generate(granularity: str, out: Path,
         fh.write(f"# GENERATED {granularity}ly report — scripts/report.py\n\n")
         fh.write(CAPTION)
         for title, args in sections(granularity, repos):
+            if granularity == "month" and "--granularity" not in args:
+                title += " [quarterly]"
             r = subprocess.run([sys.executable, "-m", *args],
                                capture_output=True, text=True)
             if r.returncode != 0:

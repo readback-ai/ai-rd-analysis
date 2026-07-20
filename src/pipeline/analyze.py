@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import re
 import random
 from collections import defaultdict
 from pathlib import Path
@@ -59,15 +60,20 @@ CENSUSED_QUARTERS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
 
 
 def censused_months(quarters: dict[str, str]) -> set[str]:
-    """Months lying inside FULLY censused quarters. Stray cells from
-    partially-pulled windows (Q3-2025) must not surface as reportable
-    months — ~60-repo coverage is not the population."""
+    """Months lying inside FULLY censused quarters, plus any explicit
+    YYYY-MM keys (incremental months from monthly_update, passed via
+    analyze --periods). Stray cells from partially-pulled windows
+    (Q3-2025) must not surface as reportable months — ~60-repo coverage
+    is not the population."""
     out = set()
     for q in CENSUSED_QUARTERS:
+        if q not in quarters:
+            continue
         start = quarters[q].split("..")[0]
         y, m = int(start[:4]), int(start[5:7])
         for i in range(3):
             out.add(f"{y}-{m + i:02d}")
+    out.update(k for k in quarters if re.fullmatch(r"\d{4}-\d{2}", k))
     return out
 
 
@@ -178,6 +184,9 @@ def main() -> None:
                     help="repo floor per period; default 5/quarter, 2/month "
                          "(comparable thresholds — METRICS §3)")
     ap.add_argument("--bootstrap", type=int, default=2000)
+    ap.add_argument("--periods", nargs="*", default=[],
+                    help="extra YYYY-MM tokens beyond the frozen quarters "
+                         "(incremental months from monthly_update)")
     a = ap.parse_args()
     markers = MARKERS_V1 if a.markers == "v1" else MARKERS_V2
     weights: dict[str, float] = {}
@@ -193,7 +202,11 @@ def main() -> None:
 
     if a.min_prs is None:
         a.min_prs = 5 if a.granularity == "quarter" else 2
-    grouped = group_by_period(load_cells(), QUARTER_RANGES, a.granularity)
+    from pipeline.scan_orgs import resolve_period
+    quarters = dict(QUARTER_RANGES)
+    for tok in a.periods:
+        quarters[tok] = resolve_period(tok)   # frozen quarters keep priority
+    grouped = group_by_period(load_cells(), quarters, a.granularity)
     if not grouped:
         raise SystemExit("no census cells found in $AIRD_DATA_DIR — the "
                          "external store is required (docs/METHODS.md §5); "
@@ -203,8 +216,8 @@ def main() -> None:
                 if ln.strip() and not ln.startswith("#")}
         grouped = {k: v for k, v in grouped.items() if k[0] in keep}
 
-    periods = CENSUSED_QUARTERS if a.granularity == "quarter" else \
-        sorted({p for (_, p) in grouped})
+    periods = (CENSUSED_QUARTERS + sorted(a.periods)) \
+        if a.granularity == "quarter" else sorted({p for (_, p) in grouped})
     print(f"{'period':9}{'weighting':16}{'repos':>6}" +
           "".join(f"{m:>18}" for m in METRICS))
     for per in periods:

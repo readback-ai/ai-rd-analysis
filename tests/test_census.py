@@ -112,14 +112,28 @@ def test_census_big_repo_subwindowed(monkeypatch):
 
 
 def test_census_cached_full_cell_skips_denominator_call(monkeypatch):
-    """Review finding: resume runs paid a search call + sleeps per cached
-    repo-period. A valid full-range cell must short-circuit entirely."""
+    """Resume runs must not pay a search call per cached repo-period — but
+    ONLY when the cached PRECOUNT corroborates the cell (external review
+    P1: an unchecked fast path let brownout-poisoned empties through)."""
     rng = QUARTER_RANGES["Q1-2026"]
     ghx.cell_path(census.STAGE, "o/r", rng).write_text(json.dumps([{"number": 1}] * 3))
+    ghx.cell_path("precount", "o/r", "Q1-2026").write_text(json.dumps({"total": 3}))
     def boom(*a, **k):
         raise AssertionError("rest_count must not be called on cached cells")
     monkeypatch.setattr(census, "rest_count", boom)
     assert census_repo_period("o/r", "Q1-2026", k=10) == 3
+
+
+def test_census_poisoned_empty_cache_self_heals(monkeypatch):
+    """External review P1: a cached-but-empty full-range cell contradicting
+    the precount must fall through to the heal/re-pull path, not return 0."""
+    rng = QUARTER_RANGES["Q1-2026"]
+    ghx.cell_path(census.STAGE, "o/r", rng).write_text(json.dumps([]))
+    ghx.cell_path("precount", "o/r", "Q1-2026").write_text(json.dumps({"total": 30}))
+    monkeypatch.setattr(census, "rest_count", lambda *a, **k: 30)
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, r: ([{"number": i} for i in range(30)], False))
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 30
 
 
 def test_census_fails_hard_on_saturation(monkeypatch, capsys):

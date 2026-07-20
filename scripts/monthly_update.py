@@ -17,6 +17,7 @@ Usage:
 """
 import subprocess
 import sys
+from pathlib import Path
 
 sys.path.insert(0, "src")
 from pipeline.ghx import raw_dir  # noqa: E402
@@ -56,6 +57,20 @@ def run(mod: str, *args: str) -> None:
         raise SystemExit(f"{mod} failed")
 
 
+def collectable(repos: Path) -> Path:
+    """Population minus documented-inaccessible repos — same waiver as
+    regenerate stage C; retrying all 71 dead repos would trip the
+    fail-hard census (external review P1)."""
+    skip_p = DRV / "inaccessible_repos.txt"
+    skip = set(skip_p.read_text().split()) if skip_p.exists() else set()
+    todo = [r for r in repos.read_text().split() if r not in skip]
+    out = DRV / "population_repos_collectable.txt"
+    out.write_text("\n".join(todo) + "\n")
+    print(f"collecting {len(todo)} repos ({len(skip)} documented "
+          f"inaccessible, waived)", flush=True)
+    return out
+
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         raise SystemExit(__doc__)
@@ -63,10 +78,12 @@ if __name__ == "__main__":
     month_range(new)                       # validates the token
     prev = previous_month(new)
     repos = DRV / "population_repos.txt"
+    coll = collectable(repos)
     print(f"revising provisional month {prev}: wiped {wipe_month(prev)} cells")
-    run("pipeline.precount", "--repos", str(repos), "--periods", prev, new)
-    run("pipeline.census", "--repos", str(repos), "--periods", prev, new)
+    run("pipeline.precount", "--repos", str(coll), "--periods", prev, new)
+    run("pipeline.census", "--repos", str(coll), "--periods", prev, new)
     print(f"\n=== monthly trend (newest month {new} is PROVISIONAL) ===")
     run("pipeline.analyze", "--granularity", "month", "--markers", "v2",
         "--contributors", str(DRV / "repo_contributors_window.csv"),
-        "--repos", str(repos), "--bootstrap", "1000")
+        "--repos", str(repos), "--bootstrap", "1000",
+        "--periods", prev, new)

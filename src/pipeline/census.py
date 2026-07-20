@@ -126,10 +126,15 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
     FAILS — an incomplete census must be visible, not a warning
     (external review finding 4)."""
     rng = resolve_period(period)
-    # fully-cached fast path: a valid full-range cell needs no denominator call
+    # fully-cached fast path — only when the cache satisfies the same
+    # drift allowance as fresh pulls; a brownout-poisoned empty cached as
+    # valid must fall through to the self-heal path (external review P1)
     cached = read_cell(cell_path(STAGE, repo, rng), list)
     if cached is not None:
-        return len(cached)
+        pre = get_precount(repo, period)
+        if pre is not None and (len(cached) >= pre * 0.98
+                                or pre - len(cached) <= 3):
+            return len(cached)
     total = get_precount(repo, period)          # batch-precounted (GraphQL)
     if total is None:                            # fall back to REST search
         total = rest_count(f"repo:{repo} is:pr created:{rng}", endpoint="search/issues")
@@ -161,7 +166,7 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
             print(f"HEAL {repo} {period}: collected {n}/{total}; "
                   f"invalidating {len(ranges)} cells and re-pulling",
                   file=sys.stderr, flush=True)
-            for r in ranges:
+            for r in {*ranges, rng}:      # incl. stale full-range cell
                 p = cell_path(STAGE, repo, r)
                 if p.exists():
                     p.unlink()

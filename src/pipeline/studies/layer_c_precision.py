@@ -33,6 +33,7 @@ SLUG = {
     "cursor": re.compile(r"^cursor/.+-[0-9a-f]{4}$"),
     "claude": re.compile(r"^claude/(issue-\d+|[a-z]+-[a-z]+-[0-9a-f]{4,})"),
     "copilot": re.compile(r"^copilot/[a-z0-9][a-z0-9-]*$"),
+    "droid": re.compile(r"^droid/.+-20\d{6}$"),
 }
 
 
@@ -47,7 +48,7 @@ def main() -> None:
     store = data_dir() / "raw" / "branch_samples"
     print(f"{'prefix':9}{'C-only n':>9}{'web_flow%':>10}{'machine_slug%':>14}"
           f"{'ci_committed%':>14}{'indeterminate%':>15}")
-    for prefix in ("codex", "copilot", "cursor", "claude"):
+    for prefix in ("codex", "copilot", "cursor", "claude", "droid"):
         n = wf = slug = ci = 0
         for f in sorted(store.glob(f"{prefix}/*.json")):
             for p in json.loads(f.read_text()).get("prs") or []:
