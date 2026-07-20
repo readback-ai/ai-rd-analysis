@@ -251,7 +251,6 @@ def test_compute_side_selection_validation(tmp_path, monkeypatch):
     fingerprint-matching manifest with selected {"Q1-2026": []} and an
     empty sample previously produced an EMPTY responsiveness table
     through the real compute() path."""
-    import json as _json
     import pytest
     from pipeline.studies import review_action as ra
     pool = {"Q1-2026": [_item("o/a", 1)]}
