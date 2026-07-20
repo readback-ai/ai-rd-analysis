@@ -44,6 +44,44 @@ byte-for-byte from the same cells.
 
 ## Module tour (what each file owns, and its load-bearing details)
 
+### The census cell — the one data structure everything reads
+
+A CELL is one JSON file in `$AIRD_DATA_DIR/raw/census-v2/`, keyed
+`<repo>@<date-range>.json`, holding the list of PR nodes CREATED in that
+range (from `census.PR_QUERY`; a repo-quarter is one full-range cell or
+several contiguous sub-window cells). Per PR node:
+
+```jsonc
+{
+  "number": 4711,
+  "createdAt": "2026-04-02T09:15:00Z",   // period bucketing + w8 anchor
+  "mergedAt":  "2026-04-03T10:00:00Z",   // null if unmerged
+  "closedAt":  null,
+  "authorAssociation": "MEMBER",          // insider = MEMBER/OWNER/COLLABORATOR
+  "additions": 120, "deletions": 30,      // LOC (capped 20k/PR downstream)
+  "changedFiles": 4,
+  "headRefName": "codex/fix-race",        // layer C input
+  "author":   {"login": "alice", "__typename": "User"},   // layer B if Bot
+  "mergedBy": {"login": "bob",   "__typename": "User"},   // self-merge
+  "commits":  {"nodes": [{"commit": {                      // FIRST 12 commits
+      "message": "…trailers live here…",                   // layer A markers
+      "authors":  {"nodes": [{"email": "noreply@anthropic.com"}]},  // <=6
+      "committer": {"email": "…", "user": {"login": "…"}}}}]},
+  "reviews":  {"nodes": [{                                 // FIRST 15 reviews
+      "author": {"login": "gemini-code-assist", "__typename": "Bot"},
+      "submittedAt": "2026-04-02T12:00:00Z",               // w8-windowed
+      "state": "CHANGES_REQUESTED",
+      "comments": {"totalCount": 3}}]}
+}
+```
+
+What is deliberately NOT here: per-commit timestamps (the post-as-of
+marker residual, METHODS §0), review/comment bodies (privacy), issue
+comments (only formal review objects count). The 12-commit/15-review
+truncation is a documented downward bias (METRICS §7). Studies needing
+more (per-commit dates for review_action) run their own hydration pulls.
+Everything a PRClass contains is derived from exactly these fields.
+
 ### Detection — `src/pipeline/detect.py`
 The single canonical home of ALL detection. Nothing else defines a marker,
 a bot list, or a review rule.

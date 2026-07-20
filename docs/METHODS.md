@@ -318,17 +318,26 @@ typical AI-org developer's PR flow look like"; pooled and equal-weight
 variants differ through a repo-size gradient (small repos are AI-heavier)
 and are reported only as reconciliation views.
 
-**Bootstrap CIs** (`analyze.bootstrap_ci`): the unit of resampling is the
-REPO — each draw resamples the qualifying (per-repo rate, weight) pairs
-with replacement to the original count, recomputes the weighted mean, and
-the 95% interval is the 2.5th/97.5th percentile over 2,000 draws. CIs
-therefore express across-repo sampling variability under the chosen
-weighting (not within-repo PR-level noise; the census is a complete
-enumeration, so there is no PR-sampling error). The RNG is module-level
-and seeded (`analyze._RNG`, seed 20260630): identical reruns reproduce
-identical intervals. Studies with their own uncertainty needs reuse the
-same helper (e.g. paper figures) or document their estimator inline
-(review_action's Horvitz–Thompson weights, §5a2).
+**Bootstrap CIs — what is being resampled, and why a complete census has
+CIs at all** (`analyze.bootstrap_ci`). The census is complete: every PR
+of every qualifying repo-period is observed, so for THE FRAME ITSELF (the
+2,142 repos in these quarters) any reported mean is an exact population
+quantity with zero sampling error. The CIs answer the superpopulation
+question a reader actually asks — "how much does this mean depend on the
+particular repos that happen to make up the frame?" — by treating REPOS
+as the exchangeable unit: each of 2,000 draws resamples the qualifying
+(per-repo rate, weight) pairs with replacement to the original count and
+recomputes the weighted mean; the interval is the 2.5th/97.5th
+percentile. Wide CIs mean the mean is carried by few/heterogeneous
+repos; narrow CIs mean it is a broad-based property. Within-repo
+PR-level noise is deliberately NOT resampled (there is none to model —
+complete enumeration), and no claim is made about GitHub beyond the
+frame (METHODS §6). The RNG is module-level and seeded (`analyze._RNG`,
+seed 20260630): identical reruns reproduce identical intervals. Studies
+with their own uncertainty needs reuse the same helper (paper figures)
+or document their estimator inline (review_action's Horvitz–Thompson
+weights, §5a2; author-level cohort tables bootstrap over AUTHORS, the
+analogous unit).
 
 Cross-layer decomposition (`studies/layers.py`) is exact and per-PR on the
 census (disjoint by precedence B > A > C); the earlier sample-blended
