@@ -26,6 +26,7 @@ def _review(login, typename="Bot", state="COMMENTED"):
 
 def _pr(reviews=(), assoc="NONE", merged=False, msg="normal"):
     return {
+        "createdAt": "2026-04-20T00:00:00Z",   # w8-mature at the as-of
         "mergedAt": "2026-05-02T00:00:00Z" if merged else None,
         "authorAssociation": assoc,
         "additions": 10, "deletions": 5,
@@ -270,3 +271,21 @@ def test_monthly_update_revises_two_trailing_months():
     mu = _monthly_update_module()
     assert mu.months_to_revise("2026-09") == ["2026-07", "2026-08"]
     assert mu.months_to_revise("2027-01") == ["2026-11", "2026-12"]
+
+
+def test_review_metrics_none_until_w8_mature():
+    """Repro RED first: an immature PR's review window is still open, so
+    its review columns are provisional undercounts — they must be None
+    (skipped), same as fates, until w8 maturity."""
+    from pipeline.analyze import pr_metrics
+    from pipeline.detect import MARKERS
+    immature = {"number": 1, "createdAt": "2026-06-20T00:00:00Z",
+                "author": {"login": "alice", "__typename": "User"},
+                "commits": {"nodes": []}, "reviews": {"nodes": []}}
+    m = pr_metrics(immature, MARKERS)
+    for col in ("human_review", "ai_review", "other_bot_review",
+                "no_review", "m_hum_rev", "m_ai_rev", "m_no_rev"):
+        assert m[col] is None, col
+    mature = dict(immature, createdAt="2026-04-01T00:00:00Z")
+    m = pr_metrics(mature, MARKERS)
+    assert m["human_review"] is False and m["no_review"] is True

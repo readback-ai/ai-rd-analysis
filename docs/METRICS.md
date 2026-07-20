@@ -60,7 +60,7 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
 | `rejected` | closed unmerged within 8 weeks | limbo = w8-mature, neither |
 | `self_merged` | merged and `mergedBy.login == author.login` | None (excluded from rates) when the cell lacks `mergedBy` |
 | `insider` | `authorAssociation ∈ {MEMBER, OWNER, COLLABORATOR}` | misses staff with private org membership |
-| `human_reviewed` | ≥1 formal review by a User **other than the PR author** (bot-logins excluded), submitted within w8 of creation and ≤ as-of | conversation comments never count; the legacy any-User variant was removed 2026-07-20 |
+| `human_reviewed` | ≥1 formal review by a User **other than the PR author** (bot-logins excluded), submitted within w8 of creation | conversation comments never count; like all review columns, reported as None (skipped) until the PR is w8-mature — an open review window is a provisional undercount |
 | `substantive_review` | a reviewer≠author review with inline comments or state COMMENTED/CHANGES_REQUESTED | "more than a rubber-stamp APPROVED"; only first 15 reviews fetched |
 | `ai_reviewed` | ≥1 review by a Bot in `AI_REVIEWERS` (gemini-code-assist, copilot-pull-request-reviewer, coderabbitai, greptile-apps, qodo-merge-pro, cursor, chatgpt-codex-connector, copilot-swe-agent, claude) | decomposed from CI bots |
 | `other_bot_reviewed` | ≥1 Bot review not in `AI_REVIEWERS` | CI/automation noise kept separate |

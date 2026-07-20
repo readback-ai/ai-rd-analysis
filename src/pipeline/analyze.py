@@ -6,9 +6,9 @@ equal-weight and contributor-weighted averages per period with bootstrap 95%
 CIs over repos. Detection semantics (markers, reviewer taxonomy, the w8
 event window) all live in pipeline.detect — nothing here re-defines them.
 
-human_review is the reviewer!=author, bot-clean rate (v2_results §11c; the
-legacy any-User variant was removed 2026-07-20). self_merged is only
-available in cells carrying mergedBy and is skipped (None) elsewhere.
+human_review is the reviewer!=author, bot-clean rate (v2_results §11c).
+self_merged is only available in cells carrying mergedBy and is skipped
+(None) elsewhere.
 
 PRs are DEDUPED by number within each (repo, period): the durable store can
 hold overlapping cell generations (full-quarter + sub-window cells, or cells
@@ -32,13 +32,11 @@ from pipeline.ghx import decode_cell_stem, raw_dir, read_cell
 
 
 def load_cells() -> dict[tuple[str, str], list[dict]]:
-    """(repo, date-range) -> PR nodes from the census-v2 store (the single
-    store since 2026-07-20: the 187 repo-quarters that existed only as
-    legacy census cells were re-collected, and the legacy read path was
-    removed). Files are visited OLDEST-mtime-first so fresher cells land
+    """(repo, date-range) -> PR nodes from the census-v2 store.
+    Files are visited OLDEST-mtime-first so fresher cells land
     later in the dict — group_by_period's dedup lets the fresher record
     win at equal richness (monthly re-collection vs a stale overlapping
-    quarter cell; external review P1)."""
+    quarter cell)."""
     cells: dict[tuple[str, str], list[dict]] = {}
     for f in sorted(raw_dir("census-v2").glob("*.json"),
                     key=lambda p: p.stat().st_mtime):
@@ -120,10 +118,10 @@ def group_by_period(cells: dict[tuple[str, str], list[dict]],
     census-v2 sub-window), the RICHER record wins: a node carrying
     headRefName (the v2 query marker field) replaces one that lacks it,
     regardless of iteration order — otherwise a stale legacy record silently
-    strips branch attribution and mergedBy (external review P1). At EQUAL
+    strips branch attribution and mergedBy. At EQUAL
     richness the LATER-loaded record wins; load_cells feeds cells in mtime
     order, so a monthly re-collection supersedes a stale overlapping
-    quarter cell for the same PR (external review P1, round 2)."""
+    quarter cell for the same PR."""
     grouped: dict[tuple[str, str], list[dict]] = defaultdict(list)
     index: dict[tuple[str, str], dict] = defaultdict(dict)
     for (repo, rng), nodes in cells.items():
@@ -161,21 +159,26 @@ def pr_metrics(pr: dict, markers: dict) -> dict:
         "merged": c.merged if c.w8_mature else None,
         "rejected_w8": c.rejected if c.w8_mature else None,
         "limbo_w8": (not c.merged and not c.rejected) if c.w8_mature else None,
-        "human_review": c.human_reviewed,      # reviewer != author, bot-clean
-        "ai_review": c.ai_reviewed,
-        "other_bot_review": c.other_bot_reviewed,
-        "no_review": not (c.human_reviewed or c.ai_reviewed
-                          or c.other_bot_reviewed),
+        # review columns follow the SAME maturity gate as fates: an
+        # immature PR's review window is still open, so its flags are
+        # provisional undercounts until w8 (None -> skipped)
+        "human_review": c.human_reviewed if c.w8_mature else None,
+        "ai_review": c.ai_reviewed if c.w8_mature else None,
+        "other_bot_review": c.other_bot_reviewed if c.w8_mature else None,
+        "no_review": (not (c.human_reviewed or c.ai_reviewed
+                           or c.other_bot_reviewed))
+                     if c.w8_mature else None,
         "insider": c.insider,
         # None (mergedBy absent on the record) -> skipped by rate calc
         "self_merged": c.self_merged,
         # merged-conditioned rates (None on unmerged PRs -> conditioning by
         # skip): unmerged PRs are implicitly reviewed-and-rejected, so
         # reviewer coverage OF WHAT SHIPS is its own question (METRICS §2b)
-        "m_hum_rev": c.human_reviewed if c.merged else None,
-        "m_ai_rev": c.ai_reviewed if c.merged else None,
+        "m_hum_rev": c.human_reviewed if (c.merged and c.w8_mature) else None,
+        "m_ai_rev": c.ai_reviewed if (c.merged and c.w8_mature) else None,
         "m_no_rev": (not c.human_reviewed and not c.ai_reviewed
-                     and not c.other_bot_reviewed) if c.merged else None,
+                     and not c.other_bot_reviewed)
+                    if (c.merged and c.w8_mature) else None,
     }
 
 
@@ -217,6 +220,9 @@ def main() -> None:
                          "(incremental months from monthly_update)")
     a = ap.parse_args()
     markers = MARKERS
+    # Repo weights for the contributor-weighted rows: core committers
+    # active in the study window (repo_contributors_window.csv). Missing
+    # repos default to 1.0 and are WARNed per period below.
     weights: dict[str, float] = {}
     if Path(a.contributors).is_file():
         with open(a.contributors) as fh:
@@ -247,6 +253,11 @@ def main() -> None:
     print(f"{'period':9}{'weighting':16}{'repos':>6}" +
           "".join(f"{m:>18}" for m in METRICS))
     for per in periods:
+        # Per-repo rates: classify each PR once, then each metric is the
+        # share of PRs with the property among the PRs where it is
+        # DEFINED — None values (w8-immature fates/reviews, absent
+        # mergedBy, unmet m_* conditioning) shrink that metric's
+        # denominator instead of biasing it toward 0.
         rows = []
         unweighted = set()
         for (repo, p), prs in grouped.items():
@@ -266,6 +277,10 @@ def main() -> None:
             print(f"WARN {per}: {len(unweighted)} qualifying repos lack "
                   f"contributor weights (default 1.0) — e.g. "
                   f"{sorted(unweighted)[:3]}", flush=True)
+        # Two aggregation rows per period: the weighted mean of per-repo
+        # rates (repo = unit, so a mega-repo cannot dominate) under equal
+        # weights, then under contributor weights; the bootstrap CI
+        # resamples REPOS (superpopulation dispersion — METHODS §4).
         for label, wfn in (("equal-weight", lambda r: 1.0),
                            ("contrib-weight", lambda r: weights.get(r, 1.0))):
             line = f"{per:9}{label:16}{len(rows):>6}"
