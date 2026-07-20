@@ -29,16 +29,29 @@ is uniform (~20-26%). Self-merge rates are flat over time and cultural in
 level (private 56% > labs 52% > public 50% > community 38%); AI concentrates
 modestly in self-merged PRs (1.1-1.4x). On complete merged-by data,
 self-merged AI-involved PRs are human-reviewed at similar-or-higher rates
-than non-AI ones in most slices — an earlier sampled finding of a review
-collapse characterized the pooled mass of a few high-volume repos, not the
-typical repo; the one slice where self-merged AI code IS reviewed less is
-research labs (46 vs 55%). Delegated-agent lanes move the human gate from
-line-level review to merge triage (38% of codex-branch PRs merge vs 68%
-baseline). All rates are floors: squash-merge strips markers, and default
-local CLI usage is structurally undetectable.
+than non-AI ones in most slices. Delegated-agent lanes move the human gate
+from line-level review to merge triage. Volume: merged LOC per core
+contributor grew ×2.66 (6.6 → 17.6 kLOC/quarter, CW), driven entirely by
+AI-adopting authors — non-adopters stayed flat — with an event-study jump
+at each author's first AI-marker month (flat pre-trend; trend-selection
+rejected) and cohort-by-cohort step-ups at adoption time. Attention
+thinned: human comments per merged kLOC fell ~55–57% (within size bands
+−35..−52%), while responsiveness to explicit human review asks held flat
+(~78–80%, identified on the no-AI-reviewer lane). A new production mode
+emerged: ~43 'agent-fleet' accounts (humans operating merge pipelines at
+300–4,400 merged PRs/quarter, roughly half unmarked) are isolated as their
+own cohort. All rates are floors: squash-merge strips markers, and default
+local CLI usage is structurally undetectable (one quantified exception:
+the weak-prefix two-sided bound, 0.05pp at the Q2-2026 headline).
 
 **Full results: [`artifacts/results.md`](artifacts/results.md) (regenerated) · metrics reference: [`docs/METRICS.md`](docs/METRICS.md) · working log: [`artifacts/v2_results.md`](artifacts/v2_results.md) ·
-Methodology: [`docs/METHODS.md`](docs/METHODS.md)**
+Methodology: [`docs/METHODS.md`](docs/METHODS.md) · **code review guide: [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md)****
+
+Generated report: [`artifacts/report_generated.md`](artifacts/report_generated.md)
+(19 sections, quarterly; monthly twin `report_monthly.md`). Figures:
+`artifacts/fig2_ai_usage.png` (traceable AI usage), `fig3_core_loc.png`
+(merged LOC per core contributor), `fig4_adoption_cohorts.png` (adoption
+cohorts incl. fleet).
 
 ## How to verify the three claims that matter
 
@@ -63,7 +76,9 @@ Methodology: [`docs/METHODS.md`](docs/METHODS.md)**
 | — | `pipeline.pull_prs` | targeted hydration (mergedBy, comment authors, commit dates) + branch-PR sampling |
 | 4 | `pipeline.analyze` | per-repo rates → contributor-weighted means + bootstrap CIs |
 | 5 | `pipeline.integrate` | layered union (marker ∪ agent-author ∪ branch-only) with measured overlap corrections |
-| studies | `pipeline.studies.*` | reproducible analyses behind v2_results §10–12 (accountability, review-mode residue, corpora) |
+| studies | `pipeline.studies.*` | one analysis = one module: paper figures, productivity/adoption cohorts, attention, fates, event study, responsiveness (HT-weighted), slices, layer-C precision |
+| figures | `scripts/plot_paper_tables.py`, `scripts/plot_adoption_cohorts.py` | Figures 2–4 (broken x-axis) |
+| monthly | `scripts/monthly_update.py` | incremental month ingestion (provisional-month revision + persistent month registry) |
 
 ## Reproduction
 
@@ -75,7 +90,13 @@ uv run python -m pipeline.org_set --verify   # population reconciliation
 # commit metadata) — available on request; analyze/integrate FAIL loudly
 # without it rather than printing empty reports. With the store present:
 uv run python scripts/regenerate.py          # full pipeline -> artifacts/report_generated.md
+PYTHONPATH=src uv run python scripts/report.py --granularity month   # monthly twin
+PYTHONPATH=src uv run python scripts/plot_paper_tables.py            # figs 2-3
+PYTHONPATH=src uv run python scripts/plot_adoption_cohorts.py        # fig 4
 ```
+
+To review the code, start with [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md) —
+reading order, module tour, invariants, and a claim → module map.
 
 Collection from scratch is ~36h wall-clock (GitHub API rate-limit bound) via
 stages 0→5 in order; every stage resumes from checkpoints after interruption.

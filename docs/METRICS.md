@@ -101,40 +101,69 @@ both framings are reported.
 
 ## 5. The generated report (`artifacts/report_generated.md`)
 
-Produced only by `scripts/regenerate.py` stage F, which refuses to run until:
-stages exit zero, every repo-scoped org has a DONE strata sentinel, and every
-manifest repo-quarter has gap-free valid-cell coverage or a documented
-inaccessibility waiver. The report has five sections:
+Produced by `scripts/report.py` (canonically invoked by
+`scripts/regenerate.py` stage F, which refuses to run until: stages exit
+zero, every repo-scoped org has a DONE strata sentinel, and every manifest
+repo-quarter has gap-free valid-cell coverage or a documented
+inaccessibility waiver). The monthly twin (`report_monthly.md`,
+`--granularity month`) runs the same sections; sections whose module is
+inherently quarterly carry an explicit `[quarterly]` tag there.
 
-1. **Contributor-weighted metrics** (`pipeline.analyze`) — per quarter ×
-   {equal-weight, contrib-weight} rows; columns = `ai_code` (layer A only),
-   **`ai_involved`**, `merged`, `human_review` (legacy any-User),
-   `human_rev_other` (corrected), `ai_review`, `other_bot_review`,
-   `no_review` (no review of any kind), `insider`, `self_merged`; each as
-   `mean [95% CI]`.
-2. **Layered decomposition** (`pipeline.integrate`) — pooled shares per
-   quarter: A-marker / B-agent / C-branch-only / union, exact per-PR on the
-   population manifest.
-3. **Slices: involvement** (`pipeline.studies.slices --table involvement`) —
-   six slices (adoption groups AI-majority / AI-heavy / repo-scoped from
-   `population.tsv` scope + measured `top5_ai`; org types public / private /
-   community from `org_type.tsv`) × {`ai_involved`, `hum_rev` (corrected),
-   `ai_rev`, `merged`} per quarter.
-4. **Slices: self-merge** — per slice: `self_merged` (share of merged, where
-   mergedBy known), `ai_of_selfm` / `ai_of_otherm` (AI-involvement of
-   self- vs other-merged PRs), `humrev_selfm_ai` / `humrev_selfm_non`
-   (reviewer≠author rate on self-merged AI vs non-AI PRs).
-5. **Balanced-panel sensitivity** (`--table panel`) — the `ai_involved`
-   series restricted to repos qualifying in ALL four quarters, next to the
-   repeated cross-section, separating adoption growth from cohort
-   composition (METHODS §1 estimand note).
-6. **Two-sided bound** (`--table bounds`) — headline `ai_involved` with and
-   without the weak-prefix (cursor/, claude/) indeterminate C-only PRs; the
-   study's single potential overcount, quantified (METHODS §2).
+The 19 sections, in order (each title names its producing module and
+argument — one section = one module invocation):
+
+1. **Contributor-weighted metrics** (`pipeline.analyze`) — per period ×
+   {equal-weight, contrib-weight}; columns = `ai_code` (layer A),
+   **`ai_involved`**, w8 fates (`merged`, `rejected_w8`, `limbo_w8`),
+   review columns, `insider`, `self_merged`, merged-conditioned `m_*`;
+   each as `mean [95% CI]`.
+2. **Figure 2: Traceable AI usage** (`paper_tables --table usage`) — AI%
+   of submitted/merged PRs and AI-PR share of submitted/merged LOC (CW,
+   CIs). Rendered as `artifacts/fig2_ai_usage.png`.
+3. **Figure 3: Merged LOC per core contributor** (`paper_tables --table
+   core`) — CW merged (w8) kLOC per insider author + baseline multiple
+   (×2.66 by Q2-2026). Rendered as `fig3_core_loc.png`.
+4. **Layered decomposition** (`pipeline.integrate`) — pooled disjoint
+   shares: B-agent > A-marker > C-branch-only, plus union.
+5. **Slices: involvement** (`slices --table involvement`) — six slices
+   (adoption groups + org types) × {ai_involved, hum_rev, ai_rev, merged}.
+6. **Slices: self-merge** (`--table selfmerge`).
+7. **Balanced-panel sensitivity** (`--table panel`) — adoption vs cohort
+   composition.
+8. **Reviewer profile of merged PRs** (`--table reviewers`) — human-only /
+   AI-only / both / neither, per slice.
+9. **Two-sided bound** (`--table bounds`) — headline with/without
+   weak-prefix (cursor/, claude/, droid/) indeterminates; 0.05pp at the
+   Q2-2026 headline.
+10. **Productivity decomposition** (`productivity --cut decomposition`) —
+    PRs = authors × PRs/author on the balanced repo panel.
+11. **Persistent-author productivity** (`--cut persistent`) — same person,
+    same repo, 2024↔2026, AI-split.
+12. **Core-contributor merged LOC** (`--cut core`) — the Figure 3 series.
+13. **Core-contributor LOC split by AI involvement** (`--cut aisplit`) —
+    noAI-author kLOC (flat) vs AI users' AI-PR + nonAI-PR kLOC.
+14. **Figure 4: adoption cohorts** (`--cut adoption`) — fixed cohorts
+    early/medium/late/never/**fleet** (≥300 merged PRs/quarter, assigned
+    first); AI/nonAI/total kLOC per author with CI + median. Rendered as
+    `fig4_adoption_cohorts.png`.
+15. **Merged LOC by approval channel** (`--cut channels`) — humanRev /
+    botOnly / selfUnrev / otherUnrev shares of merged LOC.
+16. **Attention per line** (`studies.attention`) — HUMAN comments/kLOC
+    (bot-clean) + window h/kLOC, all/ins/ext + size bands.
+17. **PR fates at matched horizons** (`studies.fates`) — w8 primary, w26
+    sensitivity, per cohort; immature PRs excluded per horizon.
+18. **Responsiveness to human asks** (`studies.review_action`) — CLEAN
+    lane identified; Horvitz–Thompson weighted (PPS sample → PR-weighted
+    responded%, population LOC share); commit lists paginated with
+    completeness metadata.
+19. **Adoption event-study** (`studies.event_study`) — merged (w8,
+    mature-months-only) and submitted kLOC in event time around each
+    author's first AI-marker month.
 
 Alongside the report, `data/derived/census_manifest.json` records SHA-256
 prefixes of the population files, repo count, and cell-coverage numbers
-(covered / waived / total repo-periods).
+(covered / waived / total repo-periods). Incremental months live in
+`data/derived/incremental_months.txt` (see METHODS §1c).
 
 ## 6. Auxiliary analyses (not in the generated report)
 

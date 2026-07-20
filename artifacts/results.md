@@ -1,5 +1,5 @@
 # Results — AI-assisted development at leading AI organizations
-CANONICAL (2026-07-13): every number below is from
+CANONICAL (2026-07-20): every number below is from
 `artifacts/report_generated.md`, produced end-to-end by
 `scripts/regenerate.py` — complete census (8,284 covered + 284 waived of
 8,568 repo-periods; 71 documented-inaccessible repos), window-scoped
@@ -38,8 +38,8 @@ census-derived evidence (stage-E convergence check).
 - **Balanced panel** (repos qualifying in all four quarters): Q2-2026 15.3
   [13.0,17.6] vs 16.6 cross-section — adoption growth is real, not cohort
   composition.
-- **Two-sided bound** (weak-prefix indeterminates, the single potential
-  overcount): 16.60 vs 16.56 — **0.05pp**.
+- **Two-sided bound** (weak-prefix indeterminates incl. droid/, the single
+  potential overcount): 16.62 vs 16.57 — **0.05pp**.
 - Contributor-weighted vs pooled Q2: 16.6 vs 16.6 — the two weightings agree
   at the headline this quarter.
 
@@ -48,7 +48,48 @@ private 20.7 [18.9,22.5] > AI-majority 18.2 > repo-scoped 13.0 > AI-heavy
 12.4 ≈ community 12.3 — full tables incl. review gradients and the
 self-merge study in `report_generated.md` §3–4.
 
-## 5. Superseded analyses
+## 5. Volume: output per core contributor (report §§ Fig 3, 12–14)
+- **Merged (w8) kLOC per core (insider) author, CW**: 6.61 → 10.02 →
+  10.68 → **17.59** = **×2.66** [Q2 CI 11.79, 26.15] (Figure 3). Q2 is
+  w8-deflated for May/June PRs — conservative.
+- **AI-split (aisplit)**: non-adopting core authors are FLAT
+  (6.61 → 5.48 kLOC); AI-using authors reach ~30 kLOC (8.99 in AI-tracked
+  PRs + 21.12 in their non-AI PRs) — adopters' untracked output roughly
+  doubled too, direct evidence detection undercounts impact.
+- **AI-PR share of LOC** (Figure 2): by Q2-2026, 22.1% of submitted and
+  20.0% of merged LOC comes from AI-involved PRs (vs 16.6/15.9% of PRs —
+  AI PRs are modestly larger, and merge at nearly the baseline rate).
+
+## 6. Adoption cohorts & event study (report §§14, 19)
+- Fixed cohorts by first AI-marker month — early (≤2026-02) / medium
+  (2026-03..04) / late (≥2026-05) / never / **fleet** (≥300 merged
+  PRs/quarter, assigned first): every cohort steps up in its own adoption
+  quarter (early 12.2→32.2 kLOC; medium 9.2→20.9; late 8.8→15.9 despite
+  w8 deflation; never flat 4.3→6.2). Baseline gradient (early > medium >
+  late > never already in 2024) = quantified adopter selection.
+- **Event study** (first AI-marker month, clean pre-period): flat
+  pre-trend ~3–5 kLOC/mo, jump to 9.6 at t0 (fully-mature balanced
+  cohort n=460; median 0.44 → 2.20), persisting ~8–9.6 through t+2 —
+  trend-selection rejected. Submitted-LOC outcome (no censoring): 5.4–7.2
+  pre → 15.5 at t0, elevated through t+4.
+- **Fleet operators**: ~43 human accounts merging 300–4,400 PRs/quarter
+  (mean 523 kLOC/author in Q2-2026, ×13 the 2024 automation baseline);
+  half-ish unmarked (hermes/ pipeline 1–4% AI-marked); review coverage
+  varies 0%–84% by org. A new production mode, reported as its own
+  cohort, never averaged into per-contributor claims.
+
+## 7. Review attention & responsiveness (report §§16–18)
+- Human comments per merged kLOC (bot-clean): 4.07 → **1.73** (−57%
+  pooled; −35..−52% within size bands) — attention per line thinned while
+  coverage held (~72–78% of merged LOC human-reviewed; channels: botOnly
+  0.7→13.8%, selfUnrev 18.6→11.0%).
+- Responsiveness to explicit human asks (CLEAN lane = no AI reviewer,
+  identified; PPS sample, Horvitz–Thompson weighted): held flat across
+  quarters — exact HT-weighted table in report §18.
+- Triage at matched horizons (w8): external merge 73.2→67.3, insider
+  83.0→81.4; permanent-limbo floor emerging (w26: 1.7% ins / 4.6% ext).
+
+## 8. Superseded analyses
 `artifacts/v2_results.md` is the working log of interim analyses on interim
 populations; re-derive before citing (its §11b self-merge collapse REVERSED
 on complete data — see report §4).
