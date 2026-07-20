@@ -251,3 +251,22 @@ def test_layered_decomposition_is_disjoint_with_b_over_a_over_c():
     assert c.agent_author and c.marker_tools and c.branch_tool
     # precedence as encoded in studies.layers.layered_table
     assert c.agent_author is not None            # -> counted as B only
+
+
+def _monthly_update_module():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "monthly_update", "scripts/monthly_update.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_monthly_update_revises_two_trailing_months():
+    """METHODS-audit repro (RED first): with the w8 rule a month's fates
+    stay open ~8 weeks past month end, so each update must re-collect the
+    previous TWO months — N-1 (creation recency) and N-2 (whose w8 windows
+    closed during month N). Revising only N-1 finalizes nothing."""
+    mu = _monthly_update_module()
+    assert mu.months_to_revise("2026-09") == ["2026-07", "2026-08"]
+    assert mu.months_to_revise("2027-01") == ["2026-11", "2026-12"]

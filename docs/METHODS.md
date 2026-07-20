@@ -4,17 +4,18 @@
 [`METRICS.md`](METRICS.md).)
 
 Methodology for the study of AI-assisted development practices at leading AI
-organizations. Successor to the pre-pivot `PIPELINE_SPEC.md` and
-`artifacts/scope_and_methods.md`; this document is canonical. Results live in
+organizations; this document is canonical. Results live in
 `artifacts/v2_results.md`; every module named here is in `src/pipeline/`.
 
 ## 0. Study cutoff and as-of policy
 
 The study cutoff is **2026-06-30** (end of Q2-2026).
 - **Activity data** (PRs, commits, reviews, branch-prefix counts) is strictly
-  windowed: every query carries `created:<=2026-06-30` bounds. Collection ran
-  2026-07-01..09, so review/merge events landing after collection are
-  censored (mild recency effect on the last quarter, noted in §6).
+  windowed: every query carries `created:<=2026-06-30` bounds. Because all
+  per-PR fate outcomes follow the w8 rule (§1d.1), collection lag is not a
+  bias: PRs whose 8-week window was still open at the as-of simply carry NO
+  fate (None-skip) — less data on the trailing quarter, not skewed data.
+  Q2-2026 fates finalize with the scheduled 2026-09-01 re-pull (§1c).
 - **Classification metadata** (repo topics, descriptions, star counts,
   org descriptions) has no historical API — it was observed 2026-07-07..09,
   as close to the cutoff as possible, and applied uniformly to all orgs. Drift
@@ -22,8 +23,10 @@ The study cutoff is **2026-06-30** (end of Q2-2026).
   each snapshot file.
 - **Ownership** (org-type cut) is pinned as-of the cutoff: e.g. xai-org
   counts as public (SpaceX acquisition + IPO completed before the cutoff).
-- **Contributor weights** are all-time counts at pull date (known limitation,
-  §6): GitHub does not expose windowed contributor statistics cheaply.
+- **Contributor weights** are WINDOW-SCOPED: core committers active in
+  Q4-2025..Q2-2026 (≥5 commits, bots excluded) from GitHub's weekly
+  contributor statistics (`repo_contributors_window.csv`); the all-time
+  variant is retained only as a sensitivity file.
 
 ## 1. Population: five rules, one override table
 
@@ -90,9 +93,11 @@ AI-topic repos. Appendix cuts (org-type public/private/community via
 ## 1c. Incremental monthly updates (runbook)
 
 `scripts/monthly_update.py YYYY-MM` adds a month of activity data:
-1. RE-COLLECTS the previous month first (wipes its census cells) — the
-   provisional-month revision: reviews and merges lag PR creation, so the
-   newest month is always preliminary until the following update.
+1. RE-COLLECTS the previous TWO months first (wipes their census cells) —
+   N-1 for creation recency, and N-2 because under the w8 rule its last
+   8-week windows only just closed: a month's fate metrics are FINAL once
+   it has been revised as N-2, i.e. two updates after first collection.
+   Until then its rows are provisional (immature PRs carry no fate).
 2. Collects the new month (precount + census; months are first-class period
    tokens via `scan_orgs.resolve_period`).
 3. Prints the monthly trend tables (`analyze --granularity month`,
@@ -126,7 +131,8 @@ trusted, so brownout-poisoned empty caches self-heal on the next run.
    hours/kLOC corroborates, never leads. Size-band decomposition separates
    within-size thinning from composition (`studies.attention`).
 4. **Weighting labeled on every number**: contributor-weighted primary
-   (active-window weights), pooled secondary. Marker set v2 everywhere.
+   (active-window weights), pooled secondary. One canonical marker set
+   (`detect.MARKERS`).
 5. **Layer-C hygiene**: CI-canary false-positive class excluded (pinning
    test); per-prefix provenance precision stated (§2); the ai_involved
    series carries its two-sided weak-prefix bound as a standing report
@@ -144,9 +150,10 @@ trusted, so brownout-poisoned empty caches self-heal on the next run.
 trailers and generation footers (Claude Code: `noreply@anthropic.com`,
 `Generated with [Claude Code]`; Cursor: `cursoragent@cursor.com`; aider
 trailer), and tool author/committer identities (Codex cloud's
-`chatgpt-codex-connector[bot]` committer, `codex@openai.com`). Two frozen
-marker sets: v1 (Claude+Cursor — all published headline numbers) and v2
-(+aider, +Codex; headline delta +0.1pp). Search-side rule: co-author trailers
+`chatgpt-codex-connector[bot]` committer, `codex@openai.com`). One canonical
+marker set (`detect.MARKERS`: Claude, Cursor, aider, Codex — the earlier
+v1/v2 versioning was collapsed 2026-07-20; adding aider+Codex had moved the
+headline +0.1pp). Search-side rule: co-author trailers
 are only findable by BARE-TERM commit search — the `author-email:` qualifier
 matches primary authors only and returns zero for co-authored commits
 (measured ~10–16× undercount). Qualifier terms remain correct for tools that
@@ -217,8 +224,12 @@ classified by its author into exactly one of three reviewer types:
    the user-bot heuristic (below) AND, for the human-review flag, login !=
    the PR author (GitHub permits self-review-comments; counting them
    inflated the self-merge lane — correction §11c of the working log,
-   aggregate impact <=2.2pp). Reviews submitted after the study cutoff are
-   excluded before classification.
+   aggregate impact <=2.2pp). Reviews are bounded by the GLOBAL AS-OF
+   (`detect.CUTOFF`), not by a per-PR window: a review submitted any time
+   up to the as-of counts, even years after the PR (review events are NOT
+   w8-windowed — only fate outcomes are; see §0). Consequence: review-rate
+   metrics on old quarters can still grow if the as-of ever advances,
+   which is why the as-of is frozen between deliberate revisions.
 2. **AI reviewer**: Bot-typed (or user-bot) account whose login (with any
    `[bot]` suffix stripped) is in the curated `AI_REVIEWERS` allowlist —
    dedicated AI code-review products observed in the data:
@@ -289,22 +300,32 @@ outside the worktree in `$AIRD_DATA_DIR`.
 
 ## 4. Metrics and weighting (`analyze.py`, `studies/layers.py`)
 
-Per-repo-period rates over PRs (repos need ≥10 PRs/period to qualify), then
-**contributor-weighted** means across repos: weight = the repo's core human
-contributors active in the study window (≥5 commits authored in
-Q4-2025..Q2-2026, bots excluded, from GitHub weekly contributor stats;
-`repo_contributors_window.csv`; all-time variant kept for sensitivity).
-Contributor weighting answers "what does the typical AI-org developer's PR
-flow look like"; pooled and equal-weight variants differ through a repo-size
-gradient (small repos are AI-heavier: 19.5% vs 12.2% AI-code in the smallest
-vs largest quartile) and are reported only as reconciliation views.
-Uncertainty: bootstrap 95% CIs over repos (2,000 resamples).
+Per-repo-period rates over PRs (repo floor: **≥5 PRs/quarter, ≥2
+PRs/month** — comparable thresholds per unit time; `analyze --min-prs`,
+`slices.MIN_PRS`), then **contributor-weighted** means across repos:
+weight = the repo's core human contributors active in the study window
+(≥5 commits authored in Q4-2025..Q2-2026, bots excluded, from GitHub
+weekly contributor stats; `repo_contributors_window.csv`; all-time variant
+kept for sensitivity). Contributor weighting answers "what does the
+typical AI-org developer's PR flow look like"; pooled and equal-weight
+variants differ through a repo-size gradient (small repos are AI-heavier)
+and are reported only as reconciliation views.
 
-Cross-layer integration weights census-based and sample-based components by
-their population PR counts, corrects layer C for measured marker/bot-author
-overlap per prefix, and never silently assumes an overlap where no sample
-exists. Org adoption thresholds add the org's branch share to its
-contributor-weighted marker rate (upper-bound union approximation, flagged).
+**Bootstrap CIs** (`analyze.bootstrap_ci`): the unit of resampling is the
+REPO — each draw resamples the qualifying (per-repo rate, weight) pairs
+with replacement to the original count, recomputes the weighted mean, and
+the 95% interval is the 2.5th/97.5th percentile over 2,000 draws. CIs
+therefore express across-repo sampling variability under the chosen
+weighting (not within-repo PR-level noise; the census is a complete
+enumeration, so there is no PR-sampling error). The RNG is module-level
+and seeded (`analyze._RNG`, seed 20260630): identical reruns reproduce
+identical intervals. Studies with their own uncertainty needs reuse the
+same helper (e.g. paper figures) or document their estimator inline
+(review_action's Horvitz–Thompson weights, §5a2).
+
+Cross-layer decomposition (`studies/layers.py`) is exact and per-PR on the
+census (disjoint by precedence B > A > C); the earlier sample-blended
+integration and org-threshold approximations were removed 2026-07-20.
 
 Accountability metrics (studies/accountability.py): self-merge =
 mergedBy == author; one-person accountability = self-merged with no
@@ -316,10 +337,14 @@ self-approval, so a second-human merge is treated as tacit review.
 All stages are checkpointed, idempotent, and resume-safe; collection was
 ~36h wall-clock under rate limits with zero data loss across interruptions.
 Studies use seeded sampling (published draws reproduce exactly); their
-API-hydration steps re-pull live state. 97 unit tests cover storage
-semantics, window math, detection (incl. cutoff filtering and the layer-C
-false-positive exclusion), weighting, coverage gating, and the layered
-decomposition. The end-to-end path is `scripts/regenerate.py`: a fixed-point
+API-hydration steps re-pull live state. The unit-test suite (`uv run
+pytest -q`; fast, no network) covers storage semantics (atomic cells,
+cache validation, self-heal), window math and the w8 rule, detection
+(marker/agent/branch layers incl. the as-of bound and the layer-C
+false-positive exclusion), review classification and bot hygiene, dedup
+freshness, the incremental-month registry, weighting, coverage gating,
+pagination completeness, and the HT sampling weights — each test names
+the finding or review item it pins. The end-to-end path is `scripts/regenerate.py`: a fixed-point
 loop over collection stages, hard gates (nonzero exits, strata DONE
 sentinels, gap-free coverage with explicit waivers), then a generated report
 (`artifacts/report_generated.md`) plus a hashed census manifest — canonical
@@ -368,8 +393,10 @@ content.
 - **Floors, asymmetric across tools** (§2). The Codex marker floor (0.15% of
   PRs) vs its branch-level rate (3.6%) shows the gap can be ~24×.
 - **Prominence-selected population**; no claim about GitHub at large.
-- **Q2-2026 mild recency censoring** (collected ~1 week after quarter end;
-  late reviews/merges undercounted).
+- **Q2-2026 fate provisionality**: PRs created after ~2026-05-05 are
+  w8-immature at the frozen as-of and carry no fate (excluded, not
+  miscounted); Q2 fate cells have less data until the 2026-09-01 re-pull
+  finalizes them (§1c).
 - **31 repo-periods (0.4%) permanently inaccessible.**
 - **Branch-PR samples are first-page (created-desc) per org-quarter** — mild
   within-quarter recency bias.

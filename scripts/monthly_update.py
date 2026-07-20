@@ -3,10 +3,12 @@
 Adds one month of data and refreshes the monthly trend tables. Semantics
 (docs/METHODS.md §0 addendum):
 
-- PROVISIONAL MONTH: reviews and merges lag PR creation, so the most recent
-  month is always preliminary. Each update therefore RE-COLLECTS the previous
-  month (wipes its census-v2 cells first) before collecting the new one, and
-  the newest month should be read as provisional until the next update.
+- PROVISIONAL MONTHS: under the w8 rule a month's fate metrics stay open
+  until ~8 weeks after month end, so each update RE-COLLECTS the previous
+  TWO months (wipes their census cells first) before collecting the new
+  one: N-1 for creation recency, N-2 for w8 finalization. A month's fates
+  are final after it has been revised as N-2 (two updates after first
+  collection); until then read it as provisional.
 - The population and classification metadata stay FROZEN between deliberate
   revisions — a monthly update adds activity data only, so trend movements
   are practice changes, not population artifacts.
@@ -29,6 +31,16 @@ from pipeline.scan_orgs import QUARTER_RANGES, month_range, resolve_period  # no
 def previous_month(tok: str) -> str:
     y, m = int(tok[:4]), int(tok[5:7])
     return f"{y - 1}-12" if m == 1 else f"{y}-{m - 1:02d}"
+
+
+def months_to_revise(new: str) -> list[str]:
+    """The two trailing months to wipe+re-collect when adding `new`:
+    N-1 (creation recency — PRs still being opened/indexed) and N-2
+    (w8 finalization — its last 8-week windows closed during month N-1/N,
+    so this re-collection makes its fate metrics final). Revising only
+    N-1 never finalizes anything under the w8 rule."""
+    prev = previous_month(new)
+    return [previous_month(prev), prev]
 
 
 def wipe_month(tok: str) -> int:
@@ -77,19 +89,20 @@ if __name__ == "__main__":
         raise SystemExit(__doc__)
     new = sys.argv[1]
     month_range(new)                       # validates the token
-    prev = previous_month(new)
+    revise = months_to_revise(new)
     repos = DRV / "population_repos.txt"
     coll = collectable(repos)
-    print(f"revising provisional month {prev}: wiped {wipe_month(prev)} cells")
-    run("pipeline.precount", "--repos", str(coll), "--periods", prev, new)
-    run("pipeline.census", "--repos", str(coll), "--periods", prev, new)
+    for tok in revise:
+        print(f"revising provisional month {tok}: wiped {wipe_month(tok)} cells")
+    run("pipeline.precount", "--repos", str(coll), "--periods", *revise, new)
+    run("pipeline.census", "--repos", str(coll), "--periods", *revise, new)
     # register the months PERSISTENTLY: later analyses (and later monthly
     # updates) must keep every incremental month, not just this invocation's
     reg = set()
     if INCREMENTAL_REGISTRY.is_file():
         reg = {ln.strip() for ln in
                INCREMENTAL_REGISTRY.read_text().splitlines() if ln.strip()}
-    for tok in (prev, new):
+    for tok in (*revise, new):
         start = resolve_period(tok).split("..")[0]
         inside_frozen = any(qr.split("..")[0] <= start <= qr.split("..")[1]
                             for qr in QUARTER_RANGES.values())
