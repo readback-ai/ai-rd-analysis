@@ -243,3 +243,22 @@ def test_manifest_payload_validated_against_deterministic_draw(tmp_path,
         {"fingerprint": m1["fingerprint"], "selected": {"Q1-2026": []}}))
     m2, fresh = ra.ensure_manifest(pool)
     assert m2["selected"] == m1["selected"]      # repaired to the true draw
+
+
+def test_compute_side_selection_validation(tmp_path, monkeypatch):
+    """Review round 8 P1 (RED first): compute() must independently compare
+    the manifest payload with the deterministic draw — a
+    fingerprint-matching manifest with selected {"Q1-2026": []} and an
+    empty sample previously produced an EMPTY responsiveness table
+    through the real compute() path."""
+    import json as _json
+    import pytest
+    from pipeline.studies import review_action as ra
+    pool = {"Q1-2026": [_item("o/a", 1)]}
+    good = {"fingerprint": ra.frame_fingerprint(ra._pool_items(pool)),
+            "selected": ra._selection_of(pool)}
+    ra.require_selection_matches(good, pool)          # passes silently
+    truncated = {"fingerprint": good["fingerprint"],
+                 "selected": {"Q1-2026": []}}
+    with pytest.raises(SystemExit, match="rerun --pull"):
+        ra.require_selection_matches(truncated, pool)

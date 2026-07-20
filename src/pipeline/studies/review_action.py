@@ -285,6 +285,17 @@ def rebuild_sample(manifest: dict, cache: dict, pool: dict) -> set:
     return done
 
 
+def require_selection_matches(manifest: dict, pool: dict) -> None:
+    """Compute-side guard (round-8 review P1): the manifest payload must
+    equal the deterministic draw of the CURRENT pool — a
+    fingerprint-matching manifest whose selection was truncated/tampered
+    after the last pull would otherwise validate coverage vacuously."""
+    if manifest.get("selected") != _selection_of(pool):
+        raise SystemExit(
+            "manifest selection does not match the deterministic draw of "
+            "the current frame — rerun --pull before computing")
+
+
 def coverage_gaps(manifest: dict, records: dict) -> list:
     """Selected keys without a verified-complete record."""
     return [k for k in _selected_keys(manifest)
@@ -485,6 +496,10 @@ def compute() -> None:
         raise SystemExit(
             f"sampling frame changed (manifest {manifest.get('fingerprint')}"
             f" != current {fp}) — rerun --pull to redraw before computing")
+    pool_now: dict = defaultdict(list)
+    for (r, n), (per, loc, frt, login, ai, ins) in frame.items():
+        pool_now[per].append((r, n, loc, frt, login, ai, ins))
+    require_selection_matches(manifest, pool_now)
     recs: dict = {}                      # newest record per PR wins (repair)
     for ln in SAMPLE.read_text().splitlines():
         d = json.loads(ln)
