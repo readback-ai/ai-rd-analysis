@@ -399,3 +399,20 @@ def test_agent_suffixed_user_logins_are_bots():
     assert is_bot_login("openhands-agent")
     assert is_bot_login("hermes_agent")
     assert not is_bot_login("reagent")        # suffix is hyphen-anchored
+
+
+def test_w8_maturity_follows_data_as_of_not_frame_end(monkeypatch):
+    """Repro RED first: maturity must be judged against detect.AS_OF (the
+    data-collection stamp, bumped at re-pulls) — not frame-end CUTOFF —
+    else June-2026 PRs stay 'immature' forever and the Sept finalization
+    re-pull can never surface their fates."""
+    from pipeline import detect
+    pr = dict({"author": {"login": "alice", "__typename": "User"},
+               "commits": {"nodes": []}, "reviews": {"nodes": []}},
+              createdAt="2026-06-20T00:00:00Z",
+              mergedAt="2026-07-10T00:00:00Z",
+              mergedBy={"login": "alice", "__typename": "User"})
+    assert not classify_pr(pr).w8_mature          # as-of = frame end today
+    monkeypatch.setattr(detect, "AS_OF", "2026-09-01T00:00:00Z")
+    assert classify_pr(pr).w8_mature              # after the Sept re-pull
+    assert classify_pr(pr).merged

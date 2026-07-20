@@ -35,6 +35,14 @@ from dataclasses import dataclass
 # to a still-open PR after the cutoff is not filterable; PRs are
 # creation-windowed, so the exposure is days and affects layer A only.
 CUTOFF = "2026-06-30T23:59:59Z"
+# AS_OF: the data-collection stamp — when the census cells were last
+# (re-)pulled. Governs w8 MATURITY only (a PR's fate is reportable once
+# its 56-day window closed before we last looked). Kept conservatively at
+# the frame end while the initial 2026-07-01..09 collection stands; BUMP
+# at each re-pull (monthly updates, the 2026-09-01 Q2 finalization) to
+# the run's start date — mature PRs are immutable, so bumping only ever
+# ADDS newly-mature PRs (METHODS §1c).
+AS_OF = CUTOFF
 
 # FROZEN CENSORING RULE (METHODS conventions): all per-PR outcomes are
 # measured at 8 WEEKS after PR creation. The maturity curves show merges
@@ -324,7 +332,7 @@ def classify_pr(pr: dict, markers: dict[str, ToolSpec] = MARKERS) -> PRClass:
     rejected = (not merged_ever and bool(created)
                 and _within_w8(created, pr.get("closedAt")))
     w8_mature = bool(created) and \
-        (_iso(CUTOFF) - _iso(created)).days >= W8_DAYS
+        (_iso(AS_OF) - _iso(created)).days >= W8_DAYS
     merged_by = pr.get("mergedBy")
     self_merged = None
     if merged and merged_by is not None:

@@ -93,14 +93,25 @@ AI-topic repos. Appendix cuts (org-type public/private/community via
 ## 1c. Incremental monthly updates (runbook)
 
 `scripts/monthly_update.py YYYY-MM` adds a month of activity data:
-1. RE-COLLECTS the previous TWO months first (wipes their census cells) —
-   N-1 for creation recency, and N-2 because under the w8 rule its last
-   8-week windows only just closed: a month's fate metrics are FINAL once
-   it has been revised as N-2, i.e. two updates after first collection.
-   Until then its rows are provisional (immature PRs carry no fate).
-2. Collects the new month (precount + census; months are first-class period
+1. RE-COLLECTS the previous TWO months first (wipes their census cells;
+   cells are immutable snapshots, so refresh is always wipe + full
+   re-query, reconciled against fresh precounts) — N-1 for creation
+   recency, and N-2 because under the w8 rule its last 8-week windows
+   only just closed: a month's fate metrics are FINAL once it has been
+   revised as N-2, i.e. two updates after first collection. Until then
+   its rows are provisional (immature PRs carry no fate). Stale
+   quarter-shaped cells overlapping a revised month are superseded PR-by-
+   PR via the load-order freshness rule (`analyze.group_by_period`).
+2. (manual, per re-pull) BUMP `detect.AS_OF` to the run's start date —
+   maturity is judged against the data-collection stamp, and since mature
+   PRs are immutable, bumping only ever ADDS newly-mature PRs. Concretely
+   for Q2-2026: the update adding 2026-07 (run ~Aug 1) re-collects and
+   finalizes May (windows closed Jul 26); the update adding 2026-08 (run
+   ~Sep 1) finalizes June (windows closed Aug 25) — the monthly cadence
+   IS the Sept-1 Q2 finalization, executed in two steps.
+3. Collects the new month (precount + census; months are first-class period
    tokens via `scan_orgs.resolve_period`).
-3. Prints the monthly trend tables (`analyze --granularity month`,
+4. Prints the monthly trend tables (`analyze --granularity month`,
    2-PR/month floor ≈ the 5-PR/quarter threshold per unit time).
 Population and classification metadata stay FROZEN between deliberate
 revisions so month-over-month movement reflects practice, not population
