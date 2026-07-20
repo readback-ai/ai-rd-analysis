@@ -228,3 +228,16 @@ def test_pull_cell_falls_back_to_small_pages_on_502(monkeypatch):
     monkeypatch.setattr(census.time, "sleep", lambda s: None)
     nodes, cached = pull_cell("o/r", "2025-12-21..2025-12-21")
     assert nodes == [{"number": 9}] and "small" in calls
+
+
+def test_census_rest_fallback_backfills_precount_cache(monkeypatch):
+    """Repro RED first: when no precount exists, the rest_count fallback
+    result must be cache-written as the precount so later invocations
+    (resume runs, the cached-cell fast path) stop re-querying."""
+    from pipeline.precount import get_precount
+    monkeypatch.setattr(census, "rest_count", lambda *a, **k: 30)
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, r: ([{"number": i} for i in range(30)], False))
+    monkeypatch.setattr(census.time, "sleep", lambda s: None)
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 30
+    assert get_precount("o/r", "Q1-2026") == 30

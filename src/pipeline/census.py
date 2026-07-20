@@ -29,7 +29,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from pipeline.ghx import cell_path, graphql_nodes, read_cell, rest_count
-from pipeline.precount import get_precount
+from pipeline.precount import get_precount, precount_path
 from pipeline.scan_orgs import QUARTER_RANGES, resolve_period
 
 PAGE_SIZE = 50   # PRs per GraphQL call; _paginate cursors to the API's
@@ -135,7 +135,10 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
         total = rest_count(f"repo:{repo} is:pr created:{rng}",  # its call
                            endpoint="search/issues")            # failed
         time.sleep(2)
-    if total is None:
+        if total is not None:                    # backfill the cache so
+            precount_path(repo, period).write_text(  # resume runs and the
+                json.dumps({"total": total}))        # fast path stop
+    if total is None:                                # re-querying
         return None
     k = max(k, -(-total * 11 // (10 * (PAGE_SIZE - 5))))   # ceil w/ headroom
     ranges = [rng] if total <= PAGE_SIZE else subwindows(rng, k)
