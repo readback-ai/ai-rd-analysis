@@ -193,7 +193,7 @@ def _hydration_cache() -> dict:
             continue
         for ln in path.read_text().splitlines():
             d = json.loads(ln)
-            if _complete(d):
+            if _complete(d) or d.get("unretrievable") is True:
                 cache[(d["repo"], d["num"])] = d
     return cache
 
@@ -287,7 +287,8 @@ def rebuild_sample(manifest: dict, cache: dict, pool: dict) -> set:
         for key in _selected_keys(manifest):
             d = cache.get(key)
             cur = current.get(key)
-            if d is None or cur is None or not _complete(d):
+            if d is None or cur is None or not (
+                    _complete(d) or d.get("unretrievable") is True):
                 continue
             per, (repo, num, loc, frt, login, ai, ins) = cur
             out.write(json.dumps({**d, "per": per, "loc": loc,
@@ -309,10 +310,42 @@ def require_selection_matches(manifest: dict, pool: dict) -> None:
             "the current frame — rerun --pull before computing")
 
 
+def _definitive_miss(node) -> bool:
+    """A SUCCESSFUL batch response carrying an explicit null repository or
+    null pullRequest: the entity is gone from the live API (repo
+    privatized/deleted, or PRs disabled after the census — measured:
+    openai/plugins disabled PRs 2026-07-14). Definitive nonresponse, as
+    opposed to a transient failure (whole-response None), which defers."""
+    if node is None:
+        return True
+    return isinstance(node, dict) and node.get("pullRequest") is None
+
+
+def _tombstone(per: str, x) -> dict:
+    """Record of DEFINITIVE nonresponse for a selected PR: resolves
+    coverage as documented unit nonresponse (~0.5% of the selection),
+    never analyzed as data, retried by --repair in case retrievability
+    returns."""
+    repo, num, loc, frt, login, ai, ins = x
+    return {"per": per, "repo": repo, "num": num, "loc": loc,
+            "first_review": frt, "author": login, "ai": ai, "ins": ins,
+            "commits": [], "unretrievable": True,
+            "commits_complete": False}
+
+
 def coverage_gaps(manifest: dict, records: dict) -> list:
-    """Selected keys without a verified-complete record."""
+    """Selected keys without a verified-complete record OR a documented
+    nonresponse tombstone."""
     return [k for k in _selected_keys(manifest)
-            if k not in records or not _complete(records[k])]
+            if k not in records
+            or not (_complete(records[k])
+                    or records[k].get("unretrievable") is True)]
+
+
+def analyzable_keys(manifest: dict, records: dict) -> list:
+    """Selected keys with actual data (tombstoned nonresponse excluded)."""
+    return [k for k in _selected_keys(manifest)
+            if _complete(records.get(k) or {})]
 
 
 def require_complete_sample(manifest: dict, records: dict) -> None:
@@ -348,7 +381,13 @@ def pull() -> None:
             if data is None:
                 continue
             for j, (repo, num, loc, frt, login, ai, ins) in enumerate(chunk):
-                node = data.get(f"a{j}") or {}
+                node = data.get(f"a{j}")
+                if _definitive_miss(node):
+                    print(f"NONRESPONSE {repo}#{num}: gone from the live "
+                          "API (tombstoned)", flush=True)
+                    out.write(json.dumps(_tombstone(
+                        per, (repo, num, loc, frt, login, ai, ins))) + "\n")
+                    continue
                 prq = node.get("pullRequest") if isinstance(node, dict) else None
                 if prq:
                     conn = prq.get("commits") or {}
@@ -407,6 +446,8 @@ def _suspect(d: dict) -> bool:
     len(commits) < commits_total — REGARDLESS of length (external review
     P1, round 3). Legacy records (no metadata): the old first:60 cap and
     exact page-boundary lengths."""
+    if d.get("unretrievable") is True:
+        return True                       # nonresponse: retried by repair
     if "commits_complete" in d or "commits_total" in d:
         total = d.get("commits_total")
         return (d.get("commits_complete") is not True
@@ -431,9 +472,13 @@ def repair() -> None:
     for i, d in enumerate(trunc):
         full = _all_commits(d["repo"], d["num"])
         if full is None:
-            print(f"SKIP {d['repo']}#{d['num']}: pull failed/incomplete",
-                  flush=True)
+            if d.get("unretrievable") is True:
+                out.write(json.dumps(d) + "\n")   # still gone: keep stone
+            else:
+                print(f"SKIP {d['repo']}#{d['num']}: pull failed/incomplete",
+                      flush=True)
             continue
+        d.pop("unretrievable", None)
         d["commits"], d["commits_total"], d["commits_api_total"] = full
         d["commits_complete"] = True
         out.write(json.dumps(d) + "\n")
@@ -521,7 +566,13 @@ def compute() -> None:
         d = json.loads(ln)
         recs[(d["repo"], d["num"])] = d
     require_complete_sample(manifest, recs)
-    selected = _selected_keys(manifest)
+    selected = analyzable_keys(manifest, recs)
+    nonresp = len(_selected_keys(manifest)) - len(selected)
+    if nonresp:
+        print(f"unit nonresponse: {nonresp} selected PRs "
+              f"({100 * nonresp / len(_selected_keys(manifest)):.1f}%) "
+              "unretrievable at hydration (repos privatized/PRs disabled "
+              "after the census) — excluded, HT weights unchanged")
     lanes = defaultdict(lambda: defaultdict(float))
     for key in selected:
         d = recs[key]

@@ -278,3 +278,31 @@ def test_draw_is_canonical_under_encounter_order(monkeypatch):
     assert d1 == d2
     assert "Q4-2025" not in d1                        # empty normalized
     assert ra._selection_of(fwd) == ra._selection_of(rev)
+
+
+def test_definitive_nonresponse_tombstones(tmp_path, monkeypatch):
+    """Round-11 (RED first): a SUCCESSFUL batch response with an explicit
+    null pullRequest (repo privatized/deleted or PRs disabled after the
+    census — measured: openai/plugins disabled PRs 2026-07-14) is
+    DEFINITIVE nonresponse, not a transient failure. It tombstones, the
+    tombstone resolves coverage (documented nonresponse, not missing
+    work), is never treated as data, and repair retries it."""
+    from pipeline.studies import review_action as ra
+    # definitive miss detection
+    assert ra._definitive_miss(None)                      # repo-level null
+    assert ra._definitive_miss({"pullRequest": None})     # PR-level null
+    assert not ra._definitive_miss({"pullRequest": {"commits": {}}})
+    # tombstones: not complete, suspect (repair retries), resolve coverage
+    tomb = ra._tombstone("Q1-2026", ("o/a", 1, 100,
+                                     "2026-01-02T00:00:00Z", "alice",
+                                     False, True))
+    assert tomb["unretrievable"] is True
+    assert not ra._complete(tomb)
+    assert ra._suspect(tomb)
+    manifest = {"fingerprint": "f", "selected":
+                {"Q1-2026": [["o/a", 1, 100], ["o/b", 2, 100]]}}
+    records = {("o/a", 1): tomb, ("o/b", 2): _rec("o/b", 2)}
+    assert ra.coverage_gaps(manifest, records) == []
+    ra.require_complete_sample(manifest, records)         # passes
+    # a tombstone never counts as analyzable data
+    assert ra.analyzable_keys(manifest, records) == [("o/b", 2)]

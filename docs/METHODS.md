@@ -436,7 +436,13 @@ numbers come only from that artifact.
   terminal pagination walk: GitHub's commits totalCount includes
   force-pushed/rebased-away commits it never serves (measured 250 of a
   claimed 281 on one PR), so records store the RETRIEVED count as
-  `commits_total` alongside the API claim (`commits_api_total`).
+  `commits_total` alongside the API claim (`commits_api_total`). UNIT
+  NONRESPONSE: selected PRs whose repo left the live API between census
+  and hydration (privatized, deleted, or PRs disabled — measured:
+  openai/plugins disabled PRs 2026-07-14) are tombstoned as documented
+  nonresponse (~0.5% of the selection), excluded from analysis with HT
+  weights unchanged, reported in the table output, and retried on every
+  repair in case retrievability returns.
 
 ## 5b. LOC hygiene sensitivity (generated content)
 
