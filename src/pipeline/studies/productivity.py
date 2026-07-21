@@ -586,16 +586,78 @@ def adoption() -> None:
                   f"{r['median']:>8.2f}")
 
 
+def review_mix() -> dict:
+    """Figure 6: review mix of MERGED PRs, insider vs external, per
+    quarter — the substitution hypothesis (human review declining, AI/bot
+    review rising). For each (period, slice in {ins, ext}): share of
+    mature merged PRs (and of their capped LOC) in each approval channel
+    (humanRev = reviewer!=author human review; botOnly = AI/CI bot review
+    only; selfUnrev / otherUnrev = merged with no review at all).
+    Mature-gated like all outcome metrics: Q2-2026 reflects PRs created
+    early enough to close their w8 window (finalizes with AS_OF
+    re-pulls). Pooled shares (repo-size weighted by construction).
+
+    Returns {(period, slice): {n, loc, <ch>_pr, <ch>_loc ...}}."""
+    keep = population_repos()
+    agg: dict = defaultdict(lambda: defaultdict(float))
+    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
+        if repo not in keep or per not in PERIODS:
+            continue
+        for p in prs:
+            a = p.get("author") or {}
+            if a.get("__typename") == "Bot" or not a.get("login") \
+                    or is_bot_login(a["login"]):
+                continue
+            c = classify_pr(p, MARKERS)
+            ch = merged_channel(c)
+            if ch is None:
+                continue                 # unmerged or w8-immature
+            loc = min((p.get("additions") or 0) + (p.get("deletions") or 0),
+                      LINE_CAP)
+            d = agg[(per, "ins" if c.insider else "ext")]
+            d["n"] += 1
+            d["loc"] += loc
+            d[f"{ch}_pr"] += 1
+            d[f"{ch}_loc"] += loc
+    out = {}
+    for key, d in agg.items():
+        row = {"n": int(d["n"]), "loc": d["loc"]}
+        for ch in ("humanRev", "botOnly", "selfUnrev", "otherUnrev"):
+            row[f"{ch}_pr"] = d[f"{ch}_pr"] / d["n"] if d["n"] else 0.0
+            row[f"{ch}_loc"] = d[f"{ch}_loc"] / d["loc"] if d["loc"] else 0.0
+        out[key] = row
+    return out
+
+
+def review_mix_table() -> None:
+    rows = review_mix()
+    print("review mix of MERGED PRs (mature-gated, pooled): PR share / "
+          "LOC share per approval channel")
+    print("humanRev = reviewer!=author human review; botOnly = AI/CI bot "
+          "only; selfUnrev/otherUnrev = merged unreviewed")
+    print(f"{'period':9}{'slice':6}{'merged':>8}{'humanRev':>16}"
+          f"{'botOnly':>16}{'selfUnrev':>16}{'otherUnrev':>16}")
+    for per in PERIODS:
+        for sl in ("ins", "ext"):
+            r = rows.get((per, sl))
+            if not r:
+                continue
+            cells = "".join(
+                f"  {100 * r[ch + '_pr']:5.1f}/{100 * r[ch + '_loc']:5.1f}%"
+                for ch in ("humanRev", "botOnly", "selfUnrev", "otherUnrev"))
+            print(f"{per:9}{sl:6}{r['n']:>8}{cells}")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cut", choices=["decomposition", "persistent",
                                       "core", "channels", "aisplit",
-                                      "adoption"],
+                                      "adoption", "reviewmix"],
                     default="decomposition")
     a = ap.parse_args()
     {"decomposition": decomposition, "persistent": persistent,
      "core": core_loc, "channels": channels, "aisplit": ai_split,
-     "adoption": adoption}[a.cut]()
+     "adoption": adoption, "reviewmix": review_mix_table}[a.cut]()
 
 
 if __name__ == "__main__":

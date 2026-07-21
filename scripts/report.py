@@ -67,6 +67,8 @@ def sections(granularity: str, repos: Path) -> list[tuple[str, list[str]]]:
          ["pipeline.studies.productivity", "--cut", "adoption"]),
         ("Merged LOC by approval channel",
          ["pipeline.studies.productivity", "--cut", "channels"]),
+        ("Figure 6: review mix of merged PRs/LOC, core vs external",
+         ["pipeline.studies.productivity", "--cut", "reviewmix"]),
         ("Attention per line (comments/kLOC primary, bot-clean)",
          ["pipeline.studies.attention"]),
         ("PR fates at matched horizons (w8 primary, w26 sensitivity)",
