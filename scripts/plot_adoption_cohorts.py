@@ -59,25 +59,26 @@ def broken_pair(subfig, title):
     return axl, axr
 
 
-def series(axl, axr, rows, coh, key, color, label):
+# six series per panel: color = outcome (blue submitted, green merged),
+# linestyle = AI split (solid total, dashed non-AI, dotted AI-involved);
+# months with open w8 windows are shaded (merged provisional there)
+SERIES = [
+    ("submitted", "tab:blue", "-", "submitted total"),
+    ("sub_nonai", "tab:blue", "--", "submitted non-AI"),
+    ("sub_ai", "tab:blue", ":", "submitted AI-involved"),
+    ("merged", "tab:green", "-", "merged total (w8)"),
+    ("mrg_nonai", "tab:green", "--", "merged non-AI"),
+    ("mrg_ai", "tab:green", ":", "merged AI-involved"),
+]
+
+
+def series(axl, axr, rows, coh, key, color, ls, label):
     def vals(months):
         return [rows.get((m, coh), {}).get(key) for m in months]
-    axl.plot(range(len(BASELINE)), vals(BASELINE), marker="o", ms=3,
-             color=color)
-    y = vals(WINDOW)
-    if key == "merged":
-        mature = [i for i, m in enumerate(WINDOW) if month_mature(m)]
-        prov = [i for i, m in enumerate(WINDOW) if not month_mature(m)]
-        axr.plot(mature, [y[i] for i in mature], marker="o", ms=3,
-                 color=color, label=label)
-        if prov:
-            join = mature[-1:] + prov
-            axr.plot(join, [y[i] for i in join], marker="o", ms=3,
-                     ls=":", color=color,
-                     label="merged (provisional, w8 open)")
-    else:
-        axr.plot(range(len(WINDOW)), y, marker="o", ms=3, color=color,
-                 label=label)
+    axl.plot(range(len(BASELINE)), vals(BASELINE), marker="o", ms=2.5,
+             ls=ls, color=color)
+    axr.plot(range(len(WINDOW)), vals(WINDOW), marker="o", ms=2.5,
+             ls=ls, color=color, label=label)
 
 
 def main() -> None:
@@ -86,18 +87,21 @@ def main() -> None:
     fig.suptitle("Figure 4: LOC per contributor per month, submitted and "
                  "merged, by adoption cohort", fontsize=12, y=1.04)
     subfigs = fig.subfigures(2, 3, hspace=0.08, wspace=0.05)
+    prov = [i for i, m in enumerate(WINDOW) if not month_mature(m)]
     for sf, (coh, desc) in zip(subfigs.flat, ADOPTION_COHORTS):
         axl, axr = broken_pair(sf, desc.split(":")[0])
-        series(axl, axr, rows, coh, "submitted", "tab:blue",
-               "submitted kLOC / contributor")
-        series(axl, axr, rows, coh, "merged", "tab:green",
-               "merged kLOC (w8)")
+        for key, color, ls, label in SERIES:
+            series(axl, axr, rows, coh, key, color, ls, label)
+        if prov:
+            axr.axvspan(prov[0] - 0.5, prov[-1] + 0.5, color="0.85",
+                        alpha=0.5, zorder=0,
+                        label="w8 windows open (merged provisional)")
         axl.set_ylim(bottom=0)
         axl.set_ylabel("kLOC / contributor / month")
     # one figure-level legend: per-panel boxes overlapped rising data
     handles, labels = axr.get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper right", ncol=3, fontsize=9,
-               frameon=False, bbox_to_anchor=(0.98, 1.03))
+    fig.legend(handles, labels, loc="upper right", ncol=4, fontsize=8,
+               frameon=False, bbox_to_anchor=(0.99, 1.05))
     fig.savefig("artifacts/fig4_adoption_cohorts.png", dpi=200,
                 bbox_inches="tight")
     print("wrote artifacts/fig4_adoption_cohorts.png")

@@ -354,10 +354,10 @@ def _author_months_and_cohorts():
         q_of[f"2026-{m + 3:02d}"] = "Q2-2026"
     for m in (10, 11, 12):
         q_of[f"2025-{m}"] = "Q4-2025"
-    # login -> month -> [ai_kloc, nonai_kloc, ai_prs, prs, mrg_prs,
-    #                     submitted_kloc]
+    # login -> month -> [ai_mrg_kloc, nonai_mrg_kloc, ai_prs, prs,
+    #                     mrg_prs, submitted_kloc, ai_submitted_kloc]
     acc: dict = defaultdict(
-        lambda: defaultdict(lambda: [0.0, 0.0, 0, 0, 0, 0.0]))
+        lambda: defaultdict(lambda: [0.0, 0.0, 0, 0, 0, 0.0, 0.0]))
     insiders = set()
     for (repo, mon), prs in group_by_period(load_cells(), QUARTER_RANGES,
                                             "month").items():
@@ -380,6 +380,7 @@ def _author_months_and_cohorts():
             row[5] += kloc                       # submitted: no censoring
             if c.ai_involved:
                 row[2] += 1
+                row[6] += kloc                   # AI-involved submitted
             if c.merged:
                 row[4] += 1
                 row[0 if c.ai_involved else 1] += kloc
@@ -404,7 +405,8 @@ def _author_months_and_cohorts():
 
 
 def adoption_monthly() -> dict:
-    """(month, cohort) -> {n, submitted, merged} — mean kLOC per
+    """(month, cohort) -> {n, submitted, sub_ai, sub_nonai, merged,
+    mrg_ai, mrg_nonai} — mean kLOC per
     quarter-ACTIVE cohort member per MONTH (the Figure 4 series: submitted
     has no censoring; merged follows the w8 rule and is provisional on
     months not yet mature — see mature-month cap in the caption)."""
@@ -413,20 +415,21 @@ def adoption_monthly() -> dict:
     out = {}
     for mon in months:
         for coh, _d in ADOPTION_COHORTS:
-            sub, mrg = [], []
-            for login, coh_ in cohort_of_login.items():
-                if coh_ != coh:
-                    continue
-                row = acc[login].get(mon)
-                if not row or not row[3]:
-                    continue                     # inactive this month
-                sub.append(row[5])
-                mrg.append(row[0] + row[1])
-            if sub:
-                out[(mon, coh)] = {
-                    "n": len(sub),
-                    "submitted": sum(sub) / len(sub),
-                    "merged": sum(mrg) / len(mrg)}
+            rows = [acc[login][mon] for login, coh_ in
+                    cohort_of_login.items()
+                    if coh_ == coh and acc[login].get(mon)
+                    and acc[login][mon][3]]
+            if not rows:
+                continue
+            n = len(rows)
+            out[(mon, coh)] = {
+                "n": n,
+                "submitted": sum(r[5] for r in rows) / n,
+                "sub_ai": sum(r[6] for r in rows) / n,
+                "sub_nonai": sum(r[5] - r[6] for r in rows) / n,
+                "merged": sum(r[0] + r[1] for r in rows) / n,
+                "mrg_ai": sum(r[0] for r in rows) / n,
+                "mrg_nonai": sum(r[1] for r in rows) / n}
     return out
 
 
