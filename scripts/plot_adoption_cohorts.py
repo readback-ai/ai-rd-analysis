@@ -85,7 +85,7 @@ def main() -> None:
     rows = adoption_monthly()
     fig = plt.figure(figsize=(13, 7))
     fig.suptitle("Figure 4: LOC per contributor per month, submitted and "
-                 "merged, by adoption cohort", fontsize=12, y=1.04)
+                 "merged, by adoption cohort", fontsize=12, y=1.02)
     subfigs = fig.subfigures(2, 3, hspace=0.08, wspace=0.05)
     prov = [i for i, m in enumerate(WINDOW) if not month_mature(m)]
     for sf, (coh, desc) in zip(subfigs.flat, ADOPTION_COHORTS):
@@ -98,10 +98,11 @@ def main() -> None:
                         label="w8 windows open (merged provisional)")
         axl.set_ylim(bottom=0)
         axl.set_ylabel("kLOC / contributor / month")
-    # one figure-level legend: per-panel boxes overlapped rising data
+    # legend lives in the unused sixth panel slot
     handles, labels = axr.get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper right", ncol=4, fontsize=8,
-               frameon=False, bbox_to_anchor=(0.99, 1.05))
+    ax6 = list(subfigs.flat)[5].subplots()
+    ax6.axis("off")
+    ax6.legend(handles, labels, loc="center", fontsize=10, frameon=False)
     fig.savefig("artifacts/fig4_adoption_cohorts.png", dpi=200,
                 bbox_inches="tight")
     print("wrote artifacts/fig4_adoption_cohorts.png")
