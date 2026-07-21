@@ -120,6 +120,11 @@ def _all_commits(repo: str, num: int) -> tuple[list[dict], int, int] | None:
         conn = graphql_nodes(q, {}, ".data.repository.pullRequest.commits",
                              expect=dict)
         if conn is None:
+            time.sleep(30)               # transient (rate/502): one retry
+            conn = graphql_nodes(q, {},
+                                 ".data.repository.pullRequest.commits",
+                                 expect=dict)
+        if conn is None:
             return None
         nodes.extend(conn.get("nodes") or [])
         total = conn.get("totalCount")
@@ -379,6 +384,12 @@ def pull() -> None:
                              + FIELDS % num)
             data = graphql_nodes(Q % " ".join(parts), {}, ".data", expect=dict)
             if data is None:
+                time.sleep(30)           # transient (rate/502): one retry
+                data = graphql_nodes(Q % " ".join(parts), {}, ".data",
+                                     expect=dict)
+            if data is None:
+                print(f"CHUNK FAILED after retry: {len(chunk)} PRs "
+                      "deferred", flush=True)
                 continue
             for j, (repo, num, loc, frt, login, ai, ins) in enumerate(chunk):
                 node = data.get(f"a{j}")
