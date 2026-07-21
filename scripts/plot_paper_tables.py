@@ -77,14 +77,25 @@ def fig2(rows):
 
 def fig3(rows):
     fig, axl, axr = broken_axes(
-        "merged kLOC per core contributor (w8)",
-        "Figure 3: Merged LOC per core contributor (CW, 95% CI)")
-    series(axl, axr, [r["kloc"] for r in rows], "merged kLOC / core author",
-           "tab:blue")
+        "kLOC per core contributor / quarter",
+        "Figure 3: Submitted and merged LOC per core contributor "
+        "(CW, 95% CI)")
+    series(axl, axr, [r["sub_kloc"] for r in rows],
+           "submitted kLOC / core author", "tab:blue")
+    series(axl, axr, [r["kloc"] for r in rows],
+           "merged kLOC / core author (w8)", "tab:green")
     for i, r in enumerate(rows):
         ax, x = (axl, 0) if i == 0 else (axr, i - 1)
+        ax.annotate(f"{r['sub_mult']:.2f}x", (x, r["sub_kloc"][0]),
+                    textcoords="offset points", xytext=(6, 8), fontsize=8,
+                    color="tab:blue")
         ax.annotate(f"{r['mult']:.2f}x", (x, r["kloc"][0]),
-                    textcoords="offset points", xytext=(6, 8), fontsize=8)
+                    textcoords="offset points", xytext=(6, -14), fontsize=8,
+                    color="tab:green")
+    # Q2-2026 merged is w8-provisional (May/June windows open at AS_OF)
+    axr.axvspan(1.6, 2.4, color="0.85", alpha=0.5, zorder=0,
+                label="Q2 merged provisional (w8 windows open)")
+    axr.legend(fontsize=8, loc="upper left")
     axl.set_ylim(bottom=0)
     fig.savefig("artifacts/fig3_core_loc.png", dpi=200,
                 bbox_inches="tight")

@@ -103,8 +103,10 @@ def usage_rows() -> list[dict]:
 
 
 def core_rows() -> list[dict]:
-    """Figure 3 rows: per period {period, repos, kloc: (mean, lo, hi),
-    mult} — kLOC merged (w8) per core author, CW."""
+    """Figure 3 rows: per period {period, repos, kloc, sub_kloc (each a
+    (mean, lo, hi) tuple), mult, sub_mult} — merged (w8) and submitted
+    kLOC per core author, CW. Submitted has no censoring; Q2 merged is
+    w8-deflated (provisional until the AS_OF re-pulls)."""
     pa = per_author()
     w = weights()
     ins_of = defaultdict(set)
@@ -116,21 +118,27 @@ def core_rows() -> list[dict]:
                     ("MEMBER", "OWNER", "COLLABORATOR"):
                 ins_of[(repo, per)].add(a["login"])
     rows = []
-    base = None
+    base = sub_base = None
     for per in PERIODS:
-        pairs = []
+        pairs, sub_pairs = [], []
         for (repo, p), authors in pa.items():
             if p != per:
                 continue
             core_a = {login: v for login, v in authors.items()
                       if login in ins_of[(repo, p)]}
             if len(core_a) >= 2:
-                mrg = sum(v[2] for v in core_a.values())
-                pairs.append((mrg / len(core_a) / 1000, w.get(repo, 1.0)))
-        est = _est(pairs)
+                n = len(core_a)
+                wt = w.get(repo, 1.0)
+                pairs.append((sum(v[2] for v in core_a.values())
+                              / n / 1000, wt))
+                sub_pairs.append((sum(v[4] for v in core_a.values())
+                                  / n / 1000, wt))
+        est, sub_est = _est(pairs), _est(sub_pairs)
         base = base if base is not None else est[0]
+        sub_base = sub_base if sub_base is not None else sub_est[0]
         rows.append({"period": per, "repos": len(pairs), "kloc": est,
-                     "mult": est[0] / base})
+                     "mult": est[0] / base, "sub_kloc": sub_est,
+                     "sub_mult": sub_est[0] / sub_base})
     return rows
 
 
@@ -148,14 +156,16 @@ def usage() -> None:
 
 
 def core() -> None:
-    print("Figure 3: Merged LOC per core contributor over time")
+    print("Figure 3: Submitted and merged LOC per core contributor over time")
     print("contributor-weighted repo means, bootstrap 95% CI; merged = w8 "
-          "rule; core = insider PR authors; repos with >=2 insider authors")
-    print(f"{'period':9}{'repos':>6}{'CW merged kLOC/core author':>30}"
-          f"{'x baseline':>12}")
+          "rule (Q2 provisional); core = insider PR authors; repos with "
+          ">=2 insider authors")
+    print(f"{'period':9}{'repos':>6}{'CW submitted kLOC/author':>28}"
+          f"{'x base':>8}{'CW merged kLOC/author':>26}{'x base':>8}")
     for r in core_rows():
         print(f"{r['period']:9}{r['repos']:>6}  "
-              f"{_fmt(r['kloc'], pct=False):>28}{r['mult']:>11.2f}x")
+              f"{_fmt(r['sub_kloc'], pct=False):>26}{r['sub_mult']:>7.2f}x"
+              f"  {_fmt(r['kloc'], pct=False):>24}{r['mult']:>7.2f}x")
 
 
 if __name__ == "__main__":

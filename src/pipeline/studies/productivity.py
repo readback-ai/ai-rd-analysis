@@ -39,9 +39,10 @@ LINE_CAP = 20_000        # per-PR cap so one vendored monster can't dominate
 
 
 def per_author() -> dict:
-    """(repo, period) -> login -> [prs, merged, merged_lines, ai_prs]."""
+    """(repo, period) -> login -> [prs, merged, merged_lines, ai_prs,
+    submitted_lines]."""
     keep = population_repos()
-    out: dict = defaultdict(lambda: defaultdict(lambda: [0, 0, 0, 0]))
+    out: dict = defaultdict(lambda: defaultdict(lambda: [0, 0, 0, 0, 0]))
     for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
         if repo not in keep or per not in PERIODS:
             continue
@@ -53,12 +54,14 @@ def per_author() -> dict:
             c = classify_pr(p, MARKERS)
             row = out[(repo, per)][a["login"]]
             row[0] += 1
+            loc = min((p.get("additions") or 0)
+                      + (p.get("deletions") or 0), LINE_CAP)
+            row[4] += loc                        # submitted: no censoring
             if c.ai_involved:
                 row[3] += 1
             if c.merged:
                 row[1] += 1
-                row[2] += min((p.get("additions") or 0)
-                              + (p.get("deletions") or 0), LINE_CAP)
+                row[2] += loc
     return out
 
 
@@ -72,7 +75,7 @@ def decomposition() -> None:
     for per in PERIODS:
         N = A = M = L = 0
         for r in panel:
-            for n, m, ln, _ in pa[(r, per)].values():
+            for n, m, ln, *_ in pa[(r, per)].values():
                 A += 1
                 N += n
                 M += m
