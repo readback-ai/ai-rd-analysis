@@ -277,12 +277,13 @@ def ai_split() -> None:
 
 
 ADOPTION_COHORTS = [
-    ("early", "first AI-tracked PR by 2026-02"),
-    ("medium", "first AI-tracked PR 2026-03..2026-04"),
-    ("late", "first AI-tracked PR 2026-05 or later"),
-    ("never", "no AI-tracked PR through 2026-06"),
-    ("fleet", ">=300 merged PRs in one quarter (fleet/automation "
-              "operators; assigned before the AI-timing cohorts)"),
+    ("fleet", "fleet operators: >=300 merged PRs in some quarter "
+              "(assigned before the AI-timing cohorts)"),
+    ("early", "early adopters: first PR with AI evidence by end of "
+              "2026-02"),
+    ("medium", "middle adopters: first AI evidence 2026-03..2026-04"),
+    ("late", "late adopters: first AI evidence 2026-05 or later"),
+    ("never", "non-adopters: no PR with AI evidence in the study period"),
 ]
 FLEET_MIN = 300   # merged PRs in a single quarter; ~0.3% of core authors
 
@@ -313,58 +314,8 @@ def adoption_rows() -> dict:
 
     Returns {(period, cohort): {n, ai, nonai, total, lo, hi}}."""
     from pipeline.analyze import bootstrap_ci, weighted_mean
-    keep = population_repos()
-    q_of = {}
-    for m in range(1, 4):
-        q_of[f"2024-{m:02d}"] = "Q1-2024"
-        q_of[f"2026-{m:02d}"] = "Q1-2026"
-        q_of[f"2026-{m + 3:02d}"] = "Q2-2026"
-    for m in (10, 11, 12):
-        q_of[f"2025-{m}"] = "Q4-2025"
-    # login -> month -> [ai_kloc, nonai_kloc, ai_prs, prs, mrg_prs]
-    acc: dict = defaultdict(lambda: defaultdict(lambda: [0.0, 0.0, 0, 0, 0]))
-    insiders = set()
-    for (repo, mon), prs in group_by_period(load_cells(), QUARTER_RANGES,
-                                            "month").items():
-        if repo not in keep or mon not in q_of:
-            continue
-        for p in prs:
-            a = p.get("author") or {}
-            if a.get("__typename") == "Bot" or not a.get("login") \
-                    or is_bot_login(a["login"]):
-                continue
-            login = a["login"]
-            if p.get("authorAssociation") in ("MEMBER", "OWNER",
-                                              "COLLABORATOR"):
-                insiders.add(login)
-            c = classify_pr(p, MARKERS)
-            row = acc[login][mon]
-            row[3] += 1
-            if c.ai_involved:
-                row[2] += 1
-            if c.merged:
-                row[4] += 1
-                kloc = min((p.get("additions") or 0)
-                           + (p.get("deletions") or 0), LINE_CAP) / 1000
-                row[0 if c.ai_involved else 1] += kloc
-
-    def cohort_of(months: dict) -> str:
-        for per in PERIODS:
-            mons = [m for m, q in q_of.items() if q == per]
-            if sum(months.get(m, [0, 0, 0, 0, 0])[4] for m in mons) \
-                    >= FLEET_MIN:
-                return "fleet"
-        first = min((m for m, v in months.items() if v[2] > 0),
-                    default=None)
-        if first is None:
-            return "never"
-        if first <= "2026-02":
-            return "early"
-        return "medium" if first <= "2026-04" else "late"
-
+    acc, per_author_cohort, q_of = _author_months_and_cohorts()
     out = {}
-    per_author_cohort = {login: cohort_of(m) for login, m in acc.items()
-                         if login in insiders}
     for per in PERIODS:
         mons = [m for m, q in q_of.items() if q == per]
         for coh, _desc in ADOPTION_COHORTS:
@@ -388,6 +339,94 @@ def adoption_rows() -> dict:
                 "nonai": sum(nonai_v) / len(nonai_v),
                 "total": weighted_mean(tot), "lo": lo, "hi": hi,
                 "median": statistics.median(t for t, _ in tot)}
+    return out
+
+
+def _author_months_and_cohorts():
+    """Shared builder: per-author monthly activity, cohort assignment, and
+    the month->quarter map. Used by adoption_rows (quarterly table) and
+    adoption_monthly (Figure 4 series)."""
+    keep = population_repos()
+    q_of = {}
+    for m in range(1, 4):
+        q_of[f"2024-{m:02d}"] = "Q1-2024"
+        q_of[f"2026-{m:02d}"] = "Q1-2026"
+        q_of[f"2026-{m + 3:02d}"] = "Q2-2026"
+    for m in (10, 11, 12):
+        q_of[f"2025-{m}"] = "Q4-2025"
+    # login -> month -> [ai_kloc, nonai_kloc, ai_prs, prs, mrg_prs,
+    #                     submitted_kloc]
+    acc: dict = defaultdict(
+        lambda: defaultdict(lambda: [0.0, 0.0, 0, 0, 0, 0.0]))
+    insiders = set()
+    for (repo, mon), prs in group_by_period(load_cells(), QUARTER_RANGES,
+                                            "month").items():
+        if repo not in keep or mon not in q_of:
+            continue
+        for p in prs:
+            a = p.get("author") or {}
+            if a.get("__typename") == "Bot" or not a.get("login") \
+                    or is_bot_login(a["login"]):
+                continue
+            login = a["login"]
+            if p.get("authorAssociation") in ("MEMBER", "OWNER",
+                                              "COLLABORATOR"):
+                insiders.add(login)
+            c = classify_pr(p, MARKERS)
+            row = acc[login][mon]
+            row[3] += 1
+            kloc = min((p.get("additions") or 0)
+                       + (p.get("deletions") or 0), LINE_CAP) / 1000
+            row[5] += kloc                       # submitted: no censoring
+            if c.ai_involved:
+                row[2] += 1
+            if c.merged:
+                row[4] += 1
+                row[0 if c.ai_involved else 1] += kloc
+
+    def cohort_of(months: dict) -> str:
+        for per in PERIODS:
+            mons = [m for m, q in q_of.items() if q == per]
+            if sum(months.get(m, [0, 0, 0, 0, 0])[4] for m in mons) \
+                    >= FLEET_MIN:
+                return "fleet"
+        first = min((m for m, v in months.items() if v[2] > 0),
+                    default=None)
+        if first is None:
+            return "never"
+        if first <= "2026-02":
+            return "early"
+        return "medium" if first <= "2026-04" else "late"
+
+    per_author_cohort = {login: cohort_of(m) for login, m in acc.items()
+                         if login in insiders}
+    return acc, per_author_cohort, q_of
+
+
+def adoption_monthly() -> dict:
+    """(month, cohort) -> {n, submitted, merged} — mean kLOC per
+    quarter-ACTIVE cohort member per MONTH (the Figure 4 series: submitted
+    has no censoring; merged follows the w8 rule and is provisional on
+    months not yet mature — see mature-month cap in the caption)."""
+    acc, cohort_of_login, q_of = _author_months_and_cohorts()
+    months = sorted(q_of)
+    out = {}
+    for mon in months:
+        for coh, _d in ADOPTION_COHORTS:
+            sub, mrg = [], []
+            for login, coh_ in cohort_of_login.items():
+                if coh_ != coh:
+                    continue
+                row = acc[login].get(mon)
+                if not row or not row[3]:
+                    continue                     # inactive this month
+                sub.append(row[5])
+                mrg.append(row[0] + row[1])
+            if sub:
+                out[(mon, coh)] = {
+                    "n": len(sub),
+                    "submitted": sum(sub) / len(sub),
+                    "merged": sum(mrg) / len(mrg)}
     return out
 
 
