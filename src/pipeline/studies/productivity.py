@@ -586,7 +586,7 @@ def adoption() -> None:
                   f"{r['median']:>8.2f}")
 
 
-def review_mix() -> dict:
+def review_mix(by: str = "role") -> dict:
     """Figure 6: review mix of MERGED PRs, insider vs external, per
     quarter — the substitution hypothesis (human review declining, AI/bot
     review rising). For each (period, slice in {ins, ext}): share of
@@ -596,6 +596,10 @@ def review_mix() -> dict:
     Mature-gated like all outcome metrics: Q2-2026 reflects PRs created
     early enough to close their w8 window (finalizes with AS_OF
     re-pulls). Pooled shares (repo-size weighted by construction).
+
+    by="role": slices {ins, ext} (author association); by="ai": slices
+    {ai, nonai} (PR-level AI involvement — the Figure 6 alternative; note
+    the ai slice is empty at the Q1-2024 baseline by construction).
 
     Returns {(period, slice): {n, loc, <ch>_pr, <ch>_loc ...}}."""
     keep = population_repos()
@@ -614,7 +618,9 @@ def review_mix() -> dict:
                 continue                 # unmerged or w8-immature
             loc = min((p.get("additions") or 0) + (p.get("deletions") or 0),
                       LINE_CAP)
-            d = agg[(per, "ins" if c.insider else "ext")]
+            sl = ("ai" if c.ai_involved else "nonai") if by == "ai" \
+                else ("ins" if c.insider else "ext")
+            d = agg[(per, sl)]
             d["n"] += 1
             d["loc"] += loc
             d[f"{ch}_pr"] += 1
@@ -630,22 +636,25 @@ def review_mix() -> dict:
 
 
 def review_mix_table() -> None:
-    rows = review_mix()
     print("review mix of MERGED PRs (mature-gated, pooled): PR share / "
           "LOC share per approval channel")
     print("humanRev = reviewer!=author human review; botOnly = AI/CI bot "
           "only; selfUnrev/otherUnrev = merged unreviewed")
-    print(f"{'period':9}{'slice':6}{'merged':>8}{'humanRev':>16}"
-          f"{'botOnly':>16}{'selfUnrev':>16}{'otherUnrev':>16}")
-    for per in PERIODS:
-        for sl in ("ins", "ext"):
-            r = rows.get((per, sl))
-            if not r:
-                continue
-            cells = "".join(
-                f"  {100 * r[ch + '_pr']:5.1f}/{100 * r[ch + '_loc']:5.1f}%"
-                for ch in ("humanRev", "botOnly", "selfUnrev", "otherUnrev"))
-            print(f"{per:9}{sl:6}{r['n']:>8}{cells}")
+    for by, slices in (("role", ("ins", "ext")), ("ai", ("ai", "nonai"))):
+        rows = review_mix(by)
+        print(f"\n--- sliced by {'author role' if by == 'role' else 'PR AI involvement'} ---")
+        print(f"{'period':9}{'slice':6}{'merged':>8}{'humanRev':>16}"
+              f"{'botOnly':>16}{'selfUnrev':>16}{'otherUnrev':>16}")
+        for per in PERIODS:
+            for sl in slices:
+                r = rows.get((per, sl))
+                if not r:
+                    continue
+                cells = "".join(
+                    f"  {100 * r[ch + '_pr']:5.1f}/{100 * r[ch + '_loc']:5.1f}%"
+                    for ch in ("humanRev", "botOnly", "selfUnrev",
+                               "otherUnrev"))
+                print(f"{per:9}{sl:6}{r['n']:>8}{cells}")
 
 
 def main() -> None:

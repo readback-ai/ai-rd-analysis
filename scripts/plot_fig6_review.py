@@ -22,10 +22,16 @@ from pipeline.studies.productivity import PERIODS, review_mix  # noqa: E402
 
 BREAK_KW = dict(marker=[(-1, -0.5), (1, 0.5)], markersize=9,
                 linestyle="none", color="k", mec="k", mew=1, clip_on=False)
-CLASSES = [("humanRev", "tab:blue", "human-reviewed"),
-           ("botOnly", "tab:orange", "bot-only reviewed"),
-           ("selfUnrev", "tab:red", "self-merged unreviewed")]
-SLICES = [("ins", "-", "core"), ("ext", "--", "external")]
+# six SOLID lines in paired hues (dark = core, light = external): a
+# dashed-vs-solid split is invisible on the isolated Q1-2024 points
+SERIES6 = [
+    ("humanRev", "ins", "#1f77b4", "human-reviewed (core)"),
+    ("humanRev", "ext", "#8ec1e8", "human-reviewed (external)"),
+    ("botOnly", "ins", "#d95f02", "bot-only reviewed (core)"),
+    ("botOnly", "ext", "#fdbf6f", "bot-only reviewed (external)"),
+    ("selfUnrev", "ins", "#c11b1b", "self-merged unreviewed (core)"),
+    ("selfUnrev", "ext", "#f79c9c", "self-merged unreviewed (external)"),
+]
 
 
 def broken_pair(subfig, title):
@@ -57,17 +63,20 @@ def main() -> None:
                             (subfigs.flat[1], "loc",
                              "share of merged LOC")):
         axl, axr = broken_pair(sf, title)
-        for ch, color, clabel in CLASSES:
-            for sl, ls, slabel in SLICES:
-                y = [100 * rows.get((p, sl), {}).get(f"{ch}_{unit}", 0)
-                     for p in PERIODS]
-                axl.plot([0], y[:1], marker="o", ms=3, ls=ls, color=color)
-                axr.plot([0, 1, 2], y[1:], marker="o", ms=3, ls=ls,
-                         color=color, label=f"{clabel} ({slabel})")
+        for ch, sl, color, label in SERIES6:
+            y = [100 * rows.get((p, sl), {}).get(f"{ch}_{unit}", 0)
+                 for p in PERIODS]
+            axl.plot([0], y[:1], marker="o", ms=4, color=color)
+            axr.plot([0, 1, 2], y[1:], marker="o", ms=3, color=color,
+                     label=label)
+        # Q2-2026 is PARTIAL: only PRs whose w8 window closed by the
+        # AS_OF are classified (early-quarter weighted until the re-pull)
+        axr.axvspan(1.6, 2.4, color="0.85", alpha=0.5, zorder=0,
+                    label="Q2 partial (w8 windows open)")
         axl.set_ylim(0, 100)
         axl.set_ylabel("% of merged " + ("PRs" if unit == "pr" else "LOC"))
     handles, labels = axr.get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower center", ncol=3, fontsize=8,
+    fig.legend(handles, labels, loc="lower center", ncol=4, fontsize=8,
                frameon=False, bbox_to_anchor=(0.5, -0.08))
     fig.savefig("artifacts/fig6_review_mix.png", dpi=200,
                 bbox_inches="tight")
