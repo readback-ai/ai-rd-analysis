@@ -166,10 +166,12 @@ argument — one section = one module invocation):
 12. **Core-contributor merged LOC** (`--cut core`) — the Figure 3 series.
 13. **Core-contributor LOC split by AI involvement** (`--cut aisplit`) —
     noAI-author kLOC (flat) vs AI users' AI-PR + nonAI-PR kLOC.
-14. **Figure 4: adoption cohorts** (`--cut adoption`) — fixed cohorts
+14. **Figure A1: adoption cohorts** (`--cut adoption`) — fixed cohorts
     early/medium/late/never/**fleet** (≥300 merged PRs/quarter, assigned
     first); AI/nonAI/total kLOC per author with CI + median. Rendered as
-    `fig4_adoption_cohorts.png`.
+    `fig_a1_adoption_cohorts.png`; companions: `fig4_event_balanced.png`
+    (pooled balanced event panel), `fig5_fleet_vs_nonadopters.png`,
+    `fig_a2_adoption_event.png` (event time net of non-adopters).
 15. **Merged LOC by approval channel** (`--cut channels`) — humanRev /
     botOnly / selfUnrev / otherUnrev shares of merged LOC.
 16. **Attention per line** (`studies.attention`) — HUMAN comments/kLOC

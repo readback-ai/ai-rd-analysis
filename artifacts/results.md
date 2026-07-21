@@ -64,7 +64,7 @@ self-merge and reviewer profiles in the report.
   output roughly doubled too: direct evidence detection undercounts
   impact.
 
-## 6. Adoption cohorts & event alignment (Figures 4–5)
+## 6. Adoption cohorts & event alignment (Figures 4–5, A1–A2)
 - Fixed cohorts by first AI evidence — fleet (≥300 merged PRs/quarter,
   assigned first) / early (≤2026-02) / middle (2026-03..04) / late
   (≥2026-05) / non-adopters: every cohort steps up in its own adoption
@@ -72,15 +72,16 @@ self-merge and reviewer profiles in the report.
   despite w8 deflation; non-adopters flat 3.8→6.2). The 2024 baseline
   gradient (early > middle > late > never) is quantified adopter
   selection.
-- **Figure 5** (balanced event panel, net of non-adopters): flat positive
+- **Figure 4** (pooled balanced event panel, first AI use 2025-12..2026-04, raw levels) and **Figure A2** (per-cohort, net of non-adopters): flat positive
   pre-period premiums (early ~+4.2, middle ~+1.7..3.3 kLOC/month), then a
   t0 discontinuity (early 4.5→12.6, middle 3.3→10.1 submitted) settling
   ~+8.5–9.5 through t+2; the NON-AI series jumps at t0 in every cohort
   (early 4.6→8.6, middle 3.2→5.7) — the undetected-usage signature under
   constant composition. t0 partly reflects ascertainment; the
   plateau-vs-pre-period comparison is the conservative estimate.
-- **Fleet operators**: ~43 accounts merging 300–4,400 PRs/quarter (mean
-  531 kLOC/author in Q2-2026, ×13 the 2024 automation baseline);
+- **Fleet operators** (Figure 5, vs the non-adopter control): ~43
+  accounts merging 300–4,400 PRs/quarter (mean 531 kLOC/author in
+  Q2-2026, ×13 the 2024 automation baseline);
   half-ish unmarked; review coverage varies 0%–84% by org. A new
   production mode, reported as its own cohort, never averaged into
   per-contributor claims.

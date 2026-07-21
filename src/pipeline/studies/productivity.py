@@ -518,6 +518,50 @@ def adoption_event(max_off: int = 2, balanced: bool = True) -> dict:
     return out
 
 
+def event_balanced(max_off: int = 2) -> dict:
+    """Figure 4: mean per-author kLOC (six metrics: submitted/merged x
+    total/AI/non-AI) at offsets [-2..+2] around each adopter's first
+    observed AI month — BALANCED PANEL pooling every non-fleet adopter
+    whose full window fits the data, i.e. first AI use 2025-12..2026-04
+    (t0-2 >= 2025-10 and t0+2 <= 2026-06). Raw levels (no baseline
+    subtraction — see Figure A2 for the net-of-non-adopters view);
+    inactive months count as zero volume. immature_share per offset =
+    fraction of observations in w8-open calendar months (merged
+    provisional there).
+
+    Returns {e: {n, submitted, sub_ai, sub_nonai, merged, mrg_ai,
+    mrg_nonai, immature_share}}."""
+    acc, cohort_of_login, _q_of = _author_months_and_cohorts()
+    zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
+
+    def metrics(row):
+        return {"submitted": row[5], "sub_ai": row[6],
+                "sub_nonai": row[5] - row[6],
+                "merged": row[0] + row[1], "mrg_ai": row[0],
+                "mrg_nonai": row[1]}
+
+    aligned = {}
+    for login, coh in cohort_of_login.items():
+        if coh in ("never", "fleet"):    # fleet: 10-100x scale, Figure 5
+            continue
+        t0 = next((i for i, m in enumerate(WINDOW_MONTHS)
+                   if acc[login].get(m, zero)[2] > 0), None)
+        if t0 is not None and max_off <= t0 < len(WINDOW_MONTHS) - max_off:
+            aligned[login] = t0
+    out = {}
+    for e in range(-max_off, max_off + 1):
+        vals, immature = [], 0
+        for login, t0 in aligned.items():
+            mon = WINDOW_MONTHS[t0 + e]
+            if not month_w8_mature(mon):
+                immature += 1
+            vals.append(metrics(acc[login].get(mon) or zero))
+        out[e] = {"n": len(vals), "immature_share": immature / len(vals),
+                  **{k: sum(v[k] for v in vals) / len(vals)
+                     for k in vals[0]}}
+    return out
+
+
 def adoption() -> None:
     rows = adoption_rows()
     print("merged (w8) kLOC per CORE author by fixed adoption cohort "

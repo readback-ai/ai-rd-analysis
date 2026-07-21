@@ -1,4 +1,4 @@
-"""Figure 5: the Figure 4 metrics in event time, net of non-adopters.
+"""Figure A2: the Figure A1 metrics in event time, net of non-adopters.
 
 BALANCED PANEL: only authors observed at every offset t-2..t+2 (constant
 composition; late adopters drop out by construction since their t+2 lies
@@ -12,7 +12,7 @@ line IS the non-adopter counterfactual). Same encoding as Figure 4:
 blue = submitted, green = merged (w8), solid/dashed/dotted =
 total/non-AI/AI-involved.
 
-Output: artifacts/fig5_adoption_event.png
+Output: artifacts/fig_a2_adoption_event.png
 Usage:  PYTHONPATH=src python scripts/plot_adoption_event.py
 """
 import sys
@@ -40,7 +40,7 @@ def main() -> None:
     rows = adoption_event()
     offs = list(range(-2, 3))
     fig, axes = plt.subplots(1, 3, figsize=(12, 4.2))
-    fig.suptitle("Figure 5: LOC per contributor around first AI adoption "
+    fig.suptitle("Figure A2: LOC per contributor around first AI adoption "
                  "(balanced panel, event time), net of the non-adopter "
                  "mean", fontsize=12)
     for ax, (coh, title) in zip(axes.flat, PANELS):
@@ -74,9 +74,9 @@ def main() -> None:
     ax3.axis("off")
     ax3.legend(handles, labels, loc="center", fontsize=9, frameon=False)
     fig.tight_layout()
-    fig.savefig("artifacts/fig5_adoption_event.png", dpi=200,
+    fig.savefig("artifacts/fig_a2_adoption_event.png", dpi=200,
                 bbox_inches="tight")
-    print("wrote artifacts/fig5_adoption_event.png")
+    print("wrote artifacts/fig_a2_adoption_event.png")
 
 
 if __name__ == "__main__":

@@ -447,7 +447,7 @@ Q2-2026     519           440    5.90 [ 4.82, 7.06]    9.68 [ 5.55,15.13]    20.
 
 ```
 
-## Figure 4: Merged LOC per core author by adoption cohort (pooled, 95% CI on total) [quarterly]
+## Figure A1: Merged LOC per core author by adoption cohort (pooled, 95% CI on total) [quarterly]
 ```
 merged (w8) kLOC per CORE author by fixed adoption cohort (pooled author-level means over quarter-active members; bootstrap 95% CI on total)
   fleet: fleet operators: >=300 merged PRs in some quarter (assigned before the AI-timing cohorts)

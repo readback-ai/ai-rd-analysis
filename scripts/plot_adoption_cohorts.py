@@ -1,4 +1,4 @@
-"""Figure 4: LOC per contributor per month, submitted and merged, by
+"""Figure A1: LOC per contributor per month, submitted and merged, by
 adoption cohort.
 
 2x3 small multiples (fleet / early / middle / late / non-adopters), each
@@ -8,7 +8,7 @@ SUBMITTED kLOC per month-active cohort member (no censoring) and mean
 MERGED (w8) kLOC. Merged values for months past the w8-mature cap are
 drawn dotted (provisional; they finalize with the AS_OF re-pulls).
 
-Output: artifacts/fig4_adoption_cohorts.png
+Output: artifacts/fig_a1_adoption_cohorts.png
 Usage:  PYTHONPATH=src python scripts/plot_adoption_cohorts.py
 """
 import sys
@@ -84,7 +84,7 @@ def series(axl, axr, rows, coh, key, color, ls, label):
 def main() -> None:
     rows = adoption_monthly()
     fig = plt.figure(figsize=(13, 7))
-    fig.suptitle("Figure 4: LOC per contributor per month, submitted and "
+    fig.suptitle("Figure A1: LOC per contributor per month, submitted and "
                  "merged, by adoption cohort", fontsize=12, y=1.02)
     subfigs = fig.subfigures(2, 3, hspace=0.08, wspace=0.05)
     prov = [i for i, m in enumerate(WINDOW) if not month_mature(m)]
@@ -103,9 +103,9 @@ def main() -> None:
     ax6 = list(subfigs.flat)[5].subplots()
     ax6.axis("off")
     ax6.legend(handles, labels, loc="center", fontsize=10, frameon=False)
-    fig.savefig("artifacts/fig4_adoption_cohorts.png", dpi=200,
+    fig.savefig("artifacts/fig_a1_adoption_cohorts.png", dpi=200,
                 bbox_inches="tight")
-    print("wrote artifacts/fig4_adoption_cohorts.png")
+    print("wrote artifacts/fig_a1_adoption_cohorts.png")
 
 
 if __name__ == "__main__":
