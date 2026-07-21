@@ -433,6 +433,70 @@ def adoption_monthly() -> dict:
     return out
 
 
+WINDOW_MONTHS = ["2025-10", "2025-11", "2025-12", "2026-01", "2026-02",
+                 "2026-03", "2026-04", "2026-05", "2026-06"]
+
+
+def adoption_event(max_off: int = 2) -> dict:
+    """Figure 4a: the Figure 4 metrics in EVENT TIME, net of non-adopters.
+
+    Each aligned author (cohort member with a first observed AI month t0
+    in the window) contributes, at offset e in [-max_off..max_off], their
+    month-(t0+e) values MINUS the contemporaneous NON-ADOPTER cohort mean
+    for the same calendar month (difference-in-differences: secular and
+    seasonal drift cancel; AI metrics are net-zero-baseline by
+    construction since non-adopters have none). Inactive months count as
+    zero volume, matching the event study. Offsets outside the observed
+    window are skipped (unbalanced panel; n reported per offset).
+
+    Returns {(cohort, e): {n, submitted, sub_ai, sub_nonai, merged,
+    mrg_ai, mrg_nonai}} for the adopting cohorts + fleet (aligned
+    members only)."""
+    acc, cohort_of_login, q_of = _author_months_and_cohorts()
+    zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
+
+    def metrics(row):
+        return {"submitted": row[5], "sub_ai": row[6],
+                "sub_nonai": row[5] - row[6],
+                "merged": row[0] + row[1], "mrg_ai": row[0],
+                "mrg_nonai": row[1]}
+
+    # non-adopter mean per calendar month (the subtracted baseline)
+    base = {}
+    for mon in WINDOW_MONTHS:
+        rows = [acc[login][mon] for login, c in cohort_of_login.items()
+                if c == "never" and acc[login].get(mon)
+                and acc[login][mon][3]]
+        ms = [metrics(r) for r in rows] or [metrics(zero)]
+        base[mon] = {k: sum(m[k] for m in ms) / len(ms) for m in ms[0]
+                     for m in [ms[0]]} if False else             {k: sum(m[k] for m in ms) / len(ms) for k in ms[0]}
+
+    out = {}
+    for coh in ("fleet", "early", "medium", "late"):
+        aligned = {}
+        for login, c in cohort_of_login.items():
+            if c != coh:
+                continue
+            t0 = next((i for i, m in enumerate(WINDOW_MONTHS)
+                       if acc[login].get(m, zero)[2] > 0), None)
+            if t0 is not None:
+                aligned[login] = t0
+        for e in range(-max_off, max_off + 1):
+            diffs = []
+            for login, t0 in aligned.items():
+                i = t0 + e
+                if not 0 <= i < len(WINDOW_MONTHS):
+                    continue
+                mon = WINDOW_MONTHS[i]
+                m = metrics(acc[login].get(mon) or zero)
+                diffs.append({k: m[k] - base[mon][k] for k in m})
+            if diffs:
+                out[(coh, e)] = {"n": len(diffs),
+                                 **{k: sum(d[k] for d in diffs) / len(diffs)
+                                    for k in diffs[0]}}
+    return out
+
+
 def adoption() -> None:
     rows = adoption_rows()
     print("merged (w8) kLOC per CORE author by fixed adoption cohort "
