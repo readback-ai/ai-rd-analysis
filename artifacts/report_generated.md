@@ -358,6 +358,16 @@ band         Q1-2024    Q4-2025    Q1-2026    Q2-2026
 101-1k          8.37       6.14       5.02       4.21
 >1k             1.18       1.03       0.86       0.91
 
+attention by PR AI involvement (mature merged human-reviewed PRs, pooled)
+period   slice      PRs     kLOC  comments/kLOC  first-rev h/kLOC
+Q1-2024  nonai    40648   14,404           3.91             108.6
+Q4-2025  ai        2154    1,206           1.80              69.3
+Q4-2025  nonai    72326   34,537           2.58              98.0
+Q1-2026  ai        8700    5,954           1.69              73.2
+Q1-2026  nonai    81985   46,521           2.00              82.4
+Q2-2026  ai        5878    4,230           1.69              74.5
+Q2-2026  nonai    34287   18,685           1.84              93.7
+
 ```
 
 ## PR fates at matched horizons (w8 primary, w26 sensitivity)
