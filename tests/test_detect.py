@@ -256,16 +256,17 @@ def test_review_action_pagination_completeness(monkeypatch):
         "nodes": [{}] * 100, "totalCount": 250,
         "pageInfo": {"hasNextPage": True, "endCursor": None}})
     assert ra._all_commits("o/r", 1) is None
-    # short result vs totalCount: incomplete -> None
+    # clean terminal walk short of the API claim: complete-as-retrievable
+    # (ghost commits; round 10 — supersedes the round-3 equality rule)
     monkeypatch.setattr(ra, "graphql_nodes", lambda *a, **k: {
         "nodes": [{}] * 90, "totalCount": 250,
         "pageInfo": {"hasNextPage": False, "endCursor": None}})
-    assert ra._all_commits("o/r", 1) is None
-    # complete single page -> (nodes, total)
+    assert ra._all_commits("o/r", 1) == ([{}] * 90, 90, 250)
+    # exact single page -> (nodes, retrieved, api_total)
     monkeypatch.setattr(ra, "graphql_nodes", lambda *a, **k: {
         "nodes": [{}] * 90, "totalCount": 90,
         "pageInfo": {"hasNextPage": False, "endCursor": None}})
-    assert ra._all_commits("o/r", 1) == ([{}] * 90, 90)
+    assert ra._all_commits("o/r", 1) == ([{}] * 90, 90, 90)
 
 
 def test_review_action_suspect_and_ht_weights():
@@ -298,21 +299,22 @@ def test_suspect_flags_metadata_short_records_regardless_of_length():
                          "commits_complete": True})
 
 
-def test_batch_connection_validation_requires_exact_totalcount():
-    """External review P1 round 3 (repro FIRST): the batch pull must
-    validate every connection — integer totalCount and
-    len(nodes) == totalCount when hasNextPage is false; anything else
-    defers (returns None) instead of checkpointing as complete."""
+def test_batch_connection_validation():
+    """Rounds 3/10: the batch pull validates every connection — explicit
+    terminal pageInfo and an integer totalCount are required; a terminal
+    page short of the API claim is complete-as-retrievable (ghost
+    commits), while genuinely partial responses defer."""
     from pipeline.studies.review_action import _conn_commits
     ok = {"nodes": [{}] * 3, "totalCount": 3,
           "pageInfo": {"hasNextPage": False}}
-    assert _conn_commits(ok) == ([{}] * 3, 3)
+    assert _conn_commits(ok) == ([{}] * 3, 3, 3)
     # missing/non-integer totalCount -> defer
     assert _conn_commits({"nodes": [{}] * 3,
                           "pageInfo": {"hasNextPage": False}}) is None
-    # hasNextPage=False but too few nodes -> defer
+    # terminal page short of the claim -> complete with ghosts (round 10)
     assert _conn_commits({"nodes": [{}] * 50, "totalCount": 250,
-                          "pageInfo": {"hasNextPage": False}}) is None
+                          "pageInfo": {"hasNextPage": False}}) == \
+        ([{}] * 50, 50, 250)
     # hasNextPage=True -> caller must paginate, never accept as-is
     assert _conn_commits({"nodes": [{}] * 100, "totalCount": 250,
                           "pageInfo": {"hasNextPage": True}}) is None
@@ -458,3 +460,34 @@ def test_scan_cache_key_tracks_marker_fingerprint():
     from pipeline.detect import ToolSpec
     extended["newtool"] = ToolSpec(search_terms=("x@y.z",), needles=("x@y.z",))
     assert marker_fingerprint(extended) != fp
+
+
+def test_fully_paginated_short_walks_are_complete_with_ghosts(monkeypatch):
+    """Round-10 (RED first): GitHub's commits totalCount includes
+    force-pushed/rebased-away commits it will never serve (measured:
+    NVIDIA-NeMo/Speech#8622 walks cleanly to hasNextPage=false with 250
+    of a claimed 281). A clean terminal walk IS complete-as-retrievable;
+    commits_total records the RETRIEVED count (the invariant
+    len == commits_total holds), commits_api_total keeps the API claim.
+    Partial-response protections are unchanged: failed pages, missing
+    endCursor, missing pageInfo/totalCount still defer."""
+    from pipeline.studies import review_action as ra
+    # single terminal page, short of the API claim -> complete w/ ghosts
+    conn = {"nodes": [{}] * 90, "totalCount": 95,
+            "pageInfo": {"hasNextPage": False}}
+    assert ra._conn_commits(conn) == ([{}] * 90, 90, 95)
+    # multi-page clean walk, short of the claim -> complete w/ ghosts
+    pages = iter([
+        {"nodes": [{}] * 100, "totalCount": 281,
+         "pageInfo": {"hasNextPage": True, "endCursor": "c1"}},
+        {"nodes": [{}] * 50, "totalCount": 281,
+         "pageInfo": {"hasNextPage": False, "endCursor": None}}])
+    monkeypatch.setattr(ra, "graphql_nodes", lambda *a, **k: next(pages))
+    assert ra._all_commits("o/r", 1) == ([{}] * 150, 150, 281)
+    # protections unchanged: missing totalCount / pageInfo still defer
+    assert ra._conn_commits({"nodes": [{}] * 3,
+                             "pageInfo": {"hasNextPage": False}}) is None
+    assert ra._conn_commits({"nodes": [{}] * 3, "totalCount": 3}) is None
+    # failed page still fails the walk
+    monkeypatch.setattr(ra, "graphql_nodes", lambda *a, **k: None)
+    assert ra._all_commits("o/r", 1) is None

@@ -98,12 +98,16 @@ FIELDS = ("{ pullRequest(number:%d){ commits(first:100){ "
           + COMMIT_FIELDS + " } } }")
 
 
-def _all_commits(repo: str, num: int) -> tuple[list[dict], int] | None:
+def _all_commits(repo: str, num: int) -> tuple[list[dict], int, int] | None:
     """Paginated fetch of ALL commits for one PR (saturation follow-up).
-    Returns (nodes, totalCount) only when COMPLETE (len >= totalCount);
-    None on any failure — a missing endCursor, a failed page, or a short
-    result must never checkpoint as a complete record (external review
-    P1: silent fallback created permanently truncated records)."""
+    Returns (nodes, retrieved, api_total) after a CLEAN TERMINAL WALK —
+    every page succeeded and the last page reported hasNextPage=false.
+    The API's totalCount may EXCEED the retrievable nodes (force-pushed /
+    rebased-away commits are counted but never served; measured:
+    NVIDIA-NeMo/Speech#8622 serves 250 of a claimed 281), so a clean
+    short walk is complete-as-retrievable (round 10). None on any actual
+    failure — a failed page or a missing endCursor must never checkpoint
+    as complete (round 3)."""
     o, n = repo.split("/", 1)
     nodes: list[dict] = []
     cursor = ""
@@ -126,9 +130,9 @@ def _all_commits(repo: str, num: int) -> tuple[list[dict], int] | None:
         if not cursor:
             return None                  # would loop on the first page
         time.sleep(1)
-    if total is None or len(nodes) < total:
-        return None                      # short result is not complete
-    return nodes, total
+    if not isinstance(total, int):
+        return None                      # partial response: no API claim
+    return nodes, len(nodes), total
 
 
 def first_human_review(pr: dict) -> str | None:
@@ -356,12 +360,14 @@ def pull() -> None:
                         print(f"DEFER {repo}#{num}: incomplete commit "
                               "connection, not checkpointed", flush=True)
                         continue         # left out of `done`: retried later
-                    commits, total = res
+                    commits, retrieved, api_total = res
                     out.write(json.dumps({
                         "per": per, "repo": repo, "num": num, "loc": loc,
                         "first_review": frt, "author": login, "ai": ai,
                         "ins": ins, "commits": commits,
-                        "commits_total": total, "commits_complete": True,
+                        "commits_total": retrieved,
+                        "commits_api_total": api_total,
+                        "commits_complete": True,
                     }) + "\n")
             time.sleep(1)
     out.close()
@@ -379,19 +385,20 @@ def _inv_pi(loc: float, W: float, k: int = PER_QUARTER) -> float:
     return 1.0 / (1.0 - (1.0 - loc / W) ** k)
 
 
-def _conn_commits(conn: dict) -> tuple[list[dict], int] | None:
+def _conn_commits(conn: dict) -> tuple[list[dict], int, int] | None:
     """Validate a commits connection from the BATCH pull. Complete only
-    when pageInfo is present with hasNextPage false, totalCount is an
-    integer, and len(nodes) == totalCount — partial GraphQL responses
-    (missing pageInfo/totalCount, short node lists) defer instead of
-    checkpointing (external review P1, round 3)."""
+    when pageInfo is present with hasNextPage explicitly false and
+    totalCount is an integer — a terminal page means everything the API
+    serves was retrieved, even when short of totalCount (ghost commits;
+    see _all_commits). Partial responses (missing pageInfo/totalCount)
+    defer instead of checkpointing (rounds 3/10)."""
     total = conn.get("totalCount")
     pi = conn.get("pageInfo")
     if not isinstance(total, int) or not isinstance(pi, dict) \
             or pi.get("hasNextPage") is not False:
         return None
     nodes = conn.get("nodes") or []
-    return (nodes, total) if len(nodes) == total else None
+    return nodes, len(nodes), total
 
 
 def _suspect(d: dict) -> bool:
@@ -427,7 +434,7 @@ def repair() -> None:
             print(f"SKIP {d['repo']}#{d['num']}: pull failed/incomplete",
                   flush=True)
             continue
-        d["commits"], d["commits_total"] = full
+        d["commits"], d["commits_total"], d["commits_api_total"] = full
         d["commits_complete"] = True
         out.write(json.dumps(d) + "\n")
         if i % 25 == 0:

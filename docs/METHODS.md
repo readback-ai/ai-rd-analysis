@@ -432,7 +432,11 @@ numbers come only from that artifact.
   Commit lists are paginated (100/page + follow-ups); the earlier
   first:60 cap chronologically truncated 261/4,233 sampled PRs, biasing
   responsiveness downward on high-commit PRs — those records were
-  re-pulled in full (`review_action --repair`).
+  re-pulled in full (`review_action --repair`). Completeness = a clean
+  terminal pagination walk: GitHub's commits totalCount includes
+  force-pushed/rebased-away commits it never serves (measured 250 of a
+  claimed 281 on one PR), so records store the RETRIEVED count as
+  `commits_total` alongside the API claim (`commits_api_total`).
 
 ## 5b. LOC hygiene sensitivity (generated content)
 
