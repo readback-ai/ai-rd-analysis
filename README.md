@@ -15,34 +15,32 @@ TechCrunch's 2025 $100M+ AI funding list), enumerate their public
 repositories with detectable AI-tool activity, and census pull requests in
 four quarters spanning the agentic-coding transition. AI involvement is
 detected in three independent layers: commit-forensic markers (co-author
-trailers, generation footers, tool committer identities), agent bot
-authorship, and agent branch-naming conventions. Findings (contributor-
-weighted unless noted): The primary metric is AI INVOLVEMENT — the union of
-the three layers per PR — which rose from 0% (Q1-2024) to 16.6%
-contributor-weighted (16.6% pooled) of PRs by Q2-2026; commit markers alone
-reach 13.6%. A balanced-panel sensitivity (15.3%) shows the growth is
-adoption, not cohort composition. Among these (by construction AI-active) organizations, adoption is
-broad, led by private companies (18.5%) over public (11.9%) and community
-(10.0%). Human review declined ~10pp everywhere while its LEVEL follows
-governance (community 62% > public 53% > private 47%); AI review deployment
-is uniform (~20-26%). Self-merge rates are flat over time and cultural in
-level (private 56% > labs 52% > public 50% > community 38%); AI concentrates
-modestly in self-merged PRs (1.1-1.4x). On complete merged-by data,
-self-merged AI-involved PRs are human-reviewed at similar-or-higher rates
-than non-AI ones in most slices. Delegated-agent lanes move the human gate
-from line-level review to merge triage. Volume: merged LOC per core
-contributor grew ×2.66 (6.6 → 17.6 kLOC/quarter, CW), driven entirely by
-AI-adopting authors — non-adopters stayed flat — with an event-study jump
-at each author's first AI-marker month (flat pre-trend; trend-selection
-rejected) and cohort-by-cohort step-ups at adoption time. Attention
-thinned: human comments per merged kLOC fell ~55–57% (within size bands
-−35..−52%), while responsiveness to explicit human review asks held flat
-(~78–80%, identified on the no-AI-reviewer lane). A new production mode
-emerged: ~43 'agent-fleet' accounts (humans operating merge pipelines at
-300–4,400 merged PRs/quarter, roughly half unmarked) are isolated as their
-own cohort. All rates are floors: squash-merge strips markers, and default
-local CLI usage is structurally undetectable (one quantified exception:
-the weak-prefix two-sided bound, 0.05pp at the Q2-2026 headline).
+trailers, generation footers, tool author/committer identities incl. a
+committer-identity audit), agent bot authorship, and agent branch-naming
+conventions; all per-PR events (merges, closes, reviews) follow an 8-week
+window from PR creation, so mature classifications are immutable under
+data refreshes. Findings (contributor-weighted unless noted): the primary
+metric is AI INVOLVEMENT — the union of the three layers per PR — which
+rose from 0% (Q1-2024) to 16.9% [14.9,18.7] of submitted PRs by Q2-2026
+(pooled 17.1%; commit markers alone 13.8%); AI-involved PRs carry 22.4%
+of submitted and 17.0% of merged LOC. A balanced-panel sensitivity
+(15.6%) shows the growth is adoption, not cohort composition; the single
+potential overcount (weak branch prefixes) is bounded two-sided at
+0.11pp. Adoption is led by private companies (21.2%) over public (13.2%)
+and community (12.3%). Volume: merged LOC per core contributor grew
+×2.96 (6.5 → 19.1 kLOC/quarter, CW), driven entirely by AI-adopting
+authors — non-adopters stayed flat — with event-time analysis showing a
+discontinuity at each author's first AI evidence on a flat pre-trend,
+in both their AI-marked AND unmarked output (the undetected-usage
+signature). A new production mode emerged: ~43 "fleet operator" accounts
+merging 300–4,400 PRs/quarter (~531 kLOC/author-month cohort mean by
+Q2-2026), roughly half unmarked, isolated as their own cohort. Review:
+human attention per merged line fell ~53% (insiders −61%) while
+human-review coverage of merged PRs held (~69–75%) and responsiveness to
+explicit human review asks stayed roughly stable (81.5% → 74.5%
+provisional, HT-weighted) with post-ask LOC share rising 46% → 63%.
+All rates are floors: squash-merge strips markers, and default local CLI
+usage is structurally undetectable.
 
 **Full results: [`artifacts/results.md`](artifacts/results.md) (regenerated) · metrics reference: [`docs/METRICS.md`](docs/METRICS.md) · working log: [`artifacts/v2_results.md`](artifacts/v2_results.md) ·
 Methodology: [`docs/METHODS.md`](docs/METHODS.md) · **code review guide: [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md)****
