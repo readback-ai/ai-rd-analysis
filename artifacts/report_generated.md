@@ -310,6 +310,8 @@ Q2-2026          34.6     63.1%    15.9%      16.5%        4.4%
 ```
 review mix of MERGED PRs (mature-gated, pooled): PR share / LOC share per approval channel
 humanRev = reviewer!=author human review; botOnly = AI/CI bot only; selfUnrev/otherUnrev = merged unreviewed
+
+--- sliced by author role ---
 period   slice   merged        humanRev         botOnly       selfUnrev      otherUnrev
 Q1-2024  ins      17729   68.2/ 62.5%    0.8/  1.0%   27.1/ 31.7%    3.8/  4.7%
 Q1-2024  ext      32677   80.5/ 79.5%    0.3/  0.6%   11.2/ 12.8%    7.7/  7.1%
@@ -319,6 +321,16 @@ Q1-2026  ins      50564   65.4/ 64.0%   10.8/ 12.4%   21.2/ 21.7%    2.6/  1.9%
 Q1-2026  ext      63680   79.4/ 74.4%    6.6/ 10.3%    8.4/ 10.7%    5.3/  4.4%
 Q2-2026  ins      23028   63.1/ 56.7%   12.9/ 17.6%   21.6/ 22.7%    2.5/  3.0%
 Q2-2026  ext      29745   74.4/ 69.3%    8.0/ 14.3%   12.7/ 10.5%    4.9/  5.8%
+
+--- sliced by PR AI involvement ---
+period   slice   merged        humanRev         botOnly       selfUnrev      otherUnrev
+Q1-2024  nonai    50406   76.2/ 72.8%    0.5/  0.7%   16.8/ 20.3%    6.4/  6.1%
+Q4-2025  ai        2083   65.3/ 61.9%   14.8/ 19.2%   16.9/ 17.5%    2.4/  1.1%
+Q4-2025  nonai    86639   78.5/ 71.3%    6.3/  9.0%   10.7/ 15.4%    3.9/  4.0%
+Q1-2026  ai       11773   61.0/ 58.2%   13.3/ 16.3%   20.8/ 21.3%    4.6/  3.9%
+Q1-2026  nonai   102471   74.6/ 71.2%    7.9/ 10.5%   13.3/ 15.0%    4.0/  3.1%
+Q2-2026  ai        8601   62.1/ 57.0%   10.9/ 17.1%   22.4/ 20.5%    4.6/  5.4%
+Q2-2026  nonai    44172   70.9/ 64.6%   10.0/ 15.6%   15.4/ 15.6%    3.7/  4.2%
 
 ```
 
