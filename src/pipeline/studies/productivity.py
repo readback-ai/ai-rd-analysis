@@ -437,8 +437,9 @@ WINDOW_MONTHS = ["2025-10", "2025-11", "2025-12", "2026-01", "2026-02",
                  "2026-03", "2026-04", "2026-05", "2026-06"]
 
 
-def adoption_event(max_off: int = 2) -> dict:
-    """Figure 4a: the Figure 4 metrics in EVENT TIME, net of non-adopters.
+def adoption_event(max_off: int = 2, balanced: bool = True) -> dict:
+    """Figure 5: the Figure 4 metrics in EVENT TIME, net of non-adopters,
+    as a BALANCED PANEL.
 
     Each aligned author (cohort member with a first observed AI month t0
     in the window) contributes, at offset e in [-max_off..max_off], their
@@ -480,8 +481,12 @@ def adoption_event(max_off: int = 2) -> dict:
                 continue
             t0 = next((i for i, m in enumerate(WINDOW_MONTHS)
                        if acc[login].get(m, zero)[2] > 0), None)
-            if t0 is not None:
-                aligned[login] = t0
+            if t0 is None:
+                continue
+            if balanced and not (max_off <= t0
+                                 < len(WINDOW_MONTHS) - max_off):
+                continue                 # full [-2..+2] must be observable
+            aligned[login] = t0
         for e in range(-max_off, max_off + 1):
             diffs = []
             for login, t0 in aligned.items():
