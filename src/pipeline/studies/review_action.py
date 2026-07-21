@@ -388,8 +388,27 @@ def pull() -> None:
                 data = graphql_nodes(Q % " ".join(parts), {}, ".data",
                                      expect=dict)
             if data is None:
-                print(f"CHUNK FAILED after retry: {len(chunk)} PRs "
-                      "deferred", flush=True)
+                # a chunk of HEAVY PRs can 502 as a batch while each PR
+                # serves fine alone (census small-page lesson): fall back
+                # to per-PR paginated pulls before deferring
+                print(f"CHUNK FAILED after retry: {len(chunk)} PRs — "
+                      "falling back to per-PR pulls", flush=True)
+                for repo, num, loc, frt, login, ai, ins in chunk:
+                    full = _all_commits(repo, num)
+                    if full is None:
+                        print(f"DEFER {repo}#{num}: per-PR pull failed",
+                              flush=True)
+                        continue
+                    commits, retrieved, api_total = full
+                    out.write(json.dumps({
+                        "per": per, "repo": repo, "num": num, "loc": loc,
+                        "first_review": frt, "author": login, "ai": ai,
+                        "ins": ins, "commits": commits,
+                        "commits_total": retrieved,
+                        "commits_api_total": api_total,
+                        "commits_complete": True,
+                    }) + "\n")
+                    time.sleep(1)
                 continue
             for j, (repo, num, loc, frt, login, ai, ins) in enumerate(chunk):
                 node = data.get(f"a{j}")
