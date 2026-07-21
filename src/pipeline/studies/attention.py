@@ -39,7 +39,7 @@ def human_comment_count(pr: dict) -> int:
                for r in human_other)
 
 
-def attention_by_ai() -> dict:
+def attention_by_ai(fleet_slice: bool = False) -> dict:
     """Figure 7: attention proxies by PR AI involvement (FLEET-OPERATOR
     authors excluded) — pooled over
     mature, merged, human-reviewed PRs per quarter x {ai, nonai}:
@@ -60,7 +60,8 @@ def attention_by_ai() -> dict:
             continue
         for p in prs:
             login = (p.get("author") or {}).get("login")
-            if login in fleet:
+            is_fleet = login in fleet
+            if is_fleet and not fleet_slice:
                 continue                 # fleet pipelines distort review stats
             c = classify_pr(p, MARKERS)
             if not (c.w8_mature and c.merged and c.human_reviewed
@@ -73,7 +74,9 @@ def attention_by_ai() -> dict:
                       CAP)
             if not loc:
                 continue
-            d = agg[(per, "ai" if c.ai_involved else "nonai")]
+            sl = "fleet" if is_fleet else ("ai" if c.ai_involved
+                                           else "nonai")
+            d = agg[(per, sl)]
             d["n"] += 1
             d["kloc"] += loc / 1000
             d["comments"] += human_comment_count(p)

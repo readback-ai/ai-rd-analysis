@@ -613,7 +613,8 @@ def fleet_logins() -> set[str]:
     return fleet
 
 
-def review_mix(by: str = "role", exclude_fleet: bool = True) -> dict:
+def review_mix(by: str = "role", exclude_fleet: bool = True,
+               fleet_slice: bool = False) -> dict:
     """Figure 6: review mix of MERGED PRs, insider vs external, per
     quarter — the substitution hypothesis (human review declining, AI/bot
     review rising). For each (period, slice in {ins, ext}): share of
@@ -628,10 +629,12 @@ def review_mix(by: str = "role", exclude_fleet: bool = True) -> dict:
     {ai, nonai} (PR-level AI involvement — the Figure 6 alternative; note
     the ai slice is empty at the Q1-2024 baseline by construction).
     exclude_fleet (default): PRs authored by fleet operators are dropped.
+    fleet_slice=True: fleet-authored PRs become their OWN slice ("fleet")
+    instead of being dropped (Figure 3 companion).
 
     Returns {(period, slice): {n, loc, <ch>_pr, <ch>_loc ...}}."""
     keep = population_repos()
-    fleet = fleet_logins() if exclude_fleet else set()
+    fleet = fleet_logins() if (exclude_fleet or fleet_slice) else set()
     agg: dict = defaultdict(lambda: defaultdict(float))
     for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
         if repo not in keep or per not in PERIODS:
@@ -639,7 +642,10 @@ def review_mix(by: str = "role", exclude_fleet: bool = True) -> dict:
         for p in prs:
             a = p.get("author") or {}
             if a.get("__typename") == "Bot" or not a.get("login") \
-                    or is_bot_login(a["login"]) or a["login"] in fleet:
+                    or is_bot_login(a["login"]):
+                continue
+            is_fleet = a["login"] in fleet
+            if is_fleet and not fleet_slice:
                 continue
             c = classify_pr(p, MARKERS)
             ch = merged_channel(c)
@@ -647,8 +653,11 @@ def review_mix(by: str = "role", exclude_fleet: bool = True) -> dict:
                 continue                 # unmerged or w8-immature
             loc = min((p.get("additions") or 0) + (p.get("deletions") or 0),
                       LINE_CAP)
-            sl = ("ai" if c.ai_involved else "nonai") if by == "ai" \
-                else ("ins" if c.insider else "ext")
+            if is_fleet:
+                sl = "fleet"
+            else:
+                sl = ("ai" if c.ai_involved else "nonai") if by == "ai" \
+                    else ("ins" if c.insider else "ext")
             d = agg[(per, sl)]
             d["n"] += 1
             d["loc"] += loc
