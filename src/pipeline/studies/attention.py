@@ -39,6 +39,61 @@ def human_comment_count(pr: dict) -> int:
                for r in human_other)
 
 
+def attention_by_ai() -> dict:
+    """Figure 7: attention proxies by PR AI involvement — pooled over
+    mature, merged, human-reviewed PRs per quarter x {ai, nonai}:
+    comments/kLOC (bot-clean human inline comments) and FIRST-REVIEW
+    latency hours/kLOC (PR creation -> first human review submission,
+    per kLOC — smaller = more LOC absorbed per elapsed hour). The ai
+    slice is empty at the Q1-2024 baseline by construction.
+
+    Returns {(period, slice): {n, kloc, comments_per_kloc,
+    first_rev_h_per_kloc}}."""
+    from pipeline.studies.review_action import first_human_review
+    keep = population_repos()
+    agg = defaultdict(lambda: defaultdict(float))
+    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
+        if repo not in keep or per not in PERIODS:
+            continue
+        for p in prs:
+            c = classify_pr(p, MARKERS)
+            if not (c.w8_mature and c.merged and c.human_reviewed
+                    and p.get("createdAt")):
+                continue
+            frt = first_human_review(p)
+            if not frt:
+                continue
+            loc = min((p.get("additions") or 0) + (p.get("deletions") or 0),
+                      CAP)
+            if not loc:
+                continue
+            d = agg[(per, "ai" if c.ai_involved else "nonai")]
+            d["n"] += 1
+            d["kloc"] += loc / 1000
+            d["comments"] += human_comment_count(p)
+            d["frt_hours"] += _hours(p["createdAt"], frt)
+    return {k: {"n": int(d["n"]), "kloc": d["kloc"],
+                "comments_per_kloc": d["comments"] / d["kloc"],
+                "first_rev_h_per_kloc": d["frt_hours"] / d["kloc"]}
+            for k, d in agg.items() if d["kloc"]}
+
+
+def attention_by_ai_table() -> None:
+    rows = attention_by_ai()
+    print("\nattention by PR AI involvement (mature merged human-reviewed "
+          "PRs, pooled)")
+    print(f"{'period':9}{'slice':7}{'PRs':>7}{'kLOC':>9}"
+          f"{'comments/kLOC':>15}{'first-rev h/kLOC':>18}")
+    for per in PERIODS:
+        for sl in ("ai", "nonai"):
+            r = rows.get((per, sl))
+            if not r:
+                continue
+            print(f"{per:9}{sl:7}{r['n']:>7}{r['kloc']:>9,.0f}"
+                  f"{r['comments_per_kloc']:>15.2f}"
+                  f"{r['first_rev_h_per_kloc']:>18.1f}")
+
+
 def main() -> None:
     keep = population_repos()
     agg = defaultdict(lambda: defaultdict(float))
@@ -93,3 +148,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+    attention_by_ai_table()

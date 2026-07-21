@@ -541,7 +541,10 @@ def _author_edits_after(d: dict, anchor: str) -> tuple[int, int]:
     return min(post, CAP), min(max(total, d["loc"]), CAP)
 
 
-def compute() -> None:
+def lane_rows() -> tuple[dict, int]:
+    """(lanes, nonresponse): the full lane accumulation used by compute()
+    and Figure 8 — {(period, lane): {n, wn, wacted, post, total}} with
+    HT weights applied. Fail-hard semantics identical to compute()."""
     from collections import defaultdict
     # one census pass: ask anchors + lane flags + the PPS sampling frame
     # (per-PR LOC weights and quarter LOC totals for inclusion probs)
@@ -630,6 +633,11 @@ def compute() -> None:
             a["wacted"] += ipw * (post > 0)
             a["post"] += ipw * post
             a["total"] += ipw * total
+    return dict(lanes), nonresp
+
+
+def compute() -> None:
+    lanes, _nonresp = lane_rows()        # nonresponse printed by lane_rows
     print("conditional responsiveness to HUMAN ASKS (changes-requested or "
           "inline comments)")
     print("CLEAN lane = no AI-reviewer activity (identified); "
