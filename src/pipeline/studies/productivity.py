@@ -437,6 +437,17 @@ WINDOW_MONTHS = ["2025-10", "2025-11", "2025-12", "2026-01", "2026-02",
                  "2026-03", "2026-04", "2026-05", "2026-06"]
 
 
+def month_w8_mature(mon: str) -> bool:
+    """Every PR created in `mon` closed its 56-day window by the AS_OF."""
+    from calendar import monthrange
+    from datetime import datetime, timedelta
+    from pipeline import detect
+    as_of = datetime.fromisoformat(detect.AS_OF.replace("Z", "+00:00"))
+    y, m = int(mon[:4]), int(mon[5:7])
+    end = datetime(y, m, monthrange(y, m)[1], 23, 59, tzinfo=as_of.tzinfo)
+    return end + timedelta(days=56) <= as_of
+
+
 def adoption_event(max_off: int = 2, balanced: bool = True) -> dict:
     """Figure 5: the Figure 4 metrics in EVENT TIME, net of non-adopters,
     as a BALANCED PANEL.
@@ -489,15 +500,19 @@ def adoption_event(max_off: int = 2, balanced: bool = True) -> dict:
             aligned[login] = t0
         for e in range(-max_off, max_off + 1):
             diffs = []
+            immature = 0
             for login, t0 in aligned.items():
                 i = t0 + e
                 if not 0 <= i < len(WINDOW_MONTHS):
                     continue
                 mon = WINDOW_MONTHS[i]
+                if not month_w8_mature(mon):
+                    immature += 1
                 m = metrics(acc[login].get(mon) or zero)
                 diffs.append({k: m[k] - base[mon][k] for k in m})
             if diffs:
                 out[(coh, e)] = {"n": len(diffs),
+                                 "immature_share": immature / len(diffs),
                                  **{k: sum(d[k] for d in diffs) / len(diffs)
                                     for k in diffs[0]}}
     return out
