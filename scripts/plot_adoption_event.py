@@ -42,7 +42,7 @@ def main() -> None:
     fig, axes = plt.subplots(1, 3, figsize=(12, 4.2))
     fig.suptitle("Figure A2: LOC per contributor around first AI adoption "
                  "(balanced panel, event time), net of the non-adopter "
-                 "mean", fontsize=12)
+                 "mean", fontsize=12, y=-0.05)
     for ax, (coh, title) in zip(axes.flat, PANELS):
         for key, color, ls, label in SERIES:
             y = [rows.get((coh, e), {}).get(key) for e in offs]

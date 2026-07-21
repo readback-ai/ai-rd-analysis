@@ -48,7 +48,7 @@ def main() -> None:
     fig = plt.figure(figsize=(11, 4.4))
     fig.suptitle("Figure 7: human attention per line — AI vs non-AI "
                  "merged PRs (fleet authors excluded)", fontsize=12,
-                 y=1.06)
+                 y=-0.08)
     subfigs = fig.subfigures(1, 2, wspace=0.05)
     for sf, key, title in (
             (subfigs.flat[0], "comments_per_kloc",

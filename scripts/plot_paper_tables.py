@@ -41,7 +41,7 @@ def broken_axes(ylabel: str, title: str):
     axr.plot([0], [0], transform=axr.transAxes, **BREAK_KW)
     axr.plot([0], [1], transform=axr.transAxes, **BREAK_KW)
     axl.set_ylabel(ylabel)
-    fig.suptitle(title)
+    fig.suptitle(title, y=-0.06)   # caption below the figure
     return fig, axl, axr
 
 

@@ -51,7 +51,7 @@ def main() -> None:
     att = attention_by_ai(fleet_slice=True)
     fig = plt.figure(figsize=(11, 4.4))
     fig.suptitle("Figure 3 companion: human review coverage and attention "
-                 "per line, by PR type", fontsize=12, y=1.06)
+                 "per line, by PR type", fontsize=12, y=-0.08)
     subfigs = fig.subfigures(1, 2, wspace=0.05)
 
     axl, axr = broken_pair(subfigs.flat[0],

@@ -36,7 +36,8 @@ def main() -> None:
     cohorts = event_by_adoption_month()
     fig, axes = plt.subplots(2, 3, figsize=(13, 7.5))
     fig.suptitle("Figure 2: LOC per contributor around first AI adoption, "
-                 "by adoption month (balanced cohorts)", fontsize=12)
+                 "by adoption month (balanced cohorts)", fontsize=12,
+                 y=-0.03)
     for ax, (t0_mon, c) in zip(axes.flat, sorted(cohorts.items())):
         offs = sorted(c["offsets"])
         for key, color, ls, label in SERIES:

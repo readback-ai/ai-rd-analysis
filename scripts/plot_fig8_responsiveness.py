@@ -59,7 +59,7 @@ def main() -> None:
     fig = plt.figure(figsize=(11, 4.4))
     fig.suptitle("Figure 8: responsiveness to human review requests — "
                  "AI vs non-AI PRs (CLEAN lane, HT; fleet authors excluded)",
-                 fontsize=12, y=1.06)
+                 fontsize=12, y=-0.08)
     subfigs = fig.subfigures(1, 2, wspace=0.05)
     for sf, kind, title in (
             (subfigs.flat[0], "responded", "% of asked PRs with author "

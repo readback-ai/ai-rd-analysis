@@ -85,7 +85,7 @@ def main() -> None:
     rows = adoption_monthly()
     fig = plt.figure(figsize=(13, 7))
     fig.suptitle("Figure A1: LOC per contributor per month, submitted and "
-                 "merged, by adoption cohort", fontsize=12, y=1.02)
+                 "merged, by adoption cohort", fontsize=12, y=-0.04)
     subfigs = fig.subfigures(2, 3, hspace=0.08, wspace=0.05)
     prov = [i for i, m in enumerate(WINDOW) if not month_mature(m)]
     for sf, (coh, desc) in zip(subfigs.flat, ADOPTION_COHORTS):

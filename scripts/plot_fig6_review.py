@@ -56,7 +56,7 @@ def main() -> None:
     rows = review_mix()
     fig = plt.figure(figsize=(11, 4.6))
     fig.suptitle("Figure 6: review of merged PRs and merged LOC — core vs external "
-                 "(fleet authors excluded)", fontsize=12, y=1.06)
+                 "(fleet authors excluded)", fontsize=12, y=-0.16)   # below the bottom legend
     subfigs = fig.subfigures(1, 2, wspace=0.05)
     for sf, unit, title in ((subfigs.flat[0], "pr",
                              "share of merged PRs"),
