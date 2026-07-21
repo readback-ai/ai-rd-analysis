@@ -1,4 +1,4 @@
-"""Figure 4: productivity metrics around the first month of AI adoption,
+"""Figure 2: productivity metrics around the first month of AI adoption,
 one panel per ADOPTION MONTH.
 
 Five balanced cohorts (first AI use 2025-12 .. 2026-04 — the months
@@ -9,8 +9,8 @@ Within a cohort each offset is one calendar month, so w8-open offsets
 are shaded exactly (merged provisional there; finalizes with the AS_OF
 re-pulls).
 
-Output: artifacts/fig4_event_balanced.png
-Usage:  PYTHONPATH=src python scripts/plot_fig4_event.py
+Output: artifacts/figure_2_comp_audits.png
+Usage:  PYTHONPATH=src python scripts/plot_fig2_comp_audits.py
 """
 import sys
 
@@ -35,7 +35,7 @@ SERIES = [
 def main() -> None:
     cohorts = event_by_adoption_month()
     fig, axes = plt.subplots(2, 3, figsize=(13, 7.5))
-    fig.suptitle("Figure 4: LOC per contributor around first AI adoption, "
+    fig.suptitle("Figure 2: LOC per contributor around first AI adoption, "
                  "by adoption month (balanced cohorts)", fontsize=12)
     for ax, (t0_mon, c) in zip(axes.flat, sorted(cohorts.items())):
         offs = sorted(c["offsets"])
@@ -60,9 +60,9 @@ def main() -> None:
     ax6.axis("off")
     ax6.legend(handles, labels, loc="center", fontsize=10, frameon=False)
     fig.tight_layout()
-    fig.savefig("artifacts/fig4_event_balanced.png", dpi=200,
+    fig.savefig("artifacts/figure_2_comp_audits.png", dpi=200,
                 bbox_inches="tight")
-    print("wrote artifacts/fig4_event_balanced.png")
+    print("wrote artifacts/figure_2_comp_audits.png")
 
 
 if __name__ == "__main__":
