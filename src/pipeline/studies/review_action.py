@@ -541,10 +541,13 @@ def _author_edits_after(d: dict, anchor: str) -> tuple[int, int]:
     return min(post, CAP), min(max(total, d["loc"]), CAP)
 
 
-def lane_rows() -> tuple[dict, int]:
-    """(lanes, nonresponse): the full lane accumulation used by compute()
-    and Figure 8 — {(period, lane): {n, wn, wacted, post, total}} with
-    HT weights applied. Fail-hard semantics identical to compute()."""
+def lane_rows() -> tuple[dict, dict, int]:
+    """(lanes, lanes_nofleet, nonresponse): the lane accumulation used by
+    compute() and Figure 8 — {(period, lane): {n, wn, wacted, post,
+    total}} with HT weights applied. lanes_nofleet restricts to PRs NOT
+    authored by fleet operators — DOMAIN ESTIMATION over the same PPS
+    draw (inclusion probabilities unchanged; no redraw needed). Fail-hard
+    semantics identical to compute()."""
     from collections import defaultdict
     # one census pass: ask anchors + lane flags + the PPS sampling frame
     # (per-PR LOC weights and quarter LOC totals for inclusion probs)
@@ -606,38 +609,44 @@ def lane_rows() -> tuple[dict, int]:
               f"({100 * nonresp / len(_selected_keys(manifest)):.1f}%) "
               "unretrievable at hydration (repos privatized/PRs disabled "
               "after the census) — excluded, HT weights unchanged")
+    from pipeline.studies.productivity import fleet_logins
+    fleet = fleet_logins()
     lanes = defaultdict(lambda: defaultdict(float))
+    lanes_nf = defaultdict(lambda: defaultdict(float))
     for key in selected:
         d = recs[key]
         per, _loc, frt, login, ai, _ins = frame[key]
         d = {**d, "per": per, "first_review": frt, "author": login,
              "ai": ai}                    # census-derived, never stale
         ipw = inv_pi(key)
+        targets = [lanes] if login in fleet else [lanes, lanes_nf]
         ask, ai_rev = anchors.get(key, (None, None))
         # descriptive companion: all-cause (any-review anchor)
         post, total = _author_edits_after(d, d["first_review"])
-        a = lanes[(d["per"], "all-cause")]
-        a["n"] += 1
-        a["wn"] += ipw
-        a["wacted"] += ipw * (post > 0)
-        a["post"] += ipw * post
-        a["total"] += ipw * total
-        if not ask:
-            continue                      # no explicit human ask on this PR
-        post, total = _author_edits_after(d, ask)
-        lane = "mixed" if ai_rev else "CLEAN"
-        for coh in (lane, lane + ("+AI" if d["ai"] else "+nonAI")):
-            a = lanes[(d["per"], coh)]
+        for tgt in targets:
+            a = tgt[(d["per"], "all-cause")]
             a["n"] += 1
             a["wn"] += ipw
             a["wacted"] += ipw * (post > 0)
             a["post"] += ipw * post
             a["total"] += ipw * total
-    return dict(lanes), nonresp
+        if not ask:
+            continue                      # no explicit human ask on this PR
+        post, total = _author_edits_after(d, ask)
+        lane = "mixed" if ai_rev else "CLEAN"
+        for coh in (lane, lane + ("+AI" if d["ai"] else "+nonAI")):
+            for tgt in targets:
+                a = tgt[(d["per"], coh)]
+                a["n"] += 1
+                a["wn"] += ipw
+                a["wacted"] += ipw * (post > 0)
+                a["post"] += ipw * post
+                a["total"] += ipw * total
+    return dict(lanes), dict(lanes_nf), nonresp
 
 
 def compute() -> None:
-    lanes, _nonresp = lane_rows()        # nonresponse printed by lane_rows
+    lanes, lanes_nf, _nonresp = lane_rows()   # nonresponse printed above
     print("conditional responsiveness to HUMAN ASKS (changes-requested or "
           "inline comments)")
     print("CLEAN lane = no AI-reviewer activity (identified); "
@@ -645,15 +654,21 @@ def compute() -> None:
     print("HT inclusion-probability weighted (PPS sample -> population "
           "estimands): responded% is PR-weighted; LOC share% is the "
           "population post-ask LOC ratio")
-    print(f"{'lane':22}{'PRs':>6}{'responded%':>11}{'post-ask LOC share%':>20}")
-    for per in PERIODS:
-        for coh in ("CLEAN", "CLEAN+AI", "CLEAN+nonAI", "mixed", "all-cause"):
-            a = lanes[(per, coh)]
-            if a["n"] < 20:
-                continue
-            print(f"{per + ' ' + coh:22}{int(a['n']):>6}"
-                  f"{100*a['wacted']/a['wn']:>10.1f}%"
-                  f"{100*a['post']/a['total']:>19.1f}%")
+    for label, src in (("all sampled PRs", lanes),
+                       ("FLEET-OPERATOR authors EXCLUDED (domain "
+                        "estimation, same HT weights)", lanes_nf)):
+        print(f"\n--- {label} ---")
+        print(f"{'lane':22}{'PRs':>6}{'responded%':>11}"
+              f"{'post-ask LOC share%':>20}")
+        for per in PERIODS:
+            for coh in ("CLEAN", "CLEAN+AI", "CLEAN+nonAI", "mixed",
+                        "all-cause"):
+                a = src.get((per, coh))
+                if not a or a["n"] < 20:
+                    continue
+                print(f"{per + ' ' + coh:22}{int(a['n']):>6}"
+                      f"{100*a['wacted']/a['wn']:>10.1f}%"
+                      f"{100*a['post']/a['total']:>19.1f}%")
 
 
 def main() -> None:

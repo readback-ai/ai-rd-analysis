@@ -55,8 +55,8 @@ def broken_pair(subfig, title):
 def main() -> None:
     rows = review_mix()
     fig = plt.figure(figsize=(11, 4.6))
-    fig.suptitle("Figure 6: review of merged PRs and merged LOC — core vs "
-                 "external contributors", fontsize=12, y=1.06)
+    fig.suptitle("Figure 6: review of merged PRs and merged LOC — core vs external "
+                 "(fleet authors excluded)", fontsize=12, y=1.06)
     subfigs = fig.subfigures(1, 2, wspace=0.05)
     for sf, unit, title in ((subfigs.flat[0], "pr",
                              "share of merged PRs"),

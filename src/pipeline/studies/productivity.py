@@ -317,7 +317,7 @@ def adoption_rows() -> dict:
 
     Returns {(period, cohort): {n, ai, nonai, total, lo, hi}}."""
     from pipeline.analyze import bootstrap_ci, weighted_mean
-    acc, per_author_cohort, q_of = _author_months_and_cohorts()
+    acc, per_author_cohort, q_of, _fleet = _author_months_and_cohorts()
     out = {}
     for per in PERIODS:
         mons = [m for m, q in q_of.items() if q == per]
@@ -404,7 +404,15 @@ def _author_months_and_cohorts():
 
     per_author_cohort = {login: cohort_of(m) for login, m in acc.items()
                          if login in insiders}
-    return acc, per_author_cohort, q_of
+    fleet_all = set()
+    for login, months in acc.items():
+        for per in PERIODS:
+            mons = [m for m, q in q_of.items() if q == per]
+            if sum(months.get(m, [0, 0, 0, 0, 0])[4] for m in mons) \
+                    >= FLEET_MIN:
+                fleet_all.add(login)
+                break
+    return acc, per_author_cohort, q_of, fleet_all
 
 
 def adoption_monthly() -> dict:
@@ -413,7 +421,7 @@ def adoption_monthly() -> dict:
     quarter-ACTIVE cohort member per MONTH (the Figure 4 series: submitted
     has no censoring; merged follows the w8 rule and is provisional on
     months not yet mature — see mature-month cap in the caption)."""
-    acc, cohort_of_login, q_of = _author_months_and_cohorts()
+    acc, cohort_of_login, q_of, _fleet = _author_months_and_cohorts()
     months = sorted(q_of)
     out = {}
     for mon in months:
@@ -467,7 +475,7 @@ def adoption_event(max_off: int = 2, balanced: bool = True) -> dict:
     Returns {(cohort, e): {n, submitted, sub_ai, sub_nonai, merged,
     mrg_ai, mrg_nonai}} for the adopting cohorts + fleet (aligned
     members only)."""
-    acc, cohort_of_login, q_of = _author_months_and_cohorts()
+    acc, cohort_of_login, q_of, _fleet = _author_months_and_cohorts()
     zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
 
     def metrics(row):
@@ -531,7 +539,7 @@ def event_by_adoption_month(max_off: int = 2) -> dict:
 
     Returns {t0_month: {"n": int, "offsets": {e: {six metrics,
     "month": str, "mature": bool}}}}."""
-    acc, cohort_of_login, _q_of = _author_months_and_cohorts()
+    acc, cohort_of_login, _q_of, _fleet = _author_months_and_cohorts()
     zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
 
     def metrics(row):
@@ -586,7 +594,26 @@ def adoption() -> None:
                   f"{r['median']:>8.2f}")
 
 
-def review_mix(by: str = "role") -> dict:
+FLEET_LOGINS_FILE = "data/derived/fleet_logins.txt"
+
+
+def fleet_logins() -> set[str]:
+    """ALL authors (insider or not) with >= FLEET_MIN merged PRs in some
+    study quarter — the exclusion set for review-behavior figures 6-8
+    (fleet pipelines distort review statistics the way they distort
+    per-contributor means). Persisted to data/derived/fleet_logins.txt
+    (reproducible from cells; computed and written when absent)."""
+    from pathlib import Path
+    p = Path(FLEET_LOGINS_FILE)
+    if p.is_file():
+        return {ln.strip() for ln in p.read_text().splitlines()
+                if ln.strip()}
+    *_rest, fleet = _author_months_and_cohorts()
+    p.write_text("\n".join(sorted(fleet)) + "\n")
+    return fleet
+
+
+def review_mix(by: str = "role", exclude_fleet: bool = True) -> dict:
     """Figure 6: review mix of MERGED PRs, insider vs external, per
     quarter — the substitution hypothesis (human review declining, AI/bot
     review rising). For each (period, slice in {ins, ext}): share of
@@ -600,9 +627,11 @@ def review_mix(by: str = "role") -> dict:
     by="role": slices {ins, ext} (author association); by="ai": slices
     {ai, nonai} (PR-level AI involvement — the Figure 6 alternative; note
     the ai slice is empty at the Q1-2024 baseline by construction).
+    exclude_fleet (default): PRs authored by fleet operators are dropped.
 
     Returns {(period, slice): {n, loc, <ch>_pr, <ch>_loc ...}}."""
     keep = population_repos()
+    fleet = fleet_logins() if exclude_fleet else set()
     agg: dict = defaultdict(lambda: defaultdict(float))
     for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
         if repo not in keep or per not in PERIODS:
@@ -610,7 +639,7 @@ def review_mix(by: str = "role") -> dict:
         for p in prs:
             a = p.get("author") or {}
             if a.get("__typename") == "Bot" or not a.get("login") \
-                    or is_bot_login(a["login"]):
+                    or is_bot_login(a["login"]) or a["login"] in fleet:
                 continue
             c = classify_pr(p, MARKERS)
             ch = merged_channel(c)
@@ -636,8 +665,8 @@ def review_mix(by: str = "role") -> dict:
 
 
 def review_mix_table() -> None:
-    print("review mix of MERGED PRs (mature-gated, pooled): PR share / "
-          "LOC share per approval channel")
+    print("review mix of MERGED PRs (mature-gated, pooled, FLEET-OPERATOR "
+          "authors excluded): PR share / LOC share per approval channel")
     print("humanRev = reviewer!=author human review; botOnly = AI/CI bot "
           "only; selfUnrev/otherUnrev = merged unreviewed")
     for by, slices in (("role", ("ins", "ext")), ("ai", ("ai", "nonai"))):

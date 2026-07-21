@@ -40,7 +40,8 @@ def human_comment_count(pr: dict) -> int:
 
 
 def attention_by_ai() -> dict:
-    """Figure 7: attention proxies by PR AI involvement — pooled over
+    """Figure 7: attention proxies by PR AI involvement (FLEET-OPERATOR
+    authors excluded) — pooled over
     mature, merged, human-reviewed PRs per quarter x {ai, nonai}:
     comments/kLOC (bot-clean human inline comments) and FIRST-REVIEW
     latency hours/kLOC (PR creation -> first human review submission,
@@ -49,13 +50,18 @@ def attention_by_ai() -> dict:
 
     Returns {(period, slice): {n, kloc, comments_per_kloc,
     first_rev_h_per_kloc}}."""
+    from pipeline.studies.productivity import fleet_logins
     from pipeline.studies.review_action import first_human_review
     keep = population_repos()
+    fleet = fleet_logins()
     agg = defaultdict(lambda: defaultdict(float))
     for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
         if repo not in keep or per not in PERIODS:
             continue
         for p in prs:
+            login = (p.get("author") or {}).get("login")
+            if login in fleet:
+                continue                 # fleet pipelines distort review stats
             c = classify_pr(p, MARKERS)
             if not (c.w8_mature and c.merged and c.human_reviewed
                     and p.get("createdAt")):
@@ -81,7 +87,7 @@ def attention_by_ai() -> dict:
 def attention_by_ai_table() -> None:
     rows = attention_by_ai()
     print("\nattention by PR AI involvement (mature merged human-reviewed "
-          "PRs, pooled)")
+          "PRs, pooled, fleet-operator authors excluded)")
     print(f"{'period':9}{'slice':7}{'PRs':>7}{'kLOC':>9}"
           f"{'comments/kLOC':>15}{'first-rev h/kLOC':>18}")
     for per in PERIODS:

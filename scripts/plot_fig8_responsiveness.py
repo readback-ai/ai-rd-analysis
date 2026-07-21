@@ -46,7 +46,7 @@ def broken_pair(subfig, title):
 
 
 def main() -> None:
-    lanes, _ = lane_rows()
+    _, lanes, _ = lane_rows()   # fleet-excluded domain
 
     def val(per, lane, kind):
         a = lanes.get((per, lane))
@@ -58,7 +58,7 @@ def main() -> None:
 
     fig = plt.figure(figsize=(11, 4.4))
     fig.suptitle("Figure 8: responsiveness to human review requests — "
-                 "AI-involved vs non-AI PRs (CLEAN lane, HT-weighted)",
+                 "AI vs non-AI PRs (CLEAN lane, HT; fleet authors excluded)",
                  fontsize=12, y=1.06)
     subfigs = fig.subfigures(1, 2, wspace=0.05)
     for sf, kind, title in (
