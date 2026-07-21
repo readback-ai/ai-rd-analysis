@@ -50,15 +50,15 @@ Q2-2026    1154     16.9% [14.8,18.8]    13.6% [11.6,15.7]    22.4% [19.7,25.0] 
 
 ```
 
-## Figure 3: Merged LOC per core contributor over time (CW, 95% CI) [quarterly]
+## Figure 3: Merged LOC per core contributor over time (CW, 95% CI)
 ```
-Figure 3: Merged LOC per core contributor over time
-contributor-weighted repo means, bootstrap 95% CI; merged = w8 rule; core = insider PR authors; repos with >=2 insider authors
-period    repos    CW merged kLOC/core author  x baseline
-Q1-2024     251            6.45 [ 4.66, 8.63]       1.00x
-Q4-2025     469           10.04 [ 6.62,15.68]       1.56x
-Q1-2026     532           10.71 [ 8.34,13.52]       1.66x
-Q2-2026     581           19.08 [13.19,26.95]       2.96x
+Figure 3: Submitted and merged LOC per core contributor over time
+contributor-weighted repo means, bootstrap 95% CI; merged = w8 rule (Q2 provisional); core = insider PR authors; repos with >=2 insider authors
+period    repos    CW submitted kLOC/author  x base     CW merged kLOC/author  x base
+Q1-2024     251          9.56 [ 6.76,12.72]   1.00x        6.45 [ 4.66, 8.63]   1.00x
+Q4-2025     469         14.00 [ 9.45,21.18]   1.46x       10.04 [ 6.45,15.56]   1.56x
+Q1-2026     532         16.28 [12.79,20.84]   1.70x       10.71 [ 8.38,13.50]   1.66x
+Q2-2026     581         26.90 [19.03,37.83]   2.81x       19.08 [13.19,27.65]   2.96x
 
 ```
 
@@ -488,6 +488,22 @@ Q1-2024          19.4     72.8%     0.8%      20.0%        6.1%
 Q4-2025          47.8     70.9%     9.4%      15.4%        3.9%
 Q1-2026          72.1     69.3%    11.5%      15.8%        3.3%
 Q2-2026          34.6     63.1%    15.9%      16.5%        4.4%
+
+```
+
+## Figure 6: review mix of merged PRs/LOC, core vs external
+```
+review mix of MERGED PRs (mature-gated, pooled): PR share / LOC share per approval channel
+humanRev = reviewer!=author human review; botOnly = AI/CI bot only; selfUnrev/otherUnrev = merged unreviewed
+period   slice   merged        humanRev         botOnly       selfUnrev      otherUnrev
+Q1-2024  ins      17729   68.2/ 62.5%    0.8/  1.0%   27.1/ 31.7%    3.8/  4.7%
+Q1-2024  ext      32677   80.5/ 79.5%    0.3/  0.6%   11.2/ 12.8%    7.7/  7.1%
+Q4-2025  ins      38672   71.0/ 65.6%    9.2/ 11.3%   17.0/ 19.8%    2.7/  3.2%
+Q4-2025  ext      50050   83.8/ 75.6%    4.4/  7.7%    6.2/ 11.7%    4.7/  4.5%
+Q1-2026  ins      50564   65.4/ 64.0%   10.8/ 12.4%   21.2/ 21.7%    2.6/  1.9%
+Q1-2026  ext      63680   79.4/ 74.4%    6.6/ 10.3%    8.4/ 10.7%    5.3/  4.4%
+Q2-2026  ins      23028   63.1/ 56.7%   12.9/ 17.6%   21.6/ 22.7%    2.5/  3.0%
+Q2-2026  ext      29745   74.4/ 69.3%    8.0/ 14.3%   12.7/ 10.5%    4.9/  5.8%
 
 ```
 

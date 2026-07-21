@@ -130,7 +130,7 @@ inaccessibility waiver). The monthly twin (`report_monthly.md`,
 `--granularity month`) runs the same sections; sections whose module is
 inherently quarterly carry an explicit `[quarterly]` tag there.
 
-The 19 sections, in order (each title names its producing module and
+The 20 sections, in order (each title names its producing module and
 argument — one section = one module invocation):
 
 1. **Contributor-weighted metrics** (`pipeline.analyze`) — per period ×
@@ -174,15 +174,19 @@ argument — one section = one module invocation):
     `fig_a2_adoption_event.png` (event time net of non-adopters).
 15. **Merged LOC by approval channel** (`--cut channels`) — humanRev /
     botOnly / selfUnrev / otherUnrev shares of merged LOC.
-16. **Attention per line** (`studies.attention`) — HUMAN comments/kLOC
+16. **Figure 6: review mix of merged PRs/LOC** (`productivity --cut
+    reviewmix`) — per quarter × {core, external}: PR and LOC shares of
+    humanRev / botOnly / selfUnrev / otherUnrev over mature merged PRs
+    (the substitution hypothesis). Rendered as `fig6_review_mix.png`.
+17. **Attention per line** (`studies.attention`) — HUMAN comments/kLOC
     (bot-clean) + window h/kLOC, all/ins/ext + size bands.
-17. **PR fates at matched horizons** (`studies.fates`) — w8 primary, w26
+18. **PR fates at matched horizons** (`studies.fates`) — w8 primary, w26
     sensitivity, per cohort; immature PRs excluded per horizon.
-18. **Responsiveness to human asks** (`studies.review_action`) — CLEAN
+19. **Responsiveness to human asks** (`studies.review_action`) — CLEAN
     lane identified; Horvitz–Thompson weighted (PPS sample → PR-weighted
     responded%, population LOC share); commit lists paginated with
     completeness metadata.
-19. **Adoption event-study** (`studies.event_study`) — merged (w8,
+20. **Adoption event-study** (`studies.event_study`) — merged (w8,
     mature-months-only) and submitted kLOC in event time around each
     author's first AI-marker month.
 
