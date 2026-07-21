@@ -94,7 +94,10 @@ def main() -> None:
                "merged kLOC (w8)")
         axl.set_ylim(bottom=0)
         axl.set_ylabel("kLOC / contributor / month")
-        axr.legend(fontsize=7, loc="upper left")
+    # one figure-level legend: per-panel boxes overlapped rising data
+    handles, labels = axr.get_legend_handles_labels()
+    fig.legend(handles, labels, loc="upper right", ncol=3, fontsize=9,
+               frameon=False, bbox_to_anchor=(0.98, 1.03))
     fig.savefig("artifacts/fig4_adoption_cohorts.png", dpi=200,
                 bbox_inches="tight")
     print("wrote artifacts/fig4_adoption_cohorts.png")
