@@ -461,15 +461,16 @@ def adoption_event(max_off: int = 2) -> dict:
                 "merged": row[0] + row[1], "mrg_ai": row[0],
                 "mrg_nonai": row[1]}
 
-    # non-adopter mean per calendar month (the subtracted baseline)
+    # non-adopter mean per calendar month (the subtracted baseline) —
+    # ZERO-INCLUSIVE over all non-adopter members, matching the adopter
+    # side (inactive month = zero volume on BOTH sides of the difference;
+    # an active-only baseline would bias pre-periods negative)
+    never = [login for login, c in cohort_of_login.items() if c == "never"]
     base = {}
     for mon in WINDOW_MONTHS:
-        rows = [acc[login][mon] for login, c in cohort_of_login.items()
-                if c == "never" and acc[login].get(mon)
-                and acc[login][mon][3]]
-        ms = [metrics(r) for r in rows] or [metrics(zero)]
-        base[mon] = {k: sum(m[k] for m in ms) / len(ms) for m in ms[0]
-                     for m in [ms[0]]} if False else             {k: sum(m[k] for m in ms) / len(ms) for k in ms[0]}
+        ms = [metrics(acc[login].get(mon) or zero) for login in never] \
+            or [metrics(zero)]
+        base[mon] = {k: sum(m[k] for m in ms) / len(ms) for k in ms[0]}
 
     out = {}
     for coh in ("fleet", "early", "medium", "late"):
