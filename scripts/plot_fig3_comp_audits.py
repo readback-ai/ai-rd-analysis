@@ -57,8 +57,12 @@ def main() -> None:
     axl, axr = broken_pair(subfigs.flat[0],
                            "% of merged PRs human-reviewed")
     for sl, color, label in SLICES:
-        y = [100 * mix[(p, sl)]["humanRev_pr"] if (p, sl) in mix else None
-             for p in PERIODS]
+        # AI-conditioned rates are undefined at the Q1-2024 baseline
+        # (zero denominator) — suppress even if a stray detector FP
+        # creates a tiny cell
+        y = [100 * mix[(p, sl)]["humanRev_pr"]
+             if (p, sl) in mix and not (sl == "ai" and p == "Q1-2024")
+             else None for p in PERIODS]
         axl.plot([0], y[:1], marker="o", ms=4, color=color)
         axr.plot([0, 1, 2], y[1:], marker="o", ms=3, color=color,
                  label=label)
@@ -70,8 +74,9 @@ def main() -> None:
 
     axl, axr = broken_pair(subfigs.flat[1], "human comments per kLOC")
     for sl, color, label in SLICES:
-        y = [att.get((p, sl), {}).get("comments_per_kloc")
-             for p in PERIODS]
+        y = [att[(p, sl)]["comments_per_kloc"]
+             if (p, sl) in att and not (sl == "ai" and p == "Q1-2024")
+             else None for p in PERIODS]
         axl.plot([0], y[:1], marker="o", ms=4, color=color)
         axr.plot([0, 1, 2], y[1:], marker="o", ms=3, color=color,
                  label=label)

@@ -64,8 +64,10 @@ def main() -> None:
                              "share of merged LOC")):
         axl, axr = broken_pair(sf, title)
         for ch, sl, color, label in SERIES6:
-            y = [100 * rows.get((p, sl), {}).get(f"{ch}_{unit}", 0)
-                 for p in PERIODS]
+            # absent cell (e.g. the AI slice at the Q1-2024 baseline) is a
+            # ZERO-DENOMINATOR: undefined, never a plotted zero
+            y = [100 * rows[(p, sl)][f"{ch}_{unit}"]
+                 if (p, sl) in rows else None for p in PERIODS]
             axl.plot([0], y[:1], marker="o", ms=4, color=color)
             axr.plot([0, 1, 2], y[1:], marker="o", ms=3, color=color,
                      label=label)
