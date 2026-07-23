@@ -157,6 +157,26 @@ contaminated by an unrecognized AI reviewer.
   seeded bootstrap CI (2,000 draws). Repo floor ≥5 PRs/quarter,
   ≥2 PRs/month.
 
+### Study frame — `src/pipeline/frame.py`
+The one census pass every study consumes (cells → period grouping →
+population filter → eligibility profile → classified, capped PR facts).
+Studies contain only their accumulation logic; the guards live here once.
+
+- `study_frame(level, periods, ranges, granularity)` — flat generator of
+  `PRFact` records `(repo, period, pr, cls, loc, author, insider,
+  bot_author)`; `study_groups(...)` is the group-shaped view for
+  per-repo floors/rates (slices). Iteration order is load-bearing (the
+  seeded bootstrap stream).
+- Eligibility profiles (CONTEXT.md): `pr` = human-authored PR population
+  (App-bot skip only — review-behavior studies); `author` = attributable
+  human authors (adds `is_bot_login` hygiene — author-level studies);
+  `all` = no author filter (population tables; responsiveness anchors).
+  NOTE: Figure 7 (`attention_by_ai`) uses `all`, Figure 8 and fates use
+  `pr` — agent-authored PRs count in one and not the other (issue #2).
+- Owns `PERIODS`, `CAP` (20k LOC/PR), and `population_repos()`.
+- Tests: `tests/test_frame.py` encodes the pre-refactor per-study guards
+  verbatim as reference implementations.
+
 ### Population — `src/pipeline/org_set.py`
 Five rules (R1 candidates from five third-party lists → R2 quality → R3
 identity → R4 evidence → R5 scope w/ conglomerates) + one override table

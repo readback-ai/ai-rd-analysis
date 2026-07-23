@@ -295,6 +295,18 @@ comments or a non-APPROVED state. All comment counts in attention metrics
 sum ONLY over class-1 reviews — bot comments can never share a numerator
 with human comments (frozen convention §1d.3).
 
+**Author-side eligibility profiles** (`pipeline.frame`, definitions in
+CONTEXT.md): which PRs enter a study is a named policy, not a per-study
+guard. `pr` = the human-authored PR population (skips App-bot authors;
+review-behavior studies — bot dep-bumps have degenerate review dynamics);
+`author` = attributable human authors (adds the `is_bot_login` hygiene;
+author-level productivity/event studies — a bot is not a productivity
+unit); `all` = no author filter (population-level usage tables, where
+layer-B agent output must count, and the responsiveness ask anchors).
+Note the review-behavior studies do not currently share one profile:
+Figure 7's by-AI cut runs on `all` while Figure 8 and fates run on `pr`
+(tracked pre-publication, issue #2).
+
 **What is undetectable** (all rates are floors): squash-merge strips trailers
 (asymmetrically — Claude's footer survives squash more often, so non-Claude
 tools are likelier undercounted); local tools with default settings
