@@ -71,16 +71,19 @@ def _eligible(pr: dict, level: str) -> bool:
 
 
 def study_frame(level: str,
-                periods: Iterable[str] = tuple(PERIODS),
-                ranges: dict | None = None) -> Iterator[PRFact]:
+                periods: Iterable[str] | None = tuple(PERIODS),
+                ranges: dict | None = None,
+                granularity: str = "quarter") -> Iterator[PRFact]:
     """Yield PRFacts for every eligible PR in the population, in the
-    canonical census order. `periods` narrows to study periods; `ranges`
-    overrides the quarter map for monthly-granularity callers."""
-    periods = set(periods)
+    canonical census order. `periods` narrows to study periods (pass the
+    month set with granularity="month" for monthly callers; None = every
+    censused period, e.g. the event study's baseline months); `ranges`
+    overrides the quarter map."""
+    pset = None if periods is None else set(periods)
     keep = population_repos()
     for (repo, per), prs in group_by_period(
-            load_cells(), ranges or QUARTER_RANGES).items():
-        if repo not in keep or per not in periods:
+            load_cells(), ranges or QUARTER_RANGES, granularity).items():
+        if repo not in keep or (pset is not None and per not in pset):
             continue
         for p in prs:
             if not _eligible(p, level):

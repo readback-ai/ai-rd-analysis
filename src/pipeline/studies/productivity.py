@@ -23,9 +23,7 @@ import argparse
 import statistics
 from collections import defaultdict
 
-from pipeline.frame import CAP, PERIODS, study_frame
-
-LINE_CAP = CAP     # legacy alias until paper_tables imports frame.CAP
+from pipeline.frame import PERIODS, study_frame
 # VOLUME ESTIMAND NOTE (documented provisional treatment, external review
 # P1): merged-LOC sums here count every w8 merge OBSERVED so far,
 # including merges of not-yet-mature PRs — immature PRs that will merge

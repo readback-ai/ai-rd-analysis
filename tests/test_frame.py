@@ -108,6 +108,28 @@ def test_fact_fields(monkeypatch):
     assert alice.repo == "o/r" and alice.period == "Q2-2026"
 
 
+def test_month_granularity_buckets_by_created_month(monkeypatch):
+    """Monthly callers (_author_months_and_cohorts) pass granularity and
+    their own period set; buckets must re-partition by createdAt month."""
+    _patched(monkeypatch)
+    got = [(f.period, f.pr["number"]) for f in frame.study_frame(
+        "pr", periods={"2026-04"}, granularity="month")]
+    assert got == [("2026-04", n) for n in (1, 4, 5, 6)]
+
+
+def test_periods_none_means_no_period_filter(monkeypatch):
+    """event_study.author_months takes every censused month (baseline
+    2024 months included) — periods=None must not narrow."""
+    baseline_pr = {**_pr(1, HUMAN), "createdAt": "2024-02-10T00:00:00Z",
+                   "mergedAt": "2024-02-12T00:00:00Z"}
+    cells = {("o/r", "2024-01-01..2024-03-31"): [baseline_pr],
+             ("o/r", "2026-04-01..2026-06-30"): [_pr(2, HUMAN)]}
+    _patched(monkeypatch, cells=cells)
+    got = [(f.period, f.pr["number"]) for f in frame.study_frame(
+        "pr", periods=None, granularity="month")]
+    assert got == [("2024-02", 1), ("2026-04", 2)]
+
+
 def test_constants_match_legacy_values():
     """PERIODS ×7 and CAP ×4 copies collapse onto these; any drift here
     would silently change every study."""

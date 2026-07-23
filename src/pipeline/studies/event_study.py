@@ -33,16 +33,14 @@ from __future__ import annotations
 from collections import defaultdict
 from statistics import mean, median
 
-from pipeline.analyze import group_by_period, load_cells
 from pipeline import detect
-from pipeline.detect import MARKERS, classify_pr, is_bot_login
-from pipeline.scan_orgs import QUARTER_RANGES
-from pipeline.studies.slices import population_repos
+from pipeline.frame import study_frame
 
 WINDOW = ["2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03",
           "2026-04", "2026-05", "2026-06"]
 BASELINE = ["2024-01", "2024-02", "2024-03"]
-CAP = 20_000
+
+
 def mature_max() -> int:
     """Index of the last WINDOW month whose PRs ALL reached w8 maturity by
     the data AS_OF (month_end + 56d <= AS_OF) — derived, not hard-coded,
@@ -64,29 +62,17 @@ def mature_max() -> int:
 def author_months():
     """login -> month -> [merged_kloc, ai_pr_count, insider_any,
     submitted_kloc]."""
-    keep = population_repos()
     out = defaultdict(lambda: defaultdict(lambda: [0.0, 0, False, 0.0]))
-    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES,
-                                            "month").items():
-        if repo not in keep:
-            continue
-        for p in prs:
-            a = p.get("author") or {}
-            if a.get("__typename") == "Bot" or not a.get("login") \
-                    or is_bot_login(a["login"]):
-                continue
-            c = classify_pr(p, MARKERS)
-            row = out[a["login"]][per]
-            kloc = min((p.get("additions") or 0)
-                       + (p.get("deletions") or 0), CAP) / 1000
-            row[3] += kloc
-            if c.merged:
-                row[0] += kloc
-            if c.ai_involved:
-                row[1] += 1
-            if p.get("authorAssociation") in ("MEMBER", "OWNER",
-                                              "COLLABORATOR"):
-                row[2] = True
+    for f in study_frame("author", periods=None, granularity="month"):
+        row = out[f.author][f.period]
+        kloc = f.loc / 1000
+        row[3] += kloc
+        if f.cls.merged:
+            row[0] += kloc
+        if f.cls.ai_involved:
+            row[1] += 1
+        if f.insider:
+            row[2] = True
     return out
 
 

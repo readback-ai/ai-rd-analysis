@@ -30,12 +30,10 @@ from __future__ import annotations
 import argparse
 from collections import defaultdict
 
-from pipeline.analyze import (bootstrap_ci, group_by_period, load_cells,
-                              weighted_mean)
-from pipeline.detect import MARKERS, classify_pr
-from pipeline.scan_orgs import QUARTER_RANGES
-from pipeline.studies.productivity import LINE_CAP, PERIODS, per_author
-from pipeline.studies.slices import population_repos, weights
+from pipeline.analyze import bootstrap_ci, weighted_mean
+from pipeline.frame import PERIODS, study_frame
+from pipeline.studies.productivity import per_author
+from pipeline.studies.slices import weights
 
 MIN_PRS = 5
 
@@ -54,34 +52,26 @@ def _fmt(est: tuple[float, float, float], pct: bool = True) -> str:
 def usage_rows() -> list[dict]:
     """Figure 2 rows: per period {period, repos, sub_pr, mrg_pr, sub_loc,
     mrg_loc} — each estimate a (mean, lo, hi) tuple of shares in [0,1]."""
-    keep = population_repos()
     w = weights()
     # (repo, per) -> [prs, ai_prs, mrg_prs, ai_mrg_prs, loc, ai_loc,
     #                 mrg_loc, ai_mrg_loc]
     acc: dict = defaultdict(lambda: [0, 0, 0, 0, 0, 0, 0, 0])
-    for (repo, per), prs in group_by_period(load_cells(),
-                                            QUARTER_RANGES).items():
-        if repo not in keep or per not in PERIODS:
-            continue
-        row = acc[(repo, per)]
-        for p in prs:
-            c = classify_pr(p, MARKERS)
-            loc = min((p.get("additions") or 0)
-                      + (p.get("deletions") or 0), LINE_CAP)
-            ai = c.ai_involved
-            row[0] += 1
-            row[4] += loc
+    for f in study_frame("all"):     # population table: bot PRs count
+        row = acc[(f.repo, f.period)]
+        ai = f.cls.ai_involved
+        row[0] += 1
+        row[4] += f.loc
+        if ai:
+            row[1] += 1
+            row[5] += f.loc
+        # merged columns are outcome-conditioned: mature PRs only
+        # (frozen rule 1d.1; external review P1)
+        if f.cls.merged and f.cls.w8_mature:
+            row[2] += 1
+            row[6] += f.loc
             if ai:
-                row[1] += 1
-                row[5] += loc
-            # merged columns are outcome-conditioned: mature PRs only
-            # (frozen rule 1d.1; external review P1)
-            if c.merged and c.w8_mature:
-                row[2] += 1
-                row[6] += loc
-                if ai:
-                    row[3] += 1
-                    row[7] += loc
+                row[3] += 1
+                row[7] += f.loc
     rows = []
     for per in PERIODS:
         sub_pr, mrg_pr, sub_loc, mrg_loc = [], [], [], []
@@ -110,13 +100,9 @@ def core_rows() -> list[dict]:
     pa = per_author()
     w = weights()
     ins_of = defaultdict(set)
-    for (repo, per), prs in group_by_period(load_cells(),
-                                            QUARTER_RANGES).items():
-        for p in prs:
-            a = p.get("author") or {}
-            if a.get("login") and p.get("authorAssociation") in \
-                    ("MEMBER", "OWNER", "COLLABORATOR"):
-                ins_of[(repo, per)].add(a["login"])
+    for f in study_frame("all"):
+        if f.author and f.insider:
+            ins_of[(f.repo, f.period)].add(f.author)
     rows = []
     base = sub_base = None
     for per in PERIODS:

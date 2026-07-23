@@ -75,8 +75,9 @@ def test_paper_tables_merged_columns_mature_only(monkeypatch):
         prs.append(_pr("2026-04-01T00:00:00Z",
                        merged="2026-04-05T00:00:00Z", num=i))
     cells = {("o/r", "2026-04-01..2026-06-30"): prs}
-    monkeypatch.setattr(paper_tables, "load_cells", lambda: cells)
-    monkeypatch.setattr(paper_tables, "population_repos", lambda: {"o/r"})
+    from pipeline import frame
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
     monkeypatch.setattr(paper_tables, "weights", lambda: {"o/r": 1.0})
     rows = paper_tables.usage_rows()
     q2 = [r for r in rows if r["period"] == "Q2-2026"][0]
