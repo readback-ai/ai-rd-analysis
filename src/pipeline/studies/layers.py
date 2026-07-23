@@ -21,37 +21,28 @@ from __future__ import annotations
 
 import argparse
 from collections import defaultdict
-from pathlib import Path
 
-from pipeline.analyze import extended_quarters, group_by_period, load_cells
-from pipeline.detect import MARKERS, classify_pr
-
-DRV = Path("data/derived")
-PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
+from pipeline.analyze import extended_quarters
+from pipeline.frame import PERIODS, study_frame
 
 
 def layered_table(granularity: str = "quarter") -> None:
-    keep = set((DRV / "population_repos.txt").read_text().split())
-    grouped = group_by_period(load_cells(), extended_quarters(), granularity)
-    if not grouped:
-        raise SystemExit("no census cells in $AIRD_DATA_DIR — refusing to "
-                         "print an empty decomposition")
     agg: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
-    for (repo, per), prs in grouped.items():
-        if repo not in keep:
-            continue
-        d = agg[per]
-        for p in prs:
-            d["n"] += 1
-            c = classify_pr(p, MARKERS)
-            if c.agent_author:
-                d["b"] += 1
-            elif c.marker_tools:
-                d["a"] += 1
-            elif c.branch_tool:
-                d["c"] += 1
-    periods = PERIODS if granularity == "quarter" else \
-        sorted({p for (_, p) in grouped})
+    for f in study_frame("all", periods=None, ranges=extended_quarters(),
+                         granularity=granularity):
+        d = agg[f.period]
+        d["n"] += 1
+        if f.cls.agent_author:
+            d["b"] += 1
+        elif f.cls.marker_tools:
+            d["a"] += 1
+        elif f.cls.branch_tool:
+            d["c"] += 1
+    if not agg:
+        raise SystemExit("no census cells for the population in "
+                         "$AIRD_DATA_DIR — refusing to print an empty "
+                         "decomposition")
+    periods = PERIODS if granularity == "quarter" else sorted(agg)
     print(f"{'period':9}{'PRs':>8}{'A marker%':>10}{'B agent%':>9}"
           f"{'C branch%':>10}{'union%':>8}")
     for per in periods:

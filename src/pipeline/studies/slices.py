@@ -24,14 +24,13 @@ from collections import defaultdict
 from pathlib import Path
 
 from pipeline.analyze import (bootstrap_ci, extended_quarters,
-                              group_by_period, load_cells,
                               weighted_mean)
-from pipeline.detect import (MARKERS, classify_pr, pr_agent_author,
-                             pr_ai_tools, pr_branch_tool)
+from pipeline.detect import (MARKERS, pr_agent_author, pr_ai_tools,
+                             pr_branch_tool)
+from pipeline.frame import PERIODS, study_groups
 
 SRC = Path("data/sources")
 DRV = Path("data/derived")
-PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
 MIN_PRS = 5            # per quarter; month floor is 2 (comparable threshold)
 GRANULARITY = "quarter"  # set by main() --granularity
 
@@ -71,10 +70,6 @@ def slices() -> dict[str, set[str]]:
     return dict(out)
 
 
-def population_repos() -> set[str]:
-    return set((DRV / "population_repos.txt").read_text().split())
-
-
 def weights() -> dict[str, float]:
     """Window-scoped contributor weights (pipeline.contributors); falls back
     to the all-time file with a warning until the window pull completes."""
@@ -94,13 +89,13 @@ def weights() -> dict[str, float]:
 def repo_rates() -> dict[tuple[str, str], dict[str, float | None]]:
     """(repo, period) -> per-repo rates of the slice metrics. None where the
     metric's denominator is under MIN_PRS or the field is unavailable."""
-    keep = population_repos()
     out: dict[tuple[str, str], dict[str, float | None]] = {}
-    for (repo, per), prs in group_by_period(load_cells(), extended_quarters(),
-                                            GRANULARITY).items():
-        if repo not in keep or len(prs) < _floor():
+    for (repo, per), facts in study_groups(
+            "all", periods=None, ranges=extended_quarters(),
+            granularity=GRANULARITY):
+        if len(facts) < _floor():
             continue
-        cls = [classify_pr(p, MARKERS) for p in prs]
+        cls = [f.cls for f in facts]
         n = len(cls)
         # outcome metrics (merge/review/self-merge) are defined only on
         # w8-MATURE PRs — immature state is provisional (frozen rule
@@ -179,22 +174,23 @@ def bounds() -> None:
     PRs (upper arm, the reported headline) and WITHOUT them (lower arm —
     weak prefixes count only with positive provenance). Everything else in
     the study is a one-sided floor."""
-    keep = population_repos()
     w = weights()
     per_repo: dict[str, dict[tuple, list]] = {"hi": defaultdict(list), "lo": defaultdict(list)}
-    from pipeline.analyze import group_by_period, load_cells
-    for (repo, per), prs in group_by_period(load_cells(), extended_quarters(),
-                                            GRANULARITY).items():
-        if repo not in keep or len(prs) < _floor():
+    for (repo, per), facts in study_groups(
+            "all", periods=None, ranges=extended_quarters(),
+            granularity=GRANULARITY):
+        if len(facts) < _floor():
             continue
-        n = len(prs)
+        n = len(facts)
         def involved(p, strict):
             return bool(pr_ai_tools(p, MARKERS)
                         or pr_agent_author(p)
                         or pr_branch_tool(p, strict=strict))
-        per_repo["hi"][per].append((sum(involved(p, False) for p in prs) / n,
+        per_repo["hi"][per].append((sum(involved(f.pr, False)
+                                        for f in facts) / n,
                                     w.get(repo, 1.0)))
-        per_repo["lo"][per].append((sum(involved(p, True) for p in prs) / n,
+        per_repo["lo"][per].append((sum(involved(f.pr, True)
+                                        for f in facts) / n,
                                     w.get(repo, 1.0)))
     periods = PERIODS if GRANULARITY == "quarter" else \
         sorted({p for p in per_repo["hi"]})

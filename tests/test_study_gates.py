@@ -23,10 +23,11 @@ MATURE = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z", num=2)
 def test_slices_skip_immature_outcomes(monkeypatch, capsys):
     """Reviewer repro: a synthetic immature PR was counted as merged /
     self-merged by slices while analyze skipped it."""
+    from pipeline import frame
     from pipeline.studies import slices
     cells = {("o/r", "2026-04-01..2026-06-30"): [IMMATURE, MATURE] * 3}
-    monkeypatch.setattr(slices, "load_cells", lambda: cells)
-    monkeypatch.setattr(slices, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
     monkeypatch.setattr(slices, "MIN_PRS", 1)
     rates = slices.repo_rates()
     r = rates[("o/r", "Q2-2026")]

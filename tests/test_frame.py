@@ -133,6 +133,21 @@ def test_periods_none_means_no_period_filter(monkeypatch):
     assert got == [("2024-02", 1), ("2026-04", 2)]
 
 
+def test_study_groups_matches_flat_frame(monkeypatch):
+    """Group-shaped studies (slices repo floors) need ((repo, period),
+    facts) in canonical order; flattening the groups must equal the flat
+    stream, and group lists carry every eligible PR of that cell group."""
+    cells = {("o/r", "2026-01-01..2026-03-31"): [_pr(1, HUMAN),
+                                                 _pr(2, APP_BOT)],
+             ("o/r", "2026-04-01..2026-06-30"): [_pr(3, HUMAN)]}
+    _patched(monkeypatch, cells=cells)
+    groups = list(frame.study_groups("all"))
+    assert [k for k, _ in groups] == [("o/r", "Q1-2026"), ("o/r", "Q2-2026")]
+    assert [[f.pr["number"] for f in fs] for _, fs in groups] == [[1, 2], [3]]
+    assert [f.pr["number"] for _, fs in groups for f in fs] \
+        == [f.pr["number"] for f in frame.study_frame("all")]
+
+
 def test_constants_match_legacy_values():
     """PERIODS ×7 and CAP ×4 copies collapse onto these; any drift here
     would silently change every study."""

@@ -73,6 +73,35 @@ def _eligible(pr: dict, level: str) -> bool:
     raise ValueError(f"unknown eligibility profile: {level!r}")
 
 
+def study_groups(level: str,
+                 periods: Iterable[str] | None = tuple(PERIODS),
+                 ranges: dict | None = None,
+                 granularity: str = "quarter",
+                 ) -> Iterator[tuple[tuple[str, str], list[PRFact]]]:
+    """Group-shaped view: ((repo, period), eligible PRFacts) in canonical
+    census order, for studies with per-repo floors or rates (slices).
+    Groups left empty by the eligibility profile are skipped."""
+    pset = None if periods is None else set(periods)
+    keep = population_repos()
+    for (repo, per), prs in group_by_period(
+            load_cells(), ranges or QUARTER_RANGES, granularity).items():
+        if repo not in keep or (pset is not None and per not in pset):
+            continue
+        facts = []
+        for p in prs:
+            if not _eligible(p, level):
+                continue
+            c = classify_pr(p, MARKERS)
+            a = p.get("author") or {}
+            loc = min((p.get("additions") or 0)
+                      + (p.get("deletions") or 0), CAP)
+            facts.append(PRFact(repo, per, p, c, loc,
+                                a.get("login") or None, c.insider,
+                                a.get("__typename") == "Bot"))
+        if facts:
+            yield (repo, per), facts
+
+
 def study_frame(level: str,
                 periods: Iterable[str] | None = tuple(PERIODS),
                 ranges: dict | None = None,
@@ -82,19 +111,5 @@ def study_frame(level: str,
     month set with granularity="month" for monthly callers; None = every
     censused period, e.g. the event study's baseline months); `ranges`
     overrides the quarter map."""
-    pset = None if periods is None else set(periods)
-    keep = population_repos()
-    for (repo, per), prs in group_by_period(
-            load_cells(), ranges or QUARTER_RANGES, granularity).items():
-        if repo not in keep or (pset is not None and per not in pset):
-            continue
-        for p in prs:
-            if not _eligible(p, level):
-                continue
-            c = classify_pr(p, MARKERS)
-            a = p.get("author") or {}
-            loc = min((p.get("additions") or 0)
-                      + (p.get("deletions") or 0), CAP)
-            yield PRFact(repo, per, p, c, loc,
-                         a.get("login") or None, c.insider,
-                         a.get("__typename") == "Bot")
+    for _key, facts in study_groups(level, periods, ranges, granularity):
+        yield from facts
