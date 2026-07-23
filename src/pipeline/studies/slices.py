@@ -216,7 +216,10 @@ def balanced_panel() -> None:
     by_repo: dict[str, set[str]] = defaultdict(set)
     for (repo, per) in rates:
         by_repo[repo].add(per)
-    panel = {r for r, pers in by_repo.items() if set(periods) <= pers}
+    # sorted: bootstrap pairs must be order-deterministic — iterating the
+    # bare set made the seeded CIs PYTHONHASHSEED-dependent (gate finding,
+    # test_balanced_panel_ci_reproducible_across_hash_seeds)
+    panel = sorted({r for r, pers in by_repo.items() if set(periods) <= pers})
     print(f"balanced panel: {len(panel)} repos qualify in all "
           f"{len(periods)} {GRANULARITY}s")
     print(f"{'period':9}{'panel ai_involved':>22}{'cross-section':>22}")

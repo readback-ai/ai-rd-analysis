@@ -308,3 +308,56 @@ def test_definitive_nonresponse_tombstones(tmp_path, monkeypatch):
     ra.require_complete_sample(manifest, records)         # passes
     # a tombstone never counts as analyzable data
     assert ra.analyzable_keys(manifest, records) == [("o/b", 2)]
+
+
+_PANEL_SCRIPT = r"""
+import sys
+from pipeline import frame
+from pipeline.studies import slices
+
+repos = [f"org/repo{i}" for i in range(20)]
+RANGES = ["2024-01-01..2024-03-31", "2025-10-01..2025-12-31",
+          "2026-01-01..2026-03-31", "2026-04-01..2026-06-30"]
+cells = {}
+for i, repo in enumerate(repos):
+    for rng in RANGES:
+        prs = []
+        for j in range(20):
+            p = {"number": j, "createdAt": rng[:10] + "T00:00:00Z",
+                 "mergedAt": None, "additions": 100, "deletions": 0,
+                 "author": {"login": f"u{i}", "__typename": "User"},
+                 "mergedBy": None, "authorAssociation": "MEMBER",
+                 "commits": {"nodes": []}, "reviews": {"nodes": []}}
+            if j < i:                       # repo i: ai rate i/20, all distinct
+                p["headRefName"] = "codex/x"
+            prs.append(p)
+        cells[(repo, rng)] = prs
+frame.load_cells = lambda: cells
+frame.population_repos = lambda: set(repos)
+slices.MIN_PRS = 1
+slices.weights = lambda: {r: 1.0 for r in repos}
+slices.balanced_panel()
+"""
+
+
+def test_balanced_panel_ci_reproducible_across_hash_seeds():
+    """Gate finding (2026-07-23, study-frame refactor verification): the
+    balanced-panel bootstrap CIs drifted between otherwise-identical runs
+    while every other section was byte-stable. balanced_panel iterated the
+    `panel` SET when building the bootstrap pairs, so the pair order fed
+    to the seeded RNG depended on PYTHONHASHSEED — violating frozen rule
+    1d.7 ('seeded everything': reruns reproduce identical CIs)."""
+    import os
+    import subprocess
+    import sys
+
+    def run(seed):
+        env = {**os.environ, "PYTHONHASHSEED": str(seed),
+               "PYTHONPATH": "src"}
+        r = subprocess.run([sys.executable, "-c", _PANEL_SCRIPT],
+                           env=env, capture_output=True, text=True)
+        assert r.returncode == 0, r.stderr
+        assert "panel ai_involved" in r.stdout
+        return r.stdout
+
+    assert run(1) == run(2)
