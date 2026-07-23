@@ -55,6 +55,9 @@ class PRFact:
     loc: int              # additions + deletions, capped at CAP
     author: str | None
     insider: bool         # authorAssociation MEMBER/OWNER/COLLABORATOR
+    bot_author: bool      # GitHub App author (__typename == "Bot") — lets
+                          # "all"-profile sites apply the "pr" skip mid-
+                          # stream (lane_rows anchors)
 
 
 def _eligible(pr: dict, level: str) -> bool:
@@ -93,4 +96,5 @@ def study_frame(level: str,
             loc = min((p.get("additions") or 0)
                       + (p.get("deletions") or 0), CAP)
             yield PRFact(repo, per, p, c, loc,
-                         a.get("login") or None, c.insider)
+                         a.get("login") or None, c.insider,
+                         a.get("__typename") == "Bot")

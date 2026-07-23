@@ -13,13 +13,8 @@ import argparse
 from collections import defaultdict
 from datetime import datetime
 
-from pipeline.analyze import group_by_period, load_cells
 from pipeline import detect
-from pipeline.detect import MARKERS, classify_pr
-from pipeline.scan_orgs import QUARTER_RANGES
-from pipeline.studies.slices import population_repos
-
-PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
+from pipeline.frame import PERIODS, study_frame
 
 
 def _iso(ts):
@@ -46,23 +41,15 @@ def classify_at(p: dict, weeks: int) -> str | None:
 
 
 def fates_at(weeks: int) -> None:
-    keep = population_repos()
     agg = defaultdict(lambda: defaultdict(int))
-    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
-        if repo not in keep or per not in PERIODS:
-            continue
-        for p in prs:
-            a = p.get("author") or {}
-            if a.get("__typename") == "Bot":
-                continue
-            fate = classify_at(p, weeks)
-            if fate is None:
-                continue                     # immature at this horizon: skip
-            c = classify_pr(p, MARKERS)
-            for coh in ("all", "ins" if c.insider else "ext",
-                        "AI" if c.ai_involved else "nonAI"):
-                agg[(per, coh)][fate] += 1
-                agg[(per, coh)]["n"] += 1
+    for f in study_frame("pr"):
+        fate = classify_at(f.pr, weeks)
+        if fate is None:
+            continue                     # immature at this horizon: skip
+        for coh in ("all", "ins" if f.cls.insider else "ext",
+                    "AI" if f.cls.ai_involved else "nonAI"):
+            agg[(f.period, coh)][fate] += 1
+            agg[(f.period, coh)]["n"] += 1
     print(f"--- fates at w{weeks} (matched horizon; immature PRs excluded) ---")
     print(f"{'cohort':16}{'n':>8}{'merged%':>9}{'rejected%':>10}{'limbo%':>8}")
     for per in PERIODS:

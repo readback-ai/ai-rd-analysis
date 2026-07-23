@@ -15,13 +15,9 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import datetime
 
-from pipeline.analyze import group_by_period, load_cells
-from pipeline.detect import MARKERS, classify_pr, split_reviews
-from pipeline.scan_orgs import QUARTER_RANGES
-from pipeline.studies.slices import population_repos
+from pipeline.detect import split_reviews
+from pipeline.frame import CAP, PERIODS, study_frame
 
-PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
-CAP = 20_000
 BANDS = [(1, 10, "<=10"), (11, 100, "11-100"), (101, 1000, "101-1k"),
          (1001, CAP, ">1k")]
 
@@ -52,35 +48,28 @@ def attention_by_ai(fleet_slice: bool = False) -> dict:
     first_rev_h_per_kloc}}."""
     from pipeline.studies.productivity import fleet_logins
     from pipeline.studies.review_action import first_human_review
-    keep = population_repos()
     fleet = fleet_logins()
     agg = defaultdict(lambda: defaultdict(float))
-    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
-        if repo not in keep or per not in PERIODS:
+    # profile "all", NOT "pr": this population never excluded Bot-typed
+    # authors, so agent-authored PRs already count in the ai slice here
+    # (unlike main()'s table and Figure 8) — see issue #2
+    for f in study_frame("all"):
+        is_fleet = f.author in fleet
+        if is_fleet and not fleet_slice:
+            continue                 # fleet pipelines distort review stats
+        p, c = f.pr, f.cls
+        if not (c.w8_mature and c.merged and c.human_reviewed
+                and p.get("createdAt")):
             continue
-        for p in prs:
-            login = (p.get("author") or {}).get("login")
-            is_fleet = login in fleet
-            if is_fleet and not fleet_slice:
-                continue                 # fleet pipelines distort review stats
-            c = classify_pr(p, MARKERS)
-            if not (c.w8_mature and c.merged and c.human_reviewed
-                    and p.get("createdAt")):
-                continue
-            frt = first_human_review(p)
-            if not frt:
-                continue
-            loc = min((p.get("additions") or 0) + (p.get("deletions") or 0),
-                      CAP)
-            if not loc:
-                continue
-            sl = "fleet" if is_fleet else ("ai" if c.ai_involved
-                                           else "nonai")
-            d = agg[(per, sl)]
-            d["n"] += 1
-            d["kloc"] += loc / 1000
-            d["comments"] += human_comment_count(p)
-            d["frt_hours"] += _hours(p["createdAt"], frt)
+        frt = first_human_review(p)
+        if not frt or not f.loc:
+            continue
+        sl = "fleet" if is_fleet else ("ai" if c.ai_involved else "nonai")
+        d = agg[(f.period, sl)]
+        d["n"] += 1
+        d["kloc"] += f.loc / 1000
+        d["comments"] += human_comment_count(p)
+        d["frt_hours"] += _hours(p["createdAt"], frt)
     return {k: {"n": int(d["n"]), "kloc": d["kloc"],
                 "comments_per_kloc": d["comments"] / d["kloc"],
                 "first_rev_h_per_kloc": d["frt_hours"] / d["kloc"]}
@@ -104,37 +93,29 @@ def attention_by_ai_table() -> None:
 
 
 def main() -> None:
-    keep = population_repos()
     agg = defaultdict(lambda: defaultdict(float))
     band = defaultdict(lambda: defaultdict(float))
-    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
-        if repo not in keep or per not in PERIODS:
+    for f in study_frame("pr"):
+        p, c = f.pr, f.cls
+        if not (c.w8_mature and c.merged and c.human_reviewed
+                and p.get("createdAt") and p.get("mergedAt")):
+            continue              # outcome-conditioned: mature PRs only
+        if not f.loc:
             continue
-        for p in prs:
-            a = p.get("author") or {}
-            if a.get("__typename") == "Bot":
-                continue
-            c = classify_pr(p, MARKERS)
-            if not (c.w8_mature and c.merged and c.human_reviewed
-                    and p.get("createdAt") and p.get("mergedAt")):
-                continue          # outcome-conditioned: mature PRs only
-            loc = min((p.get("additions") or 0) + (p.get("deletions") or 0), CAP)
-            if not loc:
-                continue
-            comments = human_comment_count(p)
-            win = _hours(p["createdAt"], p["mergedAt"])
-            for coh in ("all", "ins" if c.insider else "ext"):
-                d = agg[(per, coh)]
-                d["kloc"] += loc / 1000
-                d["hours"] += win
-                d["comments"] += comments
-                d["n"] += 1
-            for lo, hi, name in BANDS:
-                if lo <= loc <= hi:
-                    b = band[(per, name)]
-                    b["kloc"] += loc / 1000
-                    b["comments"] += comments
-                    break
+        comments = human_comment_count(p)
+        win = _hours(p["createdAt"], p["mergedAt"])
+        for coh in ("all", "ins" if c.insider else "ext"):
+            d = agg[(f.period, coh)]
+            d["kloc"] += f.loc / 1000
+            d["hours"] += win
+            d["comments"] += comments
+            d["n"] += 1
+        for lo, hi, name in BANDS:
+            if lo <= f.loc <= hi:
+                b = band[(f.period, name)]
+                b["kloc"] += f.loc / 1000
+                b["comments"] += comments
+                break
     print("attention per line — merged, human-reviewed PRs (pooled)")
     print(f"{'cohort':14}{'PRs':>8}{'kLOC':>9}{'comments/kLOC':>14}"
           f"{'window h/kLOC':>14}")

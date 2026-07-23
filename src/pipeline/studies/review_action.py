@@ -65,14 +65,9 @@ import random
 import time
 from pathlib import Path
 
-from pipeline.analyze import group_by_period, load_cells
-from pipeline.detect import MARKERS, classify_pr, split_reviews
+from pipeline.detect import split_reviews
+from pipeline.frame import CAP, PERIODS, study_frame
 from pipeline.ghx import graphql_nodes
-from pipeline.scan_orgs import QUARTER_RANGES
-from pipeline.studies.slices import population_repos
-
-PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
-CAP = 20_000
 # v2: redrawn under the MATURE-GATED eligibility frame (2026-07-24) — HT
 # inclusion probabilities are only valid for records drawn from the frame
 # they are computed on. The v1 file remains solely as a hydration cache
@@ -160,21 +155,14 @@ def first_human_ask(pr: dict) -> str | None:
 
 
 def eligible() -> dict[str, list]:
-    keep = population_repos()
     pool: dict[str, list] = {p: [] for p in PERIODS}
-    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
-        if repo not in keep or per not in PERIODS:
-            continue
-        for p in prs:
-            a = p.get("author") or {}
-            if a.get("__typename") == "Bot":
-                continue
-            c = classify_pr(p, MARKERS)
-            frt = first_human_review(p)
-            loc = min((p.get("additions") or 0) + (p.get("deletions") or 0), CAP)
-            if c.w8_mature and c.merged and c.human_reviewed and frt and loc:
-                pool[per].append((repo, p["number"], loc, frt, a.get("login"),
-                                  bool(c.ai_involved), bool(c.insider)))
+    for f in study_frame("pr"):
+        c = f.cls
+        frt = first_human_review(f.pr)
+        if c.w8_mature and c.merged and c.human_reviewed and frt and f.loc:
+            pool[f.period].append((f.repo, f.pr["number"], f.loc, frt,
+                                   f.author, bool(c.ai_involved),
+                                   bool(c.insider)))
     return pool
 
 
@@ -550,8 +538,9 @@ def lane_rows() -> tuple[dict, dict, int]:
     semantics identical to compute()."""
     from collections import defaultdict
     # one census pass: ask anchors + lane flags + the PPS sampling frame
-    # (per-PR LOC weights and quarter LOC totals for inclusion probs)
-    keep = population_repos()
+    # (per-PR LOC weights and quarter LOC totals for inclusion probs).
+    # Profile "all": anchors come from EVERY PR; the frame then applies
+    # the "pr" skip via bot_author.
     anchors: dict = {}
     # (repo, num) -> (per, loc, frt, login, ai, ins): every descriptive
     # field derives from THIS census pass — sampled records supply only
@@ -559,23 +548,18 @@ def lane_rows() -> tuple[dict, dict, int]:
     # ai/first_review values in the analysis (round-7 review P1)
     frame: dict = {}
     W: dict = defaultdict(float)         # per -> total eligible LOC
-    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
-        if repo not in keep or per not in PERIODS:
+    for f in study_frame("all"):
+        p, c = f.pr, f.cls
+        anchors[(f.repo, p.get("number"))] = (
+            first_human_ask(p), c.ai_reviewed)
+        if f.bot_author:
             continue
-        for p in prs:
-            c = classify_pr(p, MARKERS)
-            anchors[(repo, p.get("number"))] = (
-                first_human_ask(p), c.ai_reviewed)
-            a = p.get("author") or {}
-            if a.get("__typename") == "Bot":
-                continue
-            frt = first_human_review(p)
-            loc = min((p.get("additions") or 0) + (p.get("deletions") or 0), CAP)
-            if c.w8_mature and c.merged and c.human_reviewed and frt and loc:
-                frame[(repo, p["number"])] = (per, loc, frt, a.get("login"),
-                                              bool(c.ai_involved),
-                                              bool(c.insider))
-                W[per] += loc
+        frt = first_human_review(p)
+        if c.w8_mature and c.merged and c.human_reviewed and frt and f.loc:
+            frame[(f.repo, p["number"])] = (f.period, f.loc, frt, f.author,
+                                            bool(c.ai_involved),
+                                            bool(c.insider))
+            W[f.period] += f.loc
 
     def inv_pi(key) -> float:
         per, loc = frame[key][:2]

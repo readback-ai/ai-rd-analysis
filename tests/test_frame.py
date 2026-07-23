@@ -60,10 +60,13 @@ def test_author_profile_matches_legacy_productivity_guard(monkeypatch):
 
 
 def test_all_profile_is_unfiltered(monkeypatch):
-    """lane_rows anchors consume every PR before eligibility applies."""
+    """lane_rows anchors consume every PR before eligibility applies;
+    bot_author lets that site keep its App-bot skip after the anchors."""
     _patched(monkeypatch)
-    assert [f.pr["number"] for f in frame.study_frame("all")] \
-        == [p["number"] for p in PRS]
+    facts = list(frame.study_frame("all"))
+    assert [f.pr["number"] for f in facts] == [p["number"] for p in PRS]
+    assert [f.pr["number"] for f in facts if not f.bot_author] \
+        == [f.pr["number"] for f in frame.study_frame("pr")]
 
 
 def test_loc_capped_and_null_tolerant(monkeypatch):
