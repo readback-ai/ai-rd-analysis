@@ -23,13 +23,9 @@ import argparse
 import statistics
 from collections import defaultdict
 
-from pipeline.analyze import group_by_period, load_cells
-from pipeline.detect import MARKERS, classify_pr, is_bot_login
-from pipeline.scan_orgs import QUARTER_RANGES
-from pipeline.studies.slices import population_repos
+from pipeline.frame import CAP, PERIODS, study_frame
 
-PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
-LINE_CAP = 20_000        # per-PR cap so one vendored monster can't dominate
+LINE_CAP = CAP     # legacy alias until paper_tables imports frame.CAP
 # VOLUME ESTIMAND NOTE (documented provisional treatment, external review
 # P1): merged-LOC sums here count every w8 merge OBSERVED so far,
 # including merges of not-yet-mature PRs — immature PRs that will merge
@@ -41,27 +37,16 @@ LINE_CAP = 20_000        # per-PR cap so one vendored monster can't dominate
 def per_author() -> dict:
     """(repo, period) -> login -> [prs, merged, merged_lines, ai_prs,
     submitted_lines]."""
-    keep = population_repos()
     out: dict = defaultdict(lambda: defaultdict(lambda: [0, 0, 0, 0, 0]))
-    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
-        if repo not in keep or per not in PERIODS:
-            continue
-        for p in prs:
-            a = p.get("author") or {}
-            if a.get("__typename") == "Bot" or not a.get("login") \
-                    or is_bot_login(a["login"]):
-                continue
-            c = classify_pr(p, MARKERS)
-            row = out[(repo, per)][a["login"]]
-            row[0] += 1
-            loc = min((p.get("additions") or 0)
-                      + (p.get("deletions") or 0), LINE_CAP)
-            row[4] += loc                        # submitted: no censoring
-            if c.ai_involved:
-                row[3] += 1
-            if c.merged:
-                row[1] += 1
-                row[2] += loc
+    for f in study_frame("author"):
+        row = out[(f.repo, f.period)][f.author]
+        row[0] += 1
+        row[4] += f.loc                          # submitted: no censoring
+        if f.cls.ai_involved:
+            row[3] += 1
+        if f.cls.merged:
+            row[1] += 1
+            row[2] += f.loc
     return out
 
 
@@ -123,14 +108,10 @@ def core_loc() -> None:
     from pipeline.studies.slices import weights
     pa = per_author()
     w = weights()
-    from pipeline.analyze import group_by_period, load_cells
-    from pipeline.scan_orgs import QUARTER_RANGES
     ins_of = defaultdict(set)
-    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
-        for p in prs:
-            a = p.get("author") or {}
-            if a.get("login") and p.get("authorAssociation") in                     ("MEMBER", "OWNER", "COLLABORATOR"):
-                ins_of[(repo, per)].add(a["login"])
+    for f in study_frame("all"):
+        if f.author and f.insider:
+            ins_of[(f.repo, f.period)].add(f.author)
     print(f"{'period':9}{'repos':>6}{'CW merged kLOC / core author':>30}")
     for per in PERIODS:
         pairs = []
@@ -168,25 +149,13 @@ def channels() -> None:
     """Paper points 2 & 5: merged LOC by approval channel (human-reviewed /
     bot-only-reviewed / self-merged unreviewed / other-merged unreviewed),
     pooled shares per quarter."""
-    from pipeline.analyze import group_by_period, load_cells
-    from pipeline.scan_orgs import QUARTER_RANGES
-    from pipeline.studies.slices import population_repos
-    keep = population_repos()
     ch = defaultdict(lambda: defaultdict(int))
-    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
-        if repo not in keep or per not in PERIODS:
+    for f in study_frame("pr"):
+        k = merged_channel(f.cls)
+        if k is None:
             continue
-        for p in prs:
-            if (p.get("author") or {}).get("__typename") == "Bot":
-                continue
-            c = classify_pr(p, MARKERS)
-            k = merged_channel(c)
-            if k is None:
-                continue
-            loc = min((p.get("additions") or 0) + (p.get("deletions") or 0),
-                      LINE_CAP)
-            ch[per][k] += loc
-            ch[per]["total"] += loc
+        ch[f.period][k] += f.loc
+        ch[f.period]["total"] += f.loc
     print(f"{'period':9}{'merged MLOC':>12}{'humanRev%':>10}{'botOnly%':>9}"
           f"{'selfUnrev%':>11}{'otherUnrev%':>12}")
     for per in PERIODS:
@@ -216,31 +185,19 @@ def ai_split() -> None:
     AI-using core author in the repo-quarter. Detection is a floor, so the
     split is conservative: undetected AI LOC lands in the nonAI columns."""
     from pipeline.analyze import bootstrap_ci, weighted_mean
-    from pipeline.studies.slices import population_repos, weights
-    keep = population_repos()
+    from pipeline.studies.slices import weights
     w = weights()
     # (repo, per) -> login -> [ai_merged_loc, nonai_merged_loc, ai_prs]
     acc: dict = defaultdict(lambda: defaultdict(lambda: [0, 0, 0]))
     ins_of = defaultdict(set)
-    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
-        if repo not in keep or per not in PERIODS:
-            continue
-        for p in prs:
-            a = p.get("author") or {}
-            if a.get("__typename") == "Bot" or not a.get("login") \
-                    or is_bot_login(a["login"]):
-                continue
-            if p.get("authorAssociation") in ("MEMBER", "OWNER",
-                                              "COLLABORATOR"):
-                ins_of[(repo, per)].add(a["login"])
-            c = classify_pr(p, MARKERS)
-            row = acc[(repo, per)][a["login"]]
-            if c.ai_involved:
-                row[2] += 1
-            if c.merged:
-                loc = min((p.get("additions") or 0)
-                          + (p.get("deletions") or 0), LINE_CAP)
-                row[0 if c.ai_involved else 1] += loc
+    for f in study_frame("author"):
+        if f.insider:
+            ins_of[(f.repo, f.period)].add(f.author)
+        row = acc[(f.repo, f.period)][f.author]
+        if f.cls.ai_involved:
+            row[2] += 1
+        if f.cls.merged:
+            row[0 if f.cls.ai_involved else 1] += f.loc
 
     def fmt(pairs):
         if not pairs:
@@ -349,7 +306,6 @@ def _author_months_and_cohorts():
     """Shared builder: per-author monthly activity, cohort assignment, and
     the month->quarter map. Used by adoption_rows (quarterly table) and
     adoption_monthly (Figure 4 series)."""
-    keep = population_repos()
     q_of = {}
     for m in range(1, 4):
         q_of[f"2024-{m:02d}"] = "Q1-2024"
@@ -362,31 +318,19 @@ def _author_months_and_cohorts():
     acc: dict = defaultdict(
         lambda: defaultdict(lambda: [0.0, 0.0, 0, 0, 0, 0.0, 0.0]))
     insiders = set()
-    for (repo, mon), prs in group_by_period(load_cells(), QUARTER_RANGES,
-                                            "month").items():
-        if repo not in keep or mon not in q_of:
-            continue
-        for p in prs:
-            a = p.get("author") or {}
-            if a.get("__typename") == "Bot" or not a.get("login") \
-                    or is_bot_login(a["login"]):
-                continue
-            login = a["login"]
-            if p.get("authorAssociation") in ("MEMBER", "OWNER",
-                                              "COLLABORATOR"):
-                insiders.add(login)
-            c = classify_pr(p, MARKERS)
-            row = acc[login][mon]
-            row[3] += 1
-            kloc = min((p.get("additions") or 0)
-                       + (p.get("deletions") or 0), LINE_CAP) / 1000
-            row[5] += kloc                       # submitted: no censoring
-            if c.ai_involved:
-                row[2] += 1
-                row[6] += kloc                   # AI-involved submitted
-            if c.merged:
-                row[4] += 1
-                row[0 if c.ai_involved else 1] += kloc
+    for f in study_frame("author", periods=q_of, granularity="month"):
+        if f.insider:
+            insiders.add(f.author)
+        row = acc[f.author][f.period]
+        row[3] += 1
+        kloc = f.loc / 1000
+        row[5] += kloc                           # submitted: no censoring
+        if f.cls.ai_involved:
+            row[2] += 1
+            row[6] += kloc                       # AI-involved submitted
+        if f.cls.merged:
+            row[4] += 1
+            row[0 if f.cls.ai_involved else 1] += kloc
 
     def cohort_of(months: dict) -> str:
         for per in PERIODS:
@@ -633,36 +577,25 @@ def review_mix(by: str = "role", exclude_fleet: bool = True,
     instead of being dropped (Figure 3 companion).
 
     Returns {(period, slice): {n, loc, <ch>_pr, <ch>_loc ...}}."""
-    keep = population_repos()
     fleet = fleet_logins() if (exclude_fleet or fleet_slice) else set()
     agg: dict = defaultdict(lambda: defaultdict(float))
-    for (repo, per), prs in group_by_period(load_cells(), QUARTER_RANGES).items():
-        if repo not in keep or per not in PERIODS:
+    for f in study_frame("author"):
+        is_fleet = f.author in fleet
+        if is_fleet and not fleet_slice:
             continue
-        for p in prs:
-            a = p.get("author") or {}
-            if a.get("__typename") == "Bot" or not a.get("login") \
-                    or is_bot_login(a["login"]):
-                continue
-            is_fleet = a["login"] in fleet
-            if is_fleet and not fleet_slice:
-                continue
-            c = classify_pr(p, MARKERS)
-            ch = merged_channel(c)
-            if ch is None:
-                continue                 # unmerged or w8-immature
-            loc = min((p.get("additions") or 0) + (p.get("deletions") or 0),
-                      LINE_CAP)
-            if is_fleet:
-                sl = "fleet"
-            else:
-                sl = ("ai" if c.ai_involved else "nonai") if by == "ai" \
-                    else ("ins" if c.insider else "ext")
-            d = agg[(per, sl)]
-            d["n"] += 1
-            d["loc"] += loc
-            d[f"{ch}_pr"] += 1
-            d[f"{ch}_loc"] += loc
+        ch = merged_channel(f.cls)
+        if ch is None:
+            continue                 # unmerged or w8-immature
+        if is_fleet:
+            sl = "fleet"
+        else:
+            sl = ("ai" if f.cls.ai_involved else "nonai") if by == "ai" \
+                else ("ins" if f.cls.insider else "ext")
+        d = agg[(f.period, sl)]
+        d["n"] += 1
+        d["loc"] += f.loc
+        d[f"{ch}_pr"] += 1
+        d[f"{ch}_loc"] += f.loc
     out = {}
     for key, d in agg.items():
         row = {"n": int(d["n"]), "loc": d["loc"]}
