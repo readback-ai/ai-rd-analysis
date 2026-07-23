@@ -68,3 +68,13 @@ Phase 1 starts.
 
 End commit messages with:
 `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in this repo's GitHub Issues (`gh` CLI; PRs-as-request-surface off). See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` at the root + `docs/adr/`, created lazily; study vocabulary also lives in `docs/METHODS.md`/`docs/METRICS.md`/`docs/CODE_GUIDE.md`. See `docs/agents/domain.md`.
