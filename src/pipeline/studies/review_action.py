@@ -511,7 +511,14 @@ def repair() -> None:
 
 
 def _author_edits_after(d: dict, anchor: str) -> tuple[int, int]:
-    """(post_anchor_author_loc, total_commit_loc), bot committers excluded."""
+    """(post_anchor_author_loc, total_commit_loc). Commits by bots OTHER
+    than the PR author are excluded; the PR's OWN bot counts (issue #2:
+    an agent-authored PR responds when the agent pushes). The census
+    stores a Bot author without the [bot] suffix while commit-level
+    logins carry it, so matching normalizes the suffix away."""
+    def same(login: str | None) -> bool:
+        return bool(login) and (login.removesuffix("[bot]")
+                                == (d["author"] or "").removesuffix("[bot]"))
     post = total = 0
     for c in d["commits"]:
         if not c:
@@ -522,11 +529,11 @@ def _author_edits_after(d: dict, anchor: str) -> tuple[int, int]:
         committer = (cm.get("committer") or {})
         cl = ((committer.get("user") or {}).get("login")
               or committer.get("email") or "")
-        if "[bot]" in cl or cl.endswith("-bot"):
+        if ("[bot]" in cl or cl.endswith("-bot")) and not same(cl):
             continue
         author_logins = {((x or {}).get("user") or {}).get("login")
                          for x in (cm.get("authors") or {}).get("nodes") or []}
-        if d["author"] not in author_logins:
+        if not any(same(al) for al in author_logins):
             continue
         if (cm.get("committedDate") or "") > anchor:
             post += loc

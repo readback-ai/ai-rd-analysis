@@ -470,3 +470,24 @@ def test_attention_ai_slice_includes_agent_prs(monkeypatch):
     monkeypatch.setattr(productivity, "fleet_logins", lambda: set())
     rows = attention.attention_by_ai()
     assert rows[("Q2-2026", "ai")]["n"] == 1
+
+
+def test_author_edits_after_credits_agent_authored_prs():
+    """Issue #2 rollout bug (RED first): census stores a Bot PR author
+    WITHOUT the [bot] suffix (author 'devin-ai-integration') while commit
+    authors/committers carry it ('devin-ai-integration[bot]'), so an
+    agent's own post-ask commits never matched the PR author and the
+    bot-committer exclusion (written for the human estimand) discarded
+    them anyway — agent responsiveness was structurally forced to zero.
+    The PR's OWN bot must count; other bots stay excluded."""
+    from pipeline.studies.review_action import _author_edits_after
+    def mk(login, date):
+        return {"commit": {
+            "additions": 50, "deletions": 0, "committedDate": date,
+            "committer": {"user": {"login": login}, "email": "x@y"},
+            "authors": {"nodes": [{"user": {"login": login}}]}}}
+    d = {"author": "devin-ai-integration", "loc": 100,
+         "commits": [mk("devin-ai-integration[bot]", "2026-01-05T00:00:00Z"),
+                     mk("some-ci-bot", "2026-01-06T00:00:00Z")]}
+    post, _total = _author_edits_after(d, "2026-01-01T00:00:00Z")
+    assert post == 50          # agent's own commit counts; CI bot's does not
