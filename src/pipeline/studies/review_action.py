@@ -155,8 +155,12 @@ def first_human_ask(pr: dict) -> str | None:
 
 
 def eligible() -> dict[str, list]:
+    """Sampling frame: mature merged human-reviewed PRs, profile 'all'
+    (issue #2) — agent-authored PRs are in the frame; for them
+    'responsiveness' means the agent/operator pushes after a human ask.
+    Fleet handling stays downstream (domain estimation in lane_rows)."""
     pool: dict[str, list] = {p: [] for p in PERIODS}
-    for f in study_frame("pr"):
+    for f in study_frame("all"):
         c = f.cls
         frt = first_human_review(f.pr)
         if c.w8_mature and c.merged and c.human_reviewed and frt and f.loc:
@@ -539,8 +543,8 @@ def lane_rows() -> tuple[dict, dict, int]:
     from collections import defaultdict
     # one census pass: ask anchors + lane flags + the PPS sampling frame
     # (per-PR LOC weights and quarter LOC totals for inclusion probs).
-    # Profile "all": anchors come from EVERY PR; the frame then applies
-    # the "pr" skip via bot_author.
+    # Profile "all" throughout (issue #2): anchors from EVERY PR, and
+    # agent-authored PRs are frame members like eligible().
     anchors: dict = {}
     # (repo, num) -> (per, loc, frt, login, ai, ins): every descriptive
     # field derives from THIS census pass — sampled records supply only
@@ -552,8 +556,6 @@ def lane_rows() -> tuple[dict, dict, int]:
         p, c = f.pr, f.cls
         anchors[(f.repo, p.get("number"))] = (
             first_human_ask(p), c.ai_reviewed)
-        if f.bot_author:
-            continue
         frt = first_human_review(p)
         if c.w8_mature and c.merged and c.human_reviewed and frt and f.loc:
             frame[(f.repo, p["number"])] = (f.period, f.loc, frt, f.author,

@@ -146,9 +146,11 @@ def merged_channel(c) -> str | None:
 def channels() -> None:
     """Paper points 2 & 5: merged LOC by approval channel (human-reviewed /
     bot-only-reviewed / self-merged unreviewed / other-merged unreviewed),
-    pooled shares per quarter."""
+    pooled shares per quarter. Profile 'author', aligned with review_mix
+    (issue #2): a user-typed-bot pipeline's LOC is automation, not human
+    approval behavior."""
     ch = defaultdict(lambda: defaultdict(int))
-    for f in study_frame("pr"):
+    for f in study_frame("author"):
         k = merged_channel(f.cls)
         if k is None:
             continue
@@ -567,9 +569,12 @@ def review_mix(by: str = "role", exclude_fleet: bool = True,
     early enough to close their w8 window (finalizes with AS_OF
     re-pulls). Pooled shares (repo-size weighted by construction).
 
-    by="role": slices {ins, ext} (author association); by="ai": slices
-    {ai, nonai} (PR-level AI involvement — the Figure 6 alternative; note
-    the ai slice is empty at the Q1-2024 baseline by construction).
+    by="role": slices {ins, ext} (author association), profile 'author' —
+    a Bot's NONE association must not pollute the external slice.
+    by="ai": slices {ai, nonai} (PR-level AI involvement — the Figure 6
+    alternative), profile 'all' per issue #2: agent-authored (layer-B)
+    PRs belong in the ai slice; the ai slice is empty at the Q1-2024
+    baseline by construction.
     exclude_fleet (default): PRs authored by fleet operators are dropped.
     fleet_slice=True: fleet-authored PRs become their OWN slice ("fleet")
     instead of being dropped (Figure 3 companion).
@@ -577,7 +582,7 @@ def review_mix(by: str = "role", exclude_fleet: bool = True,
     Returns {(period, slice): {n, loc, <ch>_pr, <ch>_loc ...}}."""
     fleet = fleet_logins() if (exclude_fleet or fleet_slice) else set()
     agg: dict = defaultdict(lambda: defaultdict(float))
-    for f in study_frame("author"):
+    for f in study_frame("all" if by == "ai" else "author"):
         is_fleet = f.author in fleet
         if is_fleet and not fleet_slice:
             continue

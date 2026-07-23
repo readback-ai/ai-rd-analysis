@@ -361,3 +361,112 @@ def test_balanced_panel_ci_reproducible_across_hash_seeds():
         return r.stdout
 
     assert run(1) == run(2)
+
+
+# ---- issue #2 resolution (2026-07-23): AI-contrast review-behavior ----
+# outputs (Figure 6 by-AI, Figure 7, Figure 8, fates' AI/nonAI cohorts)
+# share profile 'all' + fleet exclusion — agent-authored (layer-B) PRs
+# count in the AI series; channels() aligns with review_mix on 'author'.
+
+_REV = {"author": {"login": "bob", "__typename": "User"},
+        "state": "COMMENTED", "comments": {"totalCount": 1},
+        "submittedAt": "2026-04-02T00:00:00Z"}
+
+
+def _agent_pr(num=1):
+    p = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z",
+            num=num, reviews=[dict(_REV)])
+    p["author"] = {"login": "copilot-swe-agent[bot]", "__typename": "Bot"}
+    return p
+
+
+def test_fates_ai_cohort_includes_agent_prs_and_excludes_fleet(
+        monkeypatch, capsys):
+    """Issue #2 (RED first): an agent-authored PR must count in fates'
+    AI cohort; a fleet-operator-authored PR must not count anywhere."""
+    from pipeline import frame
+    from pipeline.studies import fates, productivity
+    fleet_pr = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z",
+                   num=2)
+    fleet_pr["author"] = {"login": "fleeter", "__typename": "User"}
+    human = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z",
+                num=3)
+    cells = {("o/r", "2026-04-01..2026-06-30"):
+             [_agent_pr(), fleet_pr, human]}
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(productivity, "fleet_logins", lambda: {"fleeter"})
+    fates.fates_at(8)
+    out = capsys.readouterr().out
+    rows = {ln.split()[1]: int(ln.split()[2]) for ln in out.splitlines()
+            if ln.startswith("Q2-2026")}
+    assert rows.get("AI") == 1          # the agent PR
+    assert rows.get("all") == 2         # agent + human; fleeter excluded
+    assert "ext" not in rows            # agent PR not a human external
+
+
+def test_review_mix_ai_cut_includes_agent_prs_role_cut_does_not(
+        monkeypatch):
+    """Issue #2 (RED first): Figure 6's by-AI slices run on 'all' (agent
+    PRs in the ai slice); the role (ins/ext) cut stays 'author'."""
+    from pipeline import frame
+    from pipeline.studies import productivity
+    human = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z",
+                num=2, reviews=[dict(_REV)])
+    cells = {("o/r", "2026-04-01..2026-06-30"): [_agent_pr(), human]}
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(productivity, "fleet_logins", lambda: set())
+    ai_rows = productivity.review_mix(by="ai")
+    assert ai_rows[("Q2-2026", "ai")]["n"] == 1
+    assert ai_rows[("Q2-2026", "nonai")]["n"] == 1
+    role_rows = productivity.review_mix()
+    assert role_rows[("Q2-2026", "ins")]["n"] == 1      # human only
+    assert ("Q2-2026", "ext") not in role_rows          # agent PR absent
+
+
+def test_channels_align_with_review_mix_author_profile(monkeypatch,
+                                                       capsys):
+    """Issue #2 (RED first): channels() and review_mix are two views of
+    the approval-channel estimand — both run on 'author', so a
+    user-typed-bot pipeline's LOC no longer enters the channel shares."""
+    from pipeline import frame
+    from pipeline.studies import productivity
+    bot = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z",
+              num=1, merged_by="foo-bot")
+    bot["author"] = {"login": "foo-bot", "__typename": "User"}
+    cells = {("o/r", "2026-04-01..2026-06-30"): [bot, MATURE]}
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    productivity.channels()
+    q2 = [ln for ln in capsys.readouterr().out.splitlines()
+          if ln.startswith("Q2-2026")][0]
+    # only MATURE (other-merged, unreviewed) remains: otherUnrev 100%
+    assert q2.rstrip().endswith("100.0%")
+    assert " 50.0%" not in q2           # bot selfUnrev LOC excluded
+
+
+def test_responsiveness_frame_includes_agent_prs(monkeypatch):
+    """Issue #2 (RED first): Figure 8's sampling frame is the reviewed
+    merged population INCLUDING agent-authored PRs (fleet handled by
+    domain estimation downstream)."""
+    from pipeline import frame
+    from pipeline.studies import review_action as ra
+    cells = {("o/r", "2026-04-01..2026-06-30"): [_agent_pr()]}
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    pool = ra.eligible()
+    assert [(r, n) for r, n, *_ in pool["Q2-2026"]] == [("o/r", 1)]
+
+
+def test_attention_ai_slice_includes_agent_prs(monkeypatch):
+    """Pins the Figure 7 side of issue #2: attention_by_ai already ran on
+    the full population — agent-authored PRs stay in the ai slice."""
+    from pipeline import frame
+    from pipeline.studies import attention, productivity
+    cells = {("o/r", "2026-04-01..2026-06-30"): [_agent_pr()]}
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(productivity, "fleet_logins", lambda: set())
+    rows = attention.attention_by_ai()
+    assert rows[("Q2-2026", "ai")]["n"] == 1

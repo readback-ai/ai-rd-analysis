@@ -41,13 +41,23 @@ def classify_at(p: dict, weeks: int) -> str | None:
 
 
 def fates_at(weeks: int) -> None:
+    """Population: profile 'all' with fleet-operator authors excluded
+    (issue #2) — agent-authored PRs count in all/AI/nonAI so layer-B
+    output gets a fate; ins/ext stay human-authored (a Bot's NONE
+    association is not an 'external contributor')."""
+    from pipeline.studies.productivity import fleet_logins
+    fleet = fleet_logins()
     agg = defaultdict(lambda: defaultdict(int))
-    for f in study_frame("pr"):
+    for f in study_frame("all"):
+        if f.author in fleet:
+            continue          # fleet pipelines distort fate rates
         fate = classify_at(f.pr, weeks)
         if fate is None:
             continue                     # immature at this horizon: skip
-        for coh in ("all", "ins" if f.cls.insider else "ext",
-                    "AI" if f.cls.ai_involved else "nonAI"):
+        cohorts = ["all", "AI" if f.cls.ai_involved else "nonAI"]
+        if not f.bot_author:
+            cohorts.append("ins" if f.cls.insider else "ext")
+        for coh in cohorts:
             agg[(f.period, coh)][fate] += 1
             agg[(f.period, coh)]["n"] += 1
     print(f"--- fates at w{weeks} (matched horizon; immature PRs excluded) ---")

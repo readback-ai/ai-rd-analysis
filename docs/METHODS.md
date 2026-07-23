@@ -300,12 +300,16 @@ CONTEXT.md): which PRs enter a study is a named policy, not a per-study
 guard. `pr` = the human-authored PR population (skips App-bot authors;
 review-behavior studies — bot dep-bumps have degenerate review dynamics);
 `author` = attributable human authors (adds the `is_bot_login` hygiene;
-author-level productivity/event studies — a bot is not a productivity
-unit); `all` = no author filter (population-level usage tables, where
-layer-B agent output must count, and the responsiveness ask anchors).
-Note the review-behavior studies do not currently share one profile:
-Figure 7's by-AI cut runs on `all` while Figure 8 and fates run on `pr`
-(tracked pre-publication, issue #2).
+author-level productivity/event studies, the Figure 6 role cut, and
+channel shares — a bot is not a productivity unit and its NONE
+association is not an "external contributor"); `all` = no author filter
+(population-level usage tables, where layer-B agent output must count).
+The AI-contrast review-behavior outputs — Figure 6 by-AI, Figure 7,
+Figure 8, and fates' AI/nonAI cohorts — share `all` with fleet-operator
+exclusion (issue #2, resolved 2026-07-23): human attention and
+responsiveness to a PR are defined regardless of its author, so
+agent-authored PRs count in the AI series; for them, responsiveness
+means the agent/operator pushes commits after a human ask.
 
 **What is undetectable** (all rates are floors): squash-merge strips trailers
 (asymmetrically — Claude's footer survives squash more often, so non-Claude

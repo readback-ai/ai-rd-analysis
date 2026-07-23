@@ -168,11 +168,12 @@ Studies contain only their accumulation logic; the guards live here once.
   per-repo floors/rates (slices). Iteration order is load-bearing (the
   seeded bootstrap stream).
 - Eligibility profiles (CONTEXT.md): `pr` = human-authored PR population
-  (App-bot skip only — review-behavior studies); `author` = attributable
-  human authors (adds `is_bot_login` hygiene — author-level studies);
-  `all` = no author filter (population tables; responsiveness anchors).
-  NOTE: Figure 7 (`attention_by_ai`) uses `all`, Figure 8 and fates use
-  `pr` — agent-authored PRs count in one and not the other (issue #2).
+  (App-bot skip only — attention report table, orphans); `author` =
+  attributable human authors (adds `is_bot_login` hygiene — author-level
+  studies, Figure 6 role cut, channels); `all` = no author filter
+  (population tables; AND the AI-contrast review-behavior outputs —
+  Figures 6-by-AI/7/8 and fates' AI cohorts, with fleet exclusion —
+  issue #2 resolution: agent-authored PRs count in the AI series).
 - Owns `PERIODS`, `CAP` (20k LOC/PR), and `population_repos()`.
 - Tests: `tests/test_frame.py` encodes the pre-refactor per-study guards
   verbatim as reference implementations.
