@@ -50,7 +50,7 @@ Q2-2026    1154     16.9% [14.8,18.8]    13.6% [11.6,15.7]    22.4% [19.7,25.0] 
 
 ```
 
-## Figure 3: Merged LOC per core contributor over time (CW, 95% CI)
+## Figure 3: Merged LOC per core contributor over time (CW, 95% CI) [quarterly]
 ```
 Figure 3: Submitted and merged LOC per core contributor over time
 contributor-weighted repo means, bootstrap 95% CI; merged = w8 rule (Q2 provisional); core = insider PR authors; repos with >=2 insider authors
@@ -277,15 +277,15 @@ period        panel ai_involved         cross-section
 2024-01      0.0 [ 0.0, 0.0]    0.0 [ 0.0, 0.0]
 2024-02      0.0 [ 0.0, 0.0]    0.0 [ 0.0, 0.0]
 2024-03      0.0 [ 0.0, 0.0]    0.0 [ 0.0, 0.0]
-2025-10      1.9 [ 1.2, 3.0]    2.5 [ 1.7, 3.6]
-2025-11      2.5 [ 1.8, 3.5]    2.7 [ 2.1, 3.4]
-2025-12      3.9 [ 2.8, 5.2]    3.8 [ 3.0, 4.7]
-2026-01      4.7 [ 3.5, 6.2]    5.5 [ 4.5, 6.8]
+2025-10      1.9 [ 1.3, 3.0]    2.5 [ 1.7, 3.6]
+2025-11      2.5 [ 1.7, 3.4]    2.7 [ 2.1, 3.4]
+2025-12      3.9 [ 2.7, 5.2]    3.8 [ 3.0, 4.7]
+2026-01      4.7 [ 3.5, 6.1]    5.5 [ 4.5, 6.8]
 2026-02      9.9 [ 8.1,11.9]   10.5 [ 9.0,12.1]
-2026-03     12.1 [10.1,14.1]   12.4 [10.8,14.1]
-2026-04     13.0 [10.8,15.2]   14.1 [12.0,15.9]
-2026-05     15.2 [12.3,17.6]   16.7 [15.2,18.2]
-2026-06     16.5 [13.6,19.2]   19.5 [17.9,21.1]
+2026-03     12.1 [10.1,14.2]   12.4 [10.8,14.1]
+2026-04     13.0 [10.7,15.1]   14.1 [12.0,15.9]
+2026-05     15.2 [12.4,17.6]   16.7 [15.2,18.2]
+2026-06     16.5 [13.7,19.4]   19.5 [17.9,21.1]
 
 ```
 
@@ -484,14 +484,14 @@ Q2-2026  never       1844     0.00       6.17       6.17   [ 5.44,  7.03]    0.8
 ## Merged LOC by approval channel [quarterly]
 ```
 period    merged MLOC humanRev% botOnly% selfUnrev% otherUnrev%
-Q1-2024          19.4     72.8%     0.8%      20.0%        6.1%
-Q4-2025          47.8     70.9%     9.4%      15.4%        3.9%
-Q1-2026          72.1     69.3%    11.5%      15.8%        3.3%
-Q2-2026          34.6     63.1%    15.9%      16.5%        4.4%
+Q1-2024          19.0     72.8%     0.7%      20.3%        6.1%
+Q4-2025          47.6     71.0%     9.4%      15.4%        3.9%
+Q1-2026          71.5     69.5%    11.3%      15.9%        3.2%
+Q2-2026          34.3     63.0%    15.9%      16.6%        4.4%
 
 ```
 
-## Figure 6: review mix of merged PRs/LOC, core vs external
+## Figure 6: review mix of merged PRs/LOC, core vs external [quarterly]
 ```
 review mix of MERGED PRs (mature-gated, pooled, FLEET-OPERATOR authors excluded): PR share / LOC share per approval channel
 humanRev = reviewer!=author human review; botOnly = AI/CI bot only; selfUnrev/otherUnrev = merged unreviewed
@@ -509,17 +509,17 @@ Q2-2026  ext      26109   82.6/ 75.5%    6.9/ 12.0%    5.2/  6.1%    5.3/  6.3%
 
 --- sliced by PR AI involvement ---
 period   slice   merged        humanRev         botOnly       selfUnrev      otherUnrev
-Q1-2024  nonai    48039   77.5/ 73.6%    0.4/  0.7%   15.3/ 19.5%    6.6/  6.2%
-Q4-2025  ai        1861   67.7/ 64.1%   12.4/ 16.5%   16.9/ 17.9%    2.4/  1.2%
-Q4-2025  nonai    81503   81.0/ 73.7%    5.6/  7.8%    9.0/ 14.0%    3.9/  4.2%
-Q1-2026  ai       10053   67.2/ 66.2%   11.3/ 15.4%   17.0/ 13.9%    4.2/  4.0%
-Q1-2026  nonai    92791   79.5/ 75.1%    6.8/  9.3%    9.3/ 12.2%    4.2/  3.3%
-Q2-2026  ai        7260   69.6/ 63.5%   11.7/ 16.4%   14.5/ 14.0%    4.2/  6.0%
-Q2-2026  nonai    37618   78.5/ 70.5%    8.4/ 12.5%    9.0/ 12.3%    4.1/  4.7%
+Q1-2024  nonai    51988   76.2/ 71.9%    0.5/  0.7%   14.9/ 19.4%    8.0/  7.7%
+Q4-2025  ai        2807   73.2/ 65.2%    9.9/ 16.0%   11.2/ 14.8%    4.7/  3.7%
+Q4-2025  nonai    88352   79.7/ 71.4%    5.3/  7.3%    9.2/ 13.8%    5.2/  7.0%
+Q1-2026  ai       11991   69.1/ 65.5%   10.7/ 15.4%   14.3/ 12.7%    5.5/  6.0%
+Q1-2026  nonai   103289   76.9/ 73.9%    6.6/  8.9%    9.2/ 12.1%    7.1/  4.8%
+Q2-2026  ai        7916   70.6/ 64.2%   11.4/ 16.0%   13.3/ 13.6%    4.7/  6.1%
+Q2-2026  nonai    43246   75.2/ 69.3%    7.8/ 11.7%    8.8/ 12.2%    8.2/  6.7%
 
 ```
 
-## Attention per line (comments/kLOC primary, bot-clean)
+## Attention per line (comments/kLOC primary, bot-clean) [quarterly]
 ```
 attention per line — merged, human-reviewed PRs (pooled)
 cohort             PRs     kLOC comments/kLOC window h/kLOC
@@ -559,87 +559,88 @@ Q2-2026  nonai    32491   17,908           1.90              95.9
 ```
 --- fates at w8 (matched horizon; immature PRs excluded) ---
 cohort                 n  merged% rejected%  limbo%
-Q1-2024 all        67013    76.4%     17.5%    6.1%
-Q1-2024 ins        21879    83.0%     13.4%    3.6%
-Q1-2024 ext        45134    73.2%     19.4%    7.3%
-Q1-2024 nonAI      67013    76.4%     17.5%    6.1%
-Q4-2025 all       122572    72.8%     17.7%    9.5%
-Q4-2025 ins        47846    81.4%     13.3%    5.2%
-Q4-2025 ext        74726    67.3%     20.4%   12.3%
-Q4-2025 AI          3746    56.8%     30.0%   13.2%
-Q4-2025 nonAI     118826    73.3%     17.3%    9.4%
-Q1-2026 all       178951    64.4%     23.6%   12.0%
-Q1-2026 ins        63795    79.8%     14.7%    5.4%
-Q1-2026 ext       115156    55.8%     28.6%   15.7%
-Q1-2026 AI         20737    57.6%     27.9%   14.5%
-Q1-2026 nonAI     158214    65.2%     23.1%   11.7%
-Q2-2026 all        92945    57.4%     26.7%   15.9%
-Q2-2026 ins        29575    78.4%     16.1%    5.4%
-Q2-2026 ext        63370    47.6%     31.6%   20.8%
-Q2-2026 AI         15346    57.2%     27.3%   15.4%
-Q2-2026 nonAI      77599    57.5%     26.6%   16.0%
+Q1-2024 all        69781    74.5%     19.2%    6.3%
+Q1-2024 ins        20101    81.9%     14.3%    3.9%
+Q1-2024 ext        44403    72.9%     19.7%    7.5%
+Q1-2024 AI             1     0.0%      0.0%  100.0%
+Q1-2024 nonAI      69780    74.5%     19.2%    6.3%
+Q4-2025 all       127975    71.2%     19.1%    9.7%
+Q4-2025 ins        44061    80.5%     13.9%    5.5%
+Q4-2025 ext        72395    66.9%     20.6%   12.6%
+Q4-2025 AI          4875    57.6%     31.1%   11.4%
+Q4-2025 nonAI     123100    71.8%     18.6%    9.6%
+Q1-2026 all       184413    62.5%     25.1%   12.4%
+Q1-2026 ins        55850    79.0%     15.1%    5.9%
+Q1-2026 ext       109669    54.4%     29.3%   16.3%
+Q1-2026 AI         21192    56.6%     28.7%   14.7%
+Q1-2026 nonAI     163221    63.3%     24.7%   12.1%
+Q2-2026 all        93140    54.9%     28.4%   16.7%
+Q2-2026 ins        24402    77.6%     16.1%    6.3%
+Q2-2026 ext        59388    44.7%     33.2%   22.1%
+Q2-2026 AI         14465    54.7%     28.8%   16.5%
+Q2-2026 nonAI      78675    55.0%     28.3%   16.7%
 
 --- fates at w26 (matched horizon; immature PRs excluded) ---
 cohort                 n  merged% rejected%  limbo%
-Q1-2024 all        67013    77.2%     20.0%    2.8%
-Q1-2024 ins        21879    83.6%     15.1%    1.3%
-Q1-2024 ext        45134    74.1%     22.4%    3.5%
-Q1-2024 nonAI      67013    77.2%     20.0%    2.8%
-Q4-2025 all       121699    73.8%     22.1%    4.1%
-Q4-2025 ins        47515    82.1%     15.8%    2.0%
-Q4-2025 ext        74184    68.5%     26.1%    5.4%
-Q4-2025 AI          3707    58.2%     35.4%    6.5%
-Q4-2025 nonAI     117992    74.3%     21.7%    4.0%
+Q1-2024 all        69781    75.3%     21.9%    2.8%
+Q1-2024 ins        20101    82.5%     16.1%    1.4%
+Q1-2024 ext        44403    73.8%     22.7%    3.5%
+Q1-2024 AI             1     0.0%    100.0%    0.0%
+Q1-2024 nonAI      69780    75.3%     21.9%    2.8%
+Q4-2025 all       127097    72.3%     23.5%    4.2%
+Q4-2025 ins        43780    81.2%     16.6%    2.2%
+Q4-2025 ext        71864    68.1%     26.3%    5.6%
+Q4-2025 AI          4816    58.6%     35.8%    5.6%
+Q4-2025 nonAI     122281    72.8%     23.0%    4.2%
 
 
 ```
 
-## Responsiveness to human asks (clean lane identified)
+## Responsiveness to human asks (clean lane identified) [quarterly]
 ```
-unit nonresponse: 13 selected PRs (0.3%) unretrievable at hydration (repos privatized/PRs disabled after the census) — excluded, HT weights unchanged
+unit nonresponse (eq): 5 selected PRs (0.1%) unretrievable at hydration (repos privatized/PRs disabled after the census) — excluded, weights unchanged
+unit nonresponse (pps): 9 selected PRs (0.2%) unretrievable at hydration (repos privatized/PRs disabled after the census) — excluded, weights unchanged
 conditional responsiveness to HUMAN ASKS (changes-requested or inline comments)
 CLEAN lane = no AI-reviewer activity (identified); mixed = descriptive; all-cause = companion only
-HT inclusion-probability weighted (PPS sample -> population estimands): responded% is PR-weighted; LOC share% is the population post-ask LOC ratio
+two designs, one frame: responded% is the EQUAL-PROBABILITY sample share (uniform inclusion — unweighted); post-ask LOC share% is the HT-weighted ratio over the PPS-by-LOC sample (the estimand that design is efficient for)
 
 --- all sampled PRs ---
-lane                     PRs responded% post-ask LOC share%
-Q1-2024 CLEAN            489      81.5%               46.0%
-Q1-2024 CLEAN+nonAI      489      81.5%               46.0%
-Q1-2024 all-cause        959      34.5%               56.7%
-Q4-2025 CLEAN            309      83.1%               40.3%
-Q4-2025 CLEAN+nonAI      302      83.6%               41.4%
-Q4-2025 mixed            214      93.6%               77.1%
-Q4-2025 all-cause       1086      56.8%               59.1%
-Q1-2026 CLEAN            252      79.3%               61.1%
-Q1-2026 CLEAN+AI          28      92.4%               41.8%
-Q1-2026 CLEAN+nonAI      224      78.5%               62.0%
-Q1-2026 mixed            246      84.4%               70.3%
-Q1-2026 all-cause       1101      26.2%               48.3%
-Q2-2026 CLEAN            242      74.5%               62.8%
-Q2-2026 CLEAN+AI          49      93.3%               70.7%
-Q2-2026 CLEAN+nonAI      193      71.6%               59.5%
-Q2-2026 mixed            232      93.4%               41.2%
-Q2-2026 all-cause       1020      36.2%               32.3%
+lane                     PRs responded%   PRs post-ask LOC share%
+Q1-2024 CLEAN            404      78.2%   504               53.5%
+Q1-2024 CLEAN+nonAI      404      78.2%   504               53.5%
+Q1-2024 all-cause       1200      36.2%   957               43.0%
+Q4-2025 CLEAN            208      82.7%   298               72.8%
+Q4-2025 CLEAN+nonAI      202      82.7%   292               73.0%
+Q4-2025 mixed            140      82.9%   232               39.6%
+Q4-2025 all-cause       1200      36.7%  1112               39.7%
+Q1-2026 CLEAN            186      74.2%   240               61.9%
+Q1-2026 CLEAN+nonAI      167      73.7%   218               64.2%
+Q1-2026 mixed            168      84.5%   229               55.5%
+Q1-2026 all-cause       1198      36.8%  1092               41.0%
+Q2-2026 CLEAN            200      76.5%   228               48.1%
+Q2-2026 CLEAN+AI          24      75.0%    42               63.9%
+Q2-2026 CLEAN+nonAI      176      76.7%   186               45.3%
+Q2-2026 mixed            128      80.5%   206               78.9%
+Q2-2026 all-cause       1197      36.8%  1010               48.1%
 
---- FLEET-OPERATOR authors EXCLUDED (domain estimation, same HT weights) ---
-lane                     PRs responded% post-ask LOC share%
-Q1-2024 CLEAN            484      81.6%               42.6%
-Q1-2024 CLEAN+nonAI      484      81.6%               42.6%
-Q1-2024 all-cause        942      37.9%               56.1%
-Q4-2025 CLEAN            301      82.8%               39.6%
-Q4-2025 CLEAN+nonAI      294      83.3%               40.7%
-Q4-2025 mixed            212      93.0%               83.4%
-Q4-2025 all-cause       1052      57.4%               57.8%
-Q1-2026 CLEAN            244      79.9%               61.2%
-Q1-2026 CLEAN+AI          26      92.2%               43.7%
-Q1-2026 CLEAN+nonAI      218      79.1%               62.0%
-Q1-2026 mixed            242      84.9%               70.5%
-Q1-2026 all-cause       1058      26.2%               49.1%
-Q2-2026 CLEAN            233      74.3%               62.5%
-Q2-2026 CLEAN+AI          45      96.1%               69.9%
-Q2-2026 CLEAN+nonAI      188      71.1%               59.4%
-Q2-2026 mixed            228      93.3%               38.9%
-Q2-2026 all-cause        977      35.1%               31.4%
+--- FLEET-OPERATOR authors EXCLUDED (domain estimation, same weights) ---
+lane                     PRs responded%   PRs post-ask LOC share%
+Q1-2024 CLEAN            401      78.3%   497               53.3%
+Q1-2024 CLEAN+nonAI      401      78.3%   497               53.3%
+Q1-2024 all-cause       1168      36.9%   937               42.9%
+Q4-2025 CLEAN            204      82.4%   292               72.2%
+Q4-2025 CLEAN+nonAI      198      82.3%   286               72.4%
+Q4-2025 mixed            139      83.5%   227               39.3%
+Q4-2025 all-cause       1160      36.8%  1075               39.4%
+Q1-2026 CLEAN            182      73.6%   230               63.7%
+Q1-2026 CLEAN+nonAI      165      73.3%   209               66.1%
+Q1-2026 mixed            163      84.0%   226               53.3%
+Q1-2026 all-cause       1157      37.1%  1058               40.7%
+Q2-2026 CLEAN            197      76.6%   221               47.5%
+Q2-2026 CLEAN+AI          24      75.0%    38               64.3%
+Q2-2026 CLEAN+nonAI      173      76.9%   183               45.3%
+Q2-2026 mixed            127      80.3%   203               78.5%
+Q2-2026 all-cause       1151      37.1%   967               48.1%
 
 ```
 

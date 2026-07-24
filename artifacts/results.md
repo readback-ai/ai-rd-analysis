@@ -1,11 +1,13 @@
 # Results — AI-assisted development at leading AI organizations
-CANONICAL (2026-07-21): every number below is from
+CANONICAL (2026-07-23): every number below is from
 `artifacts/report_generated.md`, produced end-to-end by the pipeline at
 this commit — complete census (single store, legacy retired), w8 event
 windows on fates AND reviews, maturity-gated outcome metrics, marker set
-incl. the committer-identity audit additions, manifest-bound HT
-responsiveness sample, window-scoped contributor weights, seeded
-2,000-draw CIs.
+incl. the committer-identity audit additions, manifest-bound two-design
+responsiveness samples (equal-probability for rates, PPS-by-LOC + HT for
+LOC shares), study-frame eligibility profiles (issue #2: agent-authored
+PRs count in the AI-contrast review-behavior series, fleet excluded),
+window-scoped contributor weights, seeded 2,000-draw CIs.
 
 > Caption: Q1-2024 rows are a detector-validity check and review-practice
 > baseline, not an AI-usage estimate — no detectable channel existed yet,
@@ -91,18 +93,26 @@ self-merge and reviewer profiles in the report.
   (−53% pooled; insiders 3.52 → 1.37, −61%) — attention per line thinned
   while merged-PR human-review coverage held (m_hum_rev ~69–75% CW).
 - Responsiveness to explicit human asks (CLEAN lane = no AI reviewer,
-  identified): ESTIMATOR REVISED 2026-07-23 (issue #2). The earlier
-  HT-over-PPS responded% (and its "asked AI PRs respond at 92–93%"
-  reading) is WITHDRAWN as unstable — tiny-LOC PRs carried up to 39% of
-  a lane's weight, and equally-valid draws swung small lanes by tens of
-  points. responded% now comes from an equal-probability companion
-  sample (unweighted share); post-ask LOC share stays HT-over-PPS. The
-  population also changed: agent-authored PRs are in the frame, and the
-  PR's own bot counts as the author responding. Numbers regenerating
-  under the revised estimator — see report §19.
-- Triage at matched horizons (w8): population revised 2026-07-23
-  (agent-authored PRs count in all/AI/nonAI; fleet-operator authors
-  excluded) — numbers regenerating, see report §18.
+  identified; fleet-excluded; estimator revised 2026-07-23, issue #2 —
+  responded% is now the unweighted share of an equal-probability
+  companion sample, because the earlier HT-over-PPS estimator let
+  tiny-LOC PRs carry up to 39% of a lane's weight and equally-valid
+  draws swung small lanes by tens of points; the "asked AI PRs respond
+  at 92–93%" reading is WITHDRAWN as a draw artifact): CLEAN-lane
+  responded% is roughly FLAT — 78.3% (Q1-2024) → 82.4% → 73.6% → 76.6%
+  (Q2-2026, provisional) — and asked AI PRs now respond at the same rate
+  as non-AI (Q2: 75.0% vs 76.9%, n=24 AI). The AI signal is in VOLUME,
+  not rate: post-ask LOC share (HT over the PPS-by-LOC sample, the
+  design-consistent estimand) is 64.3% for asked AI PRs vs 45.3% non-AI
+  in Q2. The frame now includes agent-authored PRs (the PR's own bot
+  counts as the author responding); unit nonresponse 0.1–0.2%.
+- Triage at matched horizons (w8, pooled; population revised 2026-07-23:
+  agent-authored PRs count in all/AI/nonAI, fleet-operator authors
+  excluded, ins/ext remain human-authored): merged 74.5 → 54.9 with
+  limbo 6.3 → 16.7 — and the decline is concentrated in EXTERNAL PRs
+  (ext merged 72.9 → 44.7 while insiders hold 82 → 78). The AI-vs-nonAI
+  merge gap closes to parity by Q2-2026 (54.7% vs 55.0%, from 57.6 vs
+  71.8 in Q4-2025).
 
 ## 8. Superseded analyses
 `artifacts/v2_results.md` is the working log of interim analyses on
