@@ -91,13 +91,18 @@ self-merge and reviewer profiles in the report.
   (−53% pooled; insiders 3.52 → 1.37, −61%) — attention per line thinned
   while merged-PR human-review coverage held (m_hum_rev ~69–75% CW).
 - Responsiveness to explicit human asks (CLEAN lane = no AI reviewer,
-  identified; manifest-bound PPS sample, Horvitz–Thompson PR-weighted;
-  unit nonresponse 0.3%): 81.5% (Q1-2024) → 83.1% → 79.3% → 74.5%
-  (Q2-2026, provisional) — roughly stable with a modest late dip; the
-  post-ask LOC share RISES 46% → 63%, and asked PRs with AI involvement
-  respond at 92–93%.
-- Triage at matched horizons (w8): merged CW 75.6 → 64.3 with
-  rejected_w8 16.6 → 21.3 and limbo 7.9 → 14.4.
+  identified): ESTIMATOR REVISED 2026-07-23 (issue #2). The earlier
+  HT-over-PPS responded% (and its "asked AI PRs respond at 92–93%"
+  reading) is WITHDRAWN as unstable — tiny-LOC PRs carried up to 39% of
+  a lane's weight, and equally-valid draws swung small lanes by tens of
+  points. responded% now comes from an equal-probability companion
+  sample (unweighted share); post-ask LOC share stays HT-over-PPS. The
+  population also changed: agent-authored PRs are in the frame, and the
+  PR's own bot counts as the author responding. Numbers regenerating
+  under the revised estimator — see report §19.
+- Triage at matched horizons (w8): population revised 2026-07-23
+  (agent-authored PRs count in all/AI/nonAI; fleet-operator authors
+  excluded) — numbers regenerating, see report §18.
 
 ## 8. Superseded analyses
 `artifacts/v2_results.md` is the working log of interim analyses on

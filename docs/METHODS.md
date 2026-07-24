@@ -396,9 +396,10 @@ complete enumeration), and no claim is made about GitHub beyond the
 frame (METHODS §6). The RNG is module-level and seeded (`analyze._RNG`,
 seed 20260630): identical reruns reproduce identical intervals. Studies
 with their own uncertainty needs reuse the same helper (paper figures)
-or document their estimator inline (review_action's Horvitz–Thompson
-weights, §5a2; author-level cohort tables bootstrap over AUTHORS, the
-analogous unit).
+or document their estimator inline (review_action's two-design split —
+equal-probability for rates, Horvitz–Thompson over PPS for LOC shares,
+§5a2; author-level cohort tables bootstrap over AUTHORS, the analogous
+unit).
 
 Cross-layer decomposition (`studies/layers.py`) is exact and per-PR on the
 census (disjoint by precedence B > A > C); the earlier sample-blended
@@ -437,14 +438,24 @@ numbers come only from that artifact.
   IDENTIFIED estimate = the CLEAN lane (no AI-reviewer activity on the PR);
   the mixed lane is descriptive (post-ask edits are causally ambiguous when
   human and AI comments interleave); all-cause post-review edits are a
-  descriptive companion only. Caveats: committedDate rewritten by
-  rebase/amend (drifts late — inflates attribution); squash branches keep
-  original dates.
-  Estimation (revised 2026-07-20, external review): the sample is PPS
-  (1,200 LOC-proportional draws/quarter, seeded, distinct PRs retained),
-  so rates are Horvitz-Thompson weighted by inverse inclusion probability
-  pi_i = 1-(1-w_i/W)^1200 — responded% is the PR-weighted population
-  per-ask probability; post-ask LOC share is the ratio of HT LOC totals.
+  descriptive companion only. "Author edits" match the PR author with the
+  [bot] suffix normalized away (the census stores Bot authors without it,
+  commit-level logins carry it), and the PR's OWN bot counts as the author
+  responding (issue #2: an agent-authored PR responds when the agent
+  pushes) while commits by any OTHER bot stay excluded. Caveats:
+  committedDate rewritten by rebase/amend (drifts late — inflates
+  attribution); squash branches keep original dates.
+  Estimation (revised 2026-07-20; split into two designs 2026-07-23):
+  TWO seeded samples over the same frame, each with its own
+  frame-fingerprinted manifest. responded% comes from an
+  EQUAL-PROBABILITY sample (min(1,200, N) distinct PRs/quarter, uniform)
+  as an unweighted share — under the earlier PPS-only estimation the
+  Horvitz-Thompson weights pi_i = 1-(1-w_i/W)^1200 let tiny-LOC PRs
+  dominate small lanes (measured: 39% of a 22-PR lane's weight on one
+  75-LOC PR; the lane swung tens of points between equally-valid draws).
+  post-ask LOC share stays on the PPS-by-LOC sample (1,200 draws/quarter)
+  as the ratio of HT LOC totals — the estimand that design is efficient
+  for.
   Commit lists are paginated (100/page + follow-ups); the earlier
   first:60 cap chronologically truncated 261/4,233 sampled PRs, biasing
   responsiveness downward on high-commit PRs — those records were

@@ -491,3 +491,86 @@ def test_author_edits_after_credits_agent_authored_prs():
                      mk("some-ci-bot", "2026-01-06T00:00:00Z")]}
     post, _total = _author_edits_after(d, "2026-01-01T00:00:00Z")
     assert post == 50          # agent's own commit counts; CI bot's does not
+
+
+def test_eq_draw_canonical_capped_and_design_tagged_fingerprint(
+        monkeypatch):
+    """Issue #2 estimator decision (RED first): per-PR rate estimands
+    move to an equal-probability companion sample — under PPS-by-LOC the
+    inverse-inclusion weights of tiny-LOC PRs dominated small rate lanes
+    (39% of Q1-2026 CLEAN+AI weight on one 75-LOC PR). The EQ draw must
+    be canonical (pool-order independent), seeded, capped at
+    PER_QUARTER, and its manifest fingerprint design-tagged so the two
+    designs can never validate each other; the PPS fingerprint formula
+    is unchanged."""
+    from pipeline.studies import review_action as ra
+    monkeypatch.setattr(ra, "PER_QUARTER", 10)
+    items = [(f"o/r{i}", i, 100 + i, "t", "a", False, True)
+             for i in range(30)]
+    pool = {"Q1-2026": list(items)}
+    sel = ra.draw_eq(pool)["Q1-2026"]
+    assert len(sel) == 10 and set(sel) <= set(items)
+    shuffled = {"Q1-2026": list(reversed(items))}
+    assert ra.draw_eq(shuffled)["Q1-2026"] == sel      # canonical
+    ids = ra._pool_items(pool)
+    assert ra.frame_fingerprint(ids, design="pps") \
+        == ra.frame_fingerprint(ids)                   # pps formula stable
+    assert ra.frame_fingerprint(ids, design="eq") \
+        != ra.frame_fingerprint(ids)
+
+
+def test_lane_rates_from_eq_sample_loc_shares_from_pps(monkeypatch,
+                                                       tmp_path):
+    """Issue #2 estimator decision (RED first): responded% comes from the
+    EQ sample with UNIT weights (uniform pi cancels in the ratio); the
+    post-ask LOC share keeps the PPS sample + HT weights. With one big
+    responder and one tiny non-responder both in sample, responded% must
+    be 0.5 — not the HT ~0.002 the PPS weights produce."""
+    import json as _json
+    from pipeline import frame
+    from pipeline.studies import review_action as ra
+    ask_rev = {"author": {"login": "bob", "__typename": "User"},
+               "state": "CHANGES_REQUESTED", "comments": {"totalCount": 1},
+               "submittedAt": "2026-04-02T00:00:00Z"}
+    big = _pr("2026-04-01T00:00:00Z", merged="2026-04-10T00:00:00Z",
+              num=1, reviews=[dict(ask_rev)])
+    big["additions"] = 10_000
+    small = _pr("2026-04-01T00:00:00Z", merged="2026-04-10T00:00:00Z",
+                num=2, reviews=[dict(ask_rev)])
+    small["additions"] = 10
+    cells = {("o/r", "2026-04-01..2026-06-30"): [big, small]}
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(ra, "PER_QUARTER", 2)
+    monkeypatch.setattr(ra, "SAMPLE", tmp_path / "s_v2.jsonl")
+    monkeypatch.setattr(ra, "MANIFEST", tmp_path / "m.json")
+    monkeypatch.setattr(ra, "OLD_SAMPLE", tmp_path / "s_v1.jsonl")
+    monkeypatch.setattr(ra, "SAMPLE_EQ", tmp_path / "s_eq.jsonl")
+    monkeypatch.setattr(ra, "MANIFEST_EQ", tmp_path / "m_eq.json")
+    import pipeline.studies.productivity as prod
+    monkeypatch.setattr(prod, "fleet_logins", lambda: set())
+    pool = ra.eligible()
+    ra.ensure_manifest(pool)
+    ra.ensure_manifest(pool, path=ra.MANIFEST_EQ, draw_fn=ra.draw_eq,
+                       design="eq")
+
+    def rec(num, loc, post_commits):
+        commits = [{"commit": {
+            "additions": loc, "deletions": 0,
+            "committedDate": "2026-04-05T00:00:00Z",
+            "committer": {"user": {"login": "alice"}, "email": "a@x"},
+            "authors": {"nodes": [{"user": {"login": "alice"}}]}}}
+            ] if post_commits else []
+        return {"repo": "o/r", "num": num, "loc": loc, "per": "Q2-2026",
+                "first_review": "2026-04-02T00:00:00Z", "author": "alice",
+                "ai": False, "ins": True, "commits": commits,
+                "commits_total": len(commits), "commits_complete": True}
+    lines = [_json.dumps(rec(1, 10_000, True)),
+             _json.dumps(rec(2, 10, False))]
+    (tmp_path / "s_v2.jsonl").write_text("\n".join(lines) + "\n")
+    (tmp_path / "s_eq.jsonl").write_text("\n".join(lines) + "\n")
+    lanes, _nf, _nr = ra.lane_rows()
+    a = lanes[("Q2-2026", "CLEAN")]
+    assert a["n"] == 2
+    assert abs(a["wacted"] / a["wn"] - 0.5) < 1e-9     # EQ unit weights
+    assert a["post"] > 0 and a["total"] > 0            # PPS LOC share kept

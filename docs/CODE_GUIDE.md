@@ -212,7 +212,7 @@ history; the report section title names the module. Highlights:
 | `event_study.py` | volume jump at first AI-marker month | w8-mature months only for merged outcome; submitted-LOC outcome needs no censoring |
 | `attention.py` | comments/kLOC decline (−55/−57%) | bot-clean numerator via `split_reviews`; size-band decomposition |
 | `fates.py` | matched-horizon merge/reject/limbo | never compares "ever" across cohorts; w8 primary, w26 sensitivity |
-| `review_action.py` | responsiveness to human asks (CLEAN lane identified) | PPS sample + Horvitz–Thompson weights; paginated commit pulls with completeness metadata (`_conn_commits`, `_suspect`) |
+| `review_action.py` | responsiveness to human asks (CLEAN lane identified) | two designs, one frame: EQ sample → unweighted responded%, PPS-by-LOC + HT weights → post-ask LOC share; paginated commit pulls with completeness metadata (`_conn_commits`, `_suspect`); the PR's own bot counts as author response (issue #2) |
 | `slices.py` | adoption groups / org types; two-sided bound | conditional metrics re-floor the conditioning denominator |
 | `layer_c_precision.py` | per-prefix precision | hand-validated samples; droid/ basis is complete enumeration (METHODS §2) |
 

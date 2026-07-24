@@ -183,9 +183,10 @@ argument — one section = one module invocation):
 18. **PR fates at matched horizons** (`studies.fates`) — w8 primary, w26
     sensitivity, per cohort; immature PRs excluded per horizon.
 19. **Responsiveness to human asks** (`studies.review_action`) — CLEAN
-    lane identified; Horvitz–Thompson weighted (PPS sample → PR-weighted
-    responded%, population LOC share); commit lists paginated with
-    completeness metadata.
+    lane identified; two designs over one frame: responded% is the
+    equal-probability sample share (unweighted), post-ask LOC share is
+    Horvitz–Thompson over the PPS-by-LOC sample; commit lists paginated
+    with completeness metadata.
 20. **Adoption event-study** (`studies.event_study`) — merged (w8,
     mature-months-only) and submitted kLOC in event time around each
     author's first AI-marker month.
@@ -215,8 +216,9 @@ failed/waived, never silently truncated. All report tables run on this
 complete census.
 
 Sampling exists only in three clearly-labeled auxiliary studies, each with
-its own inference machinery: `review_action` (PPS: 1,200 LOC-proportional
-draws/quarter, Horvitz–Thompson weighted back to population estimands),
+its own inference machinery: `review_action` (two designs over one frame:
+PPS-by-LOC with Horvitz–Thompson weights for LOC-share estimands, plus an
+equal-probability sample for per-PR rates),
 the LOC-hygiene sensitivity (~3.7k PRs with file lists), and the layer-C
 precision samples (org-stratified branch-PR pages). Per-PR field
 truncation (first 12 commits / 15 reviews in census cells) is a separate,

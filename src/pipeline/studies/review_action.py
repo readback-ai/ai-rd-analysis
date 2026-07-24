@@ -31,21 +31,26 @@ Known proxy caveats (documented, not corrected): committedDate is rewritten
 by rebase/amend (drifts toward push time — direction inflates post-review
 attribution); squash-merged branches retain original branch-commit dates.
 
-Data: census cells lack per-commit dates/LOC, so this study owns a SAMPLED
-pull (PPS: 1,200 LOC-proportional draws/quarter with replacement, distinct
-PRs retained). The selection lives in review_action_manifest_v2.json
-(frame-fingerprinted, atomically replaced on any frame change); hydrated
-records in review_action_sample_v2.jsonl; the v1 file is a read-only
-hydration cache.
+Data: census cells lack per-commit dates/LOC, so this study owns SAMPLED
+pulls — TWO designs over the same eligibility frame, each with its own
+frame-fingerprinted manifest (atomically replaced on any frame change)
+and hydrated sample file; the designs share the hydration cache, and the
+v1 file is a read-only hydration cache:
+- PPS-by-LOC (manifest_v2/sample_v2): 1,200 LOC-proportional draws per
+  quarter with replacement, distinct PRs retained.
+- EQUAL-PROBABILITY (manifest_eq_v1/sample_eq_v1): min(1,200, N)
+  distinct PRs per quarter, uniform without replacement.
 
-ESTIMATION (external review P1 fixes, 2026-07-20):
-- PR-WEIGHTED PRIMARY via Horvitz-Thompson: each sampled PR i with LOC
-  weight w_i in a quarter of total eligible LOC W has inclusion
-  probability pi_i = 1-(1-w_i/W)^k (k=1200 PPS draws); rates weight each
-  PR by 1/pi_i, so responded% estimates the population per-ask
-  probability, not a size-biased sample rate. post-ask LOC share% is the
-  ratio of HT-weighted LOC totals (population LOC estimand). Raw sample
-  counts are printed alongside.
+ESTIMATION (external review P1 fixes 2026-07-20; two-design split per
+the issue #2 estimator review 2026-07-23):
+- responded% (per-PR rate) comes from the EQ sample as an UNWEIGHTED
+  share — uniform inclusion cancels in the ratio. It previously used HT
+  weights over the PPS sample, where pi_i = 1-(1-w_i/W)^k makes tiny-LOC
+  PRs dominate small lanes (measured: 39% of one 22-PR lane's weight on
+  a single 75-LOC PR; the estimate swung tens of points between draws).
+- post-ask LOC share% stays on the PPS sample as the ratio of
+  HT-weighted LOC totals — the population LOC estimand that design is
+  efficient for. Raw sample counts are printed alongside.
 - COMMIT PAGINATION: commits are fetched 100/page with totalCount;
   saturated PRs get follow-up paginated pulls (the previous first:60
   cap chronologically truncated exactly the post-ask commits on
@@ -79,6 +84,16 @@ OLD_SAMPLE = Path("data/derived/review_action_sample.jsonl")
 # REPLACES the selection instead of unioning two draws, and coverage can
 # be verified fail-hard (external review round 6).
 MANIFEST = Path("data/derived/review_action_manifest_v2.json")
+# Second design over the SAME frame (issue #2 estimator review): the
+# PPS-by-LOC sample is design-efficient for LOC-share estimands but its
+# inverse-inclusion weights let tiny-LOC PRs dominate small RATE lanes
+# (39% of one lane's weight on a single 75-LOC PR). Per-PR rate
+# estimands (responded%) therefore come from this EQUAL-PROBABILITY
+# companion sample: uniform pi cancels in the ratio, so rates are
+# unweighted sample shares. Both designs share the hydration cache
+# (commit data is a PR fact, independent of how the PR was drawn).
+SAMPLE_EQ = Path("data/derived/review_action_sample_eq_v1.jsonl")
+MANIFEST_EQ = Path("data/derived/review_action_manifest_eq_v1.json")
 SEED = 20260630
 PER_QUARTER = 1200
 
@@ -185,7 +200,7 @@ def _hydration_cache() -> dict:
     independent of the sampling frame; only the DRAW must come from the
     current frame."""
     cache = {}
-    for path in (OLD_SAMPLE, SAMPLE):
+    for path in (OLD_SAMPLE, SAMPLE, SAMPLE_EQ):
         if not path.exists():
             continue
         for ln in path.read_text().splitlines():
@@ -195,13 +210,17 @@ def _hydration_cache() -> dict:
     return cache
 
 
-def frame_fingerprint(items) -> str:
+def frame_fingerprint(items, design: str = "pps") -> str:
     """Hash of everything that determines the draw: config + the eligible
-    (period, repo, num, loc) tuples."""
+    (period, repo, num, loc) tuples. Non-PPS designs append their tag so
+    the two manifests can never validate each other; the PPS formula is
+    unchanged (existing fingerprints stay valid)."""
     import hashlib
     from pipeline.detect import AS_OF, CUTOFF
-    blob = json.dumps([AS_OF, CUTOFF, PER_QUARTER, SEED,
-                       sorted(items)], separators=(",", ":"))
+    parts = [AS_OF, CUTOFF, PER_QUARTER, SEED, sorted(items)]
+    if design != "pps":
+        parts.append(design)
+    blob = json.dumps(parts, separators=(",", ":"))
     return hashlib.sha256(blob.encode()).hexdigest()[:16]
 
 
@@ -231,24 +250,43 @@ def draw(pool: dict) -> dict[str, list]:
     return out
 
 
-def _selection_of(pool: dict) -> dict:
+def draw_eq(pool: dict) -> dict[str, list]:
+    """Equal-probability draw (canonical, same normalization as draw):
+    per period, min(PER_QUARTER, N) distinct PRs uniformly without
+    replacement — pi = k/N for every PR, so rate estimands over this
+    sample are plain unweighted shares. Seed stream is namespaced so the
+    two designs' draws are independent."""
+    out = {}
+    for per in sorted(pool):
+        items = sorted(pool[per], key=lambda x: (x[0], x[1], x[2]))
+        if not items:
+            continue
+        rng = random.Random(f"{SEED}:eq:{per}")
+        chosen = rng.sample(items, min(PER_QUARTER, len(items)))
+        out[per] = sorted(chosen, key=lambda x: (x[0], x[1], x[2]))
+    return out
+
+
+def _selection_of(pool: dict, draw_fn=draw) -> dict:
     """The deterministic draw, reduced to selection IDENTITY only
     ([repo, num, loc]) — descriptive fields (first_review, ai, ins) are
     never persisted in the manifest; they are rebound from the current
     census at use time (round-7 review P1)."""
     return {per: [[x[0], x[1], x[2]] for x in xs]
-            for per, xs in draw(pool).items()}
+            for per, xs in draw_fn(pool).items()}
 
 
-def ensure_manifest(pool: dict) -> tuple[dict, bool]:
+def ensure_manifest(pool: dict, path: Path | None = None, draw_fn=draw,
+                    design: str = "pps") -> tuple[dict, bool]:
     """Load the manifest if its fingerprint matches the CURRENT frame AND
     its payload equals the deterministic draw (a truncated/tampered
     payload with a valid fingerprint must be repaired, never reused
     vacuously — round-7 review P2); otherwise rewrite atomically."""
-    fp = frame_fingerprint(_pool_items(pool))
-    selected = _selection_of(pool)
-    if MANIFEST.exists():
-        m = json.loads(MANIFEST.read_text())
+    path = MANIFEST if path is None else path
+    fp = frame_fingerprint(_pool_items(pool), design)
+    selected = _selection_of(pool, draw_fn)
+    if path.exists():
+        m = json.loads(path.read_text())
         if m.get("fingerprint") == fp and m.get("selected") == selected:
             return m, False
         if m.get("fingerprint") != fp:
@@ -258,9 +296,9 @@ def ensure_manifest(pool: dict) -> tuple[dict, bool]:
             print("MANIFEST PAYLOAD MISMATCH: repairing from the "
                   "deterministic draw", flush=True)
     m = {"fingerprint": fp, "selected": selected}
-    tmp = MANIFEST.with_suffix(".tmp")
+    tmp = path.with_suffix(".tmp")
     tmp.write_text(json.dumps(m))
-    tmp.replace(MANIFEST)
+    tmp.replace(path)
     return m, True
 
 
@@ -270,15 +308,17 @@ def _selected_keys(manifest: dict) -> dict:
             for per, xs in manifest["selected"].items() for x in xs}
 
 
-def rebuild_sample(manifest: dict, cache: dict, pool: dict) -> set:
-    """Atomically rewrite SAMPLE to exactly the manifest-selected keys
-    with verified-complete records (commits from cache; descriptive
+def rebuild_sample(manifest: dict, cache: dict, pool: dict,
+                   path: Path | None = None) -> set:
+    """Atomically rewrite the sample file to exactly the manifest-selected
+    keys with verified-complete records (commits from cache; descriptive
     fields REBOUND from the current pool — stale ai/first_review from an
     earlier census pass must not survive a marker or window revision).
     Returns the covered keys; everything else must be pulled."""
+    path = SAMPLE if path is None else path
     current = {(x[0], x[1]): (per, x)
                for per, xs in pool.items() for x in xs}
-    tmp = SAMPLE.with_suffix(".tmp")
+    tmp = path.with_suffix(".tmp")
     done = set()
     with tmp.open("w") as out:
         for key in _selected_keys(manifest):
@@ -292,16 +332,17 @@ def rebuild_sample(manifest: dict, cache: dict, pool: dict) -> set:
                                   "first_review": frt, "author": login,
                                   "ai": ai, "ins": ins}) + "\n")
             done.add(key)
-    tmp.replace(SAMPLE)
+    tmp.replace(path)
     return done
 
 
-def require_selection_matches(manifest: dict, pool: dict) -> None:
+def require_selection_matches(manifest: dict, pool: dict,
+                              draw_fn=draw) -> None:
     """Compute-side guard (round-8 review P1): the manifest payload must
     equal the deterministic draw of the CURRENT pool — a
     fingerprint-matching manifest whose selection was truncated/tampered
     after the last pull would otherwise validate coverage vacuously."""
-    if manifest.get("selected") != _selection_of(pool):
+    if manifest.get("selected") != _selection_of(pool, draw_fn):
         raise SystemExit(
             "manifest selection does not match the deterministic draw of "
             "the current frame — rerun --pull before computing")
@@ -357,11 +398,25 @@ def require_complete_sample(manifest: dict, records: dict) -> None:
 
 def pull() -> None:
     pool = eligible()
-    manifest, fresh = ensure_manifest(pool)
-    cache = _hydration_cache()
-    done = rebuild_sample(manifest, cache, pool)  # idempotent, prunes stale
+    # both designs in one run: the EQ pass reuses everything the PPS
+    # pass just checkpointed (the hydration cache reads all sample files)
+    for mpath, spath, draw_fn, design in (
+            (MANIFEST, SAMPLE, draw, "pps"),
+            (MANIFEST_EQ, SAMPLE_EQ, draw_eq, "eq")):
+        print(f"=== design: {design} ===", flush=True)
+        if not spath.exists():
+            spath.touch()
+        manifest, _fresh = ensure_manifest(pool, mpath, draw_fn, design)
+        cache = _hydration_cache()
+        done = rebuild_sample(manifest, cache, pool, spath)  # prunes stale
+        _pull_missing(manifest, pool, spath, done)
+    print("REVIEW-ACTION PULL DONE (coverage verified)", flush=True)
+
+
+def _pull_missing(manifest: dict, pool: dict, spath: Path,
+                  done: set) -> None:
     current = {(x[0], x[1]): x for xs in pool.values() for x in xs}
-    out = SAMPLE.open("a")
+    out = spath.open("a")
     for per, xs in manifest["selected"].items():
         todo = [current[(x[0], x[1])] for x in xs
                 if (x[0], x[1]) not in done and (x[0], x[1]) in current]
@@ -433,11 +488,10 @@ def pull() -> None:
             time.sleep(1)
     out.close()
     records = {}
-    for ln in SAMPLE.read_text().splitlines():
+    for ln in spath.read_text().splitlines():
         d = json.loads(ln)
         records[(d["repo"], d["num"])] = d
     require_complete_sample(manifest, records)   # fail-hard, nonzero
-    print("REVIEW-ACTION PULL DONE (coverage verified)", flush=True)
 
 
 def _inv_pi(loc: float, W: float, k: int = PER_QUARTER) -> float:
@@ -480,17 +534,26 @@ def _suspect(d: dict) -> bool:
 
 
 def repair() -> None:
-    """Re-pull suspect records (old first:60 cap, page-boundary lengths
-    without completeness metadata, or metadata-flagged short); appended
-    records supersede (compute keeps the newest per PR). Failed re-pulls
-    stay suspect and are retried on the next run."""
+    """Re-pull suspect records in BOTH samples (old first:60 cap,
+    page-boundary lengths without completeness metadata, or
+    metadata-flagged short); appended records supersede (compute keeps
+    the newest per PR). Failed re-pulls stay suspect and are retried on
+    the next run."""
+    for spath in (SAMPLE, SAMPLE_EQ):
+        if spath.exists():
+            _repair_sample(spath)
+    print("REVIEW-ACTION REPAIR DONE", flush=True)
+
+
+def _repair_sample(spath: Path) -> None:
     recs = {}
-    for ln in SAMPLE.read_text().splitlines():
+    for ln in spath.read_text().splitlines():
         d = json.loads(ln)
         recs[(d["repo"], d["num"])] = d
     trunc = [d for d in recs.values() if _suspect(d)]
-    print(f"{len(trunc)} suspect records to repair", flush=True)
-    out = SAMPLE.open("a")
+    print(f"{spath.name}: {len(trunc)} suspect records to repair",
+          flush=True)
+    out = spath.open("a")
     for i, d in enumerate(trunc):
         full = _all_commits(d["repo"], d["num"])
         if full is None:
@@ -507,7 +570,7 @@ def repair() -> None:
         if i % 25 == 0:
             print(f"  {i}/{len(trunc)}", flush=True)
         time.sleep(1)
-    print("REVIEW-ACTION REPAIR DONE", flush=True)
+    out.close()
 
 
 def _author_edits_after(d: dict, anchor: str) -> tuple[int, int]:
@@ -542,11 +605,16 @@ def _author_edits_after(d: dict, anchor: str) -> tuple[int, int]:
 
 def lane_rows() -> tuple[dict, dict, int]:
     """(lanes, lanes_nofleet, nonresponse): the lane accumulation used by
-    compute() and Figure 8 — {(period, lane): {n, wn, wacted, post,
-    total}} with HT weights applied. lanes_nofleet restricts to PRs NOT
-    authored by fleet operators — DOMAIN ESTIMATION over the same PPS
-    draw (inclusion probabilities unchanged; no redraw needed). Fail-hard
-    semantics identical to compute()."""
+    compute() and Figure 8 — {(period, lane): {n, wn, wacted, n_loc,
+    post, total}}. TWO designs over one frame (issue #2 estimator
+    review): rate fields (n/wn/wacted) come from the EQ sample with UNIT
+    weights (uniform inclusion cancels in the ratio — responded% is an
+    unweighted share); LOC-share fields (n_loc/post/total) come from the
+    PPS sample with HT weights (the estimand that design is efficient
+    for). lanes_nofleet restricts both to PRs NOT authored by fleet
+    operators — DOMAIN ESTIMATION over the same draws (inclusion
+    probabilities unchanged; no redraw needed). Fail-hard semantics
+    identical for both designs."""
     from collections import defaultdict
     # one census pass: ask anchors + lane flags + the PPS sampling frame
     # (per-PR LOC weights and quarter LOC totals for inclusion probs).
@@ -570,72 +638,80 @@ def lane_rows() -> tuple[dict, dict, int]:
                                             bool(c.insider))
             W[f.period] += f.loc
 
-    def inv_pi(key) -> float:
-        per, loc = frame[key][:2]
-        return _inv_pi(loc, W[per])
-
-    # BIND to the selection manifest: the sample is only a valid PPS draw
-    # of THIS frame if the fingerprints match, and only publishable if
-    # every selected key has a verified-complete record (round 6).
-    if not MANIFEST.exists():
-        raise SystemExit("no selection manifest — run --pull first")
-    manifest = json.loads(MANIFEST.read_text())
-    fp = frame_fingerprint([(v[0], r, n, v[1])
-                            for (r, n), v in frame.items()])
-    if manifest.get("fingerprint") != fp:
-        raise SystemExit(
-            f"sampling frame changed (manifest {manifest.get('fingerprint')}"
-            f" != current {fp}) — rerun --pull to redraw before computing")
     pool_now: dict = defaultdict(list)
     for (r, n), (per, loc, frt, login, ai, ins) in frame.items():
         pool_now[per].append((r, n, loc, frt, login, ai, ins))
-    require_selection_matches(manifest, pool_now)
-    recs: dict = {}                      # newest record per PR wins (repair)
-    for ln in SAMPLE.read_text().splitlines():
-        d = json.loads(ln)
-        recs[(d["repo"], d["num"])] = d
-    require_complete_sample(manifest, recs)
-    selected = analyzable_keys(manifest, recs)
-    nonresp = len(_selected_keys(manifest)) - len(selected)
-    if nonresp:
-        print(f"unit nonresponse: {nonresp} selected PRs "
-              f"({100 * nonresp / len(_selected_keys(manifest)):.1f}%) "
-              "unretrievable at hydration (repos privatized/PRs disabled "
-              "after the census) — excluded, HT weights unchanged")
+
+    def load_design(mpath, spath, draw_fn, design):
+        """Validate one design end-to-end (fingerprint, payload == draw,
+        completeness) and return (analyzable keys, records, nonresponse)."""
+        if not mpath.exists():
+            raise SystemExit(f"no {design} selection manifest — "
+                             "run --pull first")
+        manifest = json.loads(mpath.read_text())
+        fp = frame_fingerprint([(v[0], r, n, v[1])
+                                for (r, n), v in frame.items()], design)
+        if manifest.get("fingerprint") != fp:
+            raise SystemExit(
+                f"sampling frame changed ({design} manifest "
+                f"{manifest.get('fingerprint')} != current {fp}) — rerun "
+                "--pull to redraw before computing")
+        require_selection_matches(manifest, pool_now, draw_fn)
+        recs: dict = {}                  # newest record per PR wins (repair)
+        for ln in spath.read_text().splitlines():
+            d = json.loads(ln)
+            recs[(d["repo"], d["num"])] = d
+        require_complete_sample(manifest, recs)
+        selected = analyzable_keys(manifest, recs)
+        nonresp = len(_selected_keys(manifest)) - len(selected)
+        if nonresp:
+            print(f"unit nonresponse ({design}): {nonresp} selected PRs "
+                  f"({100 * nonresp / len(_selected_keys(manifest)):.1f}%) "
+                  "unretrievable at hydration (repos privatized/PRs "
+                  "disabled after the census) — excluded, weights "
+                  "unchanged")
+        return selected, recs, nonresp
+
     from pipeline.studies.productivity import fleet_logins
     fleet = fleet_logins()
     lanes = defaultdict(lambda: defaultdict(float))
     lanes_nf = defaultdict(lambda: defaultdict(float))
-    for key in selected:
-        d = recs[key]
-        per, _loc, frt, login, ai, _ins = frame[key]
-        d = {**d, "per": per, "first_review": frt, "author": login,
-             "ai": ai}                    # census-derived, never stale
-        ipw = inv_pi(key)
-        targets = [lanes] if login in fleet else [lanes, lanes_nf]
-        ask, ai_rev = anchors.get(key, (None, None))
-        # descriptive companion: all-cause (any-review anchor)
-        post, total = _author_edits_after(d, d["first_review"])
-        for tgt in targets:
-            a = tgt[(d["per"], "all-cause")]
-            a["n"] += 1
-            a["wn"] += ipw
-            a["wacted"] += ipw * (post > 0)
-            a["post"] += ipw * post
-            a["total"] += ipw * total
-        if not ask:
-            continue                      # no explicit human ask on this PR
-        post, total = _author_edits_after(d, ask)
-        lane = "mixed" if ai_rev else "CLEAN"
-        for coh in (lane, lane + ("+AI" if d["ai"] else "+nonAI")):
-            for tgt in targets:
-                a = tgt[(d["per"], coh)]
-                a["n"] += 1
-                a["wn"] += ipw
-                a["wacted"] += ipw * (post > 0)
-                a["post"] += ipw * post
-                a["total"] += ipw * total
-    return dict(lanes), dict(lanes_nf), nonresp
+
+    def accumulate(selected, recs, rate: bool):
+        """Rate fields (n/wn/wacted, unit weights) from the EQ sample;
+        LOC-share fields (n_loc/post/total, HT weights) from PPS."""
+        for key in selected:
+            per, loc, frt, login, ai, _ins = frame[key]
+            d = {**recs[key], "per": per, "first_review": frt,
+                 "author": login, "ai": ai}   # census-derived, never stale
+            ipw = 1.0 if rate else _inv_pi(loc, W[per])
+            targets = [lanes] if login in fleet else [lanes, lanes_nf]
+            ask, ai_rev = anchors.get(key, (None, None))
+            cohorts = [(d["first_review"], "all-cause")]
+            if ask:
+                lane = "mixed" if ai_rev else "CLEAN"
+                cohorts += [(ask, lane),
+                            (ask, lane + ("+AI" if d["ai"] else "+nonAI"))]
+            for anchor, coh in cohorts:
+                post, total = _author_edits_after(d, anchor)
+                for tgt in targets:
+                    a = tgt[(d["per"], coh)]
+                    if rate:
+                        a["n"] += 1
+                        a["wn"] += ipw
+                        a["wacted"] += ipw * (post > 0)
+                    else:
+                        a["n_loc"] += 1
+                        a["post"] += ipw * post
+                        a["total"] += ipw * total
+
+    sel_eq, recs_eq, nonresp_eq = load_design(MANIFEST_EQ, SAMPLE_EQ,
+                                              draw_eq, "eq")
+    accumulate(sel_eq, recs_eq, rate=True)
+    sel_pps, recs_pps, nonresp_pps = load_design(MANIFEST, SAMPLE,
+                                                 draw, "pps")
+    accumulate(sel_pps, recs_pps, rate=False)
+    return dict(lanes), dict(lanes_nf), nonresp_eq + nonresp_pps
 
 
 def compute() -> None:
@@ -644,24 +720,28 @@ def compute() -> None:
           "inline comments)")
     print("CLEAN lane = no AI-reviewer activity (identified); "
           "mixed = descriptive; all-cause = companion only")
-    print("HT inclusion-probability weighted (PPS sample -> population "
-          "estimands): responded% is PR-weighted; LOC share% is the "
-          "population post-ask LOC ratio")
+    print("two designs, one frame: responded% is the EQUAL-PROBABILITY "
+          "sample share (uniform inclusion — unweighted); post-ask LOC "
+          "share% is the HT-weighted ratio over the PPS-by-LOC sample "
+          "(the estimand that design is efficient for)")
     for label, src in (("all sampled PRs", lanes),
                        ("FLEET-OPERATOR authors EXCLUDED (domain "
-                        "estimation, same HT weights)", lanes_nf)):
+                        "estimation, same weights)", lanes_nf)):
         print(f"\n--- {label} ---")
         print(f"{'lane':22}{'PRs':>6}{'responded%':>11}"
-              f"{'post-ask LOC share%':>20}")
+              f"{'PRs':>6}{'post-ask LOC share%':>20}")
         for per in PERIODS:
             for coh in ("CLEAN", "CLEAN+AI", "CLEAN+nonAI", "mixed",
                         "all-cause"):
                 a = src.get((per, coh))
-                if not a or a["n"] < 20:
+                if not a or a.get("n", 0) < 20:
                     continue
+                loc_share = (f"{100 * a['post'] / a['total']:>19.1f}%"
+                             if a.get("n_loc", 0) >= 20
+                             else f"{'n/a':>20}")
                 print(f"{per + ' ' + coh:22}{int(a['n']):>6}"
                       f"{100*a['wacted']/a['wn']:>10.1f}%"
-                      f"{100*a['post']/a['total']:>19.1f}%")
+                      f"{int(a.get('n_loc', 0)):>6}{loc_share}")
 
 
 def main() -> None:
