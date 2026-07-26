@@ -9,19 +9,24 @@ Eligibility profiles (see CONTEXT.md):
 
 - "pr" — the human-authored PR population. Skips PRs authored by GitHub
   App accounts (__typename == "Bot": dependabot, renovate, CI, and coding
-  agents). Review-behavior studies (fates, attention, responsiveness) use
-  this because bot-authored PRs have degenerate review dynamics
-  (auto-merged dep bumps would swamp attention metrics). NOTE: this also
-  removes layer-B agent-authored PRs from those studies, so their AI
-  series compare AI-assisted humans vs unassisted humans — whether that
-  is the right semantics is tracked pre-publication (issue #2).
+  agents), because bot-authored PRs have degenerate review dynamics
+  (auto-merged dep bumps would swamp attention metrics). Volume//review
+  studies with no AI contrast use this.
 - "author" — attributable human authors. Adds the user-typed-bot hygiene
   on top of "pr": requires a login and rejects is_bot_login matches (bots
   registered as User accounts — found by comment-volume audit — cannot be
-  productivity units). Author-level studies use this.
-- "all" — no author filtering. Escape hatch for call sites that need the
-  full stream (responsiveness anchors are computed over every PR before
-  eligibility applies to the sampled lanes).
+  productivity units). Author-level studies use this, as does every
+  approval-channel view (channels, review_mix by="role").
+- "all" — no author filtering. Used where layer-B agent-authored PRs must
+  reach the output (issue #2: the AI-contrast studies — review_mix
+  by="ai", fates cohorts, attention by-AI, the responsiveness frame) and
+  where a study needs the full stream regardless of eligibility
+  (responsiveness anchors, computed over every PR).
+
+  An AI-contrast study on "all" MUST also apply ai_contrast_eligible()
+  below: "all" readmits non-AI bots and login-less authors, and those land
+  in the nonAI COMPARISON arm, reintroducing the dynamics "pr" excludes
+  (2026-07-25 review).
 
 Iteration order is load-bearing: facts come in group_by_period(...).items()
 order with cell lists intact, because the seeded bootstrap RNG stream
@@ -58,6 +63,23 @@ class PRFact:
     bot_author: bool      # GitHub App author (__typename == "Bot") — lets
                           # "all"-profile sites apply the "pr" skip mid-
                           # stream (lane_rows anchors)
+
+
+def ai_contrast_eligible(f: PRFact) -> bool:
+    """Author hygiene for the AI-vs-nonAI CONTRAST studies (Figure 6's
+    by-AI cut, fates' AI/nonAI cohorts), applied on top of profile "all".
+
+    Issue #2 moved those studies off "pr" so layer-B agent-authored PRs
+    reach the AI series — but "all" alone also readmits App dep-bots
+    (dependabot/renovate/CI), user-typed bots and login-less authors, none
+    of which are AI-involved, so they all land in the NONAI comparison arm
+    and bring exactly the degenerate review dynamics profile "pr" exists to
+    exclude (auto-merged dep bumps: unreviewed, self-merged). Fixed
+    2026-07-25 review. AI-involved PRs bypass author hygiene; every other
+    PR must clear the "author" profile."""
+    if f.cls.ai_involved:
+        return True
+    return not f.bot_author and bool(f.author) and not is_bot_login(f.author)
 
 
 def _eligible(pr: dict, level: str) -> bool:

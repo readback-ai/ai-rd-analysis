@@ -167,4 +167,36 @@ def graphql_nodes(query: str, variables: dict[str, object],
     return None
 
 
+def graphql_envelope(query: str, variables: dict[str, object] | None = None,
+                     retries: int = 3) -> dict | None:
+    """The FULL response envelope — {"data": ..., "errors": [...]} — for the
+    rare caller that must tell a DEFINITIVE null apart from a transient
+    partial failure.
+
+    graphql_nodes above deliberately discards `errors` (one ghost account
+    must not drop a whole repo-period), which also makes its result unable
+    to distinguish "this PR is gone" from "this batch timed out or hit the
+    secondary rate limit" — GitHub answers both with null aliases, and the
+    latter caused the 2026-07-25 mass-tombstoning incident (1,345 live PRs
+    recorded as permanent nonresponse). Callers deciding whether an absence
+    is permanent must use this and inspect `errors` themselves.
+    None = no parseable response at all."""
+    args = ["api", "graphql", "-f", f"query={query}"]
+    for k, v in (variables or {}).items():
+        args += (["-F", f"{k}={v}"] if isinstance(v, int)
+                 else ["-f", f"{k}={v}"])
+    for _ in range(retries):
+        graphql_budget_wait()
+        out = _gh(args, allow_partial=True)
+        if out and out.strip():
+            try:
+                env = json.loads(out)
+            except json.JSONDecodeError:
+                env = None
+            if isinstance(env, dict):
+                return env
+        time.sleep(5)
+    return None
+
+
 # AI-detection identities/logic live in pipeline.detect (single home).

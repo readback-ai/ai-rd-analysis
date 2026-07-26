@@ -119,3 +119,19 @@ def test_resolve_period_quarters_and_months():
     import pytest
     with pytest.raises(ValueError):
         resolve_period("nonsense")
+
+
+def test_enum_org_fails_on_missing_pageinfo(monkeypatch):
+    """Issue #3 item 3 (RED first): enum_org's docstring already commits to
+    'silent truncation of a conglomerate's tail is worse than a loud failure'
+    (review finding 13) — but `not pi.get("hasNextPage")` read an absent or
+    null pageInfo, the shape of a partial/errored response, as the last page.
+    A truncated org enumeration silently SHRINKS the tracked population, and
+    unlike the census there is no precount to catch the deficit."""
+    from pipeline import enum_strata
+    monkeypatch.setattr(enum_strata.time, "sleep", lambda s: None)
+    monkeypatch.setattr(
+        enum_strata, "graphql_nodes",
+        lambda *a, **k: {"nodes": [{"name": "r1", "stargazerCount": 5,
+                                    "repositoryTopics": {"nodes": []}}]})
+    assert enum_strata.enum_org("bigco") is None

@@ -309,7 +309,16 @@ Figure 8, and fates' AI/nonAI cohorts — share `all` with fleet-operator
 exclusion (issue #2, resolved 2026-07-23): human attention and
 responsiveness to a PR are defined regardless of its author, so
 agent-authored PRs count in the AI series; for them, responsiveness
-means the agent/operator pushes commits after a human ask.
+means the agent/operator pushes commits after a human ask. Those sites
+additionally require `frame.ai_contrast_eligible` (2026-07-25 review): a
+PR bypasses author hygiene only if it is AI-involved, because `all` alone
+also readmits App dep-bots, user-typed bots and login-less authors — none
+AI-involved, so all of them accrue to the **nonAI comparison arm** and
+restore the degenerate dynamics `pr` excludes (undiscussed auto-merged
+bumps), with bot volume trending upward over the window alongside AI
+adoption. Under the gate `all = AI + nonAI` exactly, while `all = ins +
+ext + agent-authored` since a Bot has no human author association; fates
+footnotes that residual per quarter.
 
 **What is undetectable** (all rates are floors): squash-merge strips trailers
 (asymmetrically — Claude's footer survives squash more often, so non-Claude
@@ -460,16 +469,39 @@ numbers come only from that artifact.
   first:60 cap chronologically truncated 261/4,233 sampled PRs, biasing
   responsiveness downward on high-commit PRs — those records were
   re-pulled in full (`review_action --repair`). Completeness = a clean
-  terminal pagination walk: GitHub's commits totalCount includes
-  force-pushed/rebased-away commits it never serves (measured 250 of a
-  claimed 281 on one PR), so records store the RETRIEVED count as
-  `commits_total` alongside the API claim (`commits_api_total`). UNIT
+  terminal pagination walk: the commits totalCount can exceed what the API
+  serves, so records store the RETRIEVED count as `commits_total` alongside
+  the API claim (`commits_api_total`). Measured 2026-07-26, that shortfall
+  is GitHub's hard **250-commit-per-PR cap**, not force-pushed commits as
+  previously documented: every record claiming >250 retrieved exactly 250,
+  and none anywhere exceeds 250 (30 of ~8,960 analyzable records, 0.3%).
+  For those PRs **we analyze the first 250 commits, because that is all the
+  data that exists for them** — and, decided 2026-07-26, we measure them
+  against the LOC of *those same commits*: the census PR LOC is normally a
+  FLOOR on the denominator, but flooring a truncated record would divide a
+  250-commit numerator by a whole-PR denominator and bias post-ask LOC share
+  downward. Truncated records are neither excluded (they are real PRs, and
+  dropping the largest-commit ones would itself be selection) nor rescaled
+  (nothing supports an estimate of what the unserved commits contain). The
+  residual limitation stands: for these 30 records the estimand is
+  "post-ask share of the first 250 commits' LOC", not of the whole PR.
+  Identify them with `commits_total < commits_api_total`
+  (`review_action._truncated`). UNIT
   NONRESPONSE: selected PRs whose repo left the live API between census
   and hydration (privatized, deleted, or PRs disabled — measured:
   openai/plugins disabled PRs 2026-07-14) are tombstoned as documented
   nonresponse (~0.5% of the selection), excluded from analysis with HT
   weights unchanged, reported in the table output, and retried on every
-  repair in case retrievability returns.
+  repair in case retrievability returns. A tombstone requires a DEDICATED
+  single-PR confirmation whose every error is `NOT_FOUND`: a null alias in a
+  batch response also occurs when that batch times out or trips the
+  secondary rate limit, and on 2026-07-25 that misreading recorded 1,345
+  live PRs as permanent nonresponse (27.9% of one design's selection),
+  which zeroed the Q2-2026 AI lane before the numbers were caught and
+  repaired. Unconfirmed nulls DEFER to the next pull instead. Because
+  "documented" nonresponse resolves coverage, publication is additionally
+  refused above a nonresponse ceiling (2%, once 20+ tombstones exist) —
+  at that scale a documented subset is still a non-probability subset.
 
 ## 5b. LOC hygiene sensitivity (generated content)
 

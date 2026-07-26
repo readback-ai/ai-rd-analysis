@@ -16,7 +16,7 @@ from collections import defaultdict
 from datetime import datetime
 
 from pipeline.detect import split_reviews
-from pipeline.frame import CAP, PERIODS, study_frame
+from pipeline.frame import CAP, PERIODS, ai_contrast_eligible, study_frame
 
 BANDS = [(1, 10, "<=10"), (11, 100, "11-100"), (101, 1000, "101-1k"),
          (1001, CAP, ">1k")]
@@ -52,8 +52,13 @@ def attention_by_ai(fleet_slice: bool = False) -> dict:
     agg = defaultdict(lambda: defaultdict(float))
     # profile "all", NOT "pr": this population never excluded Bot-typed
     # authors, so agent-authored PRs already count in the ai slice here
-    # (unlike main()'s table and Figure 8) — see issue #2
+    # (unlike main()'s table) — see issue #2. ai_contrast_eligible keeps
+    # non-AI bots and login-less authors OUT of the nonai slice, where
+    # dep-bumps merged without discussion would deflate its comments/kLOC
+    # (2026-07-25 review).
     for f in study_frame("all"):
+        if not ai_contrast_eligible(f):
+            continue
         is_fleet = f.author in fleet
         if is_fleet and not fleet_slice:
             continue                 # fleet pipelines distort review stats

@@ -2,6 +2,8 @@
 gate and the AS_OF migration — analyze gating alone is not 'every paper
 number obeys the frozen rule'."""
 
+import json
+
 from pipeline import detect
 from pipeline.detect import MARKERS, classify_pr
 
@@ -396,6 +398,7 @@ def test_fates_ai_cohort_includes_agent_prs_and_excludes_fleet(
     monkeypatch.setattr(frame, "load_cells", lambda: cells)
     monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
     monkeypatch.setattr(productivity, "fleet_logins", lambda: {"fleeter"})
+    monkeypatch.setattr(fates, "MIN_N", 1)   # cohort membership, not the floor
     fates.fates_at(8)
     out = capsys.readouterr().out
     rows = {ln.split()[1]: int(ln.split()[2]) for ln in out.splitlines()
@@ -493,6 +496,65 @@ def test_author_edits_after_credits_agent_authored_prs():
     assert post == 50          # agent's own commit counts; CI bot's does not
 
 
+def _commit(date, add, login="alice"):
+    return {"commit": {"additions": add, "deletions": 0,
+                       "committedDate": date,
+                       "committer": {"user": {"login": login},
+                                     "email": "a@x"},
+                       "authors": {"nodes": [{"user": {"login": login}}]}}}
+
+
+def test_truncated_record_measured_against_its_own_commits(monkeypatch):
+    """250-cap decision (RED first, 2026-07-26): GitHub serves at most 250
+    commits per PR (measured: all 30 records claiming more retrieved exactly
+    250, none anywhere exceeds it). The post-ask numerator therefore covers
+    only those 250, while `max(total, d["loc"])` floored the DENOMINATOR with
+    the census LOC of the whole PR — a 250-commit numerator over a full-PR
+    denominator, biasing post-ask LOC share down on the largest PRs. For a
+    truncated record, measure the first 250 commits against the LOC of those
+    same commits."""
+    from pipeline.studies.review_action import _author_edits_after
+    d = {"author": "alice", "loc": 20_000,          # census LOC, WHOLE PR
+         "commits": [_commit("2026-01-05T00:00:00Z", 400),    # post-ask
+                     _commit("2025-12-01T00:00:00Z", 600)],   # pre-ask
+         "commits_total": 250, "commits_api_total": 2391,
+         "commits_complete": True}
+    assert _author_edits_after(d, "2026-01-01T00:00:00Z") == (400, 1000)
+
+
+def test_complete_record_keeps_the_census_loc_floor():
+    """The other half: where commit data is COMPLETE the census LOC stays a
+    floor on the denominator (a PR's diff can exceed the sum of the commit
+    LOC the API reports). Only truncation removes the floor."""
+    from pipeline.studies.review_action import _author_edits_after
+    d = {"author": "alice", "loc": 20_000,
+         "commits": [_commit("2026-01-05T00:00:00Z", 400),
+                     _commit("2025-12-01T00:00:00Z", 600)],
+         "commits_total": 2, "commits_api_total": 2,
+         "commits_complete": True}
+    assert _author_edits_after(d, "2026-01-01T00:00:00Z") == (400, 20_000)
+
+
+def test_fates_suppresses_cohorts_below_the_floor(monkeypatch, capsys):
+    """Review finding 6, resolved 2026-07-26: a 1-PR cohort printed
+    percentages beside 63k-PR cohorts (`Q1-2024 AI 1 0.0% 0.0% 100.0%`).
+    Every comparable table has a floor (review_action n<20, slices MIN_PRS).
+    Suppressed cohorts are LISTED, not silently dropped."""
+    from pipeline import frame
+    from pipeline.studies import fates, productivity
+    monkeypatch.setattr(frame, "load_cells", _polluted_cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(productivity, "fleet_logins", lambda: set())
+    monkeypatch.setattr(fates, "MIN_N", 2)
+    fates.fates_at(8)
+    out = capsys.readouterr().out
+    rows = {ln.split()[1] for ln in out.splitlines()
+            if ln.startswith("Q2-2026")}
+    assert "AI" not in rows            # the single agent PR: below the floor
+    assert "all" in rows              # n=2, at the floor
+    assert "AI n=1" in out            # ...but reported as suppressed
+
+
 def test_eq_draw_canonical_capped_and_design_tagged_fingerprint(
         monkeypatch):
     """Issue #2 estimator decision (RED first): per-PR rate estimands
@@ -574,3 +636,381 @@ def test_lane_rates_from_eq_sample_loc_shares_from_pps(monkeypatch,
     assert a["n"] == 2
     assert abs(a["wacted"] / a["wn"] - 0.5) < 1e-9     # EQ unit weights
     assert a["post"] > 0 and a["total"] > 0            # PPS LOC share kept
+
+
+# ---- review 2026-07-25: issue #2's 'all' profile over-widened the -------
+# nonAI COMPARISON arm. Only layer-B agent-authored PRs were meant to join
+# the AI series; 'all' also readmitted App dep-bots, user-typed bots and
+# login-less authors, and they land in nonai/nonAI — the degenerate review
+# dynamics profile 'pr' exists to exclude.
+
+
+def _bot_pr(num, login, typename="Bot"):
+    p = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z", num=num)
+    p["author"] = {"login": login, "__typename": typename}
+    return p
+
+
+def _ghost_pr(num):
+    p = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z", num=num)
+    p["author"] = None                  # deleted account: no attributable login
+    return p
+
+
+def _polluted_cells():
+    """One quarter: a layer-B agent PR and a human PR (the intended AI /
+    nonAI pair) plus three non-human authors that must not enter either."""
+    human = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z", num=2)
+    return {("o/r", "2026-04-01..2026-06-30"): [
+        _agent_pr(1), human,
+        _bot_pr(3, "dependabot[bot]"),          # App bot, not AI-involved
+        _bot_pr(4, "paddle-bot", typename="User"),   # user-typed bot
+        _ghost_pr(5)]}
+
+
+def _polluted_cells_reviewed():
+    """_polluted_cells with a human review on every PR — the review-behavior
+    studies (attention, responsiveness) only admit human-reviewed PRs, and a
+    dep-bump PR that did get a human review is exactly the contaminating
+    case."""
+    cells = _polluted_cells()
+    for p in cells[("o/r", "2026-04-01..2026-06-30")]:
+        p["reviews"] = {"nodes": [dict(_REV)]}
+    return cells
+
+
+def test_attention_by_ai_nonai_slice_excludes_bots_and_ghosts(monkeypatch):
+    """Review finding 1/2, Figure 7 side (RED first — NOT in the review's
+    list, found applying its logic): attention_by_ai also runs on profile
+    'all' with no author hygiene, so dep-bump PRs that received a human
+    review enter the NONAI slice and deflate its comments/kLOC (a bump gets
+    approved without discussion) and distort first-review latency."""
+    from pipeline import frame
+    from pipeline.studies import attention, productivity
+    monkeypatch.setattr(frame, "load_cells", _polluted_cells_reviewed)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(productivity, "fleet_logins", lambda: set())
+    rows = attention.attention_by_ai()
+    assert rows[("Q2-2026", "ai")]["n"] == 1        # the agent PR
+    assert rows[("Q2-2026", "nonai")]["n"] == 1     # the human PR ONLY
+
+
+def test_review_mix_nonai_slice_excludes_bots_and_ghost_authors(monkeypatch):
+    """Review finding 1 (RED first): review_mix(by='ai') on profile 'all'
+    drops every author-hygiene filter, so dependabot, user-typed bots and
+    login-less authors swell the NONAI arm — the published AI-vs-nonAI
+    human-review gap narrows because auto-merged dep bumps were added to
+    the baseline. Only ai_involved PRs may bypass author hygiene."""
+    from pipeline import frame
+    from pipeline.studies import productivity
+    monkeypatch.setattr(frame, "load_cells", _polluted_cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(productivity, "fleet_logins", lambda: set())
+    rows = productivity.review_mix(by="ai")
+    assert rows[("Q2-2026", "ai")]["n"] == 1        # the agent PR (layer B)
+    assert rows[("Q2-2026", "nonai")]["n"] == 1     # the human PR ONLY
+
+
+def test_fates_nonai_cohort_excludes_bots_and_ghost_authors(monkeypatch,
+                                                            capsys):
+    """Review finding 2 (RED first): same over-widening in fates_at — the
+    'all' cohort and the nonAI cohort absorbed bot-authored PRs, which also
+    broke the table's reconciliation (all != AI + nonAI vs ins + ext by the
+    bot mass). After the fix the only all-vs-ins+ext gap is layer-B agent
+    PRs, which have no human author association by construction."""
+    from pipeline import frame
+    from pipeline.studies import fates, productivity
+    monkeypatch.setattr(frame, "load_cells", _polluted_cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(productivity, "fleet_logins", lambda: set())
+    monkeypatch.setattr(fates, "MIN_N", 1)   # hygiene, not the floor
+    fates.fates_at(8)
+    rows = {ln.split()[1]: int(ln.split()[2])
+            for ln in capsys.readouterr().out.splitlines()
+            if ln.startswith("Q2-2026")}
+    assert rows.get("nonAI") == 1              # the human PR ONLY
+    assert rows.get("AI") == 1                 # the agent PR
+    assert rows.get("all") == 2                # and nothing else
+    assert rows["all"] == rows["AI"] + rows["nonAI"]
+    assert rows.get("ins") == 1 and "ext" not in rows
+
+
+def _fig8_module():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "plot_fig8", "scripts/plot_fig8_responsiveness.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_fig8_locshare_gated_on_its_own_sample_count():
+    """Review finding 3 (RED first): the two-design split gave rate fields
+    (EQ sample, n) and LOC fields (PPS sample, n_loc) independent sample
+    sizes, and compute() gates each on its own count — but Figure 8's val()
+    still gated BOTH on n. A lane with EQ n >= 20 whose PPS draw has no
+    members divides 0.0/0.0 on the defaultdict and kills the figure; a lane
+    whose own PPS draw supports the estimate is dropped for EQ n < 20."""
+    m = _fig8_module()
+    lanes = {("Q1-2026", "CLEAN+AI"): {"n": 25, "wn": 25.0, "wacted": 5.0,
+                                       "n_loc": 0, "post": 0.0,
+                                       "total": 0.0},
+             ("Q2-2026", "CLEAN+AI"): {"n": 17, "wn": 17.0, "wacted": 3.0,
+                                       "n_loc": 21, "post": 40.0,
+                                       "total": 100.0}}
+    assert m.val(lanes, "Q1-2026", "CLEAN+AI", "locshare") is None
+    assert m.val(lanes, "Q1-2026", "CLEAN+AI", "responded") == 20.0
+    assert m.val(lanes, "Q2-2026", "CLEAN+AI", "locshare") == 40.0
+    assert m.val(lanes, "Q2-2026", "CLEAN+AI", "responded") is None
+
+
+def test_responsiveness_frame_excludes_bots_and_ghost_authors(monkeypatch):
+    """Review finding 1/2, Figure 8 side (RED first): lane_rows' sampling
+    frame runs on profile 'all', so a dependabot PR that happened to get a
+    human review and an explicit ask was a frame member and landed in the
+    CLEAN+nonAI lane — the same contamination of the nonAI comparison arm
+    fixed in review_mix and fates. Layer-B agent PRs must stay (they are
+    the AI lane). Changing the frame changes the fingerprint, so this
+    forces a redraw + re-pull of both samples."""
+    from pipeline import frame
+    from pipeline.studies import review_action as ra
+    monkeypatch.setattr(frame, "load_cells", _polluted_cells_reviewed)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    pool = ra.eligible()
+    # 1 = layer-B agent (the AI lane), 2 = human; 3/4/5 = dep-bot,
+    # user-typed bot, ghost — all non-AI, none may reach a lane
+    assert sorted(n for _r, n, *_ in pool["Q2-2026"]) == [1, 2]
+
+
+def test_hydration_cache_survives_the_first_design_rebuild(tmp_path,
+                                                           monkeypatch):
+    """Review finding 10 (RED first): pull() runs the PPS design first, and
+    rebuild_sample truncates SAMPLE to the NEW PPS selection before the EQ
+    pass builds its hydration cache — so a PR already hydrated in the old
+    SAMPLE that drops out of the PPS redraw but enters the EQ selection was
+    lost from the cache and re-fetched from the API (up to ~1,200 paginated
+    PR pulls per quarter on any frame change, exactly the frame change the
+    Figure 8 hygiene fix forces). Commit data is a PR-level fact, so the
+    cache must be built once, before any rebuild prunes a file."""
+    import json as _json
+    from pipeline import frame
+    from pipeline.studies import review_action as ra
+    prs = []
+    for i, add in enumerate((10, 100, 1000, 10_000), start=1):
+        p = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z",
+                num=i, reviews=[dict(_REV)])
+        p["additions"] = add
+        prs.append(p)
+    monkeypatch.setattr(frame, "load_cells",
+                        lambda: {("o/r", "2026-04-01..2026-06-30"): prs})
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(ra, "PER_QUARTER", 2)
+    monkeypatch.setattr(ra, "SAMPLE", tmp_path / "s_v2.jsonl")
+    monkeypatch.setattr(ra, "MANIFEST", tmp_path / "m.json")
+    monkeypatch.setattr(ra, "OLD_SAMPLE", tmp_path / "absent_v1.jsonl")
+    monkeypatch.setattr(ra, "SAMPLE_EQ", tmp_path / "s_eq.jsonl")
+    monkeypatch.setattr(ra, "MANIFEST_EQ", tmp_path / "m_eq.json")
+    # every eligible PR is ALREADY hydrated, and only in SAMPLE
+    (tmp_path / "s_v2.jsonl").write_text("".join(
+        _json.dumps({"repo": "o/r", "num": i, "per": "Q2-2026", "loc": 100,
+                     "first_review": "2026-04-02T00:00:00Z",
+                     "author": "alice", "ai": False, "ins": True,
+                     "commits": [], "commits_total": 0,
+                     "commits_complete": True}) + "\n"
+        for i in range(1, 5)))
+    seen = []
+    monkeypatch.setattr(ra, "_pull_missing",
+                        lambda manifest, pool, spath, done, design="pps":
+                        seen.append((design, set(done),
+                                     set(ra._selected_keys(manifest)))))
+    ra.pull()
+    designs = {d: (done, sel) for d, done, sel in seen}
+    assert set(designs) == {"pps", "eq"}
+    # fixture must be non-degenerate: EQ selects a PR the PPS redraw drops
+    assert designs["eq"][1] - designs["pps"][1]
+    for design, (done, selected) in designs.items():
+        assert selected <= done, (
+            f"{design}: {selected - done} already hydrated but re-fetched")
+
+
+def test_compute_prints_row_when_only_one_design_supports_it(monkeypatch,
+                                                             capsys):
+    """Review finding 3, table side (RED first): compute() gates the whole
+    ROW on the EQ count n, so the real Q1-2026 CLEAN+AI lane (n=17,
+    n_loc=21) is absent from the report table — while Figure 8, now gating
+    each panel on its own design, plots its LOC share. Every published
+    figure point must have a table row; the unsupported column reads n/a."""
+    from pipeline.studies import review_action as ra
+    lanes = {("Q1-2026", "CLEAN+AI"): {"n": 17, "wn": 17.0, "wacted": 12.0,
+                                       "n_loc": 21, "post": 40.0,
+                                       "total": 100.0}}
+    monkeypatch.setattr(ra, "lane_rows", lambda: (lanes, lanes, 0))
+    ra.compute()
+    rows = [ln for ln in capsys.readouterr().out.splitlines()
+            if ln.startswith("Q1-2026 CLEAN+AI")]
+    assert rows, "a lane whose own PPS draw supports the LOC share must print"
+    assert "40.0%" in rows[0]           # its own design's estimate
+    assert "n/a" in rows[0]             # responded% unsupported at n=17
+
+
+# ---- 2026-07-25 mass-tombstoning incident -------------------------------
+# A re-pull wrote 1,345 "unretrievable" tombstones (27.9% of the EQ
+# selection) for PRs that were alive: GitHub answers a timed-out or
+# rate-limited BATCH with null aliases plus an errors array, ghx discards
+# errors, and _definitive_miss recorded the null as permanent nonresponse.
+# The coverage guard passed it, because a tombstone IS documented
+# nonresponse — so Q2-2026 CLEAN+AI published as n=0.
+
+
+def _envelope(*errors, pr=None, repo_null=False):
+    data = {"repository": None if repo_null else {"pullRequest": pr}}
+    env = {"data": data}
+    if errors:
+        env["errors"] = [{"type": t, "message": m, "path": ["repository"]}
+                         for t, m in errors]
+    return json.dumps(env)
+
+
+_GOOD_NODE = {"pullRequest": {"commits": {
+    "nodes": [{"commit": {
+        "committedDate": "2026-01-05T00:00:00Z",
+        "additions": 10, "deletions": 0,
+        "committer": {"user": {"login": "alice"}, "email": "a@x"},
+        "authors": {"nodes": [{"user": {"login": "alice"}}]}}}],
+    "pageInfo": {"hasNextPage": False, "endCursor": "c"},
+    "totalCount": 1}}}
+
+
+def _batch_envelope(alias_value, *errors):
+    """A batch response for one alias a0, optionally carrying errors whose
+    path points AT that alias — the shape GitHub returns for a timed-out or
+    rate-limited batch."""
+    env = {"data": {"a0": alias_value}}
+    if errors:
+        env["errors"] = [{"type": t, "message": m,
+                          "path": ["a0", "pullRequest"]} for t, m in errors]
+    return json.dumps(env)
+
+
+def _batch_pull(monkeypatch, tmp_path, batch_env, confirm_env="{}"):
+    """Run one _pull_missing chunk. `batch_env` answers the 8-alias batch
+    query, `confirm_env` the single-PR confirmation — dispatched on whether
+    the query carries an alias. Returns the records written to the sample."""
+    from pipeline import ghx
+    from pipeline.studies import review_action as ra
+    monkeypatch.setattr(ghx, "_gh",
+                        lambda args, timeout=90, allow_partial=False:
+                        batch_env if "a0:" in " ".join(args) else confirm_env)
+    monkeypatch.setattr(ghx, "graphql_budget_wait", lambda *_a: None)
+    monkeypatch.setattr(ra.time, "sleep", lambda *_a: None)
+    spath = tmp_path / "s.jsonl"
+    spath.touch()
+    item = _item("o/live", 7)
+    manifest = {"fingerprint": "f", "selected": {"Q1-2026": [list(item)]}}
+    try:
+        ra._pull_missing(manifest, {"Q1-2026": [item]}, spath, set(), "eq")
+    except SystemExit:
+        pass          # a DEFERRED PR leaves coverage unresolved by design:
+    # the pull exits nonzero to force a rerun. What matters here is what got
+    # written to the sample file, which is permanent.
+    return [json.loads(ln) for ln in spath.read_text().splitlines()]
+
+
+def test_transient_null_alias_defers_instead_of_tombstoning(monkeypatch,
+                                                            tmp_path):
+    """RED first (2026-07-25 incident): a null alias in a batch response is
+    NOT evidence the PR is gone. Under a rate-limited/timed-out response the
+    PR must DEFER to the next pull — never be checkpointed as permanent
+    nonresponse. Verified live: the exact 8-PR batch that produced 59
+    vllm-project/vllm tombstones re-ran clean, and those PRs are MERGED."""
+    written = _batch_pull(
+        monkeypatch, tmp_path, _batch_envelope(None),
+        _envelope(("RATE_LIMITED", "API rate limit exceeded")))
+    assert written == [], f"tombstoned a live PR on a transient error: {written}"
+
+
+def test_confirmed_not_found_still_tombstones(monkeypatch, tmp_path):
+    """The other half of the same fix: a DEFINITIVE miss (repo resolves, PR
+    explicitly NOT_FOUND — openai/plugins disabled PRs) must still record a
+    tombstone, or coverage could never be resolved for real nonresponse."""
+    written = _batch_pull(
+        monkeypatch, tmp_path, _batch_envelope(None),
+        _envelope(("NOT_FOUND", "Could not resolve to a PullRequest")))
+    assert len(written) == 1 and written[0]["unretrievable"] is True
+
+
+def test_batch_errors_are_logged_not_silently_discarded(monkeypatch, tmp_path,
+                                                        capsys):
+    """RED first (issue #3 follow-up 1): the incident's actual errors payload
+    was never recorded — graphql_nodes discards it — so the trigger had to be
+    inferred from re-running the batch afterwards. The pull must LOG the
+    error types it received, or the next occurrence is undiagnosable too."""
+    _batch_pull(monkeypatch, tmp_path,
+                _batch_envelope(_GOOD_NODE,
+                                ("RATE_LIMITED", "secondary rate limit")))
+    out = capsys.readouterr().out
+    assert "RATE_LIMITED" in out, f"errors discarded; log was: {out!r}"
+
+
+def test_alias_tainted_by_transient_error_is_not_checkpointed(monkeypatch,
+                                                              tmp_path):
+    """RED first (issue #3 follow-up 2): the same null-vs-error confusion has
+    a quieter form. When a response carries errors, a NON-null alias was
+    still checkpointed `commits_complete: True` — and since GraphQL nulls an
+    errored field inside an otherwise-valid list, a truncated commits
+    connection could be recorded as complete, which `_suspect` then never
+    revisits and `--repair` never revisits either. Measured: 0 null nodes in
+    92,515 today, so this is latent, not active — but it silently biases
+    post-ask LOC down if it ever fires, and the record looks clean forever.
+    An alias touched by a non-NOT_FOUND error must DEFER."""
+    written = _batch_pull(monkeypatch, tmp_path,
+                          _batch_envelope(_GOOD_NODE,
+                                          ("RATE_LIMITED", "rate limited")))
+    assert written == [], (
+        "checkpointed a record from an errored response: "
+        f"{[(d.get('commits_total'), d.get('commits_complete')) for d in written]}")
+
+
+def test_mass_nonresponse_fails_hard_even_though_documented():
+    """RED first (2026-07-25 incident): require_complete_sample accepted
+    27.9% tombstoned nonresponse because each stone is 'documented'. The
+    guard exists to refuse a non-probability subset — mass nonresponse is
+    exactly that, wearing the right paperwork. Genuine nonresponse has been
+    0.1-0.3%, so a small ceiling separates the two — consulted only once
+    enough stones exist for a rate to mean anything (a couple of genuine
+    misses in a small draw is not a systemic failure)."""
+    import pytest
+    from pipeline.studies import review_action as ra
+
+    def stone(i):
+        return {"repo": "o/r", "num": i, "commits": [],
+                "unretrievable": True, "commits_complete": False}
+    sel = [list(_item("o/r", i)) for i in range(1000)]
+    manifest = {"fingerprint": "f", "selected": {"Q1-2026": sel}}
+    records = {("o/r", i): _rec("o/r", i) for i in range(1000)}
+    ra.require_complete_sample(manifest, records)      # 0% nonresponse: fine
+    for i in range(5):                                 # 0.5%: genuine range
+        records[("o/r", i)] = stone(i)
+    ra.require_complete_sample(manifest, records)
+    for i in range(30):                                # 3%: incident signature
+        records[("o/r", i)] = stone(i)
+    with pytest.raises(SystemExit) as e:
+        ra.require_complete_sample(manifest, records)
+    assert "nonresponse" in str(e.value).lower()
+
+
+def test_incomplete_sample_error_names_its_design_and_file():
+    """Review finding 9 (RED first): require_complete_sample is now called
+    for BOTH designs but hardcoded 'PPS sample incomplete', so an EQ-side
+    coverage gap sends the operator to the wrong sample file."""
+    import pytest
+    from pipeline.studies import review_action as ra
+    manifest = {"fingerprint": "f",
+                "selected": {"Q1-2026": [list(_item("o/b", 2))]}}
+    with pytest.raises(SystemExit) as e:
+        ra.require_complete_sample(manifest, {}, design="eq",
+                                   path=ra.SAMPLE_EQ)
+    assert "eq" in str(e.value) and "sample_eq_v1" in str(e.value)
+    with pytest.raises(SystemExit) as e:
+        ra.require_complete_sample(manifest, {})
+    assert "pps" in str(e.value).lower()

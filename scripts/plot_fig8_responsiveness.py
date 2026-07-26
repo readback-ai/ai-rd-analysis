@@ -1,12 +1,15 @@
 """Figure 8: do human review requests still produce edits? — by PR type.
 
 Two broken-axis panels from the identified CLEAN lanes (no AI-reviewer
-activity; manifest-bound PPS sample, Horvitz-Thompson weighted):
-(a) share of PRs with an explicit human ask whose author subsequently
-edited; (b) share of post-ask LOC in those PRs' commits. Dark =
-AI-involved PRs, light = non-AI. Points with sample n < 20 are omitted;
-the AI lane starts in Q1-2026 (too few asked AI PRs earlier). Q2 partial
-(w8 windows open at the AS_OF).
+activity), each estimated on the manifest-bound sample whose design fits
+its estimand (issue #2): (a) share of PRs with an explicit human ask whose
+author subsequently edited — the UNWEIGHTED share of the equal-probability
+sample (uniform inclusion cancels in the ratio); (b) share of post-ask LOC
+in those PRs' commits — Horvitz-Thompson weighted over the PPS-by-LOC
+sample. Dark = AI-involved PRs, light = non-AI. Each panel omits points
+below n < 20 in ITS OWN sample (2026-07-25 review: the draws are
+independent, so the AI lane can begin in a different quarter per panel).
+Q2 partial (w8 windows open at the AS_OF).
 
 Output: artifacts/fig8_responsiveness_by_ai.png
 Usage:  PYTHONPATH=src python scripts/plot_fig8_responsiveness.py
@@ -45,21 +48,29 @@ def broken_pair(subfig, title):
     return axl, axr
 
 
+def val(lanes, per, lane, kind):
+    """Each panel gates on ITS OWN design's sample count (2026-07-25
+    review): responded% comes from the EQ draw (n), the LOC share from the
+    PPS draw (n_loc). The draws are independent, so a lane can support one
+    panel and not the other — gating both on n both crashed on empty PPS
+    cells (0.0/0.0 on the defaultdict) and dropped supported LOC points."""
+    a = lanes.get((per, lane))
+    if not a:
+        return None
+    if kind == "responded":
+        return 100 * a["wacted"] / a["wn"] if a["n"] >= 20 else None
+    return (100 * a["post"] / a["total"]
+            if a.get("n_loc", 0) >= 20 and a["total"] else None)
+
+
 def main() -> None:
     _, lanes, _ = lane_rows()   # fleet-excluded domain
 
-    def val(per, lane, kind):
-        a = lanes.get((per, lane))
-        if not a or a["n"] < 20:
-            return None
-        if kind == "responded":
-            return 100 * a["wacted"] / a["wn"]
-        return 100 * a["post"] / a["total"]
-
     fig = plt.figure(figsize=(11, 4.4))
-    fig.suptitle("Figure 8: responsiveness to human review requests — "
-                 "AI vs non-AI PRs (CLEAN lane, HT; fleet authors excluded)",
-                 fontsize=12, y=-0.08)
+    fig.suptitle("Figure 8: responsiveness to human review requests — AI vs "
+                 "non-AI PRs (CLEAN lane; (a) equal-probability sample, "
+                 "unweighted / (b) PPS-by-LOC, HT; fleet authors excluded)",
+                 fontsize=11, y=-0.08)
     subfigs = fig.subfigures(1, 2, wspace=0.05)
     for sf, kind, title in (
             (subfigs.flat[0], "responded", "% of asked PRs with author "
@@ -67,7 +78,7 @@ def main() -> None:
             (subfigs.flat[1], "locshare", "% of LOC edited after the ask")):
         axl, axr = broken_pair(sf, title)
         for lane, color, label in SLICES:
-            y = [val(p, lane, kind) for p in PERIODS]
+            y = [val(lanes, p, lane, kind) for p in PERIODS]
             axl.plot([0], y[:1], marker="o", ms=4, color=color)
             axr.plot([0, 1, 2], y[1:], marker="o", ms=3, color=color,
                      label=label)

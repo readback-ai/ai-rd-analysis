@@ -49,8 +49,15 @@ def enum_org(org: str, max_pages: int = 100) -> list[tuple[str, int]] | None:
                 out.append((f"{org}/{r['name']}", r["stargazerCount"]))
         pages += 1
         pi = data.get("pageInfo") or {}
-        if not pi.get("hasNextPage"):
+        # explicit false only — a missing/null pageInfo is a partial response,
+        # and treating it as the last page is exactly the silent truncation
+        # this function refuses to do (issue #3 item 3)
+        if pi.get("hasNextPage") is False:
             return out
+        if pi.get("hasNextPage") is not True:
+            print(f"FAIL {org}: page with no pageInfo (partial response)",
+                  flush=True)
+            return None
         if pages >= max_pages:
             print(f"FAIL {org}: >{max_pages * 100} repos, raise max_pages",
                   flush=True)

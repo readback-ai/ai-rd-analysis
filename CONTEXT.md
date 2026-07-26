@@ -46,3 +46,17 @@ The named policy deciding which PRs enter a study frame:
   agent-authored (layer-B) PRs count in the AI series. For agent-authored
   PRs, Figure 8 "responsiveness" means the agent/operator pushes commits
   after a human ask.
+  - **Those AI-contrast sites must also apply `frame.ai_contrast_eligible`**
+    (added 2026-07-25 review). `all` on its own readmits far more than
+    layer-B agents: App dep-bots (dependabot/renovate/CI), user-typed bots
+    and login-less authors are all non-AI, so they land in the **nonAI
+    comparison arm** and bring back exactly the degenerate dynamics `pr`
+    exists to exclude — auto-merged, undiscussed dep-bumps deflating nonAI
+    attention and inflating its merge rate, with bot volume growing over
+    the window alongside AI adoption (a time-varying confounder). The gate
+    lets a PR skip author hygiene only if it is actually AI-involved.
+    Consequences: `all == AI + nonAI` exactly, while `all == ins + ext +
+    agent-authored` (a Bot has no human author association) — fates prints
+    that residual as a footnote. Changing it moves the responsiveness
+    sampling frame, so `eligible()` and the `lane_rows` frame must apply it
+    identically or the manifest payload check fails.

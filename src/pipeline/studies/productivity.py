@@ -23,7 +23,7 @@ import argparse
 import statistics
 from collections import defaultdict
 
-from pipeline.frame import PERIODS, study_frame
+from pipeline.frame import PERIODS, ai_contrast_eligible, study_frame
 # VOLUME ESTIMAND NOTE (documented provisional treatment, external review
 # P1): merged-LOC sums here count every w8 merge OBSERVED so far,
 # including merges of not-yet-mature PRs — immature PRs that will merge
@@ -572,9 +572,11 @@ def review_mix(by: str = "role", exclude_fleet: bool = True,
     by="role": slices {ins, ext} (author association), profile 'author' —
     a Bot's NONE association must not pollute the external slice.
     by="ai": slices {ai, nonai} (PR-level AI involvement — the Figure 6
-    alternative), profile 'all' per issue #2: agent-authored (layer-B)
-    PRs belong in the ai slice; the ai slice is empty at the Q1-2024
-    baseline by construction.
+    alternative), profile 'all' + frame.ai_contrast_eligible per issue #2:
+    agent-authored (layer-B) PRs belong in the ai slice, but non-AI bots
+    and login-less authors must NOT enter the nonai comparison arm
+    (2026-07-25 review); the ai slice is empty at the Q1-2024 baseline by
+    construction.
     exclude_fleet (default): PRs authored by fleet operators are dropped.
     fleet_slice=True: fleet-authored PRs become their OWN slice ("fleet")
     instead of being dropped (Figure 3 companion).
@@ -583,6 +585,8 @@ def review_mix(by: str = "role", exclude_fleet: bool = True,
     fleet = fleet_logins() if (exclude_fleet or fleet_slice) else set()
     agg: dict = defaultdict(lambda: defaultdict(float))
     for f in study_frame("all" if by == "ai" else "author"):
+        if by == "ai" and not ai_contrast_eligible(f):
+            continue          # bots/ghosts would swell the nonai arm
         is_fleet = f.author in fleet
         if is_fleet and not fleet_slice:
             continue

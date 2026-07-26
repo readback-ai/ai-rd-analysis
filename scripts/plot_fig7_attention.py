@@ -65,7 +65,7 @@ def main() -> None:
                     label="Q2 partial (w8 windows open)")
         axl.set_ylim(bottom=0)
         axl.set_ylabel(title)
-        axr.legend(fontsize=8, loc="upper right")
+        axr.legend(fontsize=8, loc="lower left")
     fig.savefig("artifacts/fig7_attention_by_ai.png", dpi=200,
                 bbox_inches="tight")
     print("wrote artifacts/fig7_attention_by_ai.png")

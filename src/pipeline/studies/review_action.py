@@ -71,8 +71,8 @@ import time
 from pathlib import Path
 
 from pipeline.detect import split_reviews
-from pipeline.frame import CAP, PERIODS, study_frame
-from pipeline.ghx import graphql_nodes
+from pipeline.frame import CAP, PERIODS, ai_contrast_eligible, study_frame
+from pipeline.ghx import graphql_envelope, graphql_nodes
 # v2: redrawn under the MATURE-GATED eligibility frame (2026-07-24) — HT
 # inclusion probabilities are only valid for records drawn from the frame
 # they are computed on. The v1 file remains solely as a hydration cache
@@ -96,6 +96,15 @@ SAMPLE_EQ = Path("data/derived/review_action_sample_eq_v1.jsonl")
 MANIFEST_EQ = Path("data/derived/review_action_manifest_eq_v1.json")
 SEED = 20260630
 PER_QUARTER = 1200
+# Ceiling on documented unit nonresponse before publication is refused.
+# Genuine nonresponse (repos privatized / PRs disabled after the census) has
+# run 0.1-0.3%; the 2026-07-25 incident hit 27.9% because transient batch
+# failures were tombstoned as permanent. See require_complete_sample.
+MAX_NONRESPONSE = 0.02
+# ...and at least this many stones, so the RATE is only consulted once it
+# means something. A handful of genuine misses in a small selection is not
+# a systemic-failure signature; 1,340 of 4,800 is.
+MIN_NONRESPONSE_N = 20
 
 Q = """
 query{ %s }
@@ -112,12 +121,20 @@ def _all_commits(repo: str, num: int) -> tuple[list[dict], int, int] | None:
     """Paginated fetch of ALL commits for one PR (saturation follow-up).
     Returns (nodes, retrieved, api_total) after a CLEAN TERMINAL WALK —
     every page succeeded and the last page reported hasNextPage=false.
-    The API's totalCount may EXCEED the retrievable nodes (force-pushed /
-    rebased-away commits are counted but never served; measured:
-    NVIDIA-NeMo/Speech#8622 serves 250 of a claimed 281), so a clean
-    short walk is complete-as-retrievable (round 10). None on any actual
-    failure — a failed page or a missing endCursor must never checkpoint
-    as complete (round 3)."""
+    The API's totalCount may EXCEED the retrievable nodes, so a clean short
+    walk is complete-as-retrievable (round 10). None on any actual failure —
+    a failed page or a missing endCursor must never checkpoint as complete
+    (round 3).
+
+    WHY the shortfall (corrected 2026-07-26): this was read as force-pushed /
+    rebased-away commits being counted but not served. Measured across both
+    samples, it is overwhelmingly GitHub's hard **250-commit cap** per PR —
+    every record claiming >250 retrieved exactly 250, and no record anywhere
+    exceeds 250 (30 of ~8,960 analyzable records). The consequence is a
+    TRUNCATION, not an accounting quirk: for those PRs, post-ask LOC sums at
+    most 250 commits while the denominator is floored by the census LOC, so
+    their post-ask LOC share is biased DOWN. Compare `commits_total` against
+    `commits_api_total` to identify them."""
     o, n = repo.split("/", 1)
     nodes: list[dict] = []
     cursor = ""
@@ -170,12 +187,18 @@ def first_human_ask(pr: dict) -> str | None:
 
 
 def eligible() -> dict[str, list]:
-    """Sampling frame: mature merged human-reviewed PRs, profile 'all'
-    (issue #2) — agent-authored PRs are in the frame; for them
-    'responsiveness' means the agent/operator pushes after a human ask.
-    Fleet handling stays downstream (domain estimation in lane_rows)."""
+    """Sampling frame: mature merged human-reviewed PRs, profile 'all' +
+    ai_contrast_eligible (issue #2) — agent-authored PRs are in the frame
+    (for them 'responsiveness' means the agent/operator pushes after a human
+    ask), but non-AI bots and login-less authors are not: they would land in
+    the CLEAN+nonAI lane and contaminate the comparison arm (2026-07-25
+    review). MUST stay identical to the lane_rows frame or the manifest
+    payload check fails. Fleet handling stays downstream (domain estimation
+    in lane_rows)."""
     pool: dict[str, list] = {p: [] for p in PERIODS}
     for f in study_frame("all"):
+        if not ai_contrast_eligible(f):
+            continue
         c = f.cls
         frt = first_human_review(f.pr)
         if c.w8_mature and c.merged and c.human_reviewed and frt and f.loc:
@@ -359,6 +382,68 @@ def _definitive_miss(node) -> bool:
     return isinstance(node, dict) and node.get("pullRequest") is None
 
 
+def _batch_data(query: str, design: str = "pps") -> tuple[dict | None, set]:
+    """(data, tainted aliases) for one batch pull, read from the FULL
+    envelope so the errors array is neither discarded nor — as after the
+    2026-07-25 incident — reconstructed by guesswork (issue #3).
+
+    Every error's type is LOGGED, so a recurrence is diagnosable from the
+    pull log instead of inferred by re-running the batch afterwards. Every
+    alias touched by a non-NOT_FOUND error is returned as TAINTED and must
+    defer: an errored response can null a field anywhere beneath that alias,
+    including inside an otherwise well-formed commits connection, and such a
+    record would checkpoint `commits_complete: True` — which `_suspect`
+    treats as clean, so neither a later pull nor `--repair` would ever
+    revisit it. (Measured 2026-07-26: 0 null commit nodes in 92,515, so this
+    is a latent hazard, not an observed loss.) An error with no usable path
+    taints the whole batch. NOT_FOUND is exempt — it is the legitimate
+    definitive signal, and `_confirm_gone` adjudicates it."""
+    env = graphql_envelope(query)
+    if env is None:
+        return None, set()
+    errs = env.get("errors") or []
+    if errs:
+        types = sorted({e.get("type") or "UNKNOWN" for e in errs})
+        print(f"BATCH ERRORS ({design}): {len(errs)} {types}; paths="
+              f"{[e.get('path') for e in errs][:4]}", flush=True)
+    tainted = set()
+    for e in errs:
+        if (e.get("type") or "UNKNOWN") == "NOT_FOUND":
+            continue
+        path = e.get("path")
+        tainted.add(path[0] if isinstance(path, list) and path else "*")
+    data = env.get("data")
+    return (data if isinstance(data, dict) else None), tainted
+
+
+def _confirm_gone(repo: str, num: int) -> bool:
+    """Single-PR verification, REQUIRED before writing a tombstone
+    (2026-07-25 incident). A null alias in an 8-PR batch is not evidence of
+    absence: a timed-out or rate-limited batch comes back with null aliases
+    plus an errors array, and `graphql_nodes` discards errors — so 1,345
+    live PRs (59 in vllm-project/vllm alone) were checkpointed as permanent
+    nonresponse, 27.9% of the EQ selection, zeroing the Q2-2026 AI lane.
+
+    True only when a dedicated query says the PR does not resolve AND every
+    error is NOT_FOUND (the openai/plugins 'PRs disabled' case). Anything
+    else — alive, RATE_LIMITED, a timeout, an unparseable response — is
+    False, which DEFERS the PR to the next pull. Deferring costs one refetch;
+    a false tombstone silently corrupts the sample."""
+    o, n = repo.split("/", 1)
+    env = graphql_envelope('query{ repository(owner:"%s", name:"%s"){ '
+                           'pullRequest(number:%d){ number } } }'
+                           % (o, n, num))
+    if env is None:
+        return False                     # no response: transient
+    errs = env.get("errors") or []
+    if any(e.get("type") != "NOT_FOUND" for e in errs):
+        return False                     # rate limit / timeout / 502
+    repo_node = (env.get("data") or {}).get("repository")
+    if repo_node is None:
+        return bool(errs)                # repo unresolvable: only w/ NOT_FOUND
+    return repo_node.get("pullRequest") is None
+
+
 def _tombstone(per: str, x) -> dict:
     """Record of DEFINITIVE nonresponse for a selected PR: resolves
     coverage as documented unit nonresponse (~0.5% of the selection),
@@ -386,20 +471,45 @@ def analyzable_keys(manifest: dict, records: dict) -> list:
             if _complete(records.get(k) or {})]
 
 
-def require_complete_sample(manifest: dict, records: dict) -> None:
+def require_complete_sample(manifest: dict, records: dict,
+                            design: str = "pps",
+                            path: Path | None = None) -> None:
+    """Fail-hard on coverage gaps. The design and its sample file are named
+    because BOTH designs call this (2026-07-25 review): a hardcoded "PPS"
+    sent the operator to the wrong file on an EQ-side gap."""
     gaps = coverage_gaps(manifest, records)
     if gaps:
         raise SystemExit(
-            f"PPS sample incomplete: {len(gaps)} selected PRs lack "
-            f"verified-complete records (e.g. {gaps[:3]}) — rerun "
-            "--pull/--repair; refusing to publish a non-probability "
-            "subset (external review round 6)")
+            f"{design} sample incomplete ({path or SAMPLE}): {len(gaps)} "
+            "selected PRs lack verified-complete records (e.g. "
+            f"{gaps[:3]}) — rerun --pull/--repair; refusing to publish a "
+            "non-probability subset (external review round 6)")
+    sel = _selected_keys(manifest)
+    stones = [k for k in sel
+              if (records.get(k) or {}).get("unretrievable") is True]
+    if (len(stones) >= MIN_NONRESPONSE_N
+            and len(stones) / len(sel) > MAX_NONRESPONSE):
+        raise SystemExit(
+            f"{design} sample nonresponse too high ({path or SAMPLE}): "
+            f"{len(stones)}/{len(sel)} = {100 * len(stones) / len(sel):.1f}%"
+            f" tombstoned, ceiling {100 * MAX_NONRESPONSE:.0f}% (e.g. "
+            f"{stones[:3]}) — documented nonresponse at this scale is still "
+            "a non-probability subset. Genuine nonresponse has run 0.1-0.3%;"
+            " this signature means a batch failure was recorded as "
+            "permanent (2026-07-25 incident). Rerun --repair, which retries "
+            "every tombstone, before publishing.")
 
 
 def pull() -> None:
     pool = eligible()
-    # both designs in one run: the EQ pass reuses everything the PPS
-    # pass just checkpointed (the hydration cache reads all sample files)
+    # Build the hydration cache ONCE, before any rebuild_sample prunes a
+    # sample file: rebuild truncates SAMPLE to the PPS selection, so a PR
+    # hydrated only there and drawn by the LATER design would otherwise be
+    # gone from disk and re-fetched (2026-07-25 review). Commit data is a
+    # PR-level fact, independent of which design drew it. The per-design
+    # refresh is a UNION, so records pulled for an earlier design are
+    # reused and nothing already cached is ever dropped.
+    cache = _hydration_cache()
     for mpath, spath, draw_fn, design in (
             (MANIFEST, SAMPLE, draw, "pps"),
             (MANIFEST_EQ, SAMPLE_EQ, draw_eq, "eq")):
@@ -407,14 +517,14 @@ def pull() -> None:
         if not spath.exists():
             spath.touch()
         manifest, _fresh = ensure_manifest(pool, mpath, draw_fn, design)
-        cache = _hydration_cache()
+        cache.update(_hydration_cache())
         done = rebuild_sample(manifest, cache, pool, spath)  # prunes stale
-        _pull_missing(manifest, pool, spath, done)
+        _pull_missing(manifest, pool, spath, done, design)
     print("REVIEW-ACTION PULL DONE (coverage verified)", flush=True)
 
 
 def _pull_missing(manifest: dict, pool: dict, spath: Path,
-                  done: set) -> None:
+                  done: set, design: str = "pps") -> None:
     current = {(x[0], x[1]): x for xs in pool.values() for x in xs}
     out = spath.open("a")
     for per, xs in manifest["selected"].items():
@@ -429,11 +539,11 @@ def _pull_missing(manifest: dict, pool: dict, spath: Path,
                 o, n = repo.split("/", 1)
                 parts.append(f'a{j}: repository(owner:"{o}", name:"{n}")'
                              + FIELDS % num)
-            data = graphql_nodes(Q % " ".join(parts), {}, ".data", expect=dict)
+            query = Q % " ".join(parts)
+            data, tainted = _batch_data(query, design)
             if data is None:
                 time.sleep(30)           # transient (rate/502): one retry
-                data = graphql_nodes(Q % " ".join(parts), {}, ".data",
-                                     expect=dict)
+                data, tainted = _batch_data(query, design)
             if data is None:
                 # a chunk of HEAVY PRs can 502 as a batch while each PR
                 # serves fine alone (census small-page lesson): fall back
@@ -458,8 +568,19 @@ def _pull_missing(manifest: dict, pool: dict, spath: Path,
                     time.sleep(1)
                 continue
             for j, (repo, num, loc, frt, login, ai, ins) in enumerate(chunk):
+                if f"a{j}" in tainted or "*" in tainted:
+                    print(f"DEFER {repo}#{num}: alias touched by a transient "
+                          "batch error, not checkpointed", flush=True)
+                    continue             # retried on the next pull
                 node = data.get(f"a{j}")
                 if _definitive_miss(node):
+                    # a null alias is only a CANDIDATE miss — confirm with a
+                    # single-PR query before making it permanent (2026-07-25)
+                    if not _confirm_gone(repo, num):
+                        print(f"DEFER {repo}#{num}: null alias unconfirmed "
+                              "(transient batch failure), not tombstoned",
+                              flush=True)
+                        continue
                     print(f"NONRESPONSE {repo}#{num}: gone from the live "
                           "API (tombstoned)", flush=True)
                     out.write(json.dumps(_tombstone(
@@ -491,7 +612,7 @@ def _pull_missing(manifest: dict, pool: dict, spath: Path,
     for ln in spath.read_text().splitlines():
         d = json.loads(ln)
         records[(d["repo"], d["num"])] = d
-    require_complete_sample(manifest, records)   # fail-hard, nonzero
+    require_complete_sample(manifest, records, design, spath)  # fail-hard
 
 
 def _inv_pi(loc: float, W: float, k: int = PER_QUARTER) -> float:
@@ -504,7 +625,7 @@ def _conn_commits(conn: dict) -> tuple[list[dict], int, int] | None:
     """Validate a commits connection from the BATCH pull. Complete only
     when pageInfo is present with hasNextPage explicitly false and
     totalCount is an integer — a terminal page means everything the API
-    serves was retrieved, even when short of totalCount (ghost commits;
+    serves was retrieved, even when short of totalCount (the 250-commit cap;
     see _all_commits). Partial responses (missing pageInfo/totalCount)
     defer instead of checkpointing (rounds 3/10)."""
     total = conn.get("totalCount")
@@ -573,6 +694,16 @@ def _repair_sample(spath: Path) -> None:
     out.close()
 
 
+def _truncated(d: dict) -> bool:
+    """Record whose commit list was cut short by GitHub's 250-commit-per-PR
+    cap: the API claims more commits than it will serve. Measured 2026-07-26
+    — every record claiming >250 retrieved exactly 250, and nothing anywhere
+    exceeds 250 — so this is systematic truncation, not force-pushed commits
+    being counted-but-not-served as previously documented."""
+    got, api = d.get("commits_total"), d.get("commits_api_total")
+    return isinstance(got, int) and isinstance(api, int) and got < api
+
+
 def _author_edits_after(d: dict, anchor: str) -> tuple[int, int]:
     """(post_anchor_author_loc, total_commit_loc). Commits by bots OTHER
     than the PR author are excluded; the PR's OWN bot counts (issue #2:
@@ -600,6 +731,15 @@ def _author_edits_after(d: dict, anchor: str) -> tuple[int, int]:
             continue
         if (cm.get("committedDate") or "") > anchor:
             post += loc
+    # Denominator: normally the census PR LOC is a FLOOR (a PR's diff can
+    # exceed the summed commit LOC the API reports). But when the record is
+    # TRUNCATED by GitHub's 250-commit-per-PR cap, the numerator can only
+    # cover those 250 commits, so flooring with the whole-PR LOC would divide
+    # a 250-commit numerator by a full-PR denominator and bias the share down
+    # (2026-07-26 decision). Truncated records are measured against the LOC
+    # of the very commits we have — reported as such in METHODS §5.
+    if _truncated(d):
+        return min(post, CAP), min(total, CAP)
     return min(post, CAP), min(max(total, d["loc"]), CAP)
 
 
@@ -630,8 +770,10 @@ def lane_rows() -> tuple[dict, dict, int]:
     for f in study_frame("all"):
         p, c = f.pr, f.cls
         anchors[(f.repo, p.get("number"))] = (
-            first_human_ask(p), c.ai_reviewed)
+            first_human_ask(p), c.ai_reviewed)   # anchors: EVERY PR
         frt = first_human_review(p)
+        if not ai_contrast_eligible(f):
+            continue          # frame members only; must match eligible()
         if c.w8_mature and c.merged and c.human_reviewed and frt and f.loc:
             frame[(f.repo, p["number"])] = (f.period, f.loc, frt, f.author,
                                             bool(c.ai_involved),
@@ -661,7 +803,7 @@ def lane_rows() -> tuple[dict, dict, int]:
         for ln in spath.read_text().splitlines():
             d = json.loads(ln)
             recs[(d["repo"], d["num"])] = d
-        require_complete_sample(manifest, recs)
+        require_complete_sample(manifest, recs, design, spath)
         selected = analyzable_keys(manifest, recs)
         nonresp = len(_selected_keys(manifest)) - len(selected)
         if nonresp:
@@ -734,13 +876,20 @@ def compute() -> None:
             for coh in ("CLEAN", "CLEAN+AI", "CLEAN+nonAI", "mixed",
                         "all-cause"):
                 a = src.get((per, coh))
-                if not a or a.get("n", 0) < 20:
+                # each column gates on ITS OWN design's count (the two
+                # draws are independent); the row prints if either design
+                # supports its estimate, so no published figure point is
+                # missing a table row (2026-07-25 review)
+                rate_ok = a is not None and a.get("n", 0) >= 20
+                loc_ok = (a is not None and a.get("n_loc", 0) >= 20
+                          and a.get("total", 0) > 0)
+                if not (rate_ok or loc_ok):
                     continue
+                responded = (f"{100 * a['wacted'] / a['wn']:>10.1f}%"
+                             if rate_ok else f"{'n/a':>11}")
                 loc_share = (f"{100 * a['post'] / a['total']:>19.1f}%"
-                             if a.get("n_loc", 0) >= 20
-                             else f"{'n/a':>20}")
-                print(f"{per + ' ' + coh:22}{int(a['n']):>6}"
-                      f"{100*a['wacted']/a['wn']:>10.1f}%"
+                             if loc_ok else f"{'n/a':>20}")
+                print(f"{per + ' ' + coh:22}{int(a['n']):>6}{responded}"
                       f"{int(a.get('n_loc', 0)):>6}{loc_share}")
 
 

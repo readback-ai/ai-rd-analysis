@@ -174,6 +174,13 @@ Studies contain only their accumulation logic; the guards live here once.
   (population tables; AND the AI-contrast review-behavior outputs —
   Figures 6-by-AI/7/8 and fates' AI cohorts, with fleet exclusion —
   issue #2 resolution: agent-authored PRs count in the AI series).
+- `ai_contrast_eligible(fact)` — MANDATORY on top of `all` at every
+  AI-contrast site (2026-07-25 review): AI-involved PRs bypass author
+  hygiene, everything else must clear `author`, so non-AI bots and
+  login-less authors cannot enter the nonAI comparison arm. Applied in
+  `review_mix(by="ai")`, `fates_at`, `attention_by_ai`, and the
+  responsiveness frame (`eligible()` + `lane_rows` — keep the two
+  identical or the manifest payload check fails).
 - Owns `PERIODS`, `CAP` (20k LOC/PR), and `population_repos()`.
 - Tests: `tests/test_frame.py` encodes the pre-refactor per-study guards
   verbatim as reference implementations.
@@ -259,11 +266,38 @@ are floors (one quantified exception: the two-sided bound).
   (agent fleets, partly unmarked). Author-level means are whale-sensitive
   — the adoption study isolates them as their own cohort; any new
   author-level analysis should consider the same.
-- **PPS sample ≠ uniform sample**: anything computed on the review-action
-  sample (`review_action_sample_v2.jsonl`, selection bound by the
-  frame-fingerprinted `review_action_manifest_v2.json`) must use the HT
-  weights (`_inv_pi`), not raw counts; compute() fails hard on frame
-  mismatch or incomplete coverage.
+- **A null is not an absence** (2026-07-25 incident, cost: a full re-pull).
+  `ghx.graphql_nodes` discards the `errors` array by design — one ghost
+  account must not drop a whole repo-period — so its result cannot tell "the
+  entity is gone" from "this batch timed out / hit the secondary rate
+  limit": GitHub answers both with null aliases. A re-pull recorded **1,345
+  live PRs** (59 in `vllm-project/vllm`, 31 in `apache/airflow`) as
+  permanent `unretrievable` nonresponse, 27.9% of the EQ selection, which
+  published Q2-2026 `CLEAN+AI` as **n=0**. Rules: (1) any code deciding an
+  absence is PERMANENT must use `ghx.graphql_envelope` and inspect `errors`
+  itself — only all-`NOT_FOUND` is definitive (`_confirm_gone`); (2) prefer
+  deferring, which costs one refetch, over a tombstone, which silently
+  corrupts the sample; (3) the heaviest repos fail first, so the damage
+  concentrates in exactly the PRs that matter most.
+- **"Documented" is not "acceptable"**: `coverage_gaps` treats a tombstone
+  as resolved coverage, so mass nonresponse passed the fail-hard guard —
+  a non-probability subset wearing the right paperwork.
+  `require_complete_sample` now also enforces `MAX_NONRESPONSE` (2%) once
+  `MIN_NONRESPONSE_N` (20) stones exist. Genuine nonresponse has run
+  0.1-0.3%; `--repair` retries every tombstone.
+- **Two samples, one frame — match the estimand to the design**: the
+  review-action study draws the SAME eligibility frame twice. PPS-by-LOC
+  (`review_action_sample_v2.jsonl` + `review_action_manifest_v2.json`)
+  carries LOC-share estimands and **must** use the HT weights (`_inv_pi`);
+  the equal-probability companion (`review_action_sample_eq_v1.jsonl` +
+  `..._manifest_eq_v1.json`) carries per-PR RATE estimands and must use
+  **raw counts** — uniform inclusion cancels in the ratio, and applying
+  `_inv_pi` there reintroduces the tiny-LOC weight domination that forced
+  the EQ draw (issue #2). Each manifest fingerprint is design-tagged so the
+  two can never validate each other. Sample sizes are independent, so gate
+  each output on ITS OWN count (`n` for rates, `n_loc` for LOC shares).
+  compute() fails hard on frame mismatch or incomplete coverage, naming the
+  design and file.
 
 ## Tests as documentation — `tests/`
 

@@ -86,6 +86,22 @@ def test_pull_cell_paginates_within_window(monkeypatch):
     assert [n["number"] for n in nodes] == [1, 2] and not cached
 
 
+def test_pull_cell_rejects_a_page_with_no_pageinfo(monkeypatch):
+    """Issue #3 item 3 (RED first): the same null-is-not-a-fact confusion as
+    the review_action tombstone bug, in the census. `pageInfo` absent or null
+    — which is what a partial/errored GraphQL response looks like — was read
+    by `not pi.get("hasNextPage")` as 'no more pages', so a TRUNCATED page
+    returned as a complete window and `pull_cell` cached it atomically as a
+    finished cell. Terminate only on hasNextPage explicitly False; anything
+    else is a failed page (the review_action `_conn_commits` rule)."""
+    monkeypatch.setattr(census.time, "sleep", lambda s: None)
+    monkeypatch.setattr(census, "graphql_nodes",
+                        lambda *a, **k: {"nodes": [{"number": 1}]})   # no pageInfo
+    assert pull_cell("o/r", "2026-04-01..2026-04-30") == (None, False)
+    assert not ghx.cell_path(census.STAGE, "o/r",
+                             "2026-04-01..2026-04-30").exists()
+
+
 def test_pull_cell_failure_writes_nothing(monkeypatch):
     monkeypatch.setattr(census, "graphql_nodes", lambda *a, **k: None)
     assert pull_cell("o/r", "2026-02-01..2026-02-28") == (None, False)

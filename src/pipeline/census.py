@@ -84,8 +84,14 @@ def _paginate(q: str, page_size: int) -> list | None:
             return None
         nodes.extend(n for n in page.get("nodes") or [])
         pi = page.get("pageInfo") or {}
-        if not pi.get("hasNextPage"):
+        # Terminate ONLY on an explicit false: a missing/null pageInfo is what
+        # a partial or errored response looks like, and reading it as "no more
+        # pages" returned a TRUNCATED window that pull_cell then cached as a
+        # finished cell (issue #3 item 3, same rule as _conn_commits).
+        if pi.get("hasNextPage") is False:
             return nodes
+        if pi.get("hasNextPage") is not True:
+            return None                  # partial response: fail, don't cache
         cur = pi.get("endCursor")
         time.sleep(1)
     return nodes
