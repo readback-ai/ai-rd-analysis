@@ -66,16 +66,9 @@ Phase 1 starts.
 
 ## Commit trailer
 
-End commit messages with a co-author trailer naming **the model that
-actually wrote the code**, not a fixed name:
-
+End commit messages with a trailer naming the model that wrote the code:
 `Co-Authored-By: Claude <model> <noreply@anthropic.com>`
-
 e.g. `Claude Fable 5`, `Claude Opus 5 (1M context)`, `Claude Sonnet 5`.
-This file originally hardcoded `Claude Fable 5`; several sessions since
-have run on other models, and attributing their work to Fable would put a
-false record in the history. If you are unsure which model you are, ask
-rather than guess.
 
 ## Agent skills
 
