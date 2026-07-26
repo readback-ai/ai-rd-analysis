@@ -17,23 +17,11 @@ Usage:  PYTHONPATH=src python scripts/plot_adoption_event.py
 """
 import sys
 
-import matplotlib
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-
 sys.path.insert(0, "src")
-from pipeline.studies.productivity import adoption_event  # noqa: E402
+from pipeline.figstyle import LOC_SERIES, plt, save, shade_span
+from pipeline.studies.productivity import adoption_event
 
 PANELS = [("early", "early adopters"), ("medium", "middle adopters")]
-SERIES = [
-    ("submitted", "tab:blue", "-", "submitted total"),
-    ("sub_nonai", "tab:blue", "--", "submitted non-AI"),
-    ("sub_ai", "tab:blue", ":", "submitted AI-involved"),
-    ("merged", "tab:green", "-", "merged total (w8)"),
-    ("mrg_nonai", "tab:green", "--", "merged non-AI"),
-    ("mrg_ai", "tab:green", ":", "merged AI-involved"),
-]
 
 
 def main() -> None:
@@ -44,7 +32,7 @@ def main() -> None:
                  "(balanced panel, event time), net of the non-adopter "
                  "mean", fontsize=12, y=-0.05)
     for ax, (coh, title) in zip(axes.flat, PANELS):
-        for key, color, ls, label in SERIES:
+        for key, color, ls, label in LOC_SERIES:
             y = [rows.get((coh, e), {}).get(key) for e in offs]
             ax.plot(offs, y, marker="o", ms=3, ls=ls, color=color,
                     label=label)
@@ -55,8 +43,7 @@ def main() -> None:
         for e in offs:
             sh = rows.get((coh, e), {}).get("immature_share", 0)
             if sh > 0:
-                ax.axvspan(e - 0.5, e + 0.5, color="0.85", alpha=0.5,
-                           zorder=0, label=None if shaded else
+                shade_span(ax, e - 0.5, e + 0.5, label=None if shaded else
                            "offset contains w8-open months\n"
                            "(merged provisional)")
                 ax.annotate(f"{sh:.0%}", (e, 0), xycoords=("data",
@@ -74,9 +61,7 @@ def main() -> None:
     ax3.axis("off")
     ax3.legend(handles, labels, loc="center", fontsize=9, frameon=False)
     fig.tight_layout()
-    fig.savefig("artifacts/fig_a2_adoption_event.png", dpi=200,
-                bbox_inches="tight")
-    print("wrote artifacts/fig_a2_adoption_event.png")
+    save(fig, "artifacts/fig_a2_adoption_event.png")
 
 
 if __name__ == "__main__":

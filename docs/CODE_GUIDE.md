@@ -231,8 +231,17 @@ history; the report section title names the module. Highlights:
   runs tag inherently-quarterly sections `[quarterly]`.
 - `monthly_update.py` — incremental month: wipes+re-collects provisional
   month, collectable-population filter, appends to the month registry.
-- `plot_paper_tables.py`, `plot_adoption_cohorts.py` — Figures 2/3/4
-  (broken x-axis: Q1-2024 is ~7 quarters before the continuous window).
+- `plot_*.py` — one script per figure (`plot_paper_tables.py` renders
+  Figures 2 AND 3; `plot_fig6_review.py` renders both fig6 variants —
+  core/external and AI/non-AI, formerly twin files). All house style
+  lives in **`src/pipeline/figstyle.py`** (2026-07-26 architecture
+  review, candidate 2): the broken x-axis panel pair (Q1-2024 sits ~7
+  quarters before the continuous Q4-2025..Q2-2026 window), the
+  w8-provisional shaded band, the paired dark/light slice hues, the six
+  LOC series, and the unified zero-denominator suppression (`cell()` —
+  an absent cell or an AI-conditioned rate at the Q1-2024 baseline is
+  None, never a plotted zero). Scripts keep only their data wiring and
+  panel layout; `tests/test_figstyle.py` pins the style constants.
 
 ## Cross-cutting conventions (the frozen rules — METHODS §1d)
 

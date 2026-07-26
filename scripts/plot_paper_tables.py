@@ -12,37 +12,9 @@ Usage:  PYTHONPATH=src python scripts/plot_paper_tables.py
 """
 import sys
 
-import matplotlib
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-
 sys.path.insert(0, "src")
-from pipeline.studies.paper_tables import core_rows, usage_rows  # noqa: E402
-
-BREAK_KW = dict(marker=[(-1, -0.5), (1, 0.5)], markersize=12,
-                linestyle="none", color="k", mec="k", mew=1, clip_on=False)
-
-
-def broken_axes(ylabel: str, title: str):
-    """Left panel = Q1-2024 only, right = Q4-2025..Q2-2026, shared y."""
-    fig, (axl, axr) = plt.subplots(
-        1, 2, sharey=True, figsize=(8, 4.5),
-        gridspec_kw={"width_ratios": [1, 4], "wspace": 0.06})
-    axl.set_xlim(-0.5, 0.5)
-    axl.set_xticks([0], ["Q1-2024"])
-    axr.set_xlim(-0.4, 2.4)
-    axr.set_xticks([0, 1, 2], ["Q4-2025", "Q1-2026", "Q2-2026"])
-    axl.spines.right.set_visible(False)
-    axr.spines.left.set_visible(False)
-    axr.tick_params(left=False)
-    axl.plot([1], [0], transform=axl.transAxes, **BREAK_KW)
-    axl.plot([1], [1], transform=axl.transAxes, **BREAK_KW)
-    axr.plot([0], [0], transform=axr.transAxes, **BREAK_KW)
-    axr.plot([0], [1], transform=axr.transAxes, **BREAK_KW)
-    axl.set_ylabel(ylabel)
-    fig.suptitle(title, y=-0.06)   # caption below the figure
-    return fig, axl, axr
+from pipeline.figstyle import broken_axes, save, shade_q2_partial
+from pipeline.studies.paper_tables import core_rows, usage_rows
 
 
 def series(axl, axr, ests, label, color):
@@ -70,9 +42,7 @@ def fig2(rows):
         series(axl, axr, ests, label, color)
     axl.set_ylim(bottom=0)
     axr.legend(fontsize=8, loc="upper left")
-    fig.savefig("artifacts/fig2_ai_usage.png", dpi=200,
-                bbox_inches="tight")
-    print("wrote artifacts/fig2_ai_usage.png")
+    save(fig, "artifacts/fig2_ai_usage.png")
 
 
 def fig3(rows):
@@ -93,13 +63,10 @@ def fig3(rows):
                     textcoords="offset points", xytext=(6, -14), fontsize=8,
                     color="tab:green")
     # Q2-2026 merged is w8-provisional (May/June windows open at AS_OF)
-    axr.axvspan(1.6, 2.4, color="0.85", alpha=0.5, zorder=0,
-                label="Q2 merged provisional (w8 windows open)")
+    shade_q2_partial(axr, label="Q2 merged provisional (w8 windows open)")
     axr.legend(fontsize=8, loc="upper left")
     axl.set_ylim(bottom=0)
-    fig.savefig("artifacts/fig3_core_loc.png", dpi=200,
-                bbox_inches="tight")
-    print("wrote artifacts/fig3_core_loc.png")
+    save(fig, "artifacts/fig3_core_loc.png")
 
 
 if __name__ == "__main__":

@@ -11,36 +11,13 @@ Usage:  PYTHONPATH=src python scripts/plot_fig7_attention.py
 """
 import sys
 
-import matplotlib
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-
 sys.path.insert(0, "src")
-from pipeline.studies.attention import PERIODS, attention_by_ai  # noqa: E402
+from pipeline.figstyle import (PAIR_BLUE, broken_pair, cell, plt,
+                               quarter_series, save, shade_q2_partial)
+from pipeline.studies.attention import PERIODS, attention_by_ai
 
-BREAK_KW = dict(marker=[(-1, -0.5), (1, 0.5)], markersize=9,
-                linestyle="none", color="k", mec="k", mew=1, clip_on=False)
-SLICES = [("ai", "#1f77b4", "AI-involved PRs"),
-          ("nonai", "#8ec1e8", "non-AI PRs")]
-
-
-def broken_pair(subfig, title):
-    axl, axr = subfig.subplots(
-        1, 2, sharey=True,
-        gridspec_kw={"width_ratios": [1, 3], "wspace": 0.08})
-    axl.set_xlim(-0.5, 0.5)
-    axl.set_xticks([0], ["Q1-24"])
-    axr.set_xlim(-0.4, 2.4)
-    axr.set_xticks([0, 1, 2], ["Q4-25", "Q1-26", "Q2-26"])
-    axl.spines.right.set_visible(False)
-    axr.spines.left.set_visible(False)
-    axr.tick_params(left=False)
-    for ax, x in ((axl, 1), (axr, 0)):
-        ax.plot([x], [0], transform=ax.transAxes, **BREAK_KW)
-        ax.plot([x], [1], transform=ax.transAxes, **BREAK_KW)
-    axl.set_title(title, fontsize=10, loc="left")
-    return axl, axr
+SLICES = [("ai", PAIR_BLUE[0], "AI-involved PRs"),
+          ("nonai", PAIR_BLUE[1], "non-AI PRs")]
 
 
 def main() -> None:
@@ -57,18 +34,13 @@ def main() -> None:
              "hours to first human review per kLOC")):
         axl, axr = broken_pair(sf, title)
         for sl, color, label in SLICES:
-            y = [rows.get((p, sl), {}).get(key) for p in PERIODS]
-            axl.plot([0], y[:1], marker="o", ms=4, color=color)
-            axr.plot([0, 1, 2], y[1:], marker="o", ms=3, color=color,
-                     label=label)
-        axr.axvspan(1.6, 2.4, color="0.85", alpha=0.5, zorder=0,
-                    label="Q2 partial (w8 windows open)")
+            y = [cell(rows, p, sl, key) for p in PERIODS]
+            quarter_series(axl, axr, y, color, label)
+        shade_q2_partial(axr)
         axl.set_ylim(bottom=0)
         axl.set_ylabel(title)
         axr.legend(fontsize=8, loc="lower left")
-    fig.savefig("artifacts/fig7_attention_by_ai.png", dpi=200,
-                bbox_inches="tight")
-    print("wrote artifacts/fig7_attention_by_ai.png")
+    save(fig, "artifacts/fig7_attention_by_ai.png")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,189 @@
+"""Figure toolkit (pipeline.figstyle) — the house style that was copied
+across the 11 plot scripts (architecture review 2026-07-22, candidate 2:
+`broken_pair` character-identical in 7 files, the provisional band's
+axvspan(1.6, 2.4) in 11 places, the zero-denominator suppression rule
+diverged between copies, plot_fig6_review{,_ai}.py twin files).
+
+Every constant asserted here is the LEGACY value lifted verbatim from the
+scripts, so the migration is provably style-preserving.
+"""
+import matplotlib
+
+from pipeline import figstyle
+from pipeline.figstyle import (BASELINE, LOC_SERIES, WINDOW, broken_axes,
+                               broken_pair, cell, month_series,
+                               paired_series6, quarter_series, save,
+                               shade_q2_partial, shade_span)
+
+
+def _labels(ax):
+    return [t.get_text() for t in ax.get_xticklabels()]
+
+
+def test_backend_is_agg():
+    """Importing the toolkit selects Agg, replacing the per-script
+    matplotlib.use("Agg") boilerplate."""
+    assert matplotlib.get_backend().lower() == "agg"
+
+
+def test_broken_pair_quarter_geometry():
+    """Legacy broken_pair verbatim (plot_fig6_review.py and 5 siblings):
+    left panel Q1-24 at x=0, right panel Q4-25..Q2-26 at 0..2, joined
+    spines hidden, break marks drawn, left-aligned title."""
+    fig = figstyle.plt.figure()
+    sf = fig.subfigures(1, 1)
+    axl, axr = broken_pair(sf, "share of merged PRs")
+    assert axl.get_xlim() == (-0.5, 0.5)
+    assert list(axl.get_xticks()) == [0] and _labels(axl) == ["Q1-24"]
+    assert axr.get_xlim() == (-0.4, 2.4)
+    assert list(axr.get_xticks()) == [0, 1, 2]
+    assert _labels(axr) == ["Q4-25", "Q1-26", "Q2-26"]
+    assert not axl.spines.right.get_visible()
+    assert not axr.spines.left.get_visible()
+    assert axl.get_title(loc="left") == "share of merged PRs"
+    # two break marks per panel
+    assert len(axl.lines) == 2 and len(axr.lines) == 2
+    figstyle.plt.close(fig)
+
+
+def test_broken_pair_month_geometry():
+    """Legacy month variant verbatim (plot_fig5_fleet.py /
+    plot_adoption_cohorts.py): Q1-2024 months on the left, the
+    Oct-2025..Jun-2026 window on the right, ticks at [0, 3, 6, 8]."""
+    fig = figstyle.plt.figure()
+    sf = fig.subfigures(1, 1)
+    axl, axr = broken_pair(sf, "fleet operators", span="month")
+    assert axl.get_xlim() == (-0.5, len(BASELINE) - 0.5)
+    assert list(axl.get_xticks()) == [1] and _labels(axl) == ["Q1-24"]
+    assert axr.get_xlim() == (-0.5, len(WINDOW) - 0.5)
+    assert list(axr.get_xticks()) == [0, 3, 6, 8]
+    assert _labels(axr) == [WINDOW[i][2:7] for i in (0, 3, 6, 8)]
+    figstyle.plt.close(fig)
+
+
+def test_broken_axes_paper_variant():
+    """Legacy plot_paper_tables.broken_axes verbatim: its own figure,
+    full-length quarter labels, ylabel on the left panel, caption below."""
+    fig, axl, axr = broken_axes("share (%)", "Figure 2: usage")
+    assert axl.get_xlim() == (-0.5, 0.5) and _labels(axl) == ["Q1-2024"]
+    assert axr.get_xlim() == (-0.4, 2.4)
+    assert _labels(axr) == ["Q4-2025", "Q1-2026", "Q2-2026"]
+    assert axl.get_ylabel() == "share (%)"
+    assert fig.get_size_inches().tolist() == [8, 4.5]
+    figstyle.plt.close(fig)
+
+
+def test_shade_q2_partial_params():
+    """The magic band verbatim: axvspan(1.6, 2.4, color="0.85", alpha=0.5,
+    zorder=0) — previously copied into 11 call sites."""
+    fig, ax = figstyle.plt.subplots()
+    span = shade_q2_partial(ax)
+    assert (span.get_x(), span.get_x() + span.get_width()) == (1.6, 2.4)
+    assert span.get_alpha() == 0.5 and span.get_zorder() == 0
+    assert span.get_label() == "Q2 partial (w8 windows open)"
+    generic = shade_span(ax, -0.5, 0.5, "w8 window open")
+    assert (generic.get_x(),
+            generic.get_x() + generic.get_width()) == (-0.5, 0.5)
+    assert generic.get_alpha() == 0.5 and generic.get_zorder() == 0
+    figstyle.plt.close(fig)
+
+
+def test_quarter_series_split():
+    """The y[:1] / y[1:] split-plot idiom: baseline point on the left
+    panel (ms 4, unlabeled), window series on the right (ms 3, labeled)."""
+    fig = figstyle.plt.figure()
+    sf = fig.subfigures(1, 1)
+    axl, axr = broken_pair(sf, "t")
+    n_l, n_r = len(axl.lines), len(axr.lines)
+    quarter_series(axl, axr, [10, 20, None, 40], "#1f77b4", "human-reviewed")
+    (left,), (right,) = axl.lines[n_l:], axr.lines[n_r:]
+    assert list(left.get_xdata()) == [0] and list(left.get_ydata()) == [10]
+    assert list(right.get_xdata()) == [0, 1, 2]
+    assert right.get_label() == "human-reviewed"
+    assert left.get_markersize() == 4 and right.get_markersize() == 3
+    figstyle.plt.close(fig)
+
+
+def test_month_series_split():
+    """The monthly split-plot idiom shared by plot_fig5_fleet and
+    plot_adoption_cohorts: ms 2.5, baseline unlabeled, window labeled."""
+    fig = figstyle.plt.figure()
+    sf = fig.subfigures(1, 1)
+    axl, axr = broken_pair(sf, "t", span="month")
+    n_l, n_r = len(axl.lines), len(axr.lines)
+    month_series(axl, axr, [1, 2, 3], [None] * len(WINDOW), "tab:blue",
+                 ls="--", label="submitted non-AI")
+    (left,), (right,) = axl.lines[n_l:], axr.lines[n_r:]
+    assert list(left.get_xdata()) == [0, 1, 2]
+    assert list(right.get_xdata()) == list(range(len(WINDOW)))
+    assert right.get_label() == "submitted non-AI"
+    assert left.get_markersize() == 2.5 == right.get_markersize()
+    assert right.get_linestyle() == "--"
+    figstyle.plt.close(fig)
+
+
+def test_cell_suppresses_ai_slice_at_baseline():
+    """Architecture review 2026-07-22 candidate 2: the zero-denominator
+    suppression rule DIVERGED between copies — plot_fig3_comp_audits.py
+    suppresses the ai slice at Q1-2024 'even if a stray detector FP
+    creates a tiny cell', while the fig6 twins and fig7 only checked cell
+    presence and would have plotted the stray. The unified rule: an
+    AI-conditioned rate is undefined at the baseline, absent cells are
+    undefined, and both read as None (never a plotted zero)."""
+    rows = {("Q1-2024", "ai"): {"humanRev_pr": 0.5},    # stray detector FP
+            ("Q2-2026", "ai"): {"humanRev_pr": 0.6},
+            ("Q1-2024", "ins"): {"humanRev_pr": 0.7}}
+    assert cell(rows, "Q1-2024", "ai", "humanRev_pr") is None
+    assert cell(rows, "Q2-2026", "ai", "humanRev_pr") == 0.6
+    assert cell(rows, "Q1-2024", "ins", "humanRev_pr") == 0.7   # role slices exempt
+    assert cell(rows, "Q4-2025", "ai", "humanRev_pr") is None   # absent cell
+    assert cell(rows, "Q2-2026", "ai", "humanRev_pr", scale=100) == 60.0
+    assert cell(rows, "Q1-2024", "ai", "humanRev_pr", scale=100) is None
+
+
+def test_paired_series6_matches_legacy_tuples():
+    """SERIES6 was copied between the fig6 twins with only keys/labels
+    edited; the builder must reproduce both legacy lists exactly."""
+    assert paired_series6(("ins", "core"), ("ext", "external")) == [
+        ("humanRev", "ins", "#1f77b4", "human-reviewed (core)"),
+        ("humanRev", "ext", "#8ec1e8", "human-reviewed (external)"),
+        ("botOnly", "ins", "#d95f02", "bot-only reviewed (core)"),
+        ("botOnly", "ext", "#fdbf6f", "bot-only reviewed (external)"),
+        ("selfUnrev", "ins", "#c11b1b", "self-merged unreviewed (core)"),
+        ("selfUnrev", "ext", "#f79c9c", "self-merged unreviewed (external)"),
+    ]
+    assert paired_series6(("ai", "AI-involved"), ("nonai", "non-AI")) == [
+        ("humanRev", "ai", "#1f77b4", "human-reviewed (AI-involved)"),
+        ("humanRev", "nonai", "#8ec1e8", "human-reviewed (non-AI)"),
+        ("botOnly", "ai", "#d95f02", "bot-only reviewed (AI-involved)"),
+        ("botOnly", "nonai", "#fdbf6f", "bot-only reviewed (non-AI)"),
+        ("selfUnrev", "ai", "#c11b1b", "self-merged unreviewed (AI-involved)"),
+        ("selfUnrev", "nonai", "#f79c9c", "self-merged unreviewed (non-AI)"),
+    ]
+
+
+def test_loc_series_and_month_lists_are_the_legacy_values():
+    """The six submitted/merged x total/non-AI/AI tuples and the
+    BASELINE/WINDOW month lists, previously duplicated across
+    plot_fig2_comp_audits / plot_fig5_fleet / plot_adoption_{cohorts,event}."""
+    assert LOC_SERIES == [
+        ("submitted", "tab:blue", "-", "submitted total"),
+        ("sub_nonai", "tab:blue", "--", "submitted non-AI"),
+        ("sub_ai", "tab:blue", ":", "submitted AI-involved"),
+        ("merged", "tab:green", "-", "merged total (w8)"),
+        ("mrg_nonai", "tab:green", "--", "merged non-AI"),
+        ("mrg_ai", "tab:green", ":", "merged AI-involved"),
+    ]
+    assert BASELINE == ["2024-01", "2024-02", "2024-03"]
+    assert WINDOW == ["2025-10", "2025-11", "2025-12", "2026-01", "2026-02",
+                      "2026-03", "2026-04", "2026-05", "2026-06"]
+
+
+def test_save_writes_png_and_prints(tmp_path, capsys):
+    fig, ax = figstyle.plt.subplots()
+    ax.plot([0, 1], [0, 1])
+    out = tmp_path / "fig_test.png"
+    save(fig, str(out))
+    assert out.exists() and out.stat().st_size > 0
+    assert capsys.readouterr().out == f"wrote {out}\n"
+    figstyle.plt.close(fig)

@@ -14,22 +14,9 @@ Usage:  PYTHONPATH=src python scripts/plot_fig2_comp_audits.py
 """
 import sys
 
-import matplotlib
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-
 sys.path.insert(0, "src")
-from pipeline.studies.productivity import event_by_adoption_month  # noqa: E402
-
-SERIES = [
-    ("submitted", "tab:blue", "-", "submitted total"),
-    ("sub_nonai", "tab:blue", "--", "submitted non-AI"),
-    ("sub_ai", "tab:blue", ":", "submitted AI-involved"),
-    ("merged", "tab:green", "-", "merged total (w8)"),
-    ("mrg_nonai", "tab:green", "--", "merged non-AI"),
-    ("mrg_ai", "tab:green", ":", "merged AI-involved"),
-]
+from pipeline.figstyle import LOC_SERIES, plt, save, shade_span
+from pipeline.studies.productivity import event_by_adoption_month
 
 
 def main() -> None:
@@ -40,14 +27,13 @@ def main() -> None:
                  y=-0.03)
     for ax, (t0_mon, c) in zip(axes.flat, sorted(cohorts.items())):
         offs = sorted(c["offsets"])
-        for key, color, ls, label in SERIES:
+        for key, color, ls, label in LOC_SERIES:
             ax.plot(offs, [c["offsets"][e][key] for e in offs],
                     marker="o", ms=3, ls=ls, color=color, label=label)
         shaded = False
         for e in offs:
             if not c["offsets"][e]["mature"]:
-                ax.axvspan(e - 0.5, e + 0.5, color="0.85", alpha=0.5,
-                           zorder=0, label=None if shaded else
+                shade_span(ax, e - 0.5, e + 0.5, label=None if shaded else
                            "w8 window open (merged provisional)")
                 shaded = True
         ax.set_title(f"first AI use {t0_mon} (n={c['n']})",
@@ -61,9 +47,7 @@ def main() -> None:
     ax6.axis("off")
     ax6.legend(handles, labels, loc="center", fontsize=10, frameon=False)
     fig.tight_layout()
-    fig.savefig("artifacts/figure_2_comp_audits.png", dpi=200,
-                bbox_inches="tight")
-    print("wrote artifacts/figure_2_comp_audits.png")
+    save(fig, "artifacts/figure_2_comp_audits.png")
 
 
 if __name__ == "__main__":

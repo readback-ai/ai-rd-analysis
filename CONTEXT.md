@@ -60,3 +60,15 @@ The named policy deciding which PRs enter a study frame:
     that residual as a footnote. Changing it moves the responsiveness
     sampling frame, so `eligible()` and the `lane_rows` frame must apply it
     identically or the manifest payload check fails.
+
+## Figure house style
+
+The presentation conventions every `scripts/plot_*.py` shares, owned by
+`src/pipeline/figstyle.py` (never re-implemented per script): the **broken
+x-axis** (a narrow Q1-2024 baseline panel joined to the continuous
+Q4-2025..Q2-2026 panel with axis-break marks — quarter and month variants),
+the **provisional band** (gray span over periods whose w8 windows were still
+open at the AS_OF), the paired dark/light slice hues, the six per-contributor
+LOC series, and **suppression** (`figstyle.cell`): an absent (period, slice)
+cell — including any AI-conditioned rate at the Q1-2024 baseline — renders as
+a gap, never a plotted zero.
