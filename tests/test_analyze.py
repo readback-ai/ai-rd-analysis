@@ -317,3 +317,54 @@ def test_self_merged_none_until_w8_mature():
     mature = dict(immature, createdAt="2026-04-01T00:00:00Z",
                   mergedAt="2026-04-05T00:00:00Z")
     assert pr_metrics(mature, MARKERS)["self_merged"] is True
+
+
+def test_keyed_bootstrap_is_independent_of_call_order():
+    """PR #1 review item 2 (RED first): every CI in a run shared one global
+    RNG, so a CI reproduced only for an IDENTICAL SEQUENCE of calls — adding
+    a metric or a period silently shifted every CI after it, and the same
+    fragility produced the 4cf61f9 hash-seed drift. A keyed CI must be
+    identical however many other CIs were drawn first."""
+    from pipeline import analyze
+    pairs = [(i / 20, 1.0) for i in range(20)]
+    alone = analyze.bootstrap_ci(pairs, 200, key="Q1-2026|ai_involved")
+    for i in range(5):                     # unrelated CIs drawn in between
+        analyze.bootstrap_ci([(i / 7, 1.0) for i in range(7)], 200,
+                             key=f"noise-{i}")
+    again = analyze.bootstrap_ci(pairs, 200, key="Q1-2026|ai_involved")
+    assert alone == again
+    # distinct keys must NOT collapse to the same stream
+    other = analyze.bootstrap_ci(pairs, 200, key="Q2-2026|ai_involved")
+    assert other != alone
+
+
+def test_keyed_bootstrap_is_hash_seed_independent():
+    """Same finding: the derived stream must not go through hash(), which is
+    PYTHONHASHSEED-dependent for tuples."""
+    import os
+    import subprocess
+    import sys
+    script = ("import sys; sys.path.insert(0, 'src');"
+              "from pipeline.analyze import bootstrap_ci;"
+              "print(bootstrap_ci([(i/20, 1.0) for i in range(20)], 200,"
+              " key='Q1-2026|ai_involved'))")
+
+    def run(seed):
+        r = subprocess.run([sys.executable, "-c", script], capture_output=True,
+                           text=True, env={**os.environ,
+                                           "PYTHONHASHSEED": str(seed)})
+        assert r.returncode == 0, r.stderr
+        return r.stdout
+    assert run(1) == run(2)
+
+
+def test_bootstrap_percentiles_are_interpolated_not_indexed():
+    """PR #1 review item 5 (RED first): stats[int(0.025*n)] takes the
+    (0.025n+1)-th order statistic of n draws — at n=2000 the 51st value, not
+    the 2.5th percentile. On a known ascending sample the 2.5/97.5
+    percentiles are exact."""
+    from pipeline.analyze import _percentile
+    vals = [float(i) for i in range(101)]        # 0..100
+    assert _percentile(vals, 0.025) == 2.5
+    assert _percentile(vals, 0.975) == 97.5
+    assert _percentile(vals, 0.0) == 0.0 and _percentile(vals, 1.0) == 100.0

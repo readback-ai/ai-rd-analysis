@@ -38,9 +38,11 @@ from pipeline.studies.slices import weights
 MIN_PRS = 5
 
 
-def _est(pairs: list[tuple[float, float]]) -> tuple[float, float, float]:
-    """(weighted mean, ci_lo, ci_hi)."""
-    return (weighted_mean(pairs), *bootstrap_ci(pairs))
+def _est(pairs: list[tuple[float, float]],
+         key: str | None = None) -> tuple[float, float, float]:
+    """(weighted mean, ci_lo, ci_hi). `key` names the CI cell so its draw
+    stream is independent of every other CI in the run (analyze.bootstrap_ci)."""
+    return (weighted_mean(pairs), *bootstrap_ci(pairs, key=key))
 
 
 def _fmt(est: tuple[float, float, float], pct: bool = True) -> str:
@@ -87,8 +89,10 @@ def usage_rows() -> list[dict]:
                 if r[6] > 0:
                     mrg_loc.append((r[7] / r[6], wt))
         rows.append({"period": per, "repos": len(sub_pr),
-                     "sub_pr": _est(sub_pr), "mrg_pr": _est(mrg_pr),
-                     "sub_loc": _est(sub_loc), "mrg_loc": _est(mrg_loc)})
+                     "sub_pr": _est(sub_pr, f"usage|{per}|sub_pr"),
+                     "mrg_pr": _est(mrg_pr, f"usage|{per}|mrg_pr"),
+                     "sub_loc": _est(sub_loc, f"usage|{per}|sub_loc"),
+                     "mrg_loc": _est(mrg_loc, f"usage|{per}|mrg_loc")})
     return rows
 
 
@@ -119,7 +123,8 @@ def core_rows() -> list[dict]:
                               / n / 1000, wt))
                 sub_pairs.append((sum(v[4] for v in core_a.values())
                                   / n / 1000, wt))
-        est, sub_est = _est(pairs), _est(sub_pairs)
+        est = _est(pairs, f"core|{per}|kloc")
+        sub_est = _est(sub_pairs, f"core|{per}|sub_kloc")
         base = base if base is not None else est[0]
         sub_base = sub_base if sub_base is not None else sub_est[0]
         rows.append({"period": per, "repos": len(pairs), "kloc": est,

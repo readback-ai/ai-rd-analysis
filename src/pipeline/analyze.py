@@ -198,14 +198,53 @@ def weighted_mean(pairs: list[tuple[float, float]]) -> float:
     return sum(v * w for v, w in pairs) / tot if tot else float("nan")
 
 
-_RNG = random.Random(20260630)      # seeded: reruns reproduce identical CIs
+SEED = 20260630
+_RNG = random.Random(SEED)          # legacy shared stream: see bootstrap_ci
 
 
-def bootstrap_ci(pairs: list[tuple[float, float]], n: int = 2000) -> tuple[float, float]:
+def _stream(key: str) -> random.Random:
+    """A draw stream dedicated to one CI cell, derived from SEED and a label.
+
+    sha256 rather than hash(): Random(seed) with a str seed IS stable, but
+    with a tuple it falls back to hash(), which is PYTHONHASHSEED-dependent —
+    the exact class of non-determinism that made the balanced-panel CIs drift
+    between runs (fixed in 4cf61f9)."""
+    import hashlib
+    digest = hashlib.sha256(f"{SEED}|{key}".encode()).digest()[:8]
+    return random.Random(int.from_bytes(digest, "big"))
+
+
+def _percentile(sorted_vals: list[float], p: float) -> float:
+    """Linear-interpolated percentile of an ASCENDING list (the method numpy
+    and R type-7 use). Replaces stats[int(p*n)], which indexed the (p*n+1)-th
+    order statistic of n draws — at n=2000 the 51st rather than the 2.5th
+    percentile. Immaterial (<0.1pp) but wrong, and exact costs nothing."""
+    if not sorted_vals:
+        return float("nan")
+    k = p * (len(sorted_vals) - 1)
+    lo, frac = int(k), k - int(k)
+    if lo + 1 >= len(sorted_vals):
+        return sorted_vals[-1]
+    return sorted_vals[lo] + (sorted_vals[lo + 1] - sorted_vals[lo]) * frac
+
+
+def bootstrap_ci(pairs: list[tuple[float, float]], n: int = 2000,
+                 key: str | None = None) -> tuple[float, float]:
+    """Percentile bootstrap 95% CI over the resampled units in `pairs`.
+
+    `key` names the CI cell (period/metric/table) and gives it its OWN draw
+    stream. Without it, every CI in a run shares one global stream, so results
+    reproduce only for an IDENTICAL SEQUENCE of calls — adding a metric,
+    a period, or a qualifying repo silently shifts every CI computed after it,
+    and a reordered loop changes numbers that should not move (PR #1 review,
+    item 2; the same fragility produced the 4cf61f9 hash-seed drift). Keyed
+    calls are reproducible in isolation and diff only where they should."""
     if len(pairs) < 2:
         return (float("nan"), float("nan"))
-    stats = sorted(weighted_mean(_RNG.choices(pairs, k=len(pairs))) for _ in range(n))
-    return stats[int(0.025 * n)], stats[int(0.975 * n)]
+    rng = _RNG if key is None else _stream(key)
+    stats = sorted(weighted_mean(rng.choices(pairs, k=len(pairs)))
+                   for _ in range(n))
+    return _percentile(stats, 0.025), _percentile(stats, 0.975)
 
 
 def main() -> None:
@@ -296,7 +335,9 @@ def main() -> None:
                     line += f"  {'n/a':>17}"
                     continue
                 mean = weighted_mean(pairs)
-                lo, hi = bootstrap_ci(pairs, a.bootstrap)
+                lo, hi = bootstrap_ci(
+                    pairs, a.bootstrap,
+                    key=f"analyze|{a.granularity}|{per}|{label}|{m}")
                 line += f"  {100*mean:5.1f} [{100*lo:4.1f},{100*hi:4.1f}]"
             print(line)
 

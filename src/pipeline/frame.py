@@ -29,9 +29,12 @@ Eligibility profiles (see CONTEXT.md):
   (2026-07-25 review).
 
 Iteration order is load-bearing: facts come in group_by_period(...).items()
-order with cell lists intact, because the seeded bootstrap RNG stream
-(analyze._RNG) reproduces identical CIs only for an identical sequence of
-draws.
+order with cell lists intact, because bootstrap resampling draws by INDEX
+into the pair list a study builds from this stream — reorder the facts and
+the same seed selects different units. (Keyed CI streams, added for PR #1
+review item 2, removed the OTHER order dependence: a CI no longer depends
+on how many CIs were drawn before it. Pair order within a cell still
+matters, so this rule stands.)
 """
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
