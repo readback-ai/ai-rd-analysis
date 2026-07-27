@@ -214,6 +214,17 @@ def test_incremental_month_registry_is_cumulative(tmp_path, monkeypatch):
     assert {"2026-07", "2026-08", "2026-09"} <= analyze.censused_months(q)
 
 
+def test_censused_months_never_emits_a_month_past_december():
+    """PR #1 review finding 6 (RED first): censused_months assumed a quarter
+    spans months m, m+1, m+2 within one year, so any censused quarter whose
+    range starts in Nov/Dec emitted tokens like '2025-13' — which match no
+    PR's createdAt month, silently dropping that month from every monthly
+    table. Derive the months from the range itself instead."""
+    from pipeline import analyze
+    got = analyze.censused_months({"Q4-2025": "2025-11-01..2026-01-31"})
+    assert got == {"2025-11", "2025-12", "2026-01"}
+
+
 def test_overlapping_cells_fresher_record_wins_at_equal_richness():
     """External review P1 round 2: a re-collected monthly cell must
     supersede a stale quarter cell for the same PR (later-loaded wins when

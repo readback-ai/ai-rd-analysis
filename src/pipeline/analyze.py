@@ -94,10 +94,14 @@ def censused_months(quarters: dict[str, str]) -> set[str]:
     for q in CENSUSED_QUARTERS:
         if q not in quarters:
             continue
-        start = quarters[q].split("..")[0]
+        # walk the RANGE, not "m, m+1, m+2": the latter emitted impossible
+        # tokens ("2025-13") for any quarter starting in Nov/Dec, which match
+        # no PR's createdAt month and silently drop it (PR #1 review, item 6)
+        start, end = quarters[q].split("..")
         y, m = int(start[:4]), int(start[5:7])
-        for i in range(3):
-            out.add(f"{y}-{m + i:02d}")
+        while f"{y}-{m:02d}" <= end[:7]:
+            out.add(f"{y}-{m:02d}")
+            y, m = (y + 1, 1) if m == 12 else (y, m + 1)
     out.update(k for k in quarters if re.fullmatch(r"\d{4}-\d{2}", k))
     return out
 
