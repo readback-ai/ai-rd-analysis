@@ -20,6 +20,13 @@ only written (or only run) after the code change — the red run is the
 evidence the test actually captures the bug. Name the review/finding in
 the test docstring so the regression stays traceable.
 
+## File edits go through Write/Edit, not shell heredocs
+
+Create and change files — new tests especially — with the Write/Edit
+tools, never `cat >>`/`tee` heredocs in Bash. Tool edits render as
+visible diffs; heredoc content collapses into the command log where
+review can't see it.
+
 ## Comments describe the code, not its history
 
 Source comments and docstrings say what the code does and why the rule
