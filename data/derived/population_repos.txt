@@ -1914,12 +1914,6 @@ sgl-project/sglang-jax
 sgl-project/sglang-omni
 sgl-project/whl
 smallcloudai/flexus-client-kit
-sony/DiffRoll
-sony/FxNorm-automix
-sony/sampleid
-sony/san
-sony/soundctm
-sony/sqvae
 spiceai/docs
 spiceai/spiceai
 spiceai/spicebench
