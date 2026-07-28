@@ -219,7 +219,10 @@ PR-level attribution, never commit-level proof.
 
 **Measured layer-C precision** (org-stratified samples, C-only PRs — no
 marker, no agent author, repo-scoped orgs' cells filtered to their
-in-scope repos; `studies.layer_c_precision`): the share carrying
+in-scope repos; `studies.layer_c_precision`. Repo-scoped orgs' current
+cells were drawn org-wide and are filtered at read time — an interim
+measure until they are re-sampled from the scoped universe, since the
+org-wide 50-newest page is a biased selection of it): the share carrying
 positive provenance signals (GitHub web-flow committer, or the product's
 machine-generated slug pattern) is codex/ 95%, copilot/ 98%, cursor/ 49%,
 claude/ 43%. The web-flow identity (`noreply@github.com` committer) is any
