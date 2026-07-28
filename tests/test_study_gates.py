@@ -3,6 +3,7 @@ gate and the AS_OF migration — analyze gating alone is not 'every paper
 number obeys the frozen rule'."""
 
 import json
+import re
 
 from pipeline import detect
 from pipeline.detect import MARKERS, classify_pr
@@ -1016,31 +1017,39 @@ def test_incomplete_sample_error_names_its_design_and_file():
     assert "pps" in str(e.value).lower()
 
 
-def test_bot_sensitivity_reports_published_and_bot_excluded_series(
+def test_bot_sensitivity_reports_all_three_series_like_for_like(
         monkeypatch, capsys):
-    """PR #1 review item 3: the published involvement rate runs on profile
-    'all', so App-bot PRs sit in its DENOMINATOR and a rising bot share
-    mechanically depresses the AI share. The companion table must show both
-    series plus the bot share, so the sensitivity is bounded not assumed.
-    (Feature test, not a bug repro — nothing was previously wrong, the
-    diagnostic simply did not exist.)"""
+    """The companion must show the published series, the dilution-only
+    counterfactual and the all-bots-dropped one, over a SHARED repo set so
+    the deltas are within-repo. Feature test, not a bug repro."""
     from pipeline import frame
     from pipeline.studies import slices
-    ai = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z", num=1)
-    ai["commits"] = {"nodes": [{"commit": {
-        "message": "x\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
-        "authors": {"nodes": []}}}]}
-    bots = [_bot_pr(i, "dependabot[bot]") for i in range(2, 5)]
-    monkeypatch.setattr(frame, "load_cells",
-                        lambda: {("o/r", "2026-04-01..2026-06-30"):
-                                 [ai, *bots]})
-    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+
+    def ai_pr(num):
+        p = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z",
+                num=num)
+        p["commits"] = {"nodes": [{"commit": {
+            "message": "x\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+            "authors": {"nodes": []}}}]}
+        return p
+    # two repos so the bootstrap has >1 unit and the CIs are real, each with
+    # 1 AI-involved human PR + 3 non-AI dependabot PRs
+    cells = {}
+    for r in ("o/a", "o/b"):
+        cells[(r, "2026-04-01..2026-06-30")] = [
+            ai_pr(1), *[_bot_pr(i, "dependabot[bot]") for i in (2, 3, 4)]]
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/a", "o/b"})
     monkeypatch.setattr(slices, "MIN_PRS", 1)
-    monkeypatch.setattr(slices, "weights", lambda: {"o/r": 1.0})
+    monkeypatch.setattr(slices, "weights", lambda: {"o/a": 1.0, "o/b": 1.0})
     slices.bot_sensitivity()
     row = [ln for ln in capsys.readouterr().out.splitlines()
            if ln.startswith("Q2-2026")][0]
-    # published: 1 AI PR of 4 = 25.0%. no-dilution: the 3 non-AI dependabot
-    # PRs drop, leaving 1 of 1 = 100.0%. no-bots: profile 'pr' also leaves
-    # the one human PR = 100.0%. bot share 3 of 4 = 75.0%.
-    assert row.count("100.0") == 2 and "25.0" in row and "75.0%" in row
+    # parse the MEAN of each estimate cell ("NN.N [lo,hi]"), never substrings:
+    # a change in small-sample CI rendering must not break this test
+    means = [float(m) for m in re.findall(r"(\d+\.\d)\s+\[", row)]
+    published, no_dilution, no_bots = means
+    assert published == 25.0        # 1 AI PR of 4, per repo
+    assert no_dilution == 100.0     # the 3 non-AI dependabot PRs drop
+    assert no_bots == 100.0         # only the human PR remains
+    assert row.rstrip().endswith("75.0%")   # weighted bot share, 3 of 4

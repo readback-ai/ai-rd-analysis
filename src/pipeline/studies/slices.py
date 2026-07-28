@@ -144,31 +144,43 @@ def repo_rates() -> dict[tuple[str, str], dict[str, float | None]]:
 
 
 def bot_sensitivity() -> None:
-    """How much of the headline involvement rate is bot-mix (PR #1 review
-    item 3)?
+    """How much of the headline involvement rate is bot mix?
 
     The published `ai_involved` series runs on profile "all", so App-bot PRs
     (dependabot/renovate/CI — never AI-involved) sit in its DENOMINATOR. That
     is a defensible floor, but if bot volume grew across the window a rising
     bot share would mechanically depress the AI share, making part of the
-    0.0 -> 16.9 slope a change in bot mix rather than in practice.
+    slope a change in bot mix rather than in practice.
 
-    MEASURED 2026-07-27: it does not. The bot share is roughly flat (7.3% ->
-    9.4% of PRs), and the no-dilution series tracks the published one within
-    its CI (Q2-2026 17.9 vs 16.9, CI width ~+-1.9pp) — so the trend is not a
-    bot-mix artifact. Kept as a standing check, since the answer depends on
-    data that changes every update.
+    Measured 2026-07-27 it does not, though not for the obvious reason. The
+    weighted bot share DOUBLES over the window (4.1% -> 8.3%), so dilution is
+    growing. But it enters multiplicatively: published ~= no-dilution x
+    (1 - bot share), which holds to a tenth of a point in every quarter
+    (Q4-2025 3.2x0.938 = 3.0; Q1-2026 11.4x0.925 = 10.5 vs 10.3; Q2-2026
+    18.4x0.917 = 16.9 vs 17.0). A discount that grows from ~0 to ~8% of the
+    LEVEL damps the slope slightly; it cannot manufacture one. So the
+    published series is a floor understated by up to ~8% relative, and the
+    trend is not a bot-mix artifact. Kept as a standing check, since the
+    answer depends on data every update changes.
 
     Two counterfactuals, because they differ in SIGN:
     - no-dilution drops bot PRs that are NOT AI-involved and keeps layer-B
       coding agents. This isolates denominator dilution and is the column to
       read.
     - no-bots is profile "pr", which drops every bot author — including the
-      coding agents that ARE the AI signal. In Q4-2025 that removes more
-      numerator than denominator (2.5 vs a published 3.0), which is why a
-      single "bots excluded" column would invite the wrong conclusion.
+      coding agents that ARE the AI signal, so where layer B is a large share
+      of the union it moves the other way. Reported beside no-dilution
+      because a single "bots excluded" column invites the wrong conclusion.
 
-    One census pass: both populations are subsets of "all".
+    LIKE-FOR-LIKE: all three columns are computed over the repos where all
+    three are DEFINED. A filtered subset can fall under the floor, and the
+    repos that does happen to are the bot-heaviest ones — precisely the
+    subject of the diagnostic — so an unrestricted delta would partly measure
+    repo composition rather than dilution. `pub(all)` reports the published
+    column over every qualifying repo, so restricting is visibly not moving
+    the published number.
+
+    One census pass: all three populations are subsets of "all".
     Changes no published number — it is a companion diagnostic."""
     w = weights()
     rows: dict[str, list] = defaultdict(list)
@@ -177,11 +189,9 @@ def bot_sensitivity() -> None:
             granularity=GRANULARITY):
         if len(facts) < _floor():
             continue
-        # THE clean counterfactual: drop bot PRs that are not AI-involved
+        # the clean counterfactual: drop bot PRs that are not AI-involved
         # (dependabot/renovate/CI dilution) while KEEPING layer-B coding
-        # agents, which are bot-authored AND the AI signal. Profile "pr"
-        # drops both, so it answers a different question — reported beside
-        # it because the two differ in sign (see the docstring).
+        # agents, which are bot-authored AND the AI signal
         dilute = [f for f in facts
                   if not (f.bot_author and not f.cls.ai_involved)]
         hum = [f for f in facts if not f.bot_author]
@@ -200,24 +210,35 @@ def bot_sensitivity() -> None:
           "— the clean counterfactual for denominator dilution")
     print("no-bots     = profile 'pr' (ALL bot authors dropped, agents "
           "included): removes AI signal too, so it can move the OTHER way")
-    print(f"{'period':9}{'repos':>6}{'published':>20}{'no-dilution':>20}"
-          f"{'no-bots':>20}{'bot%':>7}")
+    print("the three columns share ONE repo set (all three defined) so the "
+          "deltas are within-repo; pub(all) is the published column over "
+          "every qualifying repo, for comparison")
+    print("bot% is contributor-weighted like the rates, not a raw PR share")
+    print(f"{'period':9}{'repos':>6}{'pub(all)':>9}{'published':>20}"
+          f"{'no-dilution':>20}{'no-bots':>20}{'bot%':>7}")
     for per in (PERIODS if GRANULARITY == "quarter" else sorted(rows)):
         rs = rows.get(per)
         if not rs:
             continue
-        n_all = sum(r[4] for r in rs) or 1
-        bot_share = 100 * (n_all - sum(r[5] for r in rs)) / n_all
-        line = f"{per:9}{len(rs):>6}"
-        for col, key in ((1, "published"), (2, "no-dilution"), (3, "no-bots")):
-            pairs = [(r[col], r[0]) for r in rs if r[col] is not None]
-            if not pairs:
-                line += f"{'n/a':>20}"
-                continue
+        allpub = [(r[1], r[0]) for r in rs]
+        common = [r for r in rs if r[2] is not None and r[3] is not None]
+        line = (f"{per:9}{len(common):>6}"
+                f"{100 * weighted_mean(allpub):>8.1f}%"
+                if allpub else f"{per:9}{len(common):>6}{'n/a':>9}")
+        if not common:
+            print(line + f"{'n/a':>20}{'n/a':>20}{'n/a':>20}{'n/a':>7}")
+            continue
+        for col, name in ((1, "published"), (2, "no-dilution"),
+                          (3, "no-bots")):
+            pairs = [(r[col], r[0]) for r in common]
             m = weighted_mean(pairs)
-            lo, hi = bootstrap_ci(pairs, 1000)
+            lo, hi = bootstrap_ci(pairs, 1000,
+                                  key=f"botcheck|{per}|{name}")
             line += f"  {100*m:5.1f} [{100*lo:4.1f},{100*hi:4.1f}]"
-        print(line + f"{bot_share:>6.1f}%")
+        # weighted to match the series: the share of a repo's PRs that are
+        # bot-authored, averaged over repos under the same weights
+        bot = weighted_mean([(1 - r[5] / r[4], r[0]) for r in common])
+        print(line + f"{100*bot:>6.1f}%")
 
 
 def table(metrics: list[str], header: str) -> None:
