@@ -94,9 +94,9 @@ def censused_months(quarters: dict[str, str]) -> set[str]:
     for q in CENSUSED_QUARTERS:
         if q not in quarters:
             continue
-        # walk the RANGE, not "m, m+1, m+2": the latter emitted impossible
-        # tokens ("2025-13") for any quarter starting in Nov/Dec, which match
-        # no PR's createdAt month and silently drop it (PR #1 review, item 6)
+        # walk the RANGE rather than assuming m, m+1, m+2 in one year: a
+        # quarter starting in Nov/Dec crosses the year boundary, and a token
+        # like "2025-13" matches no PR's createdAt month
         start, end = quarters[q].split("..")
         y, m = int(start[:4]), int(start[5:7])
         while f"{y}-{m:02d}" <= end[:7]:
@@ -199,16 +199,13 @@ def weighted_mean(pairs: list[tuple[float, float]]) -> float:
 
 
 SEED = 20260630
-_RNG = random.Random(SEED)          # legacy shared stream: see bootstrap_ci
 
 
 def _stream(key: str) -> random.Random:
-    """A draw stream dedicated to one CI cell, derived from SEED and a label.
+    """The draw stream for ONE CI cell, derived from SEED and the cell's key.
 
-    sha256 rather than hash(): Random(seed) with a str seed IS stable, but
-    with a tuple it falls back to hash(), which is PYTHONHASHSEED-dependent —
-    the exact class of non-determinism that made the balanced-panel CIs drift
-    between runs (fixed in 4cf61f9)."""
+    Derived through sha256 rather than by seeding Random() with a tuple:
+    tuple seeding falls back to hash(), which is PYTHONHASHSEED-dependent."""
     import hashlib
     digest = hashlib.sha256(f"{SEED}|{key}".encode()).digest()[:8]
     return random.Random(int.from_bytes(digest, "big"))
@@ -216,9 +213,7 @@ def _stream(key: str) -> random.Random:
 
 def _percentile(sorted_vals: list[float], p: float) -> float:
     """Linear-interpolated percentile of an ASCENDING list (the method numpy
-    and R type-7 use). Replaces stats[int(p*n)], which indexed the (p*n+1)-th
-    order statistic of n draws — at n=2000 the 51st rather than the 2.5th
-    percentile. Immaterial (<0.1pp) but wrong, and exact costs nothing."""
+    and R type-7 use)."""
     if not sorted_vals:
         return float("nan")
     k = p * (len(sorted_vals) - 1)
@@ -228,20 +223,17 @@ def _percentile(sorted_vals: list[float], p: float) -> float:
     return sorted_vals[lo] + (sorted_vals[lo + 1] - sorted_vals[lo]) * frac
 
 
-def bootstrap_ci(pairs: list[tuple[float, float]], n: int = 2000,
-                 key: str | None = None) -> tuple[float, float]:
+def bootstrap_ci(pairs: list[tuple[float, float]], n: int = 2000, *,
+                 key: str) -> tuple[float, float]:
     """Percentile bootstrap 95% CI over the resampled units in `pairs`.
 
-    `key` names the CI cell (period/metric/table) and gives it its OWN draw
-    stream. Without it, every CI in a run shares one global stream, so results
-    reproduce only for an IDENTICAL SEQUENCE of calls — adding a metric,
-    a period, or a qualifying repo silently shifts every CI computed after it,
-    and a reordered loop changes numbers that should not move (PR #1 review,
-    item 2; the same fragility produced the 4cf61f9 hash-seed drift). Keyed
-    calls are reproducible in isolation and diff only where they should."""
+    `key` identifies the CI cell (table / period / metric) and is REQUIRED:
+    each cell draws from its own stream, so a CI is reproducible in isolation
+    and independent of how many other CIs the run computed first. Keys must be
+    unique per reported number — reusing one makes two cells share draws."""
     if len(pairs) < 2:
         return (float("nan"), float("nan"))
-    rng = _RNG if key is None else _stream(key)
+    rng = _stream(key)          # ONE stream for all n draws of this cell
     stats = sorted(weighted_mean(rng.choices(pairs, k=len(pairs)))
                    for _ in range(n))
     return _percentile(stats, 0.025), _percentile(stats, 0.975)

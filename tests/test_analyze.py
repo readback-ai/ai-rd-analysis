@@ -79,10 +79,11 @@ def test_weighted_mean_weights_dominate():
 def test_bootstrap_ci_brackets_mean_and_handles_tiny_n():
     random.seed(7)
     pairs = [(v, 1.0) for v in (0.1, 0.2, 0.3, 0.4, 0.5)]
-    lo, hi = bootstrap_ci(pairs, n=500)
+    lo, hi = bootstrap_ci(pairs, n=500, key="brackets-mean")
     assert lo <= weighted_mean(pairs) <= hi
     assert 0.1 <= lo < hi <= 0.5
-    assert all(math.isnan(x) for x in bootstrap_ci([(0.5, 1.0)], n=50))
+    assert all(math.isnan(x) for x in
+               bootstrap_ci([(0.5, 1.0)], n=50, key="tiny-n"))
 
 
 # ------------------------------------------------- cell loading / periods
@@ -368,3 +369,15 @@ def test_bootstrap_percentiles_are_interpolated_not_indexed():
     assert _percentile(vals, 0.025) == 2.5
     assert _percentile(vals, 0.975) == 97.5
     assert _percentile(vals, 0.0) == 0.0 and _percentile(vals, 1.0) == 100.0
+
+
+def test_one_stream_per_cell_not_per_draw():
+    """A keyed CI must build its n draws from ONE stream. Constructing the
+    stream inside the draw loop reseeds it identically every iteration, so
+    every 'resample' is the same one and the interval collapses to a point
+    that need not even contain the sample mean."""
+    from pipeline.analyze import bootstrap_ci, weighted_mean
+    pairs = [(v, 1.0) for v in (0.1, 0.2, 0.3, 0.4, 0.5)]
+    lo, hi = bootstrap_ci(pairs, 500, key="one-stream")
+    assert hi > lo                                   # not degenerate
+    assert lo <= weighted_mean(pairs) <= hi

@@ -18,7 +18,8 @@ right-censoring of May/June PRs (conservative for the growth multiple).
 
 Aggregation follows the frozen conventions (METHODS §1d): repo floor >=5
 PRs/quarter (merged-conditioned columns additionally >=5 merged PRs),
-window contributor weights, seeded bootstrap (analyze._RNG, 2000 draws).
+window contributor weights, seeded bootstrap (analyze.bootstrap_ci, 2000
+draws, one keyed stream per reported interval).
 
 The *_rows() functions return the numbers (consumed by
 scripts/plot_paper_tables.py); usage()/core() print the tables.
