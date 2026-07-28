@@ -97,26 +97,33 @@ def test_census_query_has_layer_c_and_accountability_fields():
 def test_branch_scan_scoped_org_counts_only_in_scope_repos(
         tmp_path, monkeypatch):
     """Issue #8: for a repo-scoped org, branch_scan must count
-    per in-scope repo (summed), never org-wide — org-wide counts include
-    out-of-scope, non-AI repos and feed R4 admission evidence."""
+    per in-scope repo (summed, batched via aliased search), never
+    org-wide — org-wide counts include out-of-scope, non-AI repos and
+    feed R4 admission evidence."""
     queries = []
-    monkeypatch.setattr(branch_scan, "rest_count",
-                        lambda q, endpoint: queries.append(q) or 1)
+
+    def fake(query, variables, jq, expect):
+        queries.append(query)
+        return {"a0": {"issueCount": 1}, "a1": {"issueCount": 1}}
+    monkeypatch.setattr(branch_scan, "graphql_nodes", fake)
     out = tmp_path / "scan.tsv"
     branch_scan.scan(["bigco"], out, {"Q2-2026": "2026-04-01..2026-06-30"},
                      {"codex": "codex/"},
                      scoped={"bigco": ["bigco/ai-a", "bigco/ai-b"]})
     assert not any("org:" in q for q in queries)
+    assert all(r in queries[0] for r in ("repo:bigco/ai-a",
+                                         "repo:bigco/ai-b"))
     assert branch_scan.load(out) == {("bigco", "Q2-2026", "codex/"): 2}
 
 
 def test_branch_scan_scoped_org_fails_cell_on_any_repo_failure(
         tmp_path, monkeypatch):
     """Issue #8: a partial per-repo sum understates silently — if any
-    in-scope repo's count fails, the whole cell is skipped, not written."""
+    in-scope repo's count is missing from the batch, the whole cell is
+    skipped, not written."""
     monkeypatch.setattr(
-        branch_scan, "rest_count",
-        lambda q, endpoint: None if "ai-b" in q else 3)
+        branch_scan, "graphql_nodes",
+        lambda *a, **k: {"a0": {"issueCount": 3}, "a1": None})
     out = tmp_path / "scan.tsv"
     branch_scan.scan(["bigco"], out, {"Q2-2026": "2026-04-01..2026-06-30"},
                      {"codex": "codex/"},

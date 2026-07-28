@@ -26,8 +26,36 @@ import time
 from pathlib import Path
 
 from pipeline.detect import BRANCH_PREFIXES
-from pipeline.ghx import rest_count
+from pipeline.ghx import graphql_nodes, rest_count
 from pipeline.scan_orgs import QUARTER_RANGES
+
+BATCH = 25   # aliased search sub-queries per GraphQL call
+
+
+def _scoped_cell_count(repos: list[str], prefix: str,
+                       rng: str) -> int | None:
+    """Sum of per-repo branch-prefix counts for one (org, period, prefix)
+    cell, batched via aliased GraphQL search (BATCH repos per call — a
+    per-repo REST loop costs ~30x the wall clock on large conglomerates).
+    None if ANY repo's count is missing: a partial sum understates
+    silently."""
+    total = 0
+    for i in range(0, len(repos), BATCH):
+        chunk = repos[i:i + BATCH]
+        parts = [f'a{j}: search(query:"repo:{r} is:pr head:{prefix} '
+                 f'created:{rng}", type:ISSUE){{ issueCount }}'
+                 for j, r in enumerate(chunk)]
+        data = graphql_nodes("query{ " + " ".join(parts) + " }", {},
+                             ".data", expect=dict)
+        if data is None:
+            return None
+        for j in range(len(chunk)):
+            node = data.get(f"a{j}")
+            if not (isinstance(node, dict)
+                    and isinstance(node.get("issueCount"), int)):
+                return None
+            total += node["issueCount"]
+    return total
 
 
 def scan(orgs: list[str], out_path: Path, periods: dict[str, str],
@@ -52,16 +80,8 @@ def scan(orgs: list[str], out_path: Path, periods: dict[str, str],
                     if (org, per, prefix) in done:
                         continue
                     if org in scoped:
-                        n = 0
-                        for repo in scoped[org]:
-                            c = rest_count(
-                                f"repo:{repo} is:pr head:{prefix} "
-                                f"created:{rng}", endpoint="search/issues")
-                            if c is None:
-                                n = None
-                                break
-                            n += c
-                            time.sleep(pace)
+                        n = _scoped_cell_count(scoped[org], prefix, rng)
+                        time.sleep(pace)
                     else:
                         n = rest_count(
                             f"org:{org} is:pr head:{prefix} created:{rng}",
