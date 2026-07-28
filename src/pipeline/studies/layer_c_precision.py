@@ -27,6 +27,7 @@ import re
 
 from pipeline.detect import MARKERS, pr_agent_author, pr_ai_tools
 from pipeline.ghx import data_dir
+from pipeline.org_set import scoped_repos
 
 SLUG = {
     "codex": re.compile(r"^codex/[a-z0-9][a-z0-9-]*$"),
@@ -46,13 +47,21 @@ def committer_emails(pr: dict) -> list[str]:
 
 def main() -> None:
     store = data_dir() / "raw" / "branch_samples"
+    # A repo-scoped org's universe is its in-scope repos only (R5); its
+    # sample cells may carry PRs from other repos of the same owner.
+    scoped = {o.lower(): set(rs) for o, rs in scoped_repos().items()}
     print(f"{'prefix':9}{'C-only n':>9}{'web_flow%':>10}{'machine_slug%':>14}"
           f"{'ci_committed%':>14}{'indeterminate%':>15}")
     for prefix in ("codex", "copilot", "cursor", "claude", "droid"):
         n = wf = slug = ci = 0
         for f in sorted(store.glob(f"{prefix}/*.json")):
-            for p in json.loads(f.read_text()).get("prs") or []:
+            cell = json.loads(f.read_text())
+            keep = scoped.get((cell.get("org") or "").lower())
+            for p in cell.get("prs") or []:
                 if not p or pr_ai_tools(p, MARKERS) or pr_agent_author(p):
+                    continue
+                if keep is not None and ((p.get("repository") or {})
+                                         .get("nameWithOwner")) not in keep:
                     continue
                 n += 1
                 emails = committer_emails(p)

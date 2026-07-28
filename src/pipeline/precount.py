@@ -57,6 +57,30 @@ def ensure_precount(repo: str, period: str) -> int | None:
     return total
 
 
+def confirm_zero_precount(repo: str, period: str) -> int | None:
+    """A zero denominator is unverifiable from one sample: a browned-out
+    search returns 200 with issueCount 0, indistinguishable from a truly
+    empty repo-period. So a 0 only counts once independently re-observed:
+    re-query fresh; a confirmed 0 is cache-marked so later runs trust it,
+    a nonzero recount replaces the cached value, and a failed recount
+    returns None (never recorded)."""
+    val = read_cell(precount_path(repo, period), dict)
+    if val and val.get("confirmed"):
+        return 0
+    rng = resolve_period(period)
+    fresh = rest_count(f"repo:{repo} is:pr created:{rng}",
+                       endpoint="search/issues")
+    time.sleep(2)
+    if fresh is None:
+        return None
+    if fresh == 0:
+        precount_path(repo, period).write_text(
+            json.dumps({"total": 0, "confirmed": True}))
+    else:
+        write_precount(repo, period, fresh)
+    return fresh
+
+
 def batch_counts(pairs: list[tuple[str, str]]) -> int:
     """Fetch denominators for up to BATCH (repo, period) pairs in one call.
     Returns how many were written."""

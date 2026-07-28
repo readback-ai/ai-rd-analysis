@@ -92,3 +92,86 @@ def test_census_query_has_layer_c_and_accountability_fields():
     from pipeline.census import PR_QUERY
     assert "headRefName" in PR_QUERY
     assert "mergedBy" in PR_QUERY
+
+
+def test_branch_scan_scoped_org_counts_only_in_scope_repos(
+        tmp_path, monkeypatch):
+    """Issue #8 (RED first): for a repo-scoped org, branch_scan must count
+    per in-scope repo (summed), never org-wide — org-wide counts include
+    out-of-scope, non-AI repos and feed R4 admission evidence."""
+    queries = []
+    monkeypatch.setattr(branch_scan, "rest_count",
+                        lambda q, endpoint: queries.append(q) or 1)
+    out = tmp_path / "scan.tsv"
+    branch_scan.scan(["bigco"], out, {"Q2-2026": "2026-04-01..2026-06-30"},
+                     {"codex": "codex/"},
+                     scoped={"bigco": ["bigco/ai-a", "bigco/ai-b"]})
+    assert not any("org:" in q for q in queries)
+    assert branch_scan.load(out) == {("bigco", "Q2-2026", "codex/"): 2}
+
+
+def test_branch_scan_scoped_org_fails_cell_on_any_repo_failure(
+        tmp_path, monkeypatch):
+    """Issue #8: a partial per-repo sum understates silently — if any
+    in-scope repo's count fails, the whole cell is skipped, not written."""
+    monkeypatch.setattr(
+        branch_scan, "rest_count",
+        lambda q, endpoint: None if "ai-b" in q else 3)
+    out = tmp_path / "scan.tsv"
+    branch_scan.scan(["bigco"], out, {"Q2-2026": "2026-04-01..2026-06-30"},
+                     {"codex": "codex/"},
+                     scoped={"bigco": ["bigco/ai-a", "bigco/ai-b"]})
+    assert branch_scan.load(out) == {}
+
+
+def test_sample_branch_prs_filters_out_of_scope_repos(
+        tmp_path, monkeypatch):
+    """Issue #8 (RED first): layer-C sample cells for a repo-scoped org
+    must not carry PRs from out-of-scope repos — they'd enter the
+    precision estimates under the org's population weight."""
+    scan = tmp_path / "scan.tsv"
+    scan.write_text("bigco\tQ2-2026\tcodex/\t5\n")
+    def node(repo):
+        return {"number": 1, "headRefName": "codex/x",
+                "repository": {"nameWithOwner": repo}}
+    monkeypatch.setattr(
+        pull_prs, "graphql_nodes",
+        lambda *a, **k: [node("bigco/ai-a"), node("bigco/legacy")])
+    out = tmp_path / "cells"
+    pull_prs.sample_branch_prs("codex/", scan, out, ["Q2-2026"],
+                               in_scope={"bigco": {"bigco/ai-a"}})
+    cells = pull_prs.load_branch_samples(out)
+    repos = [p["repository"]["nameWithOwner"]
+             for c in cells for p in c["prs"]]
+    assert repos == ["bigco/ai-a"]
+    assert cells[0]["pop_count"] == 5
+
+
+def test_layer_c_precision_filters_scoped_org_samples(
+        tmp_path, monkeypatch, capsys):
+    """Issue #8 (RED first): existing sample cells were drawn org-wide,
+    so the precision study must drop a repo-scoped org's out-of-scope
+    PRs at read time — they are outside the study universe (R5)."""
+    from pipeline.studies import layer_c_precision as lcp
+
+    def commit(email):
+        return {"commit": {"committer": {"email": email}}}
+    cell_dir = tmp_path / "raw" / "branch_samples" / "codex"
+    cell_dir.mkdir(parents=True)
+    (cell_dir / "bigco__Q2-2026.json").write_text(json.dumps({
+        "org": "bigco", "period": "Q2-2026", "pop_count": 2, "prs": [
+            {"headRefName": "codex/in-scope",
+             "repository": {"nameWithOwner": "bigco/ai-a"},
+             "commits": {"nodes": [commit("noreply@github.com")]}},
+            {"headRefName": "codex/out-of-scope",
+             "repository": {"nameWithOwner": "bigco/legacy"},
+             "commits": {"nodes": [commit("human@example.com")]}},
+        ]}))
+    monkeypatch.setenv("AIRD_DATA_DIR", str(tmp_path))
+    monkeypatch.setattr(lcp, "scoped_repos",
+                        lambda: {"bigco": ["bigco/ai-a"]})
+    lcp.main()
+    row = [ln for ln in capsys.readouterr().out.splitlines()
+           if ln.startswith("codex")][0]
+    assert row.split()[1] == "1"          # the out-of-scope PR is gone
+    assert row.split()[2] == "100.0%"     # web-flow share over in-scope only

@@ -257,3 +257,44 @@ def test_census_rest_fallback_backfills_precount_cache(monkeypatch):
     monkeypatch.setattr(census.time, "sleep", lambda s: None)
     assert census_repo_period("o/r", "Q1-2026", k=10) == 30
     assert get_precount("o/r", "Q1-2026") == 30
+
+
+def test_zero_precount_needs_independent_confirmation(monkeypatch):
+    """Issue #7 (RED first): a browned-out search returns 200 with
+    issueCount 0, indistinguishable from a real empty — so a 0 precount
+    must be re-observed before the repo-period can census as a complete
+    empty. Here the recount says 7 while the pulls are browned-out empty:
+    the cell must FAIL (7 expected, 0 collected), not record a complete
+    empty census."""
+    monkeypatch.setattr(precount.time, "sleep", lambda s: None)
+    counts = iter([0, 7])
+    monkeypatch.setattr(precount, "rest_count",
+                        lambda *a, **k: next(counts))
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, rng: ([], False))
+    assert census_repo_period("o/r", "Q1-2026", k=10) is None
+
+
+def test_unconfirmable_zero_precount_fails_not_empty(monkeypatch):
+    """Issue #7 (RED first): if the confirming recount itself fails, the
+    repo-period must FAIL (None) — never census as a complete empty."""
+    monkeypatch.setattr(precount.time, "sleep", lambda s: None)
+    counts = iter([0, None])
+    monkeypatch.setattr(precount, "rest_count",
+                        lambda *a, **k: next(counts))
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, rng: ([], False))
+    assert census_repo_period("o/r", "Q1-2026", k=10) is None
+
+
+def test_confirmed_zero_is_cached_and_not_recounted(monkeypatch):
+    """Issue #7: a twice-observed 0 is marked confirmed, so later runs
+    trust it without re-querying (empty repo-quarters are common)."""
+    monkeypatch.setattr(precount.time, "sleep", lambda s: None)
+    calls = []
+    monkeypatch.setattr(precount, "rest_count",
+                        lambda *a, **k: calls.append(1) or 0)
+    monkeypatch.setattr(census, "pull_cell", lambda repo, rng: ([], False))
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 0
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 0
+    assert len(calls) == 2      # first pass: precount + one confirm; no more

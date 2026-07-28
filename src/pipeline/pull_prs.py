@@ -68,8 +68,12 @@ def batch_pull(refs: list[tuple[str, int]], pace: float = 0.8,
 
 
 def sample_branch_prs(prefix: str, scan_path: Path, out_dir: Path,
-                      periods: list[str], pace: float = 1.5) -> None:
-    """One 50-PR page per org-quarter with branch_scan count > 0."""
+                      periods: list[str], pace: float = 1.5,
+                      in_scope: dict[str, set[str]] | None = None) -> None:
+    """One 50-PR page per org-quarter with branch_scan count > 0.
+    in_scope maps repo-scoped orgs to their in-scope repos: the org-wide
+    search page may carry out-of-scope PRs, which must not enter the
+    precision estimates under the org's population weight (R5)."""
     from pipeline.branch_scan import load
     out_dir.mkdir(parents=True, exist_ok=True)
     counts = load(scan_path)
@@ -88,6 +92,11 @@ def sample_branch_prs(prefix: str, scan_path: Path, out_dir: Path,
         if nodes is None:
             print(f"FAIL {org} {per}", flush=True)
             continue
+        keep = in_scope.get(org) if in_scope else None
+        if keep is not None:
+            nodes = [p for p in nodes
+                     if ((p.get("repository") or {}).get("nameWithOwner")
+                         in keep)]
         cell.write_text(json.dumps(
             {"org": org, "period": per, "pop_count": n, "prs": nodes}))
         print(f"ok {org} {per}: {len(nodes)}/{n}", flush=True)
@@ -113,7 +122,10 @@ def main() -> None:
     ap.add_argument("--periods", nargs="+",
                     default=["Q4-2025", "Q1-2026", "Q2-2026"])
     a = ap.parse_args()
-    sample_branch_prs(a.prefix, Path(a.scan), Path(a.out_dir), a.periods)
+    from pipeline.org_set import scoped_repos
+    sample_branch_prs(a.prefix, Path(a.scan), Path(a.out_dir), a.periods,
+                      in_scope={o: set(rs)
+                                for o, rs in scoped_repos().items()})
 
 
 if __name__ == "__main__":

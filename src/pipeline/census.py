@@ -29,7 +29,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from pipeline.ghx import cell_path, graphql_nodes, read_cell
-from pipeline.precount import ensure_precount
+from pipeline.precount import confirm_zero_precount, ensure_precount
 from pipeline.scan_orgs import QUARTER_RANGES, resolve_period
 
 PAGE_SIZE = 50   # PRs per GraphQL call; _paginate cursors to the API's
@@ -132,6 +132,12 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
     total = ensure_precount(repo, period)   # cached, or queried+cache-written
     if total is None:
         return None
+    if total == 0:
+        # 0 passes both completeness gates trivially, so it may not stand
+        # on a single observation — a browned-out search looks identical.
+        total = confirm_zero_precount(repo, period)
+        if total is None:
+            return None
     # fully-cached fast path — only when the cache satisfies the same
     # drift allowance as fresh pulls; a brownout-poisoned empty cached as
     # valid must fall through to the self-heal path (external review P1)
