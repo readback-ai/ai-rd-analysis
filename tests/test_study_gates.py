@@ -1155,3 +1155,32 @@ def test_fleet_memo_cleared_between_tests_b(monkeypatch):
     monkeypatch.setattr(productivity, "_author_months_and_cohorts",
                         lambda: ({}, {}, {}, {"own-operator"}))
     assert productivity.fleet_logins() == {"own-operator"}
+
+
+def test_fleet_cohort_is_membership_in_fleet_all(monkeypatch):
+    """PR #12 review, P2. Drift guard on real builder output (no red run
+    exists: the duplicated FLEET_MIN predicates agreed pre-fix, so this
+    is mutation-verified — editing either site's threshold fails it):
+    at threshold-boundary data the 'fleet' cohort label, fleet_all, and
+    fleet_logins() must agree — exactly FLEET_MIN merged PRs is fleet
+    everywhere, one fewer is fleet nowhere."""
+    from pipeline import frame
+    from pipeline.studies import productivity
+
+    def m(login, num):
+        p = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z",
+                num=num)
+        p["author"] = {"login": login, "__typename": "User"}
+        return p
+    cells = {("o/r", "2026-04-01..2026-06-30"):
+             [m("atmin", 1), m("atmin", 2), m("below", 3)]}
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(productivity, "FLEET_MIN", 2)
+    _acc, cohorts, _q_of, fleet_all = \
+        productivity._author_months_and_cohorts()
+    assert fleet_all == {"atmin"}
+    assert cohorts["atmin"] == "fleet"
+    assert cohorts["below"] != "fleet"
+    assert {a for a, c in cohorts.items() if c == "fleet"} == fleet_all
+    assert productivity.fleet_logins() == fleet_all

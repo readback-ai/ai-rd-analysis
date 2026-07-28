@@ -306,9 +306,11 @@ def adoption_rows() -> dict:
 
 
 def _author_months_and_cohorts():
-    """Shared builder: per-author monthly activity, cohort assignment, and
-    the month->quarter map. Used by adoption_rows (quarterly table) and
-    adoption_monthly (Figure 4 series)."""
+    """Shared builder: per-author monthly activity, the fleet-operator
+    set (computed once; the 'fleet' cohort is membership in it), cohort
+    assignment, and the month->quarter map. Used by adoption_rows
+    (quarterly table), adoption_monthly (Figure 4 series), and
+    fleet_logins."""
     q_of = {}
     for m in range(1, 4):
         q_of[f"2024-{m:02d}"] = "Q1-2024"
@@ -335,22 +337,6 @@ def _author_months_and_cohorts():
             row[4] += 1
             row[0 if f.cls.ai_involved else 1] += kloc
 
-    def cohort_of(months: dict) -> str:
-        for per in PERIODS:
-            mons = [m for m, q in q_of.items() if q == per]
-            if sum(months.get(m, [0, 0, 0, 0, 0])[4] for m in mons) \
-                    >= FLEET_MIN:
-                return "fleet"
-        first = min((m for m, v in months.items() if v[2] > 0),
-                    default=None)
-        if first is None:
-            return "never"
-        if first <= "2026-02":
-            return "early"
-        return "medium" if first <= "2026-04" else "late"
-
-    per_author_cohort = {login: cohort_of(m) for login, m in acc.items()
-                         if login in insiders}
     fleet_all = set()
     for login, months in acc.items():
         for per in PERIODS:
@@ -359,6 +345,20 @@ def _author_months_and_cohorts():
                     >= FLEET_MIN:
                 fleet_all.add(login)
                 break
+
+    def cohort_of(login: str, months: dict) -> str:
+        if login in fleet_all:      # fleet first, by membership — the
+            return "fleet"          # FLEET_MIN predicate lives above only
+        first = min((m for m, v in months.items() if v[2] > 0),
+                    default=None)
+        if first is None:
+            return "never"
+        if first <= "2026-02":
+            return "early"
+        return "medium" if first <= "2026-04" else "late"
+
+    per_author_cohort = {login: cohort_of(login, m)
+                         for login, m in acc.items() if login in insiders}
     return acc, per_author_cohort, q_of, fleet_all
 
 
