@@ -65,8 +65,8 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
 | `insider` | `authorAssociation ∈ {MEMBER, OWNER, COLLABORATOR}` | misses staff with private org membership |
 | `human_reviewed` | ≥1 formal review by a User **other than the PR author** (bot-logins excluded), submitted within w8 of creation | conversation comments never count; like all review columns, reported as None (skipped) until the PR is w8-mature — an open review window is a provisional undercount |
 | `substantive_review` | a reviewer≠author review with inline comments or state COMMENTED/CHANGES_REQUESTED | "more than a rubber-stamp APPROVED"; only first 15 reviews fetched |
-| `ai_reviewed` | ≥1 review by a Bot in `AI_REVIEWERS` (gemini-code-assist, copilot-pull-request-reviewer, coderabbitai, greptile-apps, qodo-merge-pro, cursor, chatgpt-codex-connector, copilot-swe-agent, claude) | decomposed from CI bots |
-| `other_bot_reviewed` | ≥1 Bot review not in `AI_REVIEWERS` | CI/automation noise kept separate |
+| `ai_reviewed` | ≥1 review by a Bot **other than the PR author** in `AI_REVIEWERS` (gemini-code-assist, copilot-pull-request-reviewer, coderabbitai, greptile-apps, qodo-merge-pro, cursor, chatgpt-codex-connector, copilot-swe-agent, claude) | decomposed from CI bots; reviewer≠author applies to bots as to humans (issue #9, 2026-07-28) — an agent's self-summary review on its own PR is not review activity; logins compared with `[bot]` normalized |
+| `other_bot_reviewed` | ≥1 Bot review not in `AI_REVIEWERS`, reviewer≠author | CI/automation noise kept separate |
 
 Disjoint layer decomposition (for the layered table only): B wins over A wins
 over C, so each PR counts once (`studies.layers.layered_table`).

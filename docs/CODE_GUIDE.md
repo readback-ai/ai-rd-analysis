@@ -130,8 +130,11 @@ a bot list, or a review rule.
   Measured FP class excluded: all-github-actions-committed branches.
 - **Reviews** `split_reviews()` — the choke point for every review-based
   metric: human (User-typed, not `is_bot_login`, ≠ author) / AI
-  (`AI_REVIEWERS` allowlist) / other bot. `is_bot_login()` catches bots
-  registered as User accounts (suffix-anchored so "talbot" is human).
+  (`AI_REVIEWERS` allowlist) / other bot. Reviewer≠author applies to
+  bots too (issue #9): a bot review by the PR's own author (`[bot]`
+  normalized) is dropped — agent self-summaries are not review activity.
+  `is_bot_login()` catches bots registered as User accounts
+  (suffix-anchored so "talbot" is human).
 - **`classify_pr()` → `PRClass`** — one frozen dataclass per PR;
   `ai_involved` = A ∪ B ∪ C. `merged` is the **w8 rule** (merged within
   56 days of creation, ≤ cutoff); `merged_ever` is the secondary; fate

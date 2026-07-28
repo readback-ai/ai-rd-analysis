@@ -13,7 +13,8 @@ refresh), #7 (zero-precount confirmation), #3 (GraphQL envelope logging +
 strict pagination) closed; #8 (layer-C scoping) code landed with the
 scoped re-scan in flight; #10 (fleet cache) fixed in code; the per-cell
 bootstrap-stream fix merged (F-30/F-43); one report section added
-(botcheck, §8.2.10). Issue #9 remains open. Where the codebase and the
+(botcheck, §8.2.10). Revised again 2026-07-28 on the #9 merge (PR #16,
+bot self-reviews excluded — DET-V1/V3). Where the codebase and the
 prose docs (METHODS/METRICS) disagreed, this spec follows the **code as
 implemented** (so published numbers reproduce) and records the divergence
 in Appendix A; the published report/results artifacts still reflect the
@@ -735,7 +736,12 @@ Three independent layers, plus review classification. Source: `detect.py`
      (DET-R2), login ≠ PR author;
   2. **human-self**: same but login = PR author (tracked separately;
      currently consumed by no reported metric);
-  3. **bot**: everything else (App-typed, or User-typed bot login).
+  3. **bot**: everything else (App-typed, or User-typed bot login) —
+     EXCEPT a bot review whose login equals the PR author's (compared
+     after stripping a trailing `[bot]` from both sides), which is
+     dropped entirely: reviewer ≠ author applies to bots as to humans
+     (issue #9, 2026-07-28 — coding agents post self-summaries as formal
+     review objects on their own PRs; those are not review activity).
 - **DET-V2 (event window)** A review counts iff submitted within the PR's
   w8 window (FR-7). Reviews without a submission timestamp are dropped
   (on records lacking a creation timestamp — legacy fixtures only — the
@@ -748,9 +754,11 @@ Three independent layers, plus review classification. Source: `detect.py`
   extend-as-found and deliberately errs toward under-counting AI review
   (an unlisted AI product counts as other-bot, never as human).
   **Other-bot review** = any remaining bot review (CI/automation), kept as
-  its own class so AI review is never conflated with CI noise. (Flag F-16:
-  three logins sit in both the agent-author and AI-reviewer lists, so an
-  agent "reviewing" its own PR class-shifts it.)
+  its own class so AI review is never conflated with CI noise. Both
+  classes count only reviewer ≠ author (DET-V1 rule 3): three logins sit
+  in both the agent-author and AI-reviewer lists (`cursor`, `claude`,
+  `copilot-swe-agent`), and their self-reviews are excluded (F-16,
+  fixed).
 - **DET-V4 (substantive)** A review set is substantive iff any review has
   inline comments (> 0) or state `COMMENTED`/`CHANGES_REQUESTED` — more
   than a rubber-stamp APPROVED. (Computed over human-other reviews;
@@ -774,8 +782,8 @@ Three independent layers, plus review classification. Source: `detect.py`
   | `insider` | FR-11 |
   | `human_reviewed` | ≥ 1 human-other review (DET-V1/V2) |
   | `substantive_review` | DET-V4 over human-other reviews |
-  | `ai_reviewed` | ≥ 1 AI review (DET-V3) |
-  | `other_bot_reviewed` | ≥ 1 bot review that is not an AI review |
+  | `ai_reviewed` | ≥ 1 AI review by a bot other than the PR author (DET-V3) |
+  | `other_bot_reviewed` | ≥ 1 non-AI bot review by a bot other than the PR author |
   | `ai_involved` | DET-4 |
 
 ---
@@ -1193,7 +1201,8 @@ Contributor-weighted unless noted; from the regenerated results artifact.
 ⚠ TIMING (2026-07-28): these anchors were generated on the pre-refresh
 population (229 orgs / 2,142 repos) with the pre-fix bootstrap and fleet
 cache. The population files now say 228 / 2,136 (issue #6), and the
-botcheck section, per-cell CI streams, and computed fleet set land in the
+botcheck section, per-cell CI streams, computed fleet set, and the bot
+self-review exclusion (issue #9, ≤ 0.04pp on ai_review) land in the
 NEXT full regeneration — re-pin this table from the regenerated artifacts
 then. Point estimates are expected to move imperceptibly (sony's repos
 were a ~0.3% sliver); CIs will shift within their displayed precision.
@@ -1300,14 +1309,16 @@ and a reimplementation must copy it to reproduce published numbers.
   immature, no fleet/contrast gates), §8.2.2 (floor-5 repos), §8.2.4
   (pooled). Real, labeled differences — but easy to misread as one number.
 - **F-16** `cursor`, `claude`, `copilot-swe-agent` are both agent authors
-  (DET-B1) and AI reviewers (DET-V3). Reviewer ≠ author is enforced for
-  humans but not for bots, so when an agent submits a formal review on
-  its OWN PR it counts as AI review — moving the PR out of the
-  responsiveness CLEAN lane and into `botOnly`-channel accounting.
-  (Agent-authored PRs are NOT automatically AI-reviewed; only an actual
-  self-review event triggers this.) **Adjudicated a bug 2026-07-27 —
-  issue #9** (exclude the author's own reviews from bot review classes,
-  mirroring human-self); DET-V3/STU-R7 to be updated when the fix lands.
+  (DET-B1) and AI reviewers (DET-V3). Reviewer ≠ author was enforced for
+  humans but not for bots, so an agent's formal review on its OWN PR
+  counted as AI review — moving the PR out of the responsiveness CLEAN
+  lane and into `botOnly`-channel accounting. **RESOLVED 2026-07-28
+  (issue #9, PR #16)**: bot reviews by the PR's own author (logins
+  compared after `[bot]` normalization) are dropped, mirroring
+  human-self; DET-V1/V3 and DET-6 updated. Measured impact on mature
+  PRs: `ai_reviewed` flips on 122 (74/36/12 across Q4-2025..Q2-2026;
+  116 copilot-swe-agent), weighted ai_review series moves ≤ 0.04pp;
+  `other_bot_reviewed` flips on 385.
 - **F-17** The three bot heuristics (§2.5) disagree: contributor weights
   count user-typed bots (e.g. `*-agent` accounts, `qwen-code-ci-bot`) as
   core human contributors while every metric they weight excludes them.
