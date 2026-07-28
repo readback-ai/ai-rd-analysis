@@ -1017,11 +1017,14 @@ def test_incomplete_sample_error_names_its_design_and_file():
     assert "pps" in str(e.value).lower()
 
 
-def test_bot_sensitivity_reports_all_three_series_like_for_like(
+def test_bot_sensitivity_like_for_like_weighted_and_two_shares(
         monkeypatch, capsys):
-    """The companion must show the published series, the dilution-only
-    counterfactual and the all-bots-dropped one, over a SHARED repo set so
-    the deltas are within-repo. Feature test, not a bug repro."""
+    """Every invariant the companion advertises must be observable here, so
+    the fixture is deliberately asymmetric: unequal contributor weights,
+    different bot mixes per repo, an AI-AGENT bot (bot-authored yet
+    AI-involved, so the two shares diverge), and a repo whose filtered subset
+    falls under the floor and is therefore excluded from the shared set.
+    Feature test, not a bug repro."""
     from pipeline import frame
     from pipeline.studies import slices
 
@@ -1032,24 +1035,45 @@ def test_bot_sensitivity_reports_all_three_series_like_for_like(
             "message": "x\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
             "authors": {"nodes": []}}}]}
         return p
-    # two repos so the bootstrap has >1 unit and the CIs are real, each with
-    # 1 AI-involved human PR + 3 non-AI dependabot PRs
-    cells = {}
-    for r in ("o/a", "o/b"):
-        cells[(r, "2026-04-01..2026-06-30")] = [
-            ai_pr(1), *[_bot_pr(i, "dependabot[bot]") for i in (2, 3, 4)]]
+    cells = {
+        # o/a: 1 AI + 3 dep-bots. Dropping the 3 leaves 1 PR, under the
+        # floor of 3 -> no-dilution undefined -> EXCLUDED from the shared set
+        ("o/a", "2026-04-01..2026-06-30"): [
+            ai_pr(1), *[_bot_pr(i, "dependabot[bot]") for i in (2, 3, 4)]],
+        # o/b: 3 AI humans + 1 AI AGENT bot + 1 dep-bot. published 4/5;
+        # no-dilution drops only the dep-bot -> 4/4; no-bots drops the agent
+        # too -> 3/3. bot% 2/5 vs dilbot% 1/5 — the shares must differ.
+        ("o/b", "2026-04-01..2026-06-30"): [
+            ai_pr(1), ai_pr(2), ai_pr(3), _agent_pr(4),
+            _bot_pr(5, "dependabot[bot]")],
+        # o/c: 4 non-AI humans, no bots — zero rate, drags the weighted
+        # means down only if weighting is applied at all
+        ("o/c", "2026-04-01..2026-06-30"): [
+            _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z", num=i)
+            for i in (1, 2, 3, 4)],
+    }
     monkeypatch.setattr(frame, "load_cells", lambda: cells)
-    monkeypatch.setattr(frame, "population_repos", lambda: {"o/a", "o/b"})
-    monkeypatch.setattr(slices, "MIN_PRS", 1)
-    monkeypatch.setattr(slices, "weights", lambda: {"o/a": 1.0, "o/b": 1.0})
+    monkeypatch.setattr(frame, "population_repos",
+                        lambda: {"o/a", "o/b", "o/c"})
+    monkeypatch.setattr(slices, "MIN_PRS", 3)
+    monkeypatch.setattr(slices, "weights",
+                        lambda: {"o/a": 1.0, "o/b": 9.0, "o/c": 1.0})
     slices.bot_sensitivity()
     row = [ln for ln in capsys.readouterr().out.splitlines()
            if ln.startswith("Q2-2026")][0]
-    # parse the MEAN of each estimate cell ("NN.N [lo,hi]"), never substrings:
-    # a change in small-sample CI rendering must not break this test
+    repos = int(row.split()[1])
+    pub_all = float(row.split()[2].rstrip("%"))
     means = [float(m) for m in re.findall(r"(\d+\.\d)\s+\[", row)]
     published, no_dilution, no_bots = means
-    assert published == 25.0        # 1 AI PR of 4, per repo
-    assert no_dilution == 100.0     # the 3 non-AI dependabot PRs drop
-    assert no_bots == 100.0         # only the human PR remains
-    assert row.rstrip().endswith("75.0%")   # weighted bot share, 3 of 4
+    dilbot, bot = (float(x.rstrip("%")) for x in row.split()[-2:])
+
+    assert repos == 2                  # o/a excluded by the filtered floor
+    # pub(all) spans all THREE repos: (0.25*1 + 0.8*9 + 0*1)/11
+    assert pub_all == 67.7
+    # the shared-set columns are weighted 9:1 toward o/b, not 1:1
+    assert published == 72.0           # (0.8*9 + 0*1)/10; equal weights: 40.0
+    assert no_dilution == 90.0         # (1.0*9 + 0*1)/10
+    assert no_bots == 90.0             # agent dropped, but o/b is all-AI
+    # the two shares MUST differ: the agent bot counts in one, not the other
+    assert dilbot == 18.0              # (1/5 * 9 + 0)/10
+    assert bot == 36.0                 # (2/5 * 9 + 0)/10
