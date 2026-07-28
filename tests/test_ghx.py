@@ -115,6 +115,24 @@ def test_graphql_tolerates_node_level_errors_with_complete_data(monkeypatch):
     assert out == {"nodes": [{"number": 1}], "pageInfo": {"hasNextPage": False}}
 
 
+def test_graphql_nodes_logs_discarded_errors(monkeypatch, capsys):
+    """Issue #3, final item: graphql_nodes tolerates a partial response
+    but must not consume it SILENTLY — the errors array is printed so a
+    pipeline-wide partial-response event is visible in every caller's
+    log, not only the review-action batch path."""
+    monkeypatch.setattr(ghx, "graphql_budget_wait", lambda **k: None)
+    monkeypatch.setattr(
+        ghx, "_gh",
+        lambda *a, **k: '{"data": {"search": {"nodes": []}}, '
+                        '"errors": [{"type": "RATE_LIMITED", '
+                        '"path": ["search"]}]}')
+    out = ghx.graphql_nodes("q", {}, ".data.search.nodes", expect=list)
+    assert out == []
+    log = capsys.readouterr().out
+    assert "GRAPHQL ERRORS" in log
+    assert "RATE_LIMITED" in log
+
+
 def test_rest_count_still_rejects_nonzero_exit(monkeypatch):
     """allow_partial is GraphQL-only; REST counts must not trust error runs."""
     def fake_run(cmd, **kw):
