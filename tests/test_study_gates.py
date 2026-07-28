@@ -1077,3 +1077,110 @@ def test_bot_sensitivity_like_for_like_weighted_and_two_shares(
     # the two shares MUST differ: the agent bot counts in one, not the other
     assert dilbot == 18.0              # (1/5 * 9 + 0)/10
     assert bot == 36.0                 # (2/5 * 9 + 0)/10
+
+
+def test_fleet_logins_ignores_stale_disk_cache(monkeypatch, tmp_path):
+    """Issue #10 (RED first): fleet_logins() trusted data/derived/
+    fleet_logins.txt unconditionally, so a stale (even committed) file
+    silently mis-sliced Figure 3's fleet series, Figures 6-8, fates, and
+    review_action. The fleet set must come from the current cells."""
+    from pipeline.studies import productivity
+    monkeypatch.chdir(tmp_path)
+    d = tmp_path / "data" / "derived"
+    d.mkdir(parents=True)
+    (d / "fleet_logins.txt").write_text("stale-operator\n")
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({}, {}, {}, {"fresh-operator"}))
+    assert productivity.fleet_logins() == {"fresh-operator"}
+
+
+def test_fleet_definition_has_a_single_source(monkeypatch, tmp_path):
+    """Issue #10 (RED first): event_by_adoption_month's cohort path
+    computes the fleet set fresh while fleet_logins() read the cache, so
+    figure_2_comp_audits and figure_3_comp_audits could disagree about
+    who is a fleet operator. Both must share one definition."""
+    from pipeline.studies import productivity
+    monkeypatch.chdir(tmp_path)
+    d = tmp_path / "data" / "derived"
+    d.mkdir(parents=True)
+    (d / "fleet_logins.txt").write_text("stale-operator\n")
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({}, {}, {}, {"fresh-operator"}))
+    *_rest, cohort_fleet = productivity._author_months_and_cohorts()
+    assert productivity.fleet_logins() == cohort_fleet
+
+
+def test_fleet_logins_writes_no_cache_file(monkeypatch, tmp_path):
+    """Issue #10 (RED first): fleet_logins() must not persist an
+    unfingerprinted cache for a later run to trust."""
+    from pipeline.studies import productivity
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "data" / "derived").mkdir(parents=True)
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({}, {}, {}, {"a"}))
+    assert productivity.fleet_logins() == {"a"}
+    assert not (tmp_path / "data" / "derived"
+                / "fleet_logins.txt").exists()
+
+
+def test_fleet_logins_memoized_per_process(monkeypatch, tmp_path):
+    """Feature test for the issue #10 fix: one author-frame pass per
+    process — every consumer shares the computed set."""
+    from pipeline.studies import productivity
+    calls = []
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "data" / "derived").mkdir(parents=True)
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: calls.append(1) or ({}, {}, {}, {"a"}))
+    assert productivity.fleet_logins() == {"a"}
+    assert productivity.fleet_logins() == {"a"}
+    assert len(calls) == 1
+
+
+def test_fleet_memo_cleared_between_tests_a(monkeypatch):
+    """PR #12 review hardening (RED first, as a pair with _b below —
+    definition order is the test): populate the fleet memo under
+    monkeypatched cells, exactly what any consumer-calling test does."""
+    from pipeline.studies import productivity
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({}, {}, {}, {"leaked-operator"}))
+    assert productivity.fleet_logins() == {"leaked-operator"}
+
+
+def test_fleet_memo_cleared_between_tests_b(monkeypatch):
+    """Pair of _a: the memo populated there must not survive into this
+    test — the autouse conftest fixture clears it, so fleet_logins()
+    recomputes from THIS test's cells."""
+    from pipeline.studies import productivity
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({}, {}, {}, {"own-operator"}))
+    assert productivity.fleet_logins() == {"own-operator"}
+
+
+def test_fleet_cohort_is_membership_in_fleet_all(monkeypatch):
+    """PR #12 review, P2. Drift guard on real builder output (no red run
+    exists: the duplicated FLEET_MIN predicates agreed pre-fix, so this
+    is mutation-verified — editing either site's threshold fails it):
+    at threshold-boundary data the 'fleet' cohort label, fleet_all, and
+    fleet_logins() must agree — exactly FLEET_MIN merged PRs is fleet
+    everywhere, one fewer is fleet nowhere."""
+    from pipeline import frame
+    from pipeline.studies import productivity
+
+    def m(login, num):
+        p = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z",
+                num=num)
+        p["author"] = {"login": login, "__typename": "User"}
+        return p
+    cells = {("o/r", "2026-04-01..2026-06-30"):
+             [m("atmin", 1), m("atmin", 2), m("below", 3)]}
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(productivity, "FLEET_MIN", 2)
+    _acc, cohorts, _q_of, fleet_all = \
+        productivity._author_months_and_cohorts()
+    assert fleet_all == {"atmin"}
+    assert cohorts["atmin"] == "fleet"
+    assert cohorts["below"] != "fleet"
+    assert {a for a, c in cohorts.items() if c == "fleet"} == fleet_all
+    assert productivity.fleet_logins() == fleet_all

@@ -20,6 +20,7 @@ Usage:  python -m pipeline.studies.productivity --cut {decomposition,persistent}
 from __future__ import annotations
 
 import argparse
+import functools
 import statistics
 from collections import defaultdict
 
@@ -305,9 +306,11 @@ def adoption_rows() -> dict:
 
 
 def _author_months_and_cohorts():
-    """Shared builder: per-author monthly activity, cohort assignment, and
-    the month->quarter map. Used by adoption_rows (quarterly table) and
-    adoption_monthly (Figure 4 series)."""
+    """Shared builder: per-author monthly activity, the fleet-operator
+    set (computed once; the 'fleet' cohort is membership in it), cohort
+    assignment, and the month->quarter map. Used by adoption_rows
+    (quarterly table), adoption_monthly (Figure 4 series), and
+    fleet_logins."""
     q_of = {}
     for m in range(1, 4):
         q_of[f"2024-{m:02d}"] = "Q1-2024"
@@ -334,22 +337,6 @@ def _author_months_and_cohorts():
             row[4] += 1
             row[0 if f.cls.ai_involved else 1] += kloc
 
-    def cohort_of(months: dict) -> str:
-        for per in PERIODS:
-            mons = [m for m, q in q_of.items() if q == per]
-            if sum(months.get(m, [0, 0, 0, 0, 0])[4] for m in mons) \
-                    >= FLEET_MIN:
-                return "fleet"
-        first = min((m for m, v in months.items() if v[2] > 0),
-                    default=None)
-        if first is None:
-            return "never"
-        if first <= "2026-02":
-            return "early"
-        return "medium" if first <= "2026-04" else "late"
-
-    per_author_cohort = {login: cohort_of(m) for login, m in acc.items()
-                         if login in insiders}
     fleet_all = set()
     for login, months in acc.items():
         for per in PERIODS:
@@ -358,6 +345,20 @@ def _author_months_and_cohorts():
                     >= FLEET_MIN:
                 fleet_all.add(login)
                 break
+
+    def cohort_of(login: str, months: dict) -> str:
+        if login in fleet_all:      # fleet first, by membership — the
+            return "fleet"          # FLEET_MIN predicate lives above only
+        first = min((m for m, v in months.items() if v[2] > 0),
+                    default=None)
+        if first is None:
+            return "never"
+        if first <= "2026-02":
+            return "early"
+        return "medium" if first <= "2026-04" else "late"
+
+    per_author_cohort = {login: cohort_of(login, m)
+                         for login, m in acc.items() if login in insiders}
     return acc, per_author_cohort, q_of, fleet_all
 
 
@@ -540,22 +541,17 @@ def adoption() -> None:
                   f"{r['median']:>8.2f}")
 
 
-FLEET_LOGINS_FILE = "data/derived/fleet_logins.txt"
-
-
+@functools.cache
 def fleet_logins() -> set[str]:
     """ALL authors (insider or not) with >= FLEET_MIN merged PRs in some
-    study quarter — the exclusion set for review-behavior figures 6-8
-    (fleet pipelines distort review statistics the way they distort
-    per-contributor means). Persisted to data/derived/fleet_logins.txt
-    (reproducible from cells; computed and written when absent)."""
-    from pathlib import Path
-    p = Path(FLEET_LOGINS_FILE)
-    if p.is_file():
-        return {ln.strip() for ln in p.read_text().splitlines()
-                if ln.strip()}
+    study quarter — the exclusion set for review-behavior figures 6-8 and
+    the fleet slice in the Figure 3 companion (fleet pipelines distort
+    review statistics the way they distort per-contributor means).
+    Computed from the current cells via the same
+    _author_months_and_cohorts pass that assigns the adoption cohorts, so
+    every consumer shares one fleet definition; memoized per process
+    (cache_clear() resets), no on-disk state."""
     *_rest, fleet = _author_months_and_cohorts()
-    p.write_text("\n".join(sorted(fleet)) + "\n")
     return fleet
 
 
