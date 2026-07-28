@@ -199,11 +199,11 @@ def ai_split() -> None:
         if f.cls.merged:
             row[0 if f.cls.ai_involved else 1] += f.loc
 
-    def fmt(pairs):
+    def fmt(pairs, key):
         if not pairs:
             return "     (no AI users)"
         m = weighted_mean(pairs)
-        lo, hi = bootstrap_ci(pairs)
+        lo, hi = bootstrap_ci(pairs, key=key)
         return f"{m:6.2f} [{lo:5.2f},{hi:5.2f}]"
 
     print("core-contributor merged (w8) kLOC split by AI involvement "
@@ -232,8 +232,10 @@ def ai_split() -> None:
                 n = len(ai_users)
                 pb.append((sum(v[0] for v in ai_users) / n / 1000, wt))
                 pc.append((sum(v[1] for v in ai_users) / n / 1000, wt))
-        print(f"{per:9}{len(pa_):>6}{len(pb):>14}  {fmt(pa_):>20}"
-              f"  {fmt(pb):>20}  {fmt(pc):>21}")
+        print(f"{per:9}{len(pa_):>6}{len(pb):>14}"
+              f"  {fmt(pa_, f'aisplit|{per}|noai'):>20}"
+              f"  {fmt(pb, f'aisplit|{per}|ai_tracked'):>20}"
+              f"  {fmt(pc, f'aisplit|{per}|ai_untracked'):>21}")
 
 
 ADOPTION_COHORTS = [
@@ -292,7 +294,7 @@ def adoption_rows() -> dict:
             if not tot:
                 out[(per, coh)] = None
                 continue
-            lo, hi = bootstrap_ci(tot)
+            lo, hi = bootstrap_ci(tot, key=f"adoption|{per}|{coh}")
             out[(per, coh)] = {
                 "n": len(tot),
                 "ai": sum(ai_v) / len(ai_v),
