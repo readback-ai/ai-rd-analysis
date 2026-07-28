@@ -20,6 +20,7 @@ Usage:  python -m pipeline.studies.productivity --cut {decomposition,persistent}
 from __future__ import annotations
 
 import argparse
+import functools
 import statistics
 from collections import defaultdict
 
@@ -540,9 +541,7 @@ def adoption() -> None:
                   f"{r['median']:>8.2f}")
 
 
-_fleet_cache: set[str] | None = None
-
-
+@functools.cache
 def fleet_logins() -> set[str]:
     """ALL authors (insider or not) with >= FLEET_MIN merged PRs in some
     study quarter — the exclusion set for review-behavior figures 6-8 and
@@ -550,12 +549,10 @@ def fleet_logins() -> set[str]:
     review statistics the way they distort per-contributor means).
     Computed from the current cells via the same
     _author_months_and_cohorts pass that assigns the adoption cohorts, so
-    every consumer shares one fleet definition; memoized per process, no
-    on-disk state."""
-    global _fleet_cache
-    if _fleet_cache is None:
-        *_rest, _fleet_cache = _author_months_and_cohorts()
-    return _fleet_cache
+    every consumer shares one fleet definition; memoized per process
+    (cache_clear() resets), no on-disk state."""
+    *_rest, fleet = _author_months_and_cohorts()
+    return fleet
 
 
 def review_mix(by: str = "role", exclude_fleet: bool = True,

@@ -1091,7 +1091,6 @@ def test_fleet_logins_ignores_stale_disk_cache(monkeypatch, tmp_path):
     (d / "fleet_logins.txt").write_text("stale-operator\n")
     monkeypatch.setattr(productivity, "_author_months_and_cohorts",
                         lambda: ({}, {}, {}, {"fresh-operator"}))
-    monkeypatch.setattr(productivity, "_fleet_cache", None, raising=False)
     assert productivity.fleet_logins() == {"fresh-operator"}
 
 
@@ -1107,7 +1106,6 @@ def test_fleet_definition_has_a_single_source(monkeypatch, tmp_path):
     (d / "fleet_logins.txt").write_text("stale-operator\n")
     monkeypatch.setattr(productivity, "_author_months_and_cohorts",
                         lambda: ({}, {}, {}, {"fresh-operator"}))
-    monkeypatch.setattr(productivity, "_fleet_cache", None, raising=False)
     *_rest, cohort_fleet = productivity._author_months_and_cohorts()
     assert productivity.fleet_logins() == cohort_fleet
 
@@ -1120,7 +1118,6 @@ def test_fleet_logins_writes_no_cache_file(monkeypatch, tmp_path):
     (tmp_path / "data" / "derived").mkdir(parents=True)
     monkeypatch.setattr(productivity, "_author_months_and_cohorts",
                         lambda: ({}, {}, {}, {"a"}))
-    monkeypatch.setattr(productivity, "_fleet_cache", None, raising=False)
     assert productivity.fleet_logins() == {"a"}
     assert not (tmp_path / "data" / "derived"
                 / "fleet_logins.txt").exists()
@@ -1135,7 +1132,26 @@ def test_fleet_logins_memoized_per_process(monkeypatch, tmp_path):
     (tmp_path / "data" / "derived").mkdir(parents=True)
     monkeypatch.setattr(productivity, "_author_months_and_cohorts",
                         lambda: calls.append(1) or ({}, {}, {}, {"a"}))
-    monkeypatch.setattr(productivity, "_fleet_cache", None, raising=False)
     assert productivity.fleet_logins() == {"a"}
     assert productivity.fleet_logins() == {"a"}
     assert len(calls) == 1
+
+
+def test_fleet_memo_cleared_between_tests_a(monkeypatch):
+    """PR #12 review hardening (RED first, as a pair with _b below —
+    definition order is the test): populate the fleet memo under
+    monkeypatched cells, exactly what any consumer-calling test does."""
+    from pipeline.studies import productivity
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({}, {}, {}, {"leaked-operator"}))
+    assert productivity.fleet_logins() == {"leaked-operator"}
+
+
+def test_fleet_memo_cleared_between_tests_b(monkeypatch):
+    """Pair of _a: the memo populated there must not survive into this
+    test — the autouse conftest fixture clears it, so fleet_logins()
+    recomputes from THIS test's cells."""
+    from pipeline.studies import productivity
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({}, {}, {}, {"own-operator"}))
+    assert productivity.fleet_logins() == {"own-operator"}
