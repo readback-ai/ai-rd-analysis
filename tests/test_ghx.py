@@ -133,6 +133,19 @@ def test_graphql_nodes_logs_discarded_errors(monkeypatch, capsys):
     assert "RATE_LIMITED" in log
 
 
+def test_all_commits_rejects_page_without_pageinfo(monkeypatch):
+    """PR #14 review, P1: a partial envelope (node served, totalCount
+    claimed, pageInfo missing) must not return as a complete commit
+    list — the record would checkpoint commits_complete: true and never
+    be revisited. Pagination terminates only on hasNextPage is False,
+    the rule _conn_commits, census._paginate, and enum_org follow."""
+    from pipeline.studies import review_action as ra
+    monkeypatch.setattr(ra, "graphql_nodes",
+                        lambda *a, **k: {"nodes": [{"commit": {}}],
+                                         "totalCount": 2})
+    assert ra._all_commits("o/r", 1) is None
+
+
 def test_rest_count_still_rejects_nonzero_exit(monkeypatch):
     """allow_partial is GraphQL-only; REST counts must not trust error runs."""
     def fake_run(cmd, **kw):
