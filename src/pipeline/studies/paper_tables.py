@@ -40,7 +40,7 @@ MIN_PRS = 5
 
 
 def _est(pairs: list[tuple[float, float]],
-         key: str | None = None) -> tuple[float, float, float]:
+         key: str) -> tuple[float, float, float]:
     """(weighted mean, ci_lo, ci_hi). `key` names the CI cell so its draw
     stream is independent of every other CI in the run (analyze.bootstrap_ci)."""
     return (weighted_mean(pairs), *bootstrap_ci(pairs, key=key))

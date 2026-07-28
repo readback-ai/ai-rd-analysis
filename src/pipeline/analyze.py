@@ -204,8 +204,11 @@ SEED = 20260630
 def _stream(key: str) -> random.Random:
     """The draw stream for ONE CI cell, derived from SEED and the cell's key.
 
-    Derived through sha256 rather than by seeding Random() with a tuple:
-    tuple seeding falls back to hash(), which is PYTHONHASHSEED-dependent."""
+    The key is hashed to an integer seed explicitly rather than passed to
+    Random() as a string. String seeding works and is stable across runs, but
+    the string -> internal state mapping is a CPython implementation detail;
+    deriving the seed here makes the key -> stream relation part of this
+    module's contract instead."""
     import hashlib
     digest = hashlib.sha256(f"{SEED}|{key}".encode()).digest()[:8]
     return random.Random(int.from_bytes(digest, "big"))
