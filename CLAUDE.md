@@ -20,6 +20,14 @@ only written (or only run) after the code change — the red run is the
 evidence the test actually captures the bug. Name the review/finding in
 the test docstring so the regression stays traceable.
 
+## Comments describe the code, not its history
+
+Source comments and docstrings say what the code does and why the rule
+exists — never the bug that motivated it, the incident, the review item,
+or the commit that changed it. That history belongs in git and the issue
+tracker. The one exception is the test docstrings above, which name the
+finding on purpose.
+
 ## Parallel work via git worktrees
 
 Multiple Claude Code sessions can work features in parallel. Each session runs in

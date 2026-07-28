@@ -94,9 +94,9 @@ def censused_months(quarters: dict[str, str]) -> set[str]:
     for q in CENSUSED_QUARTERS:
         if q not in quarters:
             continue
-        # walk the RANGE, not "m, m+1, m+2": the latter emitted impossible
-        # tokens ("2025-13") for any quarter starting in Nov/Dec, which match
-        # no PR's createdAt month and silently drop it (PR #1 review, item 6)
+        # walk the RANGE rather than assuming m, m+1, m+2 in one year: a
+        # quarter starting in Nov/Dec crosses the year boundary, and a token
+        # like "2025-13" matches no PR's createdAt month
         start, end = quarters[q].split("..")
         y, m = int(start[:4]), int(start[5:7])
         while f"{y}-{m:02d}" <= end[:7]:
@@ -203,14 +203,48 @@ def weighted_mean(pairs: list[tuple[float, float]]) -> float:
     return sum(v * w for v, w in pairs) / tot if tot else float("nan")
 
 
-_RNG = random.Random(20260630)      # seeded: reruns reproduce identical CIs
+SEED = 20260630
 
 
-def bootstrap_ci(pairs: list[tuple[float, float]], n: int = 2000) -> tuple[float, float]:
+def _stream(key: str) -> random.Random:
+    """The draw stream for ONE CI cell, derived from SEED and the cell's key.
+
+    The key is hashed to an integer seed explicitly rather than passed to
+    Random() as a string. String seeding works and is stable across runs, but
+    the string -> internal state mapping is a CPython implementation detail;
+    deriving the seed here makes the key -> stream relation part of this
+    module's contract instead."""
+    import hashlib
+    digest = hashlib.sha256(f"{SEED}|{key}".encode()).digest()[:8]
+    return random.Random(int.from_bytes(digest, "big"))
+
+
+def _percentile(sorted_vals: list[float], p: float) -> float:
+    """Linear-interpolated percentile of an ASCENDING list (the method numpy
+    and R type-7 use)."""
+    if not sorted_vals:
+        return float("nan")
+    k = p * (len(sorted_vals) - 1)
+    lo, frac = int(k), k - int(k)
+    if lo + 1 >= len(sorted_vals):
+        return sorted_vals[-1]
+    return sorted_vals[lo] + (sorted_vals[lo + 1] - sorted_vals[lo]) * frac
+
+
+def bootstrap_ci(pairs: list[tuple[float, float]], n: int = 2000, *,
+                 key: str) -> tuple[float, float]:
+    """Percentile bootstrap 95% CI over the resampled units in `pairs`.
+
+    `key` identifies the CI cell (table / period / metric) and is REQUIRED:
+    each cell draws from its own stream, so a CI is reproducible in isolation
+    and independent of how many other CIs the run computed first. Keys must be
+    unique per reported number — reusing one makes two cells share draws."""
     if len(pairs) < 2:
         return (float("nan"), float("nan"))
-    stats = sorted(weighted_mean(_RNG.choices(pairs, k=len(pairs))) for _ in range(n))
-    return stats[int(0.025 * n)], stats[int(0.975 * n)]
+    rng = _stream(key)          # ONE stream for all n draws of this cell
+    stats = sorted(weighted_mean(rng.choices(pairs, k=len(pairs)))
+                   for _ in range(n))
+    return _percentile(stats, 0.025), _percentile(stats, 0.975)
 
 
 def main() -> None:
@@ -301,7 +335,9 @@ def main() -> None:
                     line += f"  {'n/a':>17}"
                     continue
                 mean = weighted_mean(pairs)
-                lo, hi = bootstrap_ci(pairs, a.bootstrap)
+                lo, hi = bootstrap_ci(
+                    pairs, a.bootstrap,
+                    key=f"analyze|{a.granularity}|{per}|{label}|{m}")
                 line += f"  {100*mean:5.1f} [{100*lo:4.1f},{100*hi:4.1f}]"
             print(line)
 
