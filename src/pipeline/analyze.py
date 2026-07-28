@@ -127,12 +127,11 @@ def group_by_period(cells: dict[tuple[str, str], list[dict]],
     order, so a monthly re-collection supersedes a stale overlapping
     quarter cell for the same PR."""
     grouped: dict[tuple[str, str], list[dict]] = defaultdict(list)
-    # num -> POSITION in grouped[key], not the record itself: replacing a
-    # superseded PR used grouped[key].index(prev), a linear scan inside the
-    # per-PR loop, so a repo-period carrying many duplicate PRs (the
-    # designed-for case: full-quarter + sub-window + re-collected month
-    # cells) cost O(n^2). Positions are stable because entries are only ever
-    # appended or overwritten in place (PR #1 review, item 4).
+    # num -> POSITION in grouped[key], not the record itself. Duplicates are
+    # the designed-for case (full-quarter + sub-window + re-collected month
+    # cells all carry the same PRs), so locating a superseded record by
+    # scanning the list would make dedup O(n^2) in them. Positions stay
+    # valid because entries are only ever appended or overwritten in place.
     pos: dict[tuple[str, str], dict[int, int]] = defaultdict(dict)
     for (repo, rng), nodes in cells.items():
         quarter = period_of(rng, quarters)
