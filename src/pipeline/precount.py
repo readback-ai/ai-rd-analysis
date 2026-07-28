@@ -24,6 +24,8 @@ from pipeline.ghx import cell_path, graphql_nodes, read_cell, rest_count
 from pipeline.scan_orgs import QUARTER_RANGES, resolve_period
 
 BATCH = 20
+BROWNOUT_WAIT = 60   # seconds; brownouts are minutes-scale (the census
+                     # self-heal waits the same horizon)
 
 
 def precount_path(repo: str, period: str) -> Path:
@@ -55,6 +57,44 @@ def ensure_precount(repo: str, period: str) -> int | None:
     if total is not None:
         write_precount(repo, period, total)
     return total
+
+
+def confirm_zero_precount(repo: str, period: str) -> int | None:
+    """A zero denominator is unverifiable from one sample: a browned-out
+    search returns 200 with issueCount 0, indistinguishable from a truly
+    empty repo-period. So a 0 only counts once independently re-observed:
+    re-query fresh; a confirmed 0 is cache-marked so later runs trust it,
+    a nonzero recount replaces the cached value, and a failed recount
+    returns None (never recorded).
+
+    Independence is temporal: a zero observed within the last
+    BROWNOUT_WAIT seconds (cell mtime) could sit in the same brownout as
+    its confirmation, so the recount first waits out the remainder of
+    that horizon; an older cached zero is already independent and is
+    re-queried immediately. (The sleeps after each rest_count are
+    rate-limit pacing, not independence.)"""
+    p = precount_path(repo, period)
+    val = read_cell(p, dict)
+    if val and val.get("confirmed"):
+        return 0
+    try:
+        age = time.time() - p.stat().st_mtime
+    except OSError:
+        age = 0.0
+    if age < BROWNOUT_WAIT:
+        time.sleep(BROWNOUT_WAIT - age)
+    rng = resolve_period(period)
+    fresh = rest_count(f"repo:{repo} is:pr created:{rng}",
+                       endpoint="search/issues")
+    time.sleep(2)
+    if fresh is None:
+        return None
+    if fresh == 0:
+        precount_path(repo, period).write_text(
+            json.dumps({"total": 0, "confirmed": True}))
+    else:
+        write_precount(repo, period, fresh)
+    return fresh
 
 
 def batch_counts(pairs: list[tuple[str, str]]) -> int:

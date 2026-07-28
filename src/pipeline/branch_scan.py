@@ -31,7 +31,14 @@ from pipeline.scan_orgs import QUARTER_RANGES
 
 
 def scan(orgs: list[str], out_path: Path, periods: dict[str, str],
-         prefixes: dict[str, str], pace: float = 2.2) -> None:
+         prefixes: dict[str, str], pace: float = 2.2,
+         scoped: dict[str, list[str]] | None = None) -> None:
+    """scoped maps repo-scoped orgs to their in-scope repos: their cells
+    are counted per repo and summed — an org-wide query would count
+    prefix PRs in out-of-scope repos into R4 admission evidence (R5).
+    A cell with any failed per-repo count is skipped, never written
+    partial (a partial sum understates silently)."""
+    scoped = scoped or {}
     done: set[tuple[str, str, str]] = set()
     if out_path.exists():
         for ln in out_path.read_text().splitlines():
@@ -44,14 +51,27 @@ def scan(orgs: list[str], out_path: Path, periods: dict[str, str],
                 for prefix in prefixes.values():
                     if (org, per, prefix) in done:
                         continue
-                    n = rest_count(f"org:{org} is:pr head:{prefix} created:{rng}",
-                                   endpoint="search/issues")
+                    if org in scoped:
+                        n = 0
+                        for repo in scoped[org]:
+                            c = rest_count(
+                                f"repo:{repo} is:pr head:{prefix} "
+                                f"created:{rng}", endpoint="search/issues")
+                            if c is None:
+                                n = None
+                                break
+                            n += c
+                            time.sleep(pace)
+                    else:
+                        n = rest_count(
+                            f"org:{org} is:pr head:{prefix} created:{rng}",
+                            endpoint="search/issues")
+                        time.sleep(pace)
                     if n is None:
                         print(f"FAIL {org} {per} {prefix}", flush=True)
                         continue
                     out.write(f"{org}\t{per}\t{prefix}\t{n}\n")
                     out.flush()
-                    time.sleep(pace)
 
 
 def load(out_path: Path) -> dict[tuple[str, str, str], int]:
@@ -65,14 +85,15 @@ def load(out_path: Path) -> dict[tuple[str, str, str], int]:
 
 
 def main() -> None:
-    from pipeline.org_set import population
+    from pipeline.org_set import population, scoped_repos
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="data/derived/branch_scan.tsv")
     ap.add_argument("--periods", nargs="+", default=list(QUARTER_RANGES),
                     choices=list(QUARTER_RANGES))
     a = ap.parse_args()
     scan(population(), Path(a.out),
-         {p: QUARTER_RANGES[p] for p in a.periods}, BRANCH_PREFIXES)
+         {p: QUARTER_RANGES[p] for p in a.periods}, BRANCH_PREFIXES,
+         scoped=scoped_repos())
     print("branch scan complete")
 
 

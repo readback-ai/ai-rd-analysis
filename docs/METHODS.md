@@ -60,13 +60,18 @@ name heuristics are deliberately NOT used: maintainers SEO their metadata
 ("AI-powered" secrets scanners self-tag `llm-training`), and topics-only plus
 lists proved the robust combination.
 
-**R4 — Evidence.** >=5 AI-evidence PRs/commits in the MAXIMUM single
-evidence source (marker scan, layered recheck, branch counts, or census-
-derived union — the max ACROSS sources avoids adding one PR's evidence
-from two sources; WITHIN the recheck and branch-count sources the probes/
-rows are summed, so a PR matching two probes, or a branch PR counted in
-several quarters, can contribute more than once to that source's total),
-or >=0.1% of the org's censused PRs (rate computed from the census
+**R4 — Evidence.** >=5 distinct AI-evidence PRs/commits in the MAXIMUM
+single evidence source (marker scan, layered recheck, branch counts, or
+census-derived union). The max ACROSS sources avoids adding one PR's
+evidence from two sources, and WITHIN a source no PR counts twice either:
+recheck evidence is the max probe count (probes overlap — one PR can
+match its branch and its markers), and branch evidence sums keyed
+(org, quarter, prefix) cells, which is an exact distinct count because
+creation-dated quarters partition PRs and the prefixes are pairwise
+non-nested; Q1-2024, the false-positive control, never counts toward
+admission. For repo-scoped orgs the branch counts cover their in-scope
+repos only (per-repo queries), matching the census universe (R5).
+Alternatively >=0.1% of the org's censused PRs (rate computed from the census
 evidence pair only); windows all <= cutoff. An org with no measurable AI-tool footprint contributes
 nothing to AI-practice metrics and only noise to denominators.
 
@@ -213,16 +218,20 @@ check) vs 3.8% of population PRs by Q2-2026. Layer C is reported as
 PR-level attribution, never commit-level proof.
 
 **Measured layer-C precision** (org-stratified samples, C-only PRs — no
-marker, no agent author; `studies.layer_c_precision`): the share carrying
+marker, no agent author, repo-scoped orgs' cells filtered to their
+in-scope repos; `studies.layer_c_precision`. Repo-scoped orgs' current
+cells were drawn org-wide and are filtered at read time — an interim
+measure until they are re-sampled from the scoped universe, since the
+org-wide 50-newest page is a biased selection of it): the share carrying
 positive provenance signals (GitHub web-flow committer, or the product's
 machine-generated slug pattern) is codex/ 95%, copilot/ 98%, cursor/ 49%,
-claude/ 42%. The web-flow identity (`noreply@github.com` committer) is any
+claude/ 43%. The web-flow identity (`noreply@github.com` committer) is any
 web-UI/API commit and is NOT standalone agent evidence — it confirms only
 CONDITIONED on the agent-named branch; these precision figures measure
 exactly that combination. One false-positive class was MEASURED and is
 EXCLUDED from detection: branches named after the product but committed
-entirely by github-actions[bot] (CI canaries; 18.4% of C-only claude/
-samples). The remainder (cursor/ 51%, claude/ 39%) is INDETERMINATE:
+entirely by github-actions[bot] (CI canaries; 19.6% of C-only claude/
+samples). The remainder (cursor/ 51%, claude/ 38%) is INDETERMINATE:
 user-pushed commits on a prefix branch are consistent both with an agent
 branch continued locally (true positive) and a human-named branch (false
 positive); the Q1-2024 zero shows no pre-product baseline of such naming,
@@ -347,7 +356,11 @@ sub-window count adapts to PR volume (integer-boundary date splits — float
 rounding once produced inverted windows), each window paginates by cursor up
 to the API's 1,000-node cap (= up to 1,000 PRs per day-window), cells are
 written atomically (tmp+rename: torn writes cannot exist), and a repo-quarter
-that still cannot be completed FAILS the run. Report generation is gated on
+that still cannot be completed FAILS the run. A zero denominator never
+stands on one observation: search brownouts return 200 with a zero count,
+so a 0 precount is re-queried and only a confirmed 0 (cache-marked) can
+census as a complete empty repo-quarter — an unconfirmable zero FAILS
+the cell. Report generation is gated on
 gap-free valid-cell coverage of every manifest repo-quarter, with documented
 inaccessible repos waived explicitly (`inaccessible_repos.txt`).
 Fields per PR: commits (messages, author emails, committer), formal reviews

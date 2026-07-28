@@ -67,9 +67,34 @@ def batch_pull(refs: list[tuple[str, int]], pace: float = 0.8,
     return out
 
 
+def _repo_chunks(repos: list[str], budget: int = 180) -> list[list[str]]:
+    """Split a repo list so each 'repo:a repo:b ...' clause fits GitHub's
+    256-char search-query limit alongside the fixed qualifiers."""
+    chunks: list[list[str]] = []
+    cur: list[str] = []
+    used = 0
+    for r in repos:
+        cost = len("repo:") + len(r) + 1
+        if cur and used + cost > budget:
+            chunks.append(cur)
+            cur, used = [], 0
+        cur.append(r)
+        used += cost
+    if cur:
+        chunks.append(cur)
+    return chunks
+
+
 def sample_branch_prs(prefix: str, scan_path: Path, out_dir: Path,
-                      periods: list[str], pace: float = 1.5) -> None:
-    """One 50-PR page per org-quarter with branch_scan count > 0."""
+                      periods: list[str], pace: float = 1.5,
+                      in_scope: dict[str, set[str]] | None = None) -> None:
+    """One 50-PR page per org-quarter with branch_scan count > 0.
+    in_scope maps repo-scoped orgs to their in-scope repos (R5). Their
+    universe is queried per repo chunk BEFORE the 50-newest cap — an
+    org-wide page could exhaust its 50 slots on out-of-scope PRs and
+    checkpoint an empty cell against a positive scoped pop_count. Scoped
+    cells carry universe='scoped'; an existing cell without it was drawn
+    org-wide (biased selection, org-wide weight) and is re-drawn."""
     from pipeline.branch_scan import load
     out_dir.mkdir(parents=True, exist_ok=True)
     counts = load(scan_path)
@@ -78,18 +103,47 @@ def sample_branch_prs(prefix: str, scan_path: Path, out_dir: Path,
                   key=lambda t: -t[2])
     for org, per, n in todo:
         cell = out_dir / f"{org}__{per}.json"
+        keep = in_scope.get(org) if in_scope else None
         if cell.exists():
-            continue
+            if keep is None:
+                continue
+            if json.loads(cell.read_text()).get("universe") == "scoped":
+                continue
         rng = QUARTER_RANGES[per]
-        nodes = graphql_nodes(
-            SEARCH_QUERY,
-            {"q": f"org:{org} is:pr head:{prefix} created:{rng} sort:created-desc"},
-            ".data.search.nodes", expect=list)
+        if keep is not None:
+            nodes = []
+            for chunk in _repo_chunks(sorted(keep)):
+                repos_q = " ".join(f"repo:{r}" for r in chunk)
+                got = graphql_nodes(
+                    SEARCH_QUERY,
+                    {"q": f"{repos_q} is:pr head:{prefix} created:{rng} "
+                          f"sort:created-desc"},
+                    ".data.search.nodes", expect=list)
+                if got is None:
+                    nodes = None
+                    break
+                nodes.extend(got)
+                time.sleep(pace)
+            if nodes is not None:
+                nodes = [p for p in nodes
+                         if ((p.get("repository") or {})
+                             .get("nameWithOwner") in keep)]
+                nodes.sort(key=lambda p: p.get("createdAt") or "",
+                           reverse=True)
+                nodes = nodes[:50]
+        else:
+            nodes = graphql_nodes(
+                SEARCH_QUERY,
+                {"q": f"org:{org} is:pr head:{prefix} created:{rng} "
+                      f"sort:created-desc"},
+                ".data.search.nodes", expect=list)
         if nodes is None:
             print(f"FAIL {org} {per}", flush=True)
             continue
-        cell.write_text(json.dumps(
-            {"org": org, "period": per, "pop_count": n, "prs": nodes}))
+        payload = {"org": org, "period": per, "pop_count": n, "prs": nodes}
+        if keep is not None:
+            payload["universe"] = "scoped"
+        cell.write_text(json.dumps(payload))
         print(f"ok {org} {per}: {len(nodes)}/{n}", flush=True)
         time.sleep(pace)
 
@@ -113,7 +167,10 @@ def main() -> None:
     ap.add_argument("--periods", nargs="+",
                     default=["Q4-2025", "Q1-2026", "Q2-2026"])
     a = ap.parse_args()
-    sample_branch_prs(a.prefix, Path(a.scan), Path(a.out_dir), a.periods)
+    from pipeline.org_set import scoped_repos
+    sample_branch_prs(a.prefix, Path(a.scan), Path(a.out_dir), a.periods,
+                      in_scope={o: set(rs)
+                                for o, rs in scoped_repos().items()})
 
 
 if __name__ == "__main__":

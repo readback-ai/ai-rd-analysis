@@ -77,3 +77,55 @@ def test_top5_ai_recorded_independently_of_admission(world):
     pop = org_set.build()
     assert pop["lab"][2] == 0            # admitted dev-list, measured 0/5
     assert pop["bigco"][2] == 5          # conglomerate, measured 5/5
+
+
+@pytest.fixture()
+def evidence_world(tmp_path, monkeypatch):
+    drv = tmp_path / "derived"
+    drv.mkdir()
+    monkeypatch.setattr(org_set, "DRV", drv)
+    (drv / "ai_scan.tsv").write_text("")
+    (drv / "recheck_scan.tsv").write_text("")
+    (drv / "branch_scan.tsv").write_text("")
+    (drv / "census_org_evidence.json").write_text("{}")
+    return drv
+
+
+def test_recheck_probes_take_max_not_sum(evidence_world):
+    """Issue #6: one PR can match several recheck probes (its
+    branch AND its markers), so probe counts overlap and their sum is not
+    a distinct-PR count — an org's recheck evidence is the max probe."""
+    (evidence_world / "recheck_scan.tsv").write_text(
+        "dbl\tclaude_br\t3\ndbl\tclaude_mk\t3\ndbl\ttotal_pr\t100\n")
+    ev, _ = org_set.evidence()
+    assert ev["dbl"] == 3
+
+
+def test_branch_evidence_dedups_and_excludes_the_2024_control(
+        evidence_world):
+    """Issue #6: branch_scan admission evidence must be a
+    distinct-PR count — Q1-2024 is the deliberate false-positive control
+    and must not admit anyone, and re-appended checkpoint rows must not
+    count twice. (Quarters partition PRs by created date and prefixes are
+    pairwise non-nested, so the keyed non-control cells sum exactly.)"""
+    (evidence_world / "branch_scan.tsv").write_text(
+        "ctrl\tQ1-2024\tclaude/\t4\n"
+        "ctrl\tQ4-2025\tclaude/\t2\n"
+        "ctrl\tQ1-2026\tcodex/\t1\n"
+        "ctrl\tQ1-2026\tcodex/\t1\n")
+    ev, _ = org_set.evidence()
+    assert ev["ctrl"] == 3
+
+
+def test_scoped_repos_includes_zero_repo_orgs(tmp_path, monkeypatch):
+    """PR #13 review, P2: a repo-scoped org with no manifest
+    repos has an EMPTY universe — omitting it from the map makes every
+    consumer fall back to org-wide (branch_scan would query org:, the
+    precision read-filter would be disabled)."""
+    drv = tmp_path / "derived"
+    drv.mkdir()
+    monkeypatch.setattr(org_set, "DRV", drv)
+    (drv / "population.tsv").write_text(
+        "bigco\trepo\tconglomerate\t0\nacme\tfull\tdev-list\t3\n")
+    (drv / "population_repos.txt").write_text("acme/x\nother/y\n")
+    assert org_set.scoped_repos() == {"bigco": []}

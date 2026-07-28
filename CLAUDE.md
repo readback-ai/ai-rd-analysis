@@ -18,7 +18,16 @@ REPRODUCES the issue and confirm it FAILS against the unfixed code, then
 apply the fix and show the test passing. Never land a fix whose test was
 only written (or only run) after the code change — the red run is the
 evidence the test actually captures the bug. Name the review/finding in
-the test docstring so the regression stays traceable.
+the test docstring so the regression stays traceable — the finding only,
+no process annotations like "(RED first)": the red run is session/PR
+evidence, not docstring content.
+
+## File edits go through Write/Edit, not shell heredocs
+
+Create and change files — new tests especially — with the Write/Edit
+tools, never `cat >>`/`tee` heredocs in Bash. Tool edits render as
+visible diffs; heredoc content collapses into the command log where
+review can't see it.
 
 ## Comments describe the code, not its history
 

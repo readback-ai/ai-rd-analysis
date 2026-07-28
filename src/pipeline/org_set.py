@@ -110,7 +110,15 @@ def top5() -> dict[str, list[dict]]:
 
 
 def evidence() -> tuple[dict[str, int], set[str]]:
-    """org(lower) -> max evidence count across layers; plus rate-branch set."""
+    """org(lower) -> evidence count, max across layers so no PR counts
+    twice across sources; plus rate-branch set. Within a source the same
+    rule holds: R4's threshold is a DISTINCT-AI-evidence-PR count.
+    - recheck probes overlap (one PR can match its branch AND its
+      markers), so an org's recheck evidence is its max probe count.
+    - branch_scan cells are keyed (dedups re-appended checkpoint rows)
+      and sum exactly: quarters partition PRs by created date and the
+      prefixes are pairwise non-nested. Q1-2024 is the false-positive
+      control and never counts toward admission."""
     ev: dict[str, int] = defaultdict(int)
     for ln in _lines(DRV / "ai_scan.tsv"):
         f = ln.split("\t")
@@ -119,14 +127,17 @@ def evidence() -> tuple[dict[str, int], set[str]]:
     for ln in _lines(DRV / "recheck_scan.tsv"):
         o, probe, n = ln.split("\t")
         if probe != "total_pr":
-            rc[o.lower()] += int(n)
+            rc[o.lower()] = max(rc[o.lower()], int(n))
     for o, n in rc.items():
         ev[o] = max(ev[o], n)
-    br: dict[str, int] = defaultdict(int)
+    br_cells: dict[tuple[str, str, str], int] = {}
     for ln in _lines(DRV / "branch_scan.tsv"):
         f = ln.split("\t")
-        if len(f) == 4:
-            br[f[0].lower()] += int(f[3])
+        if len(f) == 4 and f[1] != "Q1-2024":
+            br_cells[(f[0].lower(), f[1], f[2])] = int(f[3])
+    br: dict[str, int] = defaultdict(int)
+    for (o, _per, _pfx), n in br_cells.items():
+        br[o] += n
     for o, n in br.items():
         ev[o] = max(ev[o], n)
     rate_ok = set()
@@ -203,6 +214,22 @@ def population(scope: str | None = None) -> list[str]:
         f = ln.split("\t")
         if scope is None or f[1] == scope:
             out.append(f[0])
+    return out
+
+
+def scoped_repos() -> dict[str, list[str]]:
+    """org -> its in-scope repos, for EVERY repo-scoped population org
+    (population_repos.txt filtered by owner). Layer-C scans and samples
+    take these instead of org-wide queries: a repo-scoped org's universe
+    is its AI-topic repos only (R5), matching the census. An org with no
+    manifest repos maps to an EMPTY universe — it must not fall back to
+    org-wide by being absent from this map."""
+    owners = {o.lower(): o for o in population(scope="repo")}
+    out: dict[str, list[str]] = {org: [] for org in owners.values()}
+    for r in _lines(DRV / "population_repos.txt"):
+        org = owners.get(r.split("/", 1)[0].lower())
+        if org:
+            out[org].append(r)
     return out
 
 
