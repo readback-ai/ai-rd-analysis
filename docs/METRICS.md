@@ -132,7 +132,7 @@ inaccessibility waiver). The monthly twin (`report_monthly.md`,
 `--granularity month`) runs the same sections; sections whose module is
 inherently quarterly carry an explicit `[quarterly]` tag there.
 
-The 20 sections, in order (each title names its producing module and
+The 21 sections, in order (each title names its producing module and
 argument — one section = one module invocation):
 
 1. **Contributor-weighted metrics** (`pipeline.analyze`) — per period ×
@@ -161,35 +161,40 @@ argument — one section = one module invocation):
 9. **Two-sided bound** (`--table bounds`) — headline with/without
    weak-prefix (cursor/, claude/, droid/) indeterminates; 0.05pp at the
    Q2-2026 headline.
-10. **Productivity decomposition** (`productivity --cut decomposition`) —
+10. **Involvement sensitivity to bot-authored PRs** (`--table botcheck`,
+    added 2026-07-28) — three `ai_involved` variants on one shared repo
+    set: published (profile `all`), no-dilution (non-AI bot PRs dropped,
+    layer-B agents kept), no-bots (profile `pr`); CW, 1,000-draw CIs,
+    plus non-AI-bot and all-bot authorship shares.
+11. **Productivity decomposition** (`productivity --cut decomposition`) —
     PRs = authors × PRs/author on the balanced repo panel.
-11. **Persistent-author productivity** (`--cut persistent`) — same person,
+12. **Persistent-author productivity** (`--cut persistent`) — same person,
     same repo, 2024↔2026, AI-split.
-12. **Core-contributor merged LOC** (`--cut core`) — the Figure 3 series.
-13. **Core-contributor LOC split by AI involvement** (`--cut aisplit`) —
+13. **Core-contributor merged LOC** (`--cut core`) — the Figure 3 series.
+14. **Core-contributor LOC split by AI involvement** (`--cut aisplit`) —
     noAI-author kLOC (flat) vs AI users' AI-PR + nonAI-PR kLOC.
-14. **Figure A1: adoption cohorts** (`--cut adoption`) — fixed cohorts
+15. **Figure A1: adoption cohorts** (`--cut adoption`) — fixed cohorts
     early/medium/late/never/**fleet** (≥300 merged PRs/quarter, assigned
     first); AI/nonAI/total kLOC per author with CI + median. Rendered as
     `fig_a1_adoption_cohorts.png`; companions: `figure_2_comp_audits.png`
     (balanced event panels per adoption month), `fig5_fleet_vs_nonadopters.png`,
     `fig_a2_adoption_event.png` (event time net of non-adopters).
-15. **Merged LOC by approval channel** (`--cut channels`) — humanRev /
+16. **Merged LOC by approval channel** (`--cut channels`) — humanRev /
     botOnly / selfUnrev / otherUnrev shares of merged LOC.
-16. **Figure 6: review mix of merged PRs/LOC** (`productivity --cut
+17. **Figure 6: review mix of merged PRs/LOC** (`productivity --cut
     reviewmix`) — per quarter × {core, external}: PR and LOC shares of
     humanRev / botOnly / selfUnrev / otherUnrev over mature merged PRs
     (the substitution hypothesis). Rendered as `fig6_review_mix.png`.
-17. **Attention per line** (`studies.attention`) — HUMAN comments/kLOC
+18. **Attention per line** (`studies.attention`) — HUMAN comments/kLOC
     (bot-clean) + window h/kLOC, all/ins/ext + size bands.
-18. **PR fates at matched horizons** (`studies.fates`) — w8 primary, w26
+19. **PR fates at matched horizons** (`studies.fates`) — w8 primary, w26
     sensitivity, per cohort; immature PRs excluded per horizon.
-19. **Responsiveness to human asks** (`studies.review_action`) — CLEAN
+20. **Responsiveness to human asks** (`studies.review_action`) — CLEAN
     lane identified; two designs over one frame: responded% is the
     equal-probability sample share (unweighted), post-ask LOC share is
     Horvitz–Thompson over the PPS-by-LOC sample; commit lists paginated
     with completeness metadata.
-20. **Adoption event-study** (`studies.event_study`) — merged (w8,
+21. **Adoption event-study** (`studies.event_study`) — merged (w8,
     mature-months-only) and submitted kLOC in event time around each
     author's first AI-marker month.
 

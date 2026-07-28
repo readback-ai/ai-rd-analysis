@@ -38,7 +38,7 @@ byte-for-byte from the same cells.
 2. `src/pipeline/analyze.py` — cell loading, dedup/freshness, weighting, CIs.
 3. `src/pipeline/org_set.py` — who is in the population and why.
 4. `src/pipeline/census.py` + `precount.py` — how cells get complete.
-5. `scripts/report.py` — the 19 sections; each names its module.
+5. `scripts/report.py` — the 21 sections; each names its module.
 6. `src/pipeline/studies/*` — pick the studies behind claims you care about.
 7. `tests/` — the invariants, each named for the finding it pins.
 
@@ -214,7 +214,7 @@ history; the report section title names the module. Highlights:
 | module | claim it produces | key design point |
 |---|---|---|
 | `layers.py` | exact A/B/C decomposition (report §4) | disjoint by precedence B > A > C |
-| `paper_tables.py` | Figures 2–3 (AI usage; merged kLOC/core author ×2.66) | CW + seeded CIs; LOC capped 20k/PR |
+| `paper_tables.py` | Figures 2–3 (AI usage; merged kLOC/core author ×2.96) | CW + seeded CIs; LOC capped 20k/PR |
 | `productivity.py` | decomposition, persistent authors, aisplit, **adoption cohorts** (Figure 4) | fleet cohort (≥300 merged PRs/quarter) isolated BEFORE AI-timing cohorts; user-typed bot authors excluded |
 | `event_study.py` | volume jump at first AI-marker month | w8-mature months only for merged outcome; submitted-LOC outcome needs no censoring |
 | `attention.py` | comments/kLOC decline (−55/−57%) | bot-clean numerator via `split_reviews`; size-band decomposition |
@@ -227,7 +227,7 @@ history; the report section title names the module. Highlights:
 - `regenerate.py` — canonical quarterly path: fixed-point population loop,
   DONE sentinels, gap-free cell coverage gates, manifest with SHA-256s;
   stage F refuses to write a report over incomplete coverage.
-- `report.py` — the 19 sections at quarter/month granularity; monthly
+- `report.py` — the 21 sections at quarter/month granularity; monthly
   runs tag inherently-quarterly sections `[quarterly]`.
 - `monthly_update.py` — incremental month: wipes+re-collects provisional
   month, collectable-population filter, appends to the month registry.
@@ -310,7 +310,7 @@ are floors (one quantified exception: the two-sided bound).
 
 ## Tests as documentation — `tests/`
 
-118+ tests, each docstring naming the finding/review item it pins
+180+ tests, each docstring naming the finding/review item it pins
 (repo rule: reproduce a bug with a RED test before fixing it — see
 CLAUDE.md). Fast (`uv run pytest -q`, <1s, no network). Good entry
 points: `test_detect.py` (detection + review semantics, w8, cutoff),

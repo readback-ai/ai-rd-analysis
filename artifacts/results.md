@@ -144,5 +144,7 @@ self-merge and reviewer profiles in the report.
   57.6 vs 72.6 in Q4-2025).
 
 ## 8. Superseded analyses
-`artifacts/v2_results.md` is the working log of interim analyses on
-interim populations; re-derive before citing.
+The interim working log (`v2_results.md`, interim populations and interim
+marker sets) was retired 2026-07-27; its section numbers (§7, §10–§12)
+survive only as historical finding labels in module docstrings. Re-derive
+any interim analysis on the final population before citing.

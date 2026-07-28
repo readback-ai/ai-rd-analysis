@@ -1,8 +1,8 @@
 # AI-Assisted Development Practices at Leading AI Organizations
 
 An empirical study of how the organizations building AI use AI to build
-software — measured from public GitHub metadata over 229 leading AI
-organizations (182 full-org + 47 repo-scoped; 2,142 repositories) across
+software — measured from public GitHub metadata over 228 leading AI
+organizations (182 full-org + 46 repo-scoped; 2,136 repositories) across
 four quarters: Q1-2024 baseline, Q4-2025, Q1-2026, Q2-2026. **Study cutoff: 2026-06-30** — all activity data is windowed to the
 cutoff; classification metadata is pinned as close to it as the API allows
 (see METHODS §0).
@@ -11,7 +11,8 @@ cutoff; classification metadata is pinned as close to it as the API allows
 
 We construct a population of leading AI organizations from third-party
 sources (LF AI & Data landscape, Hugging Face hub rankings, GitHub AI topics,
-TechCrunch's 2025 $100M+ AI funding list), enumerate their public
+Epoch AI's notable-models organizations, TechCrunch's 2025 $100M+ AI funding
+list, plus a declared hand-curated remainder), enumerate their public
 repositories with detectable AI-tool activity, and census pull requests in
 four quarters spanning the agentic-coding transition. AI involvement is
 detected in three independent layers: commit-forensic markers (co-author
@@ -42,13 +43,13 @@ provisional, HT-weighted) with post-ask LOC share rising 46% → 63%.
 All rates are floors: squash-merge strips markers, and default local CLI
 usage is structurally undetectable.
 
-**Full results: [`artifacts/results.md`](artifacts/results.md) (regenerated) · metrics reference: [`docs/METRICS.md`](docs/METRICS.md) · working log: [`artifacts/v2_results.md`](artifacts/v2_results.md) ·
-Methodology: [`docs/METHODS.md`](docs/METHODS.md) · **code review guide: [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md)****
+**Full results: [`artifacts/results.md`](artifacts/results.md) (regenerated) · metrics reference: [`docs/METRICS.md`](docs/METRICS.md) ·
+Methodology: [`docs/METHODS.md`](docs/METHODS.md) · functional spec: [`docs/functional-specification.md`](docs/functional-specification.md) · **code review guide: [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md)****
 
 Generated report: [`artifacts/report_generated.md`](artifacts/report_generated.md)
-(19 sections, quarterly; monthly twin `report_monthly.md`). Figures:
+(21 sections, quarterly; monthly twin `report_monthly.md`). Figures:
 `artifacts/fig2_ai_usage.png` (traceable AI usage), `fig3_core_loc.png`
-(merged LOC per core contributor), `fig4_adoption_cohorts.png` (adoption
+(merged LOC per core contributor), `fig_a1_adoption_cohorts.png` (adoption
 cohorts incl. fleet).
 
 ## How to verify the three claims that matter
@@ -90,7 +91,7 @@ uv run python -m pipeline.org_set --verify   # population reconciliation
 uv run python scripts/regenerate.py          # full pipeline -> artifacts/report_generated.md
 PYTHONPATH=src uv run python scripts/report.py --granularity month   # monthly twin
 PYTHONPATH=src uv run python scripts/plot_paper_tables.py            # figs 2-3
-PYTHONPATH=src uv run python scripts/plot_adoption_cohorts.py        # fig 4
+PYTHONPATH=src uv run python scripts/plot_adoption_cohorts.py        # fig A1
 ```
 
 To review the code, start with [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md) —
@@ -105,5 +106,5 @@ Population is prominence-selected (leading AI orgs), so findings describe
 practices *at these organizations*, not GitHub at large; the Q1-2024
 same-repo baseline is the temporal control. Detection is evidence-based and
 therefore a floor. Weighting is contributor-weighted throughout (repo-size
-gradients make pooled/equal-weight rates differ; see v2_results §7). Full
+gradients make pooled/equal-weight rates differ; METRICS §4). Full
 caveats in `docs/METHODS.md`.

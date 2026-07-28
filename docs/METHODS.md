@@ -90,7 +90,9 @@ daytonaio, streamlit, datahub-project, ...) and 3 included topic-sparse AI
 developers (flashinfer-ai, embeddings-benchmark, AnswerDotAI). Exclusion
 beats every rule; inclusion asserts R3 only (quality/evidence still apply).
 
-Result (2026-07-10 run): **229 orgs = 182 full-org + 47 repo-scoped** (`population.tsv` is authoritative; docs quote it).
+Result (2026-07-27 refresh, issue #6 evidence dedup — sony dropped from
+the 2026-07-10 run's 229/47): **228 orgs = 182 full-org + 46 repo-scoped**
+(`population.tsv` is authoritative; docs quote it).
 Consequence for inference: the population is prominence-selected; findings
 describe practices at leading AI organizations, with the Q1-2024 census as
 the temporal control.
@@ -437,7 +439,7 @@ and are reported only as reconciliation views.
 **Bootstrap CIs — what is being resampled, and why a complete census has
 CIs at all** (`analyze.bootstrap_ci`). The census is complete: every PR
 of every qualifying repo-period is observed, so for THE FRAME ITSELF (the
-2,142 repos in these quarters) any reported mean is an exact population
+frame's repos in these quarters) any reported mean is an exact population
 quantity with zero sampling error. The CIs answer the superpopulation
 question a reader actually asks — "how much does this mean depend on the
 particular repos that happen to make up the frame?" — by treating REPOS

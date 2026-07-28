@@ -18,7 +18,7 @@ uv run python -m pipeline.precount --repos data/derived/population_repos.txt
 uv run python -m pipeline.census   --repos data/derived/population_repos.txt
 uv run python -m pipeline.branch_scan               # layer-C org counts (evidence)
 uv run python -m pipeline.analyze  --repos data/derived/population_repos.txt \
-    --contributors data/derived/repo_contributors_v2.csv --bootstrap 2000
+    --contributors data/derived/repo_contributors_window.csv --bootstrap 2000
 uv run python -m pipeline.studies.layers            # exact layer decomposition
 ```
 
@@ -37,9 +37,10 @@ uv run python -m pipeline.studies.layers            # exact layer decomposition
 | `studies/*` | slices (6 populations, self-merge, balanced panel), layer-C precision, behavioral studies | (reads cells + API) |
 
 Encoded lessons (why this code looks the way it does — evidence in
-`artifacts/agent_detection_cues.md` and `artifacts/RESUME.md`):
-- **Bare-term commit search**, never the `author-email:` qualifier (misses
-  co-authored commits org-scoped; 10-16x undercount).
+`artifacts/agent_detection_cues.md`):
+- **Bare-term commit search**, never the `author-email:` qualifier (matches
+  primary authors only: zero results for co-authored commits org-scoped,
+  ~3x undercount globally).
 - **Validate response shape before writing a cell** — GitHub returns
   `{"errors":[{"type":"RATE_LIMIT"}]}` bodies that once corrupted 267 cells.
 - **Sleep to the advertised GraphQL reset** when the point budget runs low;

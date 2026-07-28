@@ -1,5 +1,11 @@
 # Project plan: AI-assisted development practices at leading AI organizations
 
+> **SUPERSEDED (historical).** This pre-pivot plan references artifacts that
+> no longer exist (agents.yaml, ai_labs.yaml, PIPELINE_SPEC.md, RUBRIC.md,
+> DuckDB/Parquet marts). Current behavior is documented in `README.md`,
+> `docs/METHODS.md`, `docs/METRICS.md`, `docs/CODE_GUIDE.md`, and
+> `docs/functional-specification.md`.
+
 ## Goal
 Produce a fresh, queryable dataset of how **leading AI organizations** use
 autonomous coding agents and AI assistance in their **public** development, and the

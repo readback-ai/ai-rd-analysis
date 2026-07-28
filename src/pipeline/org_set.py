@@ -6,7 +6,7 @@ Inputs (data/sources/ — third-party snapshots, transcriptions, declarations):
                                    (epoch.ai CC-BY; snapshot in epoch/)
   techcrunch_ai_orgs.tsv           rote transcription of TechCrunch's 2025
                                    $100M+ AI funding round-up
-  curated_orgs.tsv                 declared hand-curated remainder (~33 labs
+  curated_orgs.tsv                 declared hand-curated remainder (18 labs
                                    on neither Epoch nor TechCrunch)
   candidates.tsv                   ecosystem-list handle-transcription record
   conglomerates.txt                declared umbrella orgs -> repo-scoped
