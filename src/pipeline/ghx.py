@@ -140,6 +140,19 @@ def _walk(val: object, jq: str) -> object:
     return val
 
 
+def _log_graphql_errors(errors: object) -> None:
+    """A partial response is tolerated but never consumed silently: print
+    the error types and first paths so a pipeline-wide partial-response
+    event is visible in every caller's log. Null aliases inside an
+    errored response are not facts (see graphql_envelope)."""
+    if not isinstance(errors, list) or not errors:
+        return
+    errs = [e for e in errors if isinstance(e, dict)]
+    types = sorted({e.get("type") or "UNKNOWN" for e in errs})
+    print(f"GRAPHQL ERRORS: {len(errors)} {types}; paths="
+          f"{[e.get('path') for e in errs][:4]}", flush=True)
+
+
 def graphql_nodes(query: str, variables: dict[str, object],
                   jq: str, expect: type = list,
                   retries: int = 5) -> object | None:
@@ -160,6 +173,7 @@ def graphql_nodes(query: str, variables: dict[str, object],
             except json.JSONDecodeError:
                 val = None
             if isinstance(val, dict) and "data" in val and "errors" in val:
+                _log_graphql_errors(val.get("errors"))
                 val = _walk(val, jq)      # raw envelope: jq was not applied
             if isinstance(val, expect):
                 return val
@@ -173,13 +187,13 @@ def graphql_envelope(query: str, variables: dict[str, object] | None = None,
     rare caller that must tell a DEFINITIVE null apart from a transient
     partial failure.
 
-    graphql_nodes above deliberately discards `errors` (one ghost account
-    must not drop a whole repo-period), which also makes its result unable
-    to distinguish "this PR is gone" from "this batch timed out or hit the
-    secondary rate limit" — GitHub answers both with null aliases, and the
-    latter caused the 2026-07-25 mass-tombstoning incident (1,345 live PRs
-    recorded as permanent nonresponse). Callers deciding whether an absence
-    is permanent must use this and inspect `errors` themselves.
+    graphql_nodes above tolerates `errors` (one ghost account must not
+    drop a whole repo-period; it logs them, then returns `data` alone),
+    which makes its result unable to distinguish "this PR is gone" from
+    "this batch timed out or hit the secondary rate limit" — GitHub
+    answers both with null aliases in `data`. Callers deciding whether an
+    absence is PERMANENT must use this and inspect `errors` themselves:
+    a null alias is definitive only when its error is NOT_FOUND.
     None = no parseable response at all."""
     args = ["api", "graphql", "-f", f"query={query}"]
     for k, v in (variables or {}).items():

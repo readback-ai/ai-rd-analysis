@@ -156,8 +156,11 @@ def _all_commits(repo: str, num: int) -> tuple[list[dict], int, int] | None:
         nodes.extend(conn.get("nodes") or [])
         total = conn.get("totalCount")
         pi = conn.get("pageInfo") or {}
-        if not pi.get("hasNextPage"):
+        if pi.get("hasNextPage") is False:
             break
+        if pi.get("hasNextPage") is not True:
+            return None                  # absent pageInfo is a PARTIAL
+                                         # response, not the last page
         cursor = pi.get("endCursor")
         if not cursor:
             return None                  # would loop on the first page
