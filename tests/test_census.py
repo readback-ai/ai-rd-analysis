@@ -287,6 +287,48 @@ def test_unconfirmable_zero_precount_fails_not_empty(monkeypatch):
     assert census_repo_period("o/r", "Q1-2026", k=10) is None
 
 
+def test_fresh_zero_confirm_waits_out_the_brownout(monkeypatch):
+    """PR #13 follow-up (RED first): a zero observed moments ago must
+    not be 'confirmed' by an immediate re-query — both samples would sit
+    inside the same minutes-scale brownout. The confirming count waits
+    out the brownout horizon first (the pacing sleeps after each call
+    are rate-limit spacing, not independence)."""
+    events = []
+    monkeypatch.setattr(precount.time, "sleep",
+                        lambda s: events.append(("sleep", s)))
+    monkeypatch.setattr(precount, "rest_count",
+                        lambda *a, **k: events.append(("query",)) or 0)
+    precount.ensure_precount("o/r", "Q1-2026")     # fresh browned-out 0
+    assert precount.confirm_zero_precount("o/r", "Q1-2026") == 0
+    second_query = [i for i, e in enumerate(events)
+                    if e[0] == "query"][1]
+    waited = sum(e[1] for e in events[:second_query]
+                 if e[0] == "sleep" and e[1] >= 30)
+    assert waited >= precount.BROWNOUT_WAIT - 2
+
+
+def test_stale_cached_zero_confirms_immediately(monkeypatch):
+    """Companion to the brownout-wait test (feature, not a repro): a
+    cached zero older than the brownout horizon is already temporally
+    independent — the confirming count runs without an extra wait."""
+    import os
+    import time as _time
+    events = []
+    monkeypatch.setattr(precount.time, "sleep",
+                        lambda s: events.append(("sleep", s)))
+    monkeypatch.setattr(precount, "rest_count",
+                        lambda *a, **k: events.append(("query",)) or 0)
+    precount.write_precount("o/r", "Q1-2026", 0)
+    p = precount.precount_path("o/r", "Q1-2026")
+    old = _time.time() - 3600
+    os.utime(p, (old, old))
+    assert precount.confirm_zero_precount("o/r", "Q1-2026") == 0
+    first_query = [i for i, e in enumerate(events)
+                   if e[0] == "query"][0]
+    assert all(s < 30 for kind, s in events[:first_query]
+               if kind == "sleep")
+
+
 def test_confirmed_zero_is_cached_and_not_recounted(monkeypatch):
     """Issue #7: a twice-observed 0 is marked confirmed, so later runs
     trust it without re-querying (empty repo-quarters are common)."""
