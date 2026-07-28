@@ -92,7 +92,7 @@ def evidence_world(tmp_path, monkeypatch):
 
 
 def test_recheck_probes_take_max_not_sum(evidence_world):
-    """Issue #6 (RED first): one PR can match several recheck probes (its
+    """Issue #6: one PR can match several recheck probes (its
     branch AND its markers), so probe counts overlap and their sum is not
     a distinct-PR count — an org's recheck evidence is the max probe."""
     (evidence_world / "recheck_scan.tsv").write_text(
@@ -103,7 +103,7 @@ def test_recheck_probes_take_max_not_sum(evidence_world):
 
 def test_branch_evidence_dedups_and_excludes_the_2024_control(
         evidence_world):
-    """Issue #6 (RED first): branch_scan admission evidence must be a
+    """Issue #6: branch_scan admission evidence must be a
     distinct-PR count — Q1-2024 is the deliberate false-positive control
     and must not admit anyone, and re-appended checkpoint rows must not
     count twice. (Quarters partition PRs by created date and prefixes are
@@ -118,7 +118,7 @@ def test_branch_evidence_dedups_and_excludes_the_2024_control(
 
 
 def test_scoped_repos_includes_zero_repo_orgs(tmp_path, monkeypatch):
-    """PR #13 review, P2 (RED first): a repo-scoped org with no manifest
+    """PR #13 review, P2: a repo-scoped org with no manifest
     repos has an EMPTY universe — omitting it from the map makes every
     consumer fall back to org-wide (branch_scan would query org:, the
     precision read-filter would be disabled)."""

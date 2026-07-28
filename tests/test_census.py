@@ -87,7 +87,7 @@ def test_pull_cell_paginates_within_window(monkeypatch):
 
 
 def test_pull_cell_rejects_a_page_with_no_pageinfo(monkeypatch):
-    """Issue #3 item 3 (RED first): the same null-is-not-a-fact confusion as
+    """Issue #3 item 3: the same null-is-not-a-fact confusion as
     the review_action tombstone bug, in the census. `pageInfo` absent or null
     — which is what a partial/errored GraphQL response looks like — was read
     by `not pi.get("hasNextPage")` as 'no more pages', so a TRUNCATED page
@@ -260,7 +260,7 @@ def test_census_rest_fallback_backfills_precount_cache(monkeypatch):
 
 
 def test_zero_precount_needs_independent_confirmation(monkeypatch):
-    """Issue #7 (RED first): a browned-out search returns 200 with
+    """Issue #7: a browned-out search returns 200 with
     issueCount 0, indistinguishable from a real empty — so a 0 precount
     must be re-observed before the repo-period can census as a complete
     empty. Here the recount says 7 while the pulls are browned-out empty:
@@ -276,7 +276,7 @@ def test_zero_precount_needs_independent_confirmation(monkeypatch):
 
 
 def test_unconfirmable_zero_precount_fails_not_empty(monkeypatch):
-    """Issue #7 (RED first): if the confirming recount itself fails, the
+    """Issue #7: if the confirming recount itself fails, the
     repo-period must FAIL (None) — never census as a complete empty."""
     monkeypatch.setattr(precount.time, "sleep", lambda s: None)
     counts = iter([0, None])
@@ -288,7 +288,7 @@ def test_unconfirmable_zero_precount_fails_not_empty(monkeypatch):
 
 
 def test_fresh_zero_confirm_waits_out_the_brownout(monkeypatch):
-    """PR #13 follow-up (RED first): a zero observed moments ago must
+    """PR #13 follow-up: a zero observed moments ago must
     not be 'confirmed' by an immediate re-query — both samples would sit
     inside the same minutes-scale brownout. The confirming count waits
     out the brownout horizon first (the pacing sleeps after each call

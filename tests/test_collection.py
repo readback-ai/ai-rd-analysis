@@ -96,7 +96,7 @@ def test_census_query_has_layer_c_and_accountability_fields():
 
 def test_branch_scan_scoped_org_counts_only_in_scope_repos(
         tmp_path, monkeypatch):
-    """Issue #8 (RED first): for a repo-scoped org, branch_scan must count
+    """Issue #8: for a repo-scoped org, branch_scan must count
     per in-scope repo (summed), never org-wide — org-wide counts include
     out-of-scope, non-AI repos and feed R4 admission evidence."""
     queries = []
@@ -126,7 +126,7 @@ def test_branch_scan_scoped_org_fails_cell_on_any_repo_failure(
 
 def test_sample_branch_prs_filters_out_of_scope_repos(
         tmp_path, monkeypatch):
-    """Issue #8 (RED first): layer-C sample cells for a repo-scoped org
+    """Issue #8: layer-C sample cells for a repo-scoped org
     must not carry PRs from out-of-scope repos — they'd enter the
     precision estimates under the org's population weight."""
     scan = tmp_path / "scan.tsv"
@@ -149,7 +149,7 @@ def test_sample_branch_prs_filters_out_of_scope_repos(
 
 def test_layer_c_precision_filters_scoped_org_samples(
         tmp_path, monkeypatch, capsys):
-    """Issue #8 (RED first): existing sample cells were drawn org-wide,
+    """Issue #8: existing sample cells were drawn org-wide,
     so the precision study must drop a repo-scoped org's out-of-scope
     PRs at read time — they are outside the study universe (R5)."""
     from pipeline.studies import layer_c_precision as lcp
@@ -184,7 +184,7 @@ def _pr_node(repo, created):
 
 def test_sample_branch_prs_queries_scoped_universe_not_orgwide(
         tmp_path, monkeypatch):
-    """PR #13 review, P1 (RED first): the 50-newest cap must apply AFTER
+    """PR #13 review, P1: the 50-newest cap must apply AFTER
     scoping. Here 50 out-of-scope PRs are newer than the only in-scope
     one — an org-wide page never sees it and checkpoints an empty cell
     against a positive scoped pop_count."""
@@ -230,7 +230,7 @@ def test_sample_scoped_queries_fit_search_limit(tmp_path, monkeypatch):
 
 def test_sample_redraws_legacy_orgwide_cell_for_scoped_org(
         tmp_path, monkeypatch):
-    """PR #13 review, P1 (RED first): a cell drawn org-wide is a biased
+    """PR #13 review, P1: a cell drawn org-wide is a biased
     selection carrying an org-wide weight — for a repo-scoped org it is
     re-drawn scoped (cells are versioned by universe='scoped'), while a
     scoped cell is a valid checkpoint and stays skipped."""
