@@ -299,7 +299,14 @@ def split_reviews(pr: dict) -> tuple[list[dict], list[dict], list[dict]]:
     creation AND on or before the as-of — so every per-PR quantity
     finalizes at w8 and advancing the as-of never changes mature numbers.
     PRs lacking createdAt (legacy fixtures) fall back to the as-of bound
-    alone."""
+    alone.
+
+    The reviewer!=author rule applies to bots as it does to humans: a bot
+    review by the PR's own author (coding agents post self-summaries as
+    formal review objects) is not independent review activity and is
+    excluded from the bot bucket. Bot logins compare after [bot]
+    normalization — the author and review nodes can disagree about the
+    suffix."""
     author = (pr.get("author") or {}).get("login")
     created = pr.get("createdAt") or ""
     human_other, human_self, bot = [], [], []
@@ -315,6 +322,9 @@ def split_reviews(pr: dict) -> tuple[list[dict], list[dict], list[dict]]:
             continue          # no createdAt (legacy fixture): frame end + w8
         if ra["__typename"] == "User" and not is_bot_login(ra.get("login")):
             (human_self if ra.get("login") == author else human_other).append(r)
+        elif author and (ra.get("login") or "").removesuffix("[bot]") \
+                == author.removesuffix("[bot]"):
+            pass              # bot self-review: reviewer == PR author
         else:
             bot.append(r)
     return human_other, human_self, bot

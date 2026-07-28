@@ -296,6 +296,18 @@ classified by its author into exactly one of three reviewer types:
    automation, dependency bots. Kept as its own class so AI review is never
    conflated with CI noise.
 
+The reviewer != author rule applies to bots exactly as to humans: a bot
+review whose login (with any `[bot]` suffix stripped) equals the PR
+author's is excluded from classes 2 and 3. Coding agents (three logins —
+cursor, claude, copilot-swe-agent — sit in both `AGENT_PR_AUTHORS` and
+`AI_REVIEWERS`) post self-summaries as formal review objects on their own
+PRs; counting those as AI review misclassified the PR's approval channel
+and its review_action lane. Measured impact of adopting the rule (mature
+PRs): `ai_reviewed` drops on 74 / 36 / 12 PRs in Q4-2025 / Q1-2026 /
+Q2-2026 (0 in Q1-2024; 116 of the 122 are copilot-swe-agent
+self-reviews), moving the weighted ai_review series by <= 0.04pp;
+`other_bot_reviewed` drops on 385 PRs across the window.
+
 **The user-typed-bot problem** (`detect.is_bot_login`): GitHub's
 `__typename` distinguishes App-installed bots, but organizations also run
 bots as ordinary User accounts (found by a comment-volume audit:
