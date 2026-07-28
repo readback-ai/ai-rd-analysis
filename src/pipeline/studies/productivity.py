@@ -540,23 +540,22 @@ def adoption() -> None:
                   f"{r['median']:>8.2f}")
 
 
-FLEET_LOGINS_FILE = "data/derived/fleet_logins.txt"
+_fleet_cache: set[str] | None = None
 
 
 def fleet_logins() -> set[str]:
     """ALL authors (insider or not) with >= FLEET_MIN merged PRs in some
-    study quarter — the exclusion set for review-behavior figures 6-8
-    (fleet pipelines distort review statistics the way they distort
-    per-contributor means). Persisted to data/derived/fleet_logins.txt
-    (reproducible from cells; computed and written when absent)."""
-    from pathlib import Path
-    p = Path(FLEET_LOGINS_FILE)
-    if p.is_file():
-        return {ln.strip() for ln in p.read_text().splitlines()
-                if ln.strip()}
-    *_rest, fleet = _author_months_and_cohorts()
-    p.write_text("\n".join(sorted(fleet)) + "\n")
-    return fleet
+    study quarter — the exclusion set for review-behavior figures 6-8 and
+    the fleet slice in the Figure 3 companion (fleet pipelines distort
+    review statistics the way they distort per-contributor means).
+    Computed from the current cells via the same
+    _author_months_and_cohorts pass that assigns the adoption cohorts, so
+    every consumer shares one fleet definition; memoized per process, no
+    on-disk state."""
+    global _fleet_cache
+    if _fleet_cache is None:
+        *_rest, _fleet_cache = _author_months_and_cohorts()
+    return _fleet_cache
 
 
 def review_mix(by: str = "role", exclude_fleet: bool = True,

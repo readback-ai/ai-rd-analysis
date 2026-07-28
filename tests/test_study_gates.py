@@ -1077,3 +1077,65 @@ def test_bot_sensitivity_like_for_like_weighted_and_two_shares(
     # the two shares MUST differ: the agent bot counts in one, not the other
     assert dilbot == 18.0              # (1/5 * 9 + 0)/10
     assert bot == 36.0                 # (2/5 * 9 + 0)/10
+
+
+def test_fleet_logins_ignores_stale_disk_cache(monkeypatch, tmp_path):
+    """Issue #10 (RED first): fleet_logins() trusted data/derived/
+    fleet_logins.txt unconditionally, so a stale (even committed) file
+    silently mis-sliced Figure 3's fleet series, Figures 6-8, fates, and
+    review_action. The fleet set must come from the current cells."""
+    from pipeline.studies import productivity
+    monkeypatch.chdir(tmp_path)
+    d = tmp_path / "data" / "derived"
+    d.mkdir(parents=True)
+    (d / "fleet_logins.txt").write_text("stale-operator\n")
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({}, {}, {}, {"fresh-operator"}))
+    monkeypatch.setattr(productivity, "_fleet_cache", None, raising=False)
+    assert productivity.fleet_logins() == {"fresh-operator"}
+
+
+def test_fleet_definition_has_a_single_source(monkeypatch, tmp_path):
+    """Issue #10 (RED first): event_by_adoption_month's cohort path
+    computes the fleet set fresh while fleet_logins() read the cache, so
+    figure_2_comp_audits and figure_3_comp_audits could disagree about
+    who is a fleet operator. Both must share one definition."""
+    from pipeline.studies import productivity
+    monkeypatch.chdir(tmp_path)
+    d = tmp_path / "data" / "derived"
+    d.mkdir(parents=True)
+    (d / "fleet_logins.txt").write_text("stale-operator\n")
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({}, {}, {}, {"fresh-operator"}))
+    monkeypatch.setattr(productivity, "_fleet_cache", None, raising=False)
+    *_rest, cohort_fleet = productivity._author_months_and_cohorts()
+    assert productivity.fleet_logins() == cohort_fleet
+
+
+def test_fleet_logins_writes_no_cache_file(monkeypatch, tmp_path):
+    """Issue #10 (RED first): fleet_logins() must not persist an
+    unfingerprinted cache for a later run to trust."""
+    from pipeline.studies import productivity
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "data" / "derived").mkdir(parents=True)
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({}, {}, {}, {"a"}))
+    monkeypatch.setattr(productivity, "_fleet_cache", None, raising=False)
+    assert productivity.fleet_logins() == {"a"}
+    assert not (tmp_path / "data" / "derived"
+                / "fleet_logins.txt").exists()
+
+
+def test_fleet_logins_memoized_per_process(monkeypatch, tmp_path):
+    """Feature test for the issue #10 fix: one author-frame pass per
+    process — every consumer shares the computed set."""
+    from pipeline.studies import productivity
+    calls = []
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "data" / "derived").mkdir(parents=True)
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: calls.append(1) or ({}, {}, {}, {"a"}))
+    monkeypatch.setattr(productivity, "_fleet_cache", None, raising=False)
+    assert productivity.fleet_logins() == {"a"}
+    assert productivity.fleet_logins() == {"a"}
+    assert len(calls) == 1
