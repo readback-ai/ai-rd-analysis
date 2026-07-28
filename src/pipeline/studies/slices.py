@@ -241,7 +241,8 @@ def table(metrics: list[str], header: str) -> None:
                     line += f"{'n/a':>22}"
                     continue
                 mean = weighted_mean(pairs)
-                lo, hi = bootstrap_ci(pairs, 500)
+                lo, hi = bootstrap_ci(
+                    pairs, 500, key=f"slices|{name}|{per}|{m}")
                 line += f"  {100*mean:5.1f} [{100*lo:4.1f},{100*hi:4.1f}]"
             print(line)
 
@@ -305,8 +306,10 @@ def balanced_panel() -> None:
         rows_p = [(rates[(r, per)]["ai_involved"], w.get(r, 1.0)) for r in panel]
         rows_x = [(v["ai_involved"], w.get(repo, 1.0))
                   for (repo, p), v in rates.items() if p == per]
-        mp, (lp, hp) = weighted_mean(rows_p), bootstrap_ci(rows_p, 1000)
-        mx, (lx, hx) = weighted_mean(rows_x), bootstrap_ci(rows_x, 1000)
+        mp, (lp, hp) = weighted_mean(rows_p), bootstrap_ci(
+            rows_p, 1000, key=f"panel|{per}|panel")
+        mx, (lx, hx) = weighted_mean(rows_x), bootstrap_ci(
+            rows_x, 1000, key=f"panel|{per}|cross-section")
         print(f"{per:9}  {100*mp:5.1f} [{100*lp:4.1f},{100*hp:4.1f}]"
               f"  {100*mx:5.1f} [{100*lx:4.1f},{100*hx:4.1f}]")
 

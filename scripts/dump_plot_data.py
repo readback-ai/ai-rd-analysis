@@ -35,8 +35,6 @@ def norm(x):
 
 def main() -> None:
     out = {
-        # order matters: the seeded bootstrap RNG stream is shared within
-        # this process, so calls must stay in this exact sequence
         "usage_rows": usage_rows(),
         "core_rows": core_rows(),
         "adoption_monthly": adoption_monthly(),

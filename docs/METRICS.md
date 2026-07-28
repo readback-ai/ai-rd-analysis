@@ -57,7 +57,7 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
 |---|---|---|
 | `marker_tools` (layer A) | any commit in the PR carries a tool marker: Claude (`noreply@anthropic.com` co-author / "Generated with [Claude Code]" footer), Cursor (`cursoragent@cursor.com`), aider trailer, Codex (`codex@openai.com` author or `chatgpt-codex-connector` committer) | commit-forensic, strongest evidence; floors — squash strips trailers; only first 12 commits fetched |
 | `agent_author` (layer B) | PR author is a Bot-typed account in `AGENT_PR_AUTHORS` (copilot-swe-agent, devin-ai-integration, cursor, google-labs-jules, codegen-sh, amazon-q-developer, factory-droid, claude) | the author IS the tool; no trailer needed |
-| `branch_tool` (layer C) | head branch matches an agent prefix: `codex/`, `copilot/`, `cursor/`, `claude/`, `droid/` (weak, added 2026-07-17) | PR-level attribution only; measured precision per prefix in METHODS §2 (codex/copilot ~95%+; cursor/claude indeterminates are the study's only potential overcount, bounded at 0.06pp on the Q2-2026 headline — report section 6); all-github-actions-committed branches excluded as measured FPs; requires census-v2 cells |
+| `branch_tool` (layer C) | head branch matches an agent prefix: `codex/`, `copilot/`, `cursor/`, `claude/`, `droid/` (weak, added 2026-07-17) | PR-level attribution only; measured precision per prefix in METHODS §2 (codex/copilot ~95%+; cursor/claude/droid indeterminates are the study's only potential overcount, bounded at 0.05pp CW / 0.11pp pooled on the Q2-2026 headline — report section 9); all-github-actions-committed branches excluded as measured FPs; requires census-v2 cells |
 | **`ai_involved`** | **A ∪ B ∪ C — the PRIMARY metric** | an explicit lower bound on true AI involvement |
 | `merged` | merged WITHIN 8 WEEKS of creation (frozen censoring rule; METHODS §1d); events past the frame-end CUTOFF count if inside the window | `merged_ever` = merged at ANY observed time (no window, no cap) — differs from `merged` exactly on >56-day merges; fate metrics are None on w8-immature PRs |
 | `rejected` | closed unmerged within 8 weeks | limbo = w8-mature, neither |
@@ -112,8 +112,10 @@ both framings are reported.
   sensitivity file.
 - **Pooled (secondary)**: share over all PRs (repo-size-dominated; the
   layered decomposition table is pooled and labeled as such).
-- **Uncertainty**: bootstrap 95% CIs over repos, 2,000 resamples, seeded RNG
-  (`analyze._RNG`, seed 20260630) — identical reruns give identical CIs.
+- **Uncertainty**: bootstrap 95% CIs over repos, 2,000 resamples, per-cell
+  seeded streams (`analyze.bootstrap_ci(..., key=...)`, study seed 20260630)
+  — each interval reproduces on its own, independent of the other intervals
+  a run computes.
 - **Marker set**: one canonical set (`detect.MARKERS`: Claude, Cursor,
   aider, Codex, OpenHands, and the vetted self-identified-agent
   identities from the 2026-07-20 committer audit — METHODS §2); the
@@ -144,7 +146,7 @@ argument — one section = one module invocation):
    CIs). Rendered as `artifacts/fig2_ai_usage.png`.
 3. **Figure 3: Merged LOC per core contributor** (`paper_tables --table
    core`) — CW merged (w8) kLOC per insider author + baseline multiple
-   (×2.66 by Q2-2026). Rendered as `fig3_core_loc.png`.
+   (×2.96 by Q2-2026). Rendered as `fig3_core_loc.png`.
 4. **Layered decomposition** (`pipeline.studies.layers`) — pooled
    disjoint shares: B-agent > A-marker > C-branch-only, plus union
    (exact per-PR; replaced `pipeline.integrate`'s sampled blending,
@@ -169,8 +171,8 @@ argument — one section = one module invocation):
 14. **Figure A1: adoption cohorts** (`--cut adoption`) — fixed cohorts
     early/medium/late/never/**fleet** (≥300 merged PRs/quarter, assigned
     first); AI/nonAI/total kLOC per author with CI + median. Rendered as
-    `fig_a1_adoption_cohorts.png`; companions: `fig4_event_balanced.png`
-    (pooled balanced event panel), `fig5_fleet_vs_nonadopters.png`,
+    `fig_a1_adoption_cohorts.png`; companions: `figure_2_comp_audits.png`
+    (balanced event panels per adoption month), `fig5_fleet_vs_nonadopters.png`,
     `fig_a2_adoption_event.png` (event time net of non-adopters).
 15. **Merged LOC by approval channel** (`--cut channels`) — humanRev /
     botOnly / selfUnrev / otherUnrev shares of merged LOC.

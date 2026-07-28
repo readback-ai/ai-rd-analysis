@@ -5,7 +5,7 @@
 
 Methodology for the study of AI-assisted development practices at leading AI
 organizations; this document is canonical. Results live in
-`artifacts/v2_results.md`; every module named here is in `src/pipeline/`.
+`artifacts/results.md`; every module named here is in `src/pipeline/`.
 
 ## 0. Study cutoff and as-of policy
 
@@ -43,10 +43,11 @@ hub top organizations, GitHub AI-topic organizations, **Epoch AI's
 notable-models organizations** (epoch.ai, CC-BY; `epoch_org_map.tsv` is the
 name->handle transcription), and TechCrunch's 2025 $100M+ AI funding
 round-up (`techcrunch_ai_orgs.tsv`, rote transcription). A **declared
-hand-curated remainder** (`curated_orgs.tsv`, ~33 labs on neither Epoch nor
+hand-curated remainder** (`curated_orgs.tsv`, 18 labs on neither Epoch nor
 TechCrunch — mostly Chinese labs whose models Epoch attributes to parent
-companies, and labs too new to have a notable model) is stated plainly as
-curation.
+companies, and labs too new to have a notable model; trimmed 2026-07-10
+from an initial 33 by counterfactual test, later re-additions included) is
+stated plainly as curation.
 
 **R2 — Quality.** Flagship repository >=1,000 stars. Members of the
 AI-developer lists (Epoch/TechCrunch/curated) are exempt: those lists
@@ -61,8 +62,12 @@ lists proved the robust combination.
 
 **R4 — Evidence.** >=5 AI-evidence PRs/commits in the MAXIMUM single
 evidence source (marker scan, layered recheck, branch counts, or census-
-derived union — maxima avoid double-counting one PR across sources), or
->=0.1% of the org's censused PRs; windows all <= cutoff. An org with no measurable AI-tool footprint contributes
+derived union — the max ACROSS sources avoids adding one PR's evidence
+from two sources; WITHIN the recheck and branch-count sources the probes/
+rows are summed, so a PR matching two probes, or a branch PR counted in
+several quarters, can contribute more than once to that source's total),
+or >=0.1% of the org's censused PRs (rate computed from the census
+evidence pair only); windows all <= cutoff. An org with no measurable AI-tool footprint contributes
 nothing to AI-practice metrics and only noise to denominators.
 
 **R5 — Scope.** AI developers enter FULL-ORG, except the declared
@@ -119,10 +124,11 @@ churn. Quarterly regeneration (`scripts/regenerate.py`) remains the
 canonical headline path.
 Plumbing (fixed 2026-07-20, external review): collection is restricted to
 the collectable population (documented-inaccessible repos waived, same
-rule as regenerate stage C), and the update passes its month tokens to
-`analyze --periods`, which extends the frozen quarter map — previously a
-newly collected month's cells were silently discarded by the
-static-quarter filter. Cached full-range census cells are re-validated
+rule as regenerate stage C), and the update persists its month tokens in
+`data/derived/incremental_months.txt` — a registry `analyze` reads to
+extend the frozen quarter map (`analyze.extended_quarters`; explicit
+`--periods` tokens are additive) — previously a newly collected month's
+cells were silently discarded by the static-quarter filter. Cached full-range census cells are re-validated
 against the precount (same drift allowance as fresh pulls) before being
 trusted, so brownout-poisoned empty caches self-heal on the next run.
 
@@ -154,8 +160,10 @@ trusted, so brownout-poisoned empty caches self-heal on the next run.
 6. **Q1-2024 caption** on every table where the column appears:
    detector-validity check and review-practice baseline, not an AI-usage
    estimate.
-7. **Determinism & completeness**: seeded bootstrap (20260630, 2,000
-   draws), seeded samples, SHA-256 manifest, fail-hard on incomplete or
+7. **Determinism & completeness**: seeded bootstrap (seed 20260630; 2,000
+   draws on the headline table, paper figures and productivity tables —
+   slice tables use 500, the balanced panel and monthly trend prints
+   1,000), seeded samples, SHA-256 manifest, fail-hard on incomplete or
    invalid cells, gap-free coverage gate with documented waivers.
 
 ## 2. Detection: three independent layers (`detect.py`)
@@ -183,8 +191,10 @@ overwhelmingly commit under PERSONAL identities, which no needle can
 catch. `-agent`/`_agent` joined the user-typed-bot login suffixes
 (author/reviewer hygiene). Search-side rule: co-author trailers
 are only findable by BARE-TERM commit search — the `author-email:` qualifier
-matches primary authors only and returns zero for co-authored commits
-(measured ~10–16× undercount). Qualifier terms remain correct for tools that
+matches primary authors only and returns ZERO for co-authored commits when
+org-scoped (measured: 0 vs 251 for QwenLM, 0 vs 799 for OpenBMB; globally
+the bare search finds ~3× more, 15.7M vs 5.31M — see
+`artifacts/agent_detection_cues.md` cue 4). Qualifier terms remain correct for tools that
 ARE the author/committer.
 
 **Layer B — agent PR authorship.** PRs authored by coding-agent bot accounts
@@ -325,7 +335,7 @@ footnotes that residual per quarter.
 tools are likelier undercounted); local tools with default settings
 (Windsurf, Codex CLI, Copilot in-IDE) leave no public metadata; in-session
 review (reading agent diffs before accepting) is invisible except through
-residue (v2_results §11d–e).
+residue (`studies.review_modes`).
 
 ## 3. Census design (`precount.py`, `census.py`)
 
@@ -402,8 +412,12 @@ percentile. Wide CIs mean the mean is carried by few/heterogeneous
 repos; narrow CIs mean it is a broad-based property. Within-repo
 PR-level noise is deliberately NOT resampled (there is none to model —
 complete enumeration), and no claim is made about GitHub beyond the
-frame (METHODS §6). The RNG is module-level and seeded (`analyze._RNG`,
-seed 20260630): identical reruns reproduce identical intervals. Studies
+frame (METHODS §6). Each reported interval draws from its OWN seeded
+stream, derived from the study seed (20260630) and a key naming the CI
+cell — table, period, metric (`analyze.bootstrap_ci`, whose `key` argument
+is required). So an interval is reproducible in isolation: identical reruns
+reproduce it, and so does a run that computes a different set of other
+intervals first. Studies
 with their own uncertainty needs reuse the same helper (paper figures)
 or document their estimator inline (review_action's two-design split —
 equal-probability for rates, Horvitz–Thompson over PPS for LOC shares,
@@ -527,10 +541,12 @@ content.
   w8-immature at the frozen as-of and carry no fate (excluded, not
   miscounted); Q2 fate cells have less data until the 2026-09-01 re-pull
   finalizes them (§1c).
-- **31 repo-periods (0.4%) permanently inaccessible.**
+- **284 repo-periods (3.3%; 71 repos) permanently inaccessible** — each
+  waived explicitly in `inaccessible_repos.txt` (census manifest:
+  8,284 of 8,568 repo-periods covered).
 - **Branch-PR samples are first-page (created-desc) per org-quarter** — mild
   within-quarter recency bias.
 - **Insider classification** (authorAssociation) misses staff whose org
   membership is private — several "external" substantial-PR authors are
-  founders (v2_results §10 caveat).
+  founders (working-log finding, retired log).
 - **In-session review is unobservable**; §11d–e measure only its residue.
