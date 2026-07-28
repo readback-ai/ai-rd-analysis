@@ -117,6 +117,44 @@ def test_ai_reviewer_decomposed_from_ci_bots():
     assert c.ai_reviewed and c.other_bot_reviewed and not c.human_reviewed
 
 
+def _bot_authored_pr(author_login, reviews):
+    return {"author": {"login": author_login, "__typename": "Bot"},
+            "commits": {"nodes": []},
+            "reviews": {"nodes": list(reviews)}}
+
+
+def test_agent_self_review_is_not_ai_review():
+    """Issue #9 (spec flag F-16): reviewer!=author was enforced for humans
+    but not bots, so an agent's formal review of its OWN PR (cursor, claude
+    and copilot-swe-agent sit in both AGENT_PR_AUTHORS and AI_REVIEWERS)
+    counted as AI review — pushing the PR out of review_action's clean lane,
+    labeling its approval channel botOnly, and inflating ai_review rates.
+    A self-review must set neither ai_reviewed nor other_bot_reviewed, and
+    logins must compare after [bot] normalization (the author node and the
+    review node may disagree about the suffix)."""
+    for author, reviewer in (("claude", "claude[bot]"),
+                             ("claude[bot]", "claude"),
+                             ("cursor[bot]", "cursor[bot]")):
+        c = classify_pr(_bot_authored_pr(
+            author, [_rev(reviewer, typename="Bot", state="COMMENTED")]))
+        assert not c.ai_reviewed, (author, reviewer)
+        assert not c.other_bot_reviewed, (author, reviewer)
+    # an INDEPENDENT AI reviewer on the agent's PR still counts
+    c = classify_pr(_bot_authored_pr(
+        "claude", [_rev("claude[bot]", typename="Bot"),
+                   _rev("coderabbitai[bot]", typename="Bot")]))
+    assert c.ai_reviewed and not c.other_bot_reviewed
+
+
+def test_bot_self_review_is_not_other_bot_review():
+    """Issue #9 (spec flag F-16): the reviewer!=author rule applies to
+    non-AI bots too — a CI bot approving its own PR is not independent
+    bot review activity."""
+    c = classify_pr(_bot_authored_pr(
+        "release-bot[bot]", [_rev("release-bot[bot]", typename="Bot")]))
+    assert not c.other_bot_reviewed and not c.ai_reviewed
+
+
 # ------------------------------------------------------------ classify_pr
 
 def test_self_merged_requires_mergedby_field():
