@@ -218,17 +218,19 @@ def population(scope: str | None = None) -> list[str]:
 
 
 def scoped_repos() -> dict[str, list[str]]:
-    """org -> its in-scope repos, for every repo-scoped population org
+    """org -> its in-scope repos, for EVERY repo-scoped population org
     (population_repos.txt filtered by owner). Layer-C scans and samples
     take these instead of org-wide queries: a repo-scoped org's universe
-    is its AI-topic repos only (R5), matching the census."""
+    is its AI-topic repos only (R5), matching the census. An org with no
+    manifest repos maps to an EMPTY universe — it must not fall back to
+    org-wide by being absent from this map."""
     owners = {o.lower(): o for o in population(scope="repo")}
-    out: dict[str, list[str]] = defaultdict(list)
+    out: dict[str, list[str]] = {org: [] for org in owners.values()}
     for r in _lines(DRV / "population_repos.txt"):
         org = owners.get(r.split("/", 1)[0].lower())
         if org:
             out[org].append(r)
-    return dict(out)
+    return out
 
 
 def verify() -> None:

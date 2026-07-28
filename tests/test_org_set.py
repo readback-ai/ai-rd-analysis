@@ -115,3 +115,17 @@ def test_branch_evidence_dedups_and_excludes_the_2024_control(
         "ctrl\tQ1-2026\tcodex/\t1\n")
     ev, _ = org_set.evidence()
     assert ev["ctrl"] == 3
+
+
+def test_scoped_repos_includes_zero_repo_orgs(tmp_path, monkeypatch):
+    """PR #13 review, P2 (RED first): a repo-scoped org with no manifest
+    repos has an EMPTY universe — omitting it from the map makes every
+    consumer fall back to org-wide (branch_scan would query org:, the
+    precision read-filter would be disabled)."""
+    drv = tmp_path / "derived"
+    drv.mkdir()
+    monkeypatch.setattr(org_set, "DRV", drv)
+    (drv / "population.tsv").write_text(
+        "bigco\trepo\tconglomerate\t0\nacme\tfull\tdev-list\t3\n")
+    (drv / "population_repos.txt").write_text("acme/x\nother/y\n")
+    assert org_set.scoped_repos() == {"bigco": []}

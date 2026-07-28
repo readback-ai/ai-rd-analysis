@@ -175,3 +175,87 @@ def test_layer_c_precision_filters_scoped_org_samples(
            if ln.startswith("codex")][0]
     assert row.split()[1] == "1"          # the out-of-scope PR is gone
     assert row.split()[2] == "100.0%"     # web-flow share over in-scope only
+
+
+def _pr_node(repo, created):
+    return {"number": 1, "headRefName": "codex/x", "createdAt": created,
+            "repository": {"nameWithOwner": repo}}
+
+
+def test_sample_branch_prs_queries_scoped_universe_not_orgwide(
+        tmp_path, monkeypatch):
+    """PR #13 review, P1 (RED first): the 50-newest cap must apply AFTER
+    scoping. Here 50 out-of-scope PRs are newer than the only in-scope
+    one — an org-wide page never sees it and checkpoints an empty cell
+    against a positive scoped pop_count."""
+    scan = tmp_path / "scan.tsv"
+    scan.write_text("bigco\tQ2-2026\tcodex/\t3\n")
+
+    def fake(query, variables, jq, expect):
+        q = variables["q"]
+        if "repo:" in q:
+            return [_pr_node("bigco/ai-a", "2026-04-02T00:00:00Z")]
+        return [_pr_node("bigco/legacy", "2026-06-15T00:00:00Z")] * 50
+    monkeypatch.setattr(pull_prs, "graphql_nodes", fake)
+    out = tmp_path / "cells"
+    pull_prs.sample_branch_prs("codex/", scan, out, ["Q2-2026"],
+                               in_scope={"bigco": {"bigco/ai-a"}})
+    cells = pull_prs.load_branch_samples(out)
+    repos = [p["repository"]["nameWithOwner"]
+             for c in cells for p in c["prs"]]
+    assert repos == ["bigco/ai-a"]
+
+
+def test_sample_scoped_queries_fit_search_limit(tmp_path, monkeypatch):
+    """PR #13 review, P1: a large scoped universe is queried in chunks —
+    every search query fits GitHub's 256-char limit and every in-scope
+    repo appears in exactly one chunk."""
+    repos = [f"bigco/some-repo-name-{i:03d}" for i in range(40)]
+    scan = tmp_path / "scan.tsv"
+    scan.write_text("bigco\tQ2-2026\tcodex/\t3\n")
+    queries = []
+
+    def fake(query, variables, jq, expect):
+        queries.append(variables["q"])
+        return []
+    monkeypatch.setattr(pull_prs, "graphql_nodes", fake)
+    pull_prs.sample_branch_prs("codex/", scan, tmp_path / "cells",
+                               ["Q2-2026"],
+                               in_scope={"bigco": set(repos)})
+    assert all(len(q) <= 256 for q in queries)
+    seen = [m for q in queries for m in q.split()
+            if m.startswith("repo:")]
+    assert sorted(m[len("repo:"):] for m in seen) == sorted(repos)
+
+
+def test_sample_redraws_legacy_orgwide_cell_for_scoped_org(
+        tmp_path, monkeypatch):
+    """PR #13 review, P1 (RED first): a cell drawn org-wide is a biased
+    selection carrying an org-wide weight — for a repo-scoped org it is
+    re-drawn scoped (cells are versioned by universe='scoped'), while a
+    scoped cell is a valid checkpoint and stays skipped."""
+    scan = tmp_path / "scan.tsv"
+    scan.write_text("bigco\tQ2-2026\tcodex/\t3\n")
+    out = tmp_path / "cells"
+    out.mkdir()
+    (out / "bigco__Q2-2026.json").write_text(json.dumps(
+        {"org": "bigco", "period": "Q2-2026", "pop_count": 999,
+         "prs": [_pr_node("bigco/legacy", "2026-06-15T00:00:00Z")]}))
+    calls = []
+
+    def fake(query, variables, jq, expect):
+        calls.append(1)
+        return [_pr_node("bigco/ai-a", "2026-04-02T00:00:00Z")]
+    monkeypatch.setattr(pull_prs, "graphql_nodes", fake)
+    scope = {"bigco": {"bigco/ai-a"}}
+    pull_prs.sample_branch_prs("codex/", scan, out, ["Q2-2026"],
+                               in_scope=scope)
+    cell = json.loads((out / "bigco__Q2-2026.json").read_text())
+    assert cell["universe"] == "scoped"
+    assert cell["pop_count"] == 3
+    assert [p["repository"]["nameWithOwner"] for p in cell["prs"]] \
+        == ["bigco/ai-a"]
+    n = len(calls)
+    pull_prs.sample_branch_prs("codex/", scan, out, ["Q2-2026"],
+                               in_scope=scope)
+    assert len(calls) == n        # scoped cell is a valid checkpoint
