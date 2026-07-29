@@ -224,13 +224,13 @@ queried directly, before the per-cell page cap — and filtered again at
 read time as belt-and-braces): the share carrying
 positive provenance signals (GitHub web-flow committer, or the product's
 machine-generated slug pattern) is codex/ 95%, copilot/ 98%, cursor/ 49%,
-claude/ 43%. The web-flow identity (`noreply@github.com` committer) is any
+claude/ 42%. The web-flow identity (`noreply@github.com` committer) is any
 web-UI/API commit and is NOT standalone agent evidence — it confirms only
 CONDITIONED on the agent-named branch; these precision figures measure
 exactly that combination. One false-positive class was MEASURED and is
 EXCLUDED from detection: branches named after the product but committed
-entirely by github-actions[bot] (CI canaries; 19.6% of C-only claude/
-samples). The remainder (cursor/ 51%, claude/ 38%) is INDETERMINATE:
+entirely by github-actions[bot] (CI canaries; 18.4% of C-only claude/
+samples). The remainder (cursor/ 51%, claude/ 39%) is INDETERMINATE:
 user-pushed commits on a prefix branch are consistent both with an agent
 branch continued locally (true positive) and a human-named branch (false
 positive); the Q1-2024 zero shows no pre-product baseline of such naming,
