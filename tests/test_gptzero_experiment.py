@@ -351,10 +351,12 @@ def test_score_drops_rows_for_redrawn_documents(tmp_path, monkeypatch):
     monkeypatch.setattr(gz, "RESERVATIONS",
                         local / "results" / "reservations.jsonl",
                         raising=False)
+    monkeypatch.setattr(gptzero_client, "PINNED_VERSION", "pinver")
     monkeypatch.setattr(
         gptzero_client, "score",
         lambda sha, text, cache_dir, resv, **kw:
-            ({"documents": [{"predicted_class": "ai"}]}, 3))
+            ({"version": "pinver",
+              "documents": [{"predicted_class": "ai"}]}, 3))
     gz.cmd_score(None)
     rows = [json.loads(ln)
             for ln in results.read_text().splitlines() if ln.strip()]
@@ -424,6 +426,140 @@ def test_plus_plus_source_lines_survive_parsing():
             "+done = 1;\n")
     files = diffs.parse_diff(diff)
     assert files == [("inc.c", [["++counter;", "done = 1;"]])]
+
+
+def _score_world(tmp_path, monkeypatch, docs_row, results_rows=(),
+                 resp_version="pinver"):
+    import gptzero_client
+    import gz
+    local = tmp_path / "local"
+    (local / "results").mkdir(parents=True)
+    (local / "cache" / "docs").mkdir(parents=True)
+    (local / "manifest.json").write_text(json.dumps(
+        {"fingerprint": "FP", "params": {}, "slots": []}))
+    docs = local / "docs.jsonl"
+    docs.write_text(json.dumps(docs_row) + "\n")
+    (local / "cache" / "docs" / f"{docs_row['doc_sha']}.txt")\
+        .write_text("one two three")
+    results = local / "results" / "scores.jsonl"
+    results.write_text("".join(json.dumps(r) + "\n"
+                               for r in results_rows))
+    monkeypatch.setattr(gz, "LOCAL", local)
+    monkeypatch.setattr(gz, "MANIFEST", local / "manifest.json")
+    monkeypatch.setattr(gz, "DOCS", docs)
+    monkeypatch.setattr(gz, "RESULTS", results)
+    monkeypatch.setattr(gz, "DOC_CACHE", local / "cache" / "docs")
+    monkeypatch.setattr(gz, "RESP_CACHE", local / "cache" / "responses")
+    monkeypatch.setattr(gz, "RESERVATIONS",
+                        local / "results" / "reservations.jsonl",
+                        raising=False)
+    monkeypatch.setattr(
+        gptzero_client, "score",
+        lambda sha, text, cache_dir, resv, **kw:
+            ({"version": resp_version,
+              "documents": [{"predicted_class": "ai"}]}, 3))
+    return gz, results
+
+
+_DOC_ROW = {"slot": "P:a:ai", "arm": "P", "author": "a",
+            "period": "Q2-2026", "ai": True, "repo": "o/r", "num": 1,
+            "loc": 100, "doc_sha": "SHA", "words": 3, "kept": ["x.py"],
+            "dropped": [], "truncated": False, "fingerprint": "FP"}
+
+
+def test_full_score_run_requires_a_pinned_version(tmp_path, monkeypatch):
+    """PR re-review P2: only the smoke run (--limit) may go unpinned;
+    an unlimited run with PINNED_VERSION unset must refuse."""
+    import gptzero_client
+    gz, _ = _score_world(tmp_path, monkeypatch, dict(_DOC_ROW))
+    monkeypatch.setattr(gptzero_client, "PINNED_VERSION", None)
+    with pytest.raises(SystemExit):
+        gz.cmd_score(None)
+    gz.cmd_score(2)                       # smoke is allowed unpinned
+
+
+def test_pinned_run_invalidates_rows_from_other_versions(
+        tmp_path, monkeypatch):
+    """PR re-review P2: once a version is pinned, results scored under
+    another (or no) version are invalid — dropped and rescored."""
+    import gptzero_client
+    stale = {**_DOC_ROW, "billed_words": 3, "predicted_class": "human",
+             "model_version": None}
+    gz, results = _score_world(tmp_path, monkeypatch, dict(_DOC_ROW),
+                               results_rows=[stale],
+                               resp_version="pinver")
+    monkeypatch.setattr(gptzero_client, "PINNED_VERSION", "pinver")
+    gz.cmd_score(None)
+    rows = [json.loads(ln)
+            for ln in results.read_text().splitlines() if ln.strip()]
+    assert len(rows) == 1
+    assert rows[0]["model_version"] == "pinver"
+    assert rows[0]["predicted_class"] == "ai"      # rescored, not kept
+
+
+def test_mismatched_response_version_is_not_recorded(
+        tmp_path, monkeypatch):
+    """PR re-review P2: a response whose version differs from the pin is
+    a contract violation — logged and NOT written to results."""
+    import gptzero_client
+    gz, results = _score_world(tmp_path, monkeypatch, dict(_DOC_ROW),
+                               resp_version="other")
+    monkeypatch.setattr(gptzero_client, "PINNED_VERSION", "pinver")
+    gz.cmd_score(None)
+    assert results.read_text().strip() == ""
+
+
+def test_fetch_rebuilds_when_assembly_params_change(
+        tmp_path, monkeypatch):
+    """PR re-review P2: a document row survives --fetch only under the
+    assembly parameters it was built with — changing word_cap must
+    rebuild from the cached diff, not relabel the old document."""
+    import diffs
+    import gz
+    manifest = {"fingerprint": "FP2",
+                "params": {"word_cap": 10, "word_floor": 1},
+                "slots": [
+                    {"slot": "P:a:ai", "arm": "P", "author": "a",
+                     "period": "Q2-2026", "ai": True,
+                     "candidates": [["o/r", 1, 100]]}]}
+    local = tmp_path / "local"
+    local.mkdir()
+    (local / "manifest.json").write_text(json.dumps(manifest))
+    docs = local / "docs.jsonl"
+    old = {**_DOC_ROW, "words": 600, "word_cap": 600,
+           "word_floor": 100, "assembly": diffs.ASSEMBLY}
+    docs.write_text(json.dumps(old) + "\n")
+    monkeypatch.setattr(gz, "LOCAL", local)
+    monkeypatch.setattr(gz, "MANIFEST", local / "manifest.json")
+    monkeypatch.setattr(gz, "DOCS", docs)
+    monkeypatch.setattr(gz, "DOC_CACHE", local / "cache")
+    monkeypatch.setattr(
+        diffs, "fetch_diff",
+        lambda repo, num, cache_dir, pace=0.5:
+            "diff --git a/x.py b/x.py\n+++ b/x.py\n@@ -1 +1,2 @@\n"
+            "+short = 1\n")
+    gz.cmd_fetch()
+    rows = [json.loads(ln)
+            for ln in docs.read_text().splitlines() if ln.strip()]
+    assert rows[0]["word_cap"] == 10          # rebuilt under new params
+    assert rows[0]["words"] <= 10
+
+
+def test_report_treats_missing_version_as_its_own_version(
+        tmp_path, capsys):
+    """PR re-review P2: a row with no model_version must not silently
+    pool with pinned rows — it counts as a distinct 'unknown' version
+    and triggers the mixed-version refusal."""
+    rows = [{"arm": "P", "author": "a", "ai": True, "words": 300,
+             "class_probabilities": {"ai": 0.9},
+             "predicted_class": "ai", "model_version": "v1"},
+            {"arm": "P", "author": "a", "ai": False, "words": 300,
+             "class_probabilities": {"ai": 0.1},
+             "predicted_class": "human"}]
+    p = tmp_path / "scores.jsonl"
+    p.write_text("\n".join(json.dumps(r) for r in rows) + "\n")
+    analyze.report(p)
+    assert "REFUSING" in capsys.readouterr().out
 
 
 def test_analysis_paired_sign_and_arm_rates():

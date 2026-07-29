@@ -26,23 +26,34 @@ experiment calibrates GPTZero against the study's own labels.
   Candidate lists are seeded whole-pool shuffles, so deepening `k_cand`
   refills unfilled slots without disturbing fetched ones.
 - **Budget**: ≤80 docs × ≤600 words ≤ 48k, under a hard 50k ceiling
-  enforced before any HTTP; responses cached by document sha256 and
-  never re-billed; the ledger is recomputed from the results file.
+  enforced against a durable **reservation ledger** — one row is
+  appended before EVERY HTTP attempt, because an attempt can be billed
+  server-side even when its response is lost (connection drop, crash
+  before the cache write). Responses are cached by (detector version,
+  document sha256) and a cached document is never re-billed under the
+  same version.
+- **Version discipline**: the full run requires a pinned detector
+  version. The smoke run may go unpinned; once pinned, requests carry
+  the version, responses that report a different version are refused,
+  results scored under any other (or no) version are invalidated and
+  rescored, and the report refuses to pool mixed versions.
 
 ## Run
 
 ```
-python experiments/gptzero/gz.py --sample   # manifest + pool sizes
-python experiments/gptzero/gz.py --fetch    # diffs -> documents
-python experiments/gptzero/gz.py --score --limit 2   # smoke first
-python experiments/gptzero/gz.py --score
-python experiments/gptzero/gz.py            # analysis report
+python experiments/gptzero/gz.py --sample            # manifest + pool sizes
+python experiments/gptzero/gz.py --fetch             # diffs -> documents
+python experiments/gptzero/gz.py --score --limit 2   # unpinned smoke
+# read the smoke output's model version, then set
+#   gptzero_client.PINNED_VERSION = "<that version>"
+python experiments/gptzero/gz.py --score             # refuses while unpinned
+python experiments/gptzero/gz.py                     # analysis report
 ```
 
 API key: `GPTZERO_API_KEY` env var, or paste into `local/api_key`.
-Everything data-shaped (manifest, documents, diffs, responses, scores)
-lives under `local/` — gitignored; only code and this README are
-committed.
+Everything data-shaped (manifest, documents, diffs, responses,
+reservations, scores) lives under `local/` — gitignored; only code and
+this README are committed.
 
 ## What the numbers do and don't license
 

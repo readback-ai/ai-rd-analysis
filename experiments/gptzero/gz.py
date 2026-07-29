@@ -64,15 +64,20 @@ def cmd_fetch() -> None:
     manifest = json.loads(MANIFEST.read_text())
     cap = manifest["params"]["word_cap"]
     floor = manifest["params"]["word_floor"]
-    # A row is a valid checkpoint only if it is FILLED and its chosen PR
-    # is still among its slot's candidates (a redraw invalidates rows);
-    # unfilled slots are retried every run — a deepened candidate pool
-    # can fill them later.
+    # A row is a valid checkpoint only if it is FILLED, its chosen PR is
+    # still among its slot's candidates (a redraw invalidates rows), AND
+    # it was assembled under the current rules — cap, floor, and the
+    # assembly version — else it is rebuilt from the cached diff (a pure
+    # k_cand deepening retains everything). Unfilled slots are retried
+    # every run.
     cands_of = {s["slot"]: {(c[0], int(c[1])) for c in s["candidates"]}
                 for s in manifest["slots"]}
     filled = {s: r for s, r in _doc_rows().items()
               if not r.get("unfilled")
-              and (r["repo"], r["num"]) in cands_of.get(s, set())}
+              and (r["repo"], r["num"]) in cands_of.get(s, set())
+              and r.get("word_cap") == cap
+              and r.get("word_floor") == floor
+              and r.get("assembly") == diffs.ASSEMBLY}
     LOCAL.mkdir(parents=True, exist_ok=True)
     fp = manifest["fingerprint"]
     with DOCS.open("w") as out:
@@ -98,7 +103,9 @@ def cmd_fetch() -> None:
                 row = {**{k: slot[k] for k in
                           ("slot", "arm", "author", "period", "ai")},
                        "repo": repo, "num": int(num), "loc": int(loc),
-                       "doc_sha": sha, "fingerprint": fp, **meta}
+                       "doc_sha": sha, "fingerprint": fp,
+                       "word_cap": cap, "word_floor": floor,
+                       "assembly": diffs.ASSEMBLY, **meta}
                 break
             if row is None:
                 row = {**{k: slot[k] for k in
@@ -125,6 +132,11 @@ def cmd_fetch() -> None:
 def cmd_score(limit: int | None) -> None:
     import gptzero_client as gzc
     fp = json.loads(MANIFEST.read_text())["fingerprint"]
+    if gzc.PINNED_VERSION is None and limit is None:
+        raise SystemExit(
+            "full run requires a pinned detector version: smoke first "
+            "(--score --limit 2), set gptzero_client.PINNED_VERSION to "
+            "the version the responses report, then re-run --score")
     docs = {r["slot"]: r for r in _doc_rows().values()
             if not r.get("unfilled")}
     stale = [r["slot"] for r in docs.values()
@@ -137,12 +149,15 @@ def cmd_score(limit: int | None) -> None:
     if RESULTS.is_file():
         old = [json.loads(ln)
                for ln in RESULTS.read_text().splitlines() if ln.strip()]
-    # A result binds to the document its slot CURRENTLY selects: after a
-    # redraw changes a slot's doc_sha, the stale row is dropped and the
-    # slot rescored (the response cache makes a re-key free). Rows for
-    # slots no longer in the manifest drop the same way.
+    # A result binds to the document its slot CURRENTLY selects AND to
+    # the pinned detector version: after a redraw changes a slot's
+    # doc_sha, or once a pin is set, rows scored otherwise are dropped
+    # and rescored (the response cache makes a same-version re-key
+    # free). Rows for slots no longer in the manifest drop the same way.
     valid = [r for r in old
-             if docs.get(r["slot"], {}).get("doc_sha") == r["doc_sha"]]
+             if docs.get(r["slot"], {}).get("doc_sha") == r["doc_sha"]
+             and (gzc.PINNED_VERSION is None
+                  or r.get("model_version") == gzc.PINNED_VERSION)]
     RESULTS.parent.mkdir(parents=True, exist_ok=True)
     with RESULTS.open("w") as out:
         for r in valid:
@@ -159,12 +174,18 @@ def cmd_score(limit: int | None) -> None:
             except RuntimeError as e:
                 print(f"SCORE FAIL {r['slot']}: {e}", flush=True)
                 continue          # deferred: absent from results, retried
+            fields = gzc.doc_fields(resp)
+            if (gzc.PINNED_VERSION is not None
+                    and fields["model_version"] != gzc.PINNED_VERSION):
+                print(f"VERSION MISMATCH {r['slot']}: response reports "
+                      f"{fields['model_version']!r}, pin is "
+                      f"{gzc.PINNED_VERSION!r} — not recorded",
+                      flush=True)
+                continue
             out.write(json.dumps(
-                {**r, **gzc.doc_fields(resp),
-                 "billed_words": billed}) + "\n")
+                {**r, **fields, "billed_words": billed}) + "\n")
             out.flush()
-            print(f"scored {r['slot']}: "
-                  f"{gzc.doc_fields(resp)['predicted_class']} "
+            print(f"scored {r['slot']}: {fields['predicted_class']} "
                   f"({billed} words billed)", flush=True)
     print(f"reserved: {gzc.ledger(RESERVATIONS)}/{gzc.BUDGET_WORDS} "
           f"words")

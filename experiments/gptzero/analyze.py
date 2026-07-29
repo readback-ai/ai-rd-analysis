@@ -105,8 +105,8 @@ def report(results_path: Path) -> None:
     if not rows:
         print(f"no results at {results_path} — run --score first")
         return
-    versions = sorted({r.get("model_version") for r in rows
-                       if r.get("model_version")})
+    versions = sorted({r.get("model_version") or "unknown"
+                       for r in rows})
     if len(versions) > 1:
         print(f"REFUSING pooled analysis: results mix detector versions "
               f"{versions} — pin gptzero_client.PINNED_VERSION and "

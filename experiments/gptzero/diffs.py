@@ -14,6 +14,11 @@ import subprocess
 import time
 from pathlib import Path
 
+# Document-definition version: bump whenever the assembly rules change
+# (allowlist, vendored filter, packing, headers) — fetched documents are
+# retained across runs only when it matches.
+ASSEMBLY = "v1"
+
 CODE_EXTS = {
     ".py", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".go", ".rs", ".java",
     ".kt", ".kts", ".c", ".h", ".cc", ".cpp", ".hpp", ".cxx", ".cs",
