@@ -162,7 +162,9 @@ def test_budget_guard_blocks_before_http(tmp_path):
     assert calls == []
 
 
-def test_cache_hit_never_resubmits_or_reserves(tmp_path):
+def test_cache_hit_never_resubmits_or_reserves(tmp_path, monkeypatch):
+    import gptzero_client as gzc
+    monkeypatch.setattr(gzc, "PINNED_VERSION", None)
     resv = tmp_path / "resv.jsonl"
     calls = []
 
@@ -194,22 +196,16 @@ def test_pinned_version_namespaces_cache_and_request(tmp_path,
         gptzero_client._cache_path(tmp_path, "sha"))
     sent = {}
 
-    class _Resp:
-        def __enter__(self):
-            return self
+    def fake_run(cmd, input=None, capture_output=True, text=True):
+        sent.update(json.loads(input))
+        assert not any("x-api-key" in c for c in cmd)   # key never in argv
+        class R:
+            returncode = 0
+            stdout = '{"documents": []}\n200'
+            stderr = ""
+        return R()
 
-        def __exit__(self, *a):
-            return False
-
-        def read(self):
-            return b'{"documents": []}'
-
-    def fake_urlopen(req, timeout):
-        sent.update(json.loads(req.data))
-        return _Resp()
-
-    monkeypatch.setattr(gptzero_client.urllib.request, "urlopen",
-                        fake_urlopen)
+    monkeypatch.setattr(gptzero_client.subprocess, "run", fake_run)
     gptzero_client._post_once("text")
     assert sent["version"] == "2026-01-01"
 
@@ -301,6 +297,7 @@ def test_every_retry_attempt_reserves(tmp_path, monkeypatch):
     """PR review P1: each attempt reserves its words BEFORE the HTTP call
     — two transient failures plus a success = three reservations."""
     import gptzero_client as gzc
+    monkeypatch.setattr(gzc, "PINNED_VERSION", None)
     monkeypatch.setattr(gzc.time, "sleep", lambda s: None)
     resv = tmp_path / "reservations.jsonl"
     attempts = []

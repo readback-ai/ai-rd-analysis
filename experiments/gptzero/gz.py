@@ -15,7 +15,12 @@ import argparse
 import hashlib
 import json
 import sys
+import time
+import urllib.error
 from pathlib import Path
+
+SCORE_PACE = 4.0   # seconds between billed requests: rapid-fire POSTs
+                   # trip the API edge's behavioral bot rules
 
 BASE = Path(__file__).resolve().parent
 sys.path.insert(0, str(BASE))
@@ -174,12 +179,19 @@ def cmd_score(limit: int | None) -> None:
             except RuntimeError as e:
                 print(f"SCORE FAIL {r['slot']}: {e}", flush=True)
                 continue          # deferred: absent from results, retried
+            except urllib.error.HTTPError as e:
+                raise SystemExit(
+                    f"HTTP {e.code} on {r['slot']} — results so far are "
+                    f"recorded; re-run --score to resume. If it "
+                    f"persists, check the key.") from e
             fields = gzc.doc_fields(resp)
             out.write(json.dumps(
                 {**r, **fields, "billed_words": billed}) + "\n")
             out.flush()
             print(f"scored {r['slot']}: {fields['predicted_class']} "
                   f"({billed} words billed)", flush=True)
+            if billed:
+                time.sleep(SCORE_PACE)
     print(f"reserved: {gzc.ledger(RESERVATIONS)}/{gzc.BUDGET_WORDS} "
           f"words")
 

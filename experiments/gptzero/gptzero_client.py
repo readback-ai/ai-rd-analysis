@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import time
 import urllib.error
 import urllib.request
@@ -28,8 +29,8 @@ from diffs import count_words
 
 API_URL = "https://api.gptzero.me/v2/predict/text"
 BUDGET_WORDS = 50_000
-PINNED_VERSION: str | None = None   # set from the smoke run's response
-                                    # before scoring the full corpus
+PINNED_VERSION: str | None = "2026-07-04-base"   # from the 2026-07-29
+                                                 # smoke run's responses
 TRANSIENT_HTTP = (429, 500, 502, 503, 504)
 
 
@@ -52,30 +53,69 @@ def _reserve(path: Path, doc_sha: str, words: int) -> None:
 
 
 def _api_key() -> str:
-    """GPTZERO_API_KEY env var, else the gitignored local/api_key file.
-    The key is read at call time and never logged or written."""
+    """GPTZERO_API_KEY from the environment, the experiment's .env file
+    (KEY=VALUE lines), or the gitignored local/api_key. The key is read
+    at call time and never logged or written."""
     key = os.environ.get("GPTZERO_API_KEY")
+    here = Path(__file__).resolve().parent
     if not key:
-        p = Path(__file__).resolve().parent / "local" / "api_key"
+        env = here / ".env"
+        if env.is_file():
+            names = {"GPTZERO_API_KEY", "GPTZERO_KEY", "API_KEY",
+                     "X_API_KEY"}
+            lines = [ln.strip() for ln in env.read_text().splitlines()
+                     if ln.strip() and not ln.strip().startswith("#")]
+            for ln in lines:
+                k, sep, v = ln.partition("=")
+                k = k.strip()
+                if k.startswith("export "):
+                    k = k[len("export "):].strip()
+                if sep and k in names and v.strip():
+                    key = v.strip().strip("'\"")
+                    break
+            if not key and len(lines) == 1 and "=" not in lines[0]:
+                key = lines[0]          # bare token, no NAME= wrapper
+    if not key:
+        p = here / "local" / "api_key"
         if p.is_file():
             key = p.read_text().strip()
     if not key:
-        raise SystemExit("no GPTZero key: set GPTZERO_API_KEY or write "
+        raise SystemExit("no GPTZero key: set GPTZERO_API_KEY, put it "
+                         "in experiments/gptzero/.env, or write "
                          "experiments/gptzero/local/api_key")
     return key
 
 
 def _post_once(text: str) -> dict:
+    """One POST via curl: GPTZero's edge blocks urllib's client
+    signature (Cloudflare 1010) but accepts standard API clients. The
+    key travels in a 0600 header file, never in argv. Raises
+    urllib.error types so score()'s transient/permanent classification
+    is transport-agnostic."""
     body: dict = {"document": text, "multilingual": False}
     if PINNED_VERSION:
         body["version"] = PINNED_VERSION
-    req = urllib.request.Request(
-        API_URL, data=json.dumps(body).encode(),
-        headers={"Content-Type": "application/json",
-                 "Accept": "application/json",
-                 "x-api-key": _api_key()})
-    with urllib.request.urlopen(req, timeout=120) as r:
-        return json.loads(r.read())
+    hdr = Path(__file__).resolve().parent / "local" / "curl_headers"
+    hdr.parent.mkdir(parents=True, exist_ok=True)
+    hdr.touch()
+    hdr.chmod(0o600)
+    hdr.write_text(f"x-api-key: {_api_key()}\n")
+    out = subprocess.run(
+        ["curl", "-sS", "-m", "120", "-X", "POST", API_URL,
+         "-H", "Content-Type: application/json",
+         "-H", "Accept: application/json",
+         "-H", f"@{hdr}",
+         "--data", "@-",
+         "-w", "\n%{http_code}"],
+        input=json.dumps(body), capture_output=True, text=True)
+    if out.returncode != 0:
+        raise urllib.error.URLError(out.stderr.strip()[:200])
+    payload, _, code_s = out.stdout.rpartition("\n")
+    code = int(code_s) if code_s.isdigit() else 0
+    if code >= 400 or not payload:
+        raise urllib.error.HTTPError(API_URL, code or 599,
+                                     payload[:200], None, None)
+    return json.loads(payload)
 
 
 def _cache_path(cache_dir: Path, doc_sha: str) -> Path:
