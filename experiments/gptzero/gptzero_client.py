@@ -1,11 +1,19 @@
-"""GPTZero API client: response cache + hard word-budget guard.
+"""GPTZero API client: reservation-ledger budget guard, versioned
+response cache, transient-failure backoff.
 
-Words are money: a document is billed once, so the response cache
-(keyed by document sha256) short-circuits both the POST and the ledger,
-and the ceiling is checked BEFORE any HTTP. The ledger is recomputed
-from the results file on every run — a crashed run resumes without
-double-spending. The API key comes from GPTZERO_API_KEY and is never
-logged or written anywhere.
+Words are money, and an HTTP attempt can be billed server-side even
+when its response is lost (connection drop after processing, crash
+before the cache write). So the ceiling is enforced against words
+RESERVED — one durable ledger row appended BEFORE every attempt — not
+against observed successes. Cache hits reserve nothing.
+
+The detector version is pinned for a whole design (PINNED_VERSION,
+set from the smoke run before the full corpus): requests carry it,
+the response cache is namespaced by it, and analyze refuses pooled
+statistics over mixed versions.
+
+The API key comes from GPTZERO_API_KEY (or the gitignored
+local/api_key) and is never logged or written.
 """
 from __future__ import annotations
 
@@ -20,16 +28,27 @@ from diffs import count_words
 
 API_URL = "https://api.gptzero.me/v2/predict/text"
 BUDGET_WORDS = 50_000
+PINNED_VERSION: str | None = None   # set from the smoke run's response
+                                    # before scoring the full corpus
+TRANSIENT_HTTP = (429, 500, 502, 503, 504)
 
 
-def ledger(results_path: Path) -> int:
-    """Words billed so far = sum over recorded results, never a running
-    variable."""
-    if not results_path.is_file():
+def ledger(reservations_path: Path) -> int:
+    """Words reserved so far — every attempt row counts, settled or
+    not."""
+    if not reservations_path.is_file():
         return 0
-    return sum(json.loads(ln)["billed_words"]
-               for ln in results_path.read_text().splitlines()
+    return sum(json.loads(ln)["words"]
+               for ln in reservations_path.read_text().splitlines()
                if ln.strip())
+
+
+def _reserve(path: Path, doc_sha: str, words: int) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a") as f:
+        f.write(json.dumps({"doc_sha": doc_sha, "words": words}) + "\n")
+        f.flush()
+        os.fsync(f.fileno())
 
 
 def _api_key() -> str:
@@ -46,52 +65,63 @@ def _api_key() -> str:
     return key
 
 
-def _post(text: str, retries: int = 3) -> dict:
-    """POST with backoff on transient failures (429/5xx/network). A
-    non-transient HTTP error (bad key, bad request) raises immediately;
-    exhausted retries raise RuntimeError so the caller can defer the
-    document instead of crashing the run."""
+def _post_once(text: str) -> dict:
+    body: dict = {"document": text, "multilingual": False}
+    if PINNED_VERSION:
+        body["version"] = PINNED_VERSION
+    req = urllib.request.Request(
+        API_URL, data=json.dumps(body).encode(),
+        headers={"Content-Type": "application/json",
+                 "Accept": "application/json",
+                 "x-api-key": _api_key()})
+    with urllib.request.urlopen(req, timeout=120) as r:
+        return json.loads(r.read())
+
+
+def _cache_path(cache_dir: Path, doc_sha: str) -> Path:
+    return cache_dir / (PINNED_VERSION or "unpinned") / f"{doc_sha}.json"
+
+
+def score(doc_sha: str, text: str, cache_dir: Path,
+          reservations_path: Path, transport=_post_once,
+          retries: int = 3) -> tuple[dict, int]:
+    """(raw response, billed words); 0 billed on a cache hit. Each HTTP
+    attempt first checks the ceiling against the reservation ledger and
+    appends its own reservation, so neither retries nor crashes can
+    spend past BUDGET_WORDS unnoticed. Transient failures (429/5xx/
+    network) back off and retry; anything else raises immediately;
+    exhausted retries raise RuntimeError so the caller defers the
+    document."""
+    cached = _cache_path(cache_dir, doc_sha)
+    if cached.is_file():
+        return json.loads(cached.read_text()), 0
+    words = count_words(text)
     last: Exception | None = None
     for attempt in range(retries):
-        req = urllib.request.Request(
-            API_URL,
-            data=json.dumps({"document": text,
-                             "multilingual": False}).encode(),
-            headers={"Content-Type": "application/json",
-                     "Accept": "application/json",
-                     "x-api-key": _api_key()})
+        spent = ledger(reservations_path)
+        if spent + words > BUDGET_WORDS:
+            raise SystemExit(
+                f"budget ceiling: {spent} reserved + {words} for this "
+                f"document > {BUDGET_WORDS}")
+        _reserve(reservations_path, doc_sha, words)
         try:
-            with urllib.request.urlopen(req, timeout=120) as r:
-                return json.loads(r.read())
+            resp = transport(text)
         except urllib.error.HTTPError as e:
-            if e.code not in (429, 500, 502, 503, 504):
+            if e.code not in TRANSIENT_HTTP:
                 raise
             last = e
         except (urllib.error.URLError, TimeoutError,
                 json.JSONDecodeError) as e:
             last = e
+        else:
+            cached.parent.mkdir(parents=True, exist_ok=True)
+            tmp = cached.with_suffix(".tmp")
+            tmp.write_text(json.dumps(resp))
+            tmp.replace(cached)
+            return resp, words
         time.sleep(5 * 3 ** attempt)
-    raise RuntimeError(f"GPTZero request failed after {retries} tries: "
-                       f"{last}")
-
-
-def score(doc_sha: str, text: str, spent: int, cache_dir: Path,
-          transport=_post) -> tuple[dict, int]:
-    """(raw response, billed words). billed = 0 on a cache hit."""
-    cached = cache_dir / f"{doc_sha}.json"
-    if cached.is_file():
-        return json.loads(cached.read_text()), 0
-    words = count_words(text)
-    if spent + words > BUDGET_WORDS:
-        raise SystemExit(
-            f"budget ceiling: {spent} spent + {words} for this document "
-            f"> {BUDGET_WORDS}")
-    resp = transport(text)
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    tmp = cached.with_suffix(".tmp")
-    tmp.write_text(json.dumps(resp))
-    tmp.replace(cached)
-    return resp, words
+    raise RuntimeError(f"GPTZero request failed after {retries} "
+                       f"attempts: {last}")
 
 
 def doc_fields(resp: dict) -> dict:

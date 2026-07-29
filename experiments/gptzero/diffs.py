@@ -87,7 +87,9 @@ def parse_diff(text: str) -> list[tuple[str, list[list[str]]]]:
     for ln in text.splitlines():
         if ln.startswith("diff --git "):
             flush()
-        elif ln.startswith("+++ "):
+        elif cur is None and ln.startswith("+++ "):
+            # the file header only exists OUTSIDE a hunk: inside one,
+            # '+++counter;' is an added source line beginning '++'
             p = ln[4:].split("\t")[0].strip()
             path = None if p == "/dev/null" else \
                 (p[2:] if p.startswith("b/") else p)
@@ -97,8 +99,7 @@ def parse_diff(text: str) -> list[tuple[str, list[list[str]]]]:
             if cur:
                 hunks.append(cur)
             cur = []
-        elif cur is not None and ln.startswith("+") \
-                and not ln.startswith("+++"):
+        elif cur is not None and ln.startswith("+"):
             cur.append(ln[1:])
     flush()
     return files

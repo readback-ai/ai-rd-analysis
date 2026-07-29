@@ -101,15 +101,22 @@ def draw(pools_: dict) -> list[dict]:
         crng = random.Random(f"{SEED}:gptzero:v1:cand:{author}:q1")
         q2_repos = {r for arm in ("ai", "nonai")
                     for r, _n, _l in pools_["q2"][author][arm]}
-        cands = _candidates(crng, pools_["q1"][author], PARAMS["k_cand"])
-        cands.sort(key=lambda c: c[0] not in q2_repos)   # same-repo first
+        order = sorted(pools_["q1"][author])
+        crng.shuffle(order)
+        # same-repo priority on the FULL ordering, before slicing —
+        # sorting a slice would let a deeper k reorder the prefix
+        order.sort(key=lambda t: t[0] not in q2_repos)
+        cands = [list(p) for p in order[:PARAMS["k_cand"]]]
         slots.append({
             "slot": f"B1:{author}", "arm": "B1", "author": author,
             "period": "Q1-2024", "ai": False,
             "same_repo": bool(cands and cands[0][0] in q2_repos),
             "candidates": cands})
     rng2 = random.Random(f"{SEED}:gptzero:v1:q1")
-    rest = sorted(a for a in pools_["q1"] if a not in set(b1_authors))
+    # B2 is the INDEPENDENT baseline: exclude every paired author, not
+    # just the B1 subset — a paired author past the B1 cap is still not
+    # independent of Arm P
+    rest = sorted(a for a in pools_["q1"] if a not in set(take))
     n_b2 = max(PARAMS["n_q1"] - len(b1_authors), 0)
     for author in rng2.sample(rest, min(n_b2, len(rest))):
         crng = random.Random(f"{SEED}:gptzero:v1:cand:{author}:q1")

@@ -25,6 +25,7 @@ LOCAL = BASE / "local"
 MANIFEST = LOCAL / "manifest_v1_50k.json"
 DOCS = LOCAL / "docs_v1.jsonl"
 RESULTS = LOCAL / "results" / "scores_v1.jsonl"
+RESERVATIONS = LOCAL / "results" / "reservations_v1.jsonl"
 DIFF_CACHE = LOCAL / "cache" / "diffs"
 DOC_CACHE = LOCAL / "cache" / "docs"
 RESP_CACHE = LOCAL / "cache" / "responses"
@@ -73,9 +74,10 @@ def cmd_fetch() -> None:
               if not r.get("unfilled")
               and (r["repo"], r["num"]) in cands_of.get(s, set())}
     LOCAL.mkdir(parents=True, exist_ok=True)
+    fp = manifest["fingerprint"]
     with DOCS.open("w") as out:
         for r in filled.values():
-            out.write(json.dumps(r) + "\n")
+            out.write(json.dumps({**r, "fingerprint": fp}) + "\n")
         for slot in manifest["slots"]:
             if slot["slot"] in filled:
                 continue
@@ -96,12 +98,12 @@ def cmd_fetch() -> None:
                 row = {**{k: slot[k] for k in
                           ("slot", "arm", "author", "period", "ai")},
                        "repo": repo, "num": int(num), "loc": int(loc),
-                       "doc_sha": sha, **meta}
+                       "doc_sha": sha, "fingerprint": fp, **meta}
                 break
             if row is None:
                 row = {**{k: slot[k] for k in
                           ("slot", "arm", "author", "period", "ai")},
-                       "unfilled": True}
+                       "unfilled": True, "fingerprint": fp}
                 print(f"UNFILLED slot {slot['slot']} (no candidate "
                       f"cleared the floor)", flush=True)
             out.write(json.dumps(row) + "\n")
@@ -122,34 +124,50 @@ def cmd_fetch() -> None:
 
 def cmd_score(limit: int | None) -> None:
     import gptzero_client as gzc
-    done = set()
+    fp = json.loads(MANIFEST.read_text())["fingerprint"]
+    docs = {r["slot"]: r for r in _doc_rows().values()
+            if not r.get("unfilled")}
+    stale = [r["slot"] for r in docs.values()
+             if r.get("fingerprint") != fp]
+    if stale:
+        raise SystemExit(
+            f"{len(stale)} document rows predate the current manifest "
+            f"({fp}) — run --fetch first")
+    old = []
     if RESULTS.is_file():
-        done = {json.loads(ln)["slot"]
-                for ln in RESULTS.read_text().splitlines() if ln.strip()}
-    todo = [r for r in _doc_rows().values()
-            if not r.get("unfilled") and r["slot"] not in done]
-    if limit is not None:
-        todo = todo[:limit]
+        old = [json.loads(ln)
+               for ln in RESULTS.read_text().splitlines() if ln.strip()]
+    # A result binds to the document its slot CURRENTLY selects: after a
+    # redraw changes a slot's doc_sha, the stale row is dropped and the
+    # slot rescored (the response cache makes a re-key free). Rows for
+    # slots no longer in the manifest drop the same way.
+    valid = [r for r in old
+             if docs.get(r["slot"], {}).get("doc_sha") == r["doc_sha"]]
     RESULTS.parent.mkdir(parents=True, exist_ok=True)
-    spent = gzc.ledger(RESULTS)
-    with RESULTS.open("a") as out:
+    with RESULTS.open("w") as out:
+        for r in valid:
+            out.write(json.dumps(r) + "\n")
+        done = {r["slot"] for r in valid}
+        todo = [r for s, r in docs.items() if s not in done]
+        if limit is not None:
+            todo = todo[:limit]
         for r in todo:
             text = (DOC_CACHE / f"{r['doc_sha']}.txt").read_text()
             try:
-                resp, billed = gzc.score(r["doc_sha"], text, spent,
-                                         RESP_CACHE)
+                resp, billed = gzc.score(r["doc_sha"], text, RESP_CACHE,
+                                         RESERVATIONS)
             except RuntimeError as e:
                 print(f"SCORE FAIL {r['slot']}: {e}", flush=True)
                 continue          # deferred: absent from results, retried
-            spent += billed
             out.write(json.dumps(
                 {**r, **gzc.doc_fields(resp),
                  "billed_words": billed}) + "\n")
             out.flush()
             print(f"scored {r['slot']}: "
                   f"{gzc.doc_fields(resp)['predicted_class']} "
-                  f"({billed} words billed, {spent} total)", flush=True)
-    print(f"ledger: {spent}/{gzc.BUDGET_WORDS} words")
+                  f"({billed} words billed)", flush=True)
+    print(f"reserved: {gzc.ledger(RESERVATIONS)}/{gzc.BUDGET_WORDS} "
+          f"words")
 
 
 def main() -> None:
