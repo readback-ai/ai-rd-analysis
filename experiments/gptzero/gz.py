@@ -28,6 +28,8 @@ sys.path.insert(0, str(BASE.parents[1] / "src"))
 
 LOCAL = BASE / "local"
 MANIFEST = LOCAL / "manifest_v1_50k.json"
+MANIFEST_B3 = LOCAL / "manifest_b3.json"
+B3_PAGES = LOCAL / "cache" / "q3_2022_pages"
 DOCS = LOCAL / "docs_v1.jsonl"
 RESULTS = LOCAL / "results" / "scores_v1.jsonl"
 RESERVATIONS = LOCAL / "results" / "reservations_v1.jsonl"
@@ -56,6 +58,43 @@ def cmd_sample() -> None:
           f"B2={by_arm['B2']}), fingerprint {manifest['fingerprint']}")
 
 
+def cmd_sample_b3() -> None:
+    import b3
+    pool = b3.repo_pool(BASE.parents[1]
+                        / "data" / "derived" / "population_repos.txt")
+    print(f"B3 pool: {len(pool)} repos with >= "
+          f"{b3.B3_PARAMS['min_repo_prs']} Q3-2022 PRs")
+    ranked = b3.draw_repos(pool)
+    pages = {}
+    for repo in ranked:
+        page = b3.fetch_page(repo, B3_PAGES)
+        if page is None:
+            print(f"PAGE FAIL {repo} (spare will stand in)", flush=True)
+            continue
+        pages[repo] = page
+    manifest, rewrote = b3.ensure_manifest(pool, pages, MANIFEST_B3)
+    print(f"B3 manifest {'rewritten' if rewrote else 'unchanged'}: "
+          f"{len(manifest['slots'])} slots, "
+          f"fingerprint {manifest['fingerprint']}")
+
+
+def _manifests() -> list[dict]:
+    return [json.loads(p.read_text())
+            for p in (MANIFEST, MANIFEST_B3) if p.is_file()]
+
+
+def _slot_index(manifests: list[dict]) -> tuple[list[dict], dict]:
+    """(all slot defs, slot -> (fingerprint, word_cap, word_floor))."""
+    slots, meta = [], {}
+    for m in manifests:
+        for s in m["slots"]:
+            slots.append(s)
+            meta[s["slot"]] = (m["fingerprint"],
+                               m["params"]["word_cap"],
+                               m["params"]["word_floor"])
+    return slots, meta
+
+
 def _doc_rows() -> dict[str, dict]:
     if not DOCS.is_file():
         return {}
@@ -66,9 +105,7 @@ def _doc_rows() -> dict[str, dict]:
 
 def cmd_fetch() -> None:
     import diffs
-    manifest = json.loads(MANIFEST.read_text())
-    cap = manifest["params"]["word_cap"]
-    floor = manifest["params"]["word_floor"]
+    slots, meta_of = _slot_index(_manifests())
     # A row is a valid checkpoint only if it is FILLED, its chosen PR is
     # still among its slot's candidates (a redraw invalidates rows), AND
     # it was assembled under the current rules — cap, floor, and the
@@ -76,21 +113,25 @@ def cmd_fetch() -> None:
     # k_cand deepening retains everything). Unfilled slots are retried
     # every run.
     cands_of = {s["slot"]: {(c[0], int(c[1])) for c in s["candidates"]}
-                for s in manifest["slots"]}
-    filled = {s: r for s, r in _doc_rows().items()
-              if not r.get("unfilled")
-              and (r["repo"], r["num"]) in cands_of.get(s, set())
-              and r.get("word_cap") == cap
-              and r.get("word_floor") == floor
-              and r.get("assembly") == diffs.ASSEMBLY}
+                for s in slots}
+    filled = {}
+    for s, r in _doc_rows().items():
+        fp, cap, floor = meta_of.get(s, (None, None, None))
+        if not r.get("unfilled") \
+                and (r["repo"], r["num"]) in cands_of.get(s, set()) \
+                and r.get("word_cap") == cap \
+                and r.get("word_floor") == floor \
+                and r.get("assembly") == diffs.ASSEMBLY:
+            filled[s] = r
     LOCAL.mkdir(parents=True, exist_ok=True)
-    fp = manifest["fingerprint"]
     with DOCS.open("w") as out:
-        for r in filled.values():
-            out.write(json.dumps({**r, "fingerprint": fp}) + "\n")
-        for slot in manifest["slots"]:
+        for s, r in filled.items():
+            out.write(json.dumps(
+                {**r, "fingerprint": meta_of[s][0]}) + "\n")
+        for slot in slots:
             if slot["slot"] in filled:
                 continue
+            fp, cap, floor = meta_of[slot["slot"]]
             row = None
             for repo, num, loc in slot["candidates"]:
                 raw = diffs.fetch_diff(repo, int(num), DIFF_CACHE)
@@ -136,7 +177,7 @@ def cmd_fetch() -> None:
 
 def cmd_score(limit: int | None) -> None:
     import gptzero_client as gzc
-    fp = json.loads(MANIFEST.read_text())["fingerprint"]
+    _, meta_of = _slot_index(_manifests())
     if gzc.PINNED_VERSION is None and limit is None:
         raise SystemExit(
             "full run requires a pinned detector version: smoke first "
@@ -145,11 +186,12 @@ def cmd_score(limit: int | None) -> None:
     docs = {r["slot"]: r for r in _doc_rows().values()
             if not r.get("unfilled")}
     stale = [r["slot"] for r in docs.values()
-             if r.get("fingerprint") != fp]
+             if r.get("fingerprint")
+             != meta_of.get(r["slot"], (None,))[0]]
     if stale:
         raise SystemExit(
-            f"{len(stale)} document rows predate the current manifest "
-            f"({fp}) — run --fetch first")
+            f"{len(stale)} document rows predate the current "
+            f"manifest(s) — run --fetch first")
     old = []
     if RESULTS.is_file():
         old = [json.loads(ln)
@@ -199,12 +241,15 @@ def cmd_score(limit: int | None) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--sample", action="store_true")
+    ap.add_argument("--sample-b3", action="store_true")
     ap.add_argument("--fetch", action="store_true")
     ap.add_argument("--score", action="store_true")
     ap.add_argument("--limit", type=int, default=None)
     a = ap.parse_args()
     if a.sample:
         cmd_sample()
+    elif a.sample_b3:
+        cmd_sample_b3()
     elif a.fetch:
         cmd_fetch()
     elif a.score:

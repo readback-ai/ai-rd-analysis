@@ -11,7 +11,8 @@ from pathlib import Path
 ARMS = (("Q2-AI", lambda r: r["arm"] == "P" and r["ai"]),
         ("Q2-nonAI", lambda r: r["arm"] == "P" and not r["ai"]),
         ("Q1-persistent", lambda r: r["arm"] == "B1"),
-        ("Q1-independent", lambda r: r["arm"] == "B2"))
+        ("Q1-independent", lambda r: r["arm"] == "B2"),
+        ("Q3-2022-era", lambda r: r["arm"] == "B3"))
 
 CAVEATS = """\
 Caveats (they bound every number above):
@@ -29,6 +30,9 @@ Caveats (they bound every number above):
 - Documents span 100-600 words and GPTZero's accuracy rises with
   length; the length-matched sensitivity bounds that confound — trust
   the headline pairing only where the two agree.
+- Q3-2022-era predates ChatGPT: its positives are near-pure FALSE
+  positives (early-Codex/Copilot-autocomplete volume was tiny) — the
+  cleanest false-positive calibration in the design.
 - Near-uniform scores in ALL arms would itself be the answer: no signal
   on bare added-lines code."""
 

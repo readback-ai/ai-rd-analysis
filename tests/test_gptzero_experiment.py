@@ -325,7 +325,10 @@ def test_score_drops_rows_for_redrawn_documents(tmp_path, monkeypatch):
     (local / "results").mkdir(parents=True)
     (local / "cache" / "docs").mkdir(parents=True)
     (local / "manifest.json").write_text(json.dumps(
-        {"fingerprint": "FP", "params": {}, "slots": []}))
+        {"fingerprint": "FP",
+         "params": {"word_cap": 600, "word_floor": 100},
+         "slots": [{"slot": "P:a:ai",
+                    "candidates": [["o/r", 1, 100]]}]}))
     docs = local / "docs.jsonl"
     docs.write_text(json.dumps(
         {"slot": "P:a:ai", "arm": "P", "author": "a",
@@ -433,7 +436,11 @@ def _score_world(tmp_path, monkeypatch, docs_row, results_rows=(),
     (local / "results").mkdir(parents=True)
     (local / "cache" / "docs").mkdir(parents=True)
     (local / "manifest.json").write_text(json.dumps(
-        {"fingerprint": "FP", "params": {}, "slots": []}))
+        {"fingerprint": "FP",
+         "params": {"word_cap": 600, "word_floor": 100},
+         "slots": [{"slot": docs_row["slot"],
+                    "candidates": [[docs_row.get("repo", "o/r"),
+                                    docs_row.get("num", 1), 100]]}]}))
     docs = local / "docs.jsonl"
     docs.write_text(json.dumps(docs_row) + "\n")
     (local / "cache" / "docs" / f"{docs_row['doc_sha']}.txt")\
@@ -526,6 +533,10 @@ def test_mismatch_does_not_advance_to_the_next_document(
     with gz.DOCS.open("a") as f:
         f.write(json.dumps(second) + "\n")
     (gz.DOC_CACHE / "SHA2.txt").write_text("four five six")
+    m = json.loads(gz.MANIFEST.read_text())
+    m["slots"].append({"slot": "P:b:ai",
+                       "candidates": [["o/r", 1, 100]]})
+    gz.MANIFEST.write_text(json.dumps(m))
     calls = []
 
     def bad_score(sha, text, cache_dir, resv, **kw):
@@ -590,6 +601,49 @@ def test_report_treats_missing_version_as_its_own_version(
     p.write_text("\n".join(json.dumps(r) for r in rows) + "\n")
     analyze.report(p)
     assert "REFUSING" in capsys.readouterr().out
+
+
+def _b3_node(num, login="dev", typ="User", merged="2022-08-01T00:00:00Z",
+             additions=100):
+    return {"number": num, "createdAt": "2022-07-15T00:00:00Z",
+            "mergedAt": merged, "additions": additions, "deletions": 0,
+            "author": {"login": login, "__typename": typ}}
+
+
+def test_b3_node_hygiene_mirrors_frame_rules():
+    """B3 has no census frame, so eligibility applies node-side: bots,
+    unmerged PRs, and out-of-window LOC never become candidates."""
+    import b3
+    nodes = [_b3_node(1),
+             _b3_node(2, login="dependabot[bot]"),
+             _b3_node(3, typ="Bot", login="copilot"),
+             _b3_node(4, merged=None),
+             _b3_node(5, additions=10),
+             _b3_node(6, additions=99999)]
+    assert b3.eligible_nodes(nodes) == [("dev", 1, 100)]
+
+
+def test_b3_draw_is_deterministic_and_one_doc_per_author():
+    """The repo draw is seeded PPS; slots take one document per author
+    across the whole arm."""
+    import b3
+    pool = {f"o/r{i}": 50 + i for i in range(30)}
+    assert b3.draw_repos(pool) == b3.draw_repos(pool)
+    pages = {r: [_b3_node(1, login="samedev"), _b3_node(2, login=f"u{r}")]
+             for r in pool}
+    slots = b3.slots_for(sorted(pool), pages)
+    authors = [s["author"] for s in slots]
+    assert len(authors) == len(set(authors))     # no author twice
+    assert len(slots) == b3.B3_PARAMS["n_docs"]
+    assert all(s["arm"] == "B3" and s["ai"] is False for s in slots)
+
+
+def test_b3_fingerprint_tracks_pool():
+    import b3
+    pool = {"o/a": 30, "o/b": 40}
+    fp = b3.fingerprint(pool)
+    assert b3.fingerprint({**pool, "o/c": 25}) != fp
+    assert b3.fingerprint(dict(reversed(pool.items()))) == fp
 
 
 def test_analysis_paired_sign_and_arm_rates():
