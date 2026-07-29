@@ -178,6 +178,28 @@ def test_sample_run_removes_unjustified_orgwide_cells(
     assert (out / "acme__Q2-2026.json").exists()
 
 
+def test_verify_zeros_fails_loudly_on_unverified_zeros(
+        tmp_path, monkeypatch):
+    """PR #18 re-review, P2: load() cannot tell an unverified zero from a
+    confirmed one, so an incomplete verification must not exit 0 — a
+    scripted check would accept it. Corrections found before the failure
+    are still written."""
+    out = tmp_path / "scan.tsv"
+    out.write_text("bigco\tQ1-2024\tcodex/\t0\n"
+                   "bigco\tQ1-2024\tclaude/\t0\n")
+    results = {"codex/": 4, "claude/": None}     # one correction, one fail
+    monkeypatch.setattr(branch_scan, "_scoped_cell_count",
+                        lambda repos, prefix, rng: results[prefix])
+    with pytest.raises(SystemExit) as exc:
+        branch_scan.verify_zeros(
+            out, {"Q1-2024": "2024-01-01..2024-03-31"},
+            scoped={"bigco": ["bigco/a"]}, pace=0)
+    assert exc.value.code == 1
+    assert branch_scan.load(out) == {
+        ("bigco", "Q1-2024", "codex/"): 4,       # correction persisted
+        ("bigco", "Q1-2024", "claude/"): 0}
+
+
 def test_verify_zeros_corrects_poisoned_scoped_zero(
         tmp_path, monkeypatch):
     """PR #18 review, P2: a zero scoped cell is only a fact once

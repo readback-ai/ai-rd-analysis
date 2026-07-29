@@ -100,9 +100,11 @@ def verify_zeros(out_path: Path, periods: dict[str, str],
     """Second, temporally-independent observation of every scoped ZERO
     cell: a search brownout can return a structurally valid zero, so a
     zero only stands once re-observed (the precount confirm-zero rule).
-    Rows whose recount is nonzero are corrected in place; recount
-    failures leave the row untouched and are reported for the next
-    run."""
+    Rows whose recount is nonzero are corrected in place. A recount
+    FAILURE leaves its row's zero unverified, and load() cannot tell
+    that apart from a confirmed zero — so corrections are written first
+    and then the run exits non-zero, refusing to report an incomplete
+    verification as success."""
     rows = []
     checked = corrected = failed = 0
     for ln in out_path.read_text().splitlines():
@@ -126,6 +128,8 @@ def verify_zeros(out_path: Path, periods: dict[str, str],
     tmp.replace(out_path)
     print(f"verify-zeros: {checked} checked, {corrected} corrected, "
           f"{failed} failed", flush=True)
+    if failed:
+        raise SystemExit(1)
 
 
 def load(out_path: Path) -> dict[tuple[str, str, str], int]:
