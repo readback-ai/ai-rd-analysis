@@ -367,7 +367,19 @@ sub-window count adapts to PR volume (integer-boundary date splits — float
 rounding once produced inverted windows), each window paginates by cursor up
 to the API's 1,000-node cap (= up to 1,000 PRs per day-window), cells are
 written atomically (tmp+rename: torn writes cannot exist), and a repo-quarter
-that still cannot be completed FAILS the run. A zero denominator never
+that still cannot be completed FAILS the run.
+**Unsearchable repos** (`census_direct.py`): GitHub's search index refuses
+some public repos outright (`repo:X` answers HTTP 422 "cannot be searched"),
+so no precount and no search-collected cell can ever exist for them. Such a
+repo is collected through `repository.pullRequests`, which does not use the
+search index; its own `totalCount` is the completeness denominator (the full
+history must arrive, verified page by page, or nothing is written), and
+quarters with no PRs get a VERIFIED empty cell. Only the definitive 422
+triggers this route — a transient failure still fails the repo-quarter.
+Measured 2026-07-29: 8 population repos in this state, 364 in-window PRs
+recovered rather than waived as inaccessible (they skew new and
+AI-tooling-heavy, e.g. `ComposioHQ/awesome-claude-plugins` at 265, so
+waiving them would bias AI rates DOWN). A zero denominator never
 stands on one observation: search brownouts return 200 with a zero count,
 so a 0 precount is re-queried and only a confirmed 0 (cache-marked) can
 census as a complete empty repo-quarter — an unconfirmable zero FAILS

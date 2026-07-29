@@ -131,6 +131,15 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
     rng = resolve_period(period)
     total = ensure_precount(repo, period)   # cached, or queried+cache-written
     if total is None:
+        # No precount can exist for a repo the search index refuses (422):
+        # every search-based route is blind to it. Collect it through the
+        # object API instead, which carries its own completeness rule.
+        # Only the DEFINITIVE refusal qualifies — a transient failure must
+        # still fail the period rather than switch collection routes.
+        from pipeline import census_direct
+        if census_direct.repo_unsearchable(repo):
+            written = census_direct.census_repo_direct(repo)
+            return None if written is None else written.get(period)
         return None
     if total == 0:
         # 0 passes both completeness gates trivially, so it may not stand

@@ -329,6 +329,41 @@ def test_stale_cached_zero_confirms_immediately(monkeypatch):
                if kind == "sleep")
 
 
+def test_unsearchable_repo_falls_back_to_the_direct_route(monkeypatch):
+    """A repo GitHub's search index refuses (422) has no precount and can
+    never be censused by search; census delegates to the object-API route
+    instead of failing the repo-period forever."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount.time, "sleep", lambda s: None)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: None)
+    monkeypatch.setattr(census_direct, "repo_unsearchable",
+                        lambda repo: True)
+    called = []
+    monkeypatch.setattr(
+        census_direct, "census_repo_direct",
+        lambda repo: called.append(repo) or {"Q1-2024": 0, "Q4-2025": 0,
+                                             "Q1-2026": 7, "Q2-2026": 1})
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 7
+    assert called == ["o/r"]
+
+
+def test_transient_precount_failure_does_not_use_the_direct_route(
+        monkeypatch):
+    """Only the definitive 422 justifies the fallback: a rate-limited or
+    browned-out precount must still fail the period, not silently switch
+    collection routes."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount.time, "sleep", lambda s: None)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: None)
+    monkeypatch.setattr(census_direct, "repo_unsearchable",
+                        lambda repo: False)
+    called = []
+    monkeypatch.setattr(census_direct, "census_repo_direct",
+                        lambda repo: called.append(repo) or {})
+    assert census_repo_period("o/r", "Q1-2026", k=10) is None
+    assert called == []
+
+
 def test_confirmed_zero_is_cached_and_not_recounted(monkeypatch):
     """Issue #7: a twice-observed 0 is marked confirmed, so later runs
     trust it without re-querying (empty repo-quarters are common)."""
