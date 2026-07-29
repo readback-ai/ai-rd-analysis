@@ -17,6 +17,19 @@ import sampling         # noqa: E402
 CLAUDE_MARK = "x\n\nCo-Authored-By: Claude <noreply@anthropic.com>"
 
 
+_REAL_POST_ONCE = gptzero_client._post_once
+
+
+@pytest.fixture(autouse=True)
+def _no_live_gptzero(monkeypatch):
+    """Tests must never reach the live API: the default transports raise
+    unless a test injects its own."""
+    def _blocked(*a, **k):
+        raise AssertionError("live GPTZero call from a test")
+    monkeypatch.setattr(gptzero_client, "_post_once", _blocked)
+    monkeypatch.setattr(gptzero_client, "_post_files_once", _blocked)
+
+
 def _pr(created, merged, num, login="alice", additions=100, msg="x"):
     return {"number": num, "createdAt": created, "mergedAt": merged,
             "additions": additions, "deletions": 0,
@@ -206,6 +219,7 @@ def test_pinned_version_namespaces_cache_and_request(tmp_path,
         return R()
 
     monkeypatch.setattr(gptzero_client.subprocess, "run", fake_run)
+    monkeypatch.setattr(gptzero_client, "_post_once", _REAL_POST_ONCE)
     gptzero_client._post_once("text")
     assert sent["version"] == "2026-01-01"
 
@@ -353,10 +367,11 @@ def test_score_drops_rows_for_redrawn_documents(tmp_path, monkeypatch):
                         raising=False)
     monkeypatch.setattr(gptzero_client, "PINNED_VERSION", "pinver")
     monkeypatch.setattr(
-        gptzero_client, "score",
-        lambda sha, text, cache_dir, resv, **kw:
-            ({"version": "pinver",
-              "documents": [{"predicted_class": "ai"}]}, 3))
+        gptzero_client, "score_batch",
+        lambda items, cache_dir, resv, **kw:
+            [({"version": "pinver",
+               "documents": [{"predicted_class": "ai"}]}, 3)
+             for _ in items])
     gz.cmd_score(None)
     rows = [json.loads(ln)
             for ln in results.read_text().splitlines() if ln.strip()]
