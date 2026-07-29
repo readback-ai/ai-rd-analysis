@@ -497,15 +497,48 @@ def test_pinned_run_invalidates_rows_from_other_versions(
     assert rows[0]["predicted_class"] == "ai"      # rescored, not kept
 
 
-def test_mismatched_response_version_is_not_recorded(
+def test_version_mismatch_aborts_before_caching(tmp_path, monkeypatch):
+    """PR re-re-review P1: a response whose version differs from the pin
+    must ABORT the run inside score() BEFORE the cache write — caching
+    it would poison the pinned namespace (every later run replays the
+    wrong-version response), and continuing would bill every remaining
+    document while recording none. The attempt's reservation stays (it
+    may have been billed); the cache stays empty."""
+    import gptzero_client as gzc
+    monkeypatch.setattr(gzc, "PINNED_VERSION", "pinver")
+    resv = tmp_path / "resv.jsonl"
+    with pytest.raises(SystemExit):
+        gzc.score("shaV", "one two three", tmp_path, resv,
+                  transport=lambda t: {"version": "other",
+                                       "documents": []})
+    assert not list(tmp_path.rglob("*.json"))     # nothing cached
+    assert gzc.ledger(resv) == 3                  # attempt still reserved
+
+
+def test_mismatch_does_not_advance_to_the_next_document(
         tmp_path, monkeypatch):
-    """PR re-review P2: a response whose version differs from the pin is
-    a contract violation — logged and NOT written to results."""
+    """PR re-re-review P1 (contract pin): cmd_score must let the
+    version-mismatch SystemExit propagate — the run halts on the first
+    bad document instead of billing the rest."""
     import gptzero_client
-    gz, results = _score_world(tmp_path, monkeypatch, dict(_DOC_ROW),
-                               resp_version="other")
+    import gz
+    gz_mod, results = _score_world(tmp_path, monkeypatch,
+                                   dict(_DOC_ROW))
+    second = {**_DOC_ROW, "slot": "P:b:ai", "author": "b",
+              "doc_sha": "SHA2"}
+    with gz.DOCS.open("a") as f:
+        f.write(json.dumps(second) + "\n")
+    (gz.DOC_CACHE / "SHA2.txt").write_text("four five six")
+    calls = []
+
+    def bad_score(sha, text, cache_dir, resv, **kw):
+        calls.append(sha)
+        raise SystemExit("version mismatch")
     monkeypatch.setattr(gptzero_client, "PINNED_VERSION", "pinver")
-    gz.cmd_score(None)
+    monkeypatch.setattr(gptzero_client, "score", bad_score)
+    with pytest.raises(SystemExit):
+        gz_mod.cmd_score(None)
+    assert len(calls) == 1
     assert results.read_text().strip() == ""
 
 

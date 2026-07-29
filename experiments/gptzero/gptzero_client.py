@@ -114,6 +114,19 @@ def score(doc_sha: str, text: str, cache_dir: Path,
                 json.JSONDecodeError) as e:
             last = e
         else:
+            if PINNED_VERSION is not None:
+                got = resp.get("version") or (
+                    (resp.get("documents") or [{}])[0].get("version"))
+                if got != PINNED_VERSION:
+                    # NOT cached (it would poison the pinned namespace
+                    # for every later run) and the whole run aborts —
+                    # a wrong pin must not bill the remaining corpus.
+                    # The reservation above stands: the attempt may
+                    # have been billed.
+                    raise SystemExit(
+                        f"version mismatch: response reports {got!r}, "
+                        f"pin is {PINNED_VERSION!r} — nothing cached; "
+                        f"fix the pin before re-running")
             cached.parent.mkdir(parents=True, exist_ok=True)
             tmp = cached.with_suffix(".tmp")
             tmp.write_text(json.dumps(resp))

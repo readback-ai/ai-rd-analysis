@@ -175,13 +175,6 @@ def cmd_score(limit: int | None) -> None:
                 print(f"SCORE FAIL {r['slot']}: {e}", flush=True)
                 continue          # deferred: absent from results, retried
             fields = gzc.doc_fields(resp)
-            if (gzc.PINNED_VERSION is not None
-                    and fields["model_version"] != gzc.PINNED_VERSION):
-                print(f"VERSION MISMATCH {r['slot']}: response reports "
-                      f"{fields['model_version']!r}, pin is "
-                      f"{gzc.PINNED_VERSION!r} — not recorded",
-                      flush=True)
-                continue
             out.write(json.dumps(
                 {**r, **fields, "billed_words": billed}) + "\n")
             out.flush()
