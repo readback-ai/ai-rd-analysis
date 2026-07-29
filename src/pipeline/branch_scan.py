@@ -94,6 +94,40 @@ def scan(orgs: list[str], out_path: Path, periods: dict[str, str],
                     out.flush()
 
 
+def verify_zeros(out_path: Path, periods: dict[str, str],
+                 scoped: dict[str, list[str]],
+                 pace: float = 1.0) -> None:
+    """Second, temporally-independent observation of every scoped ZERO
+    cell: a search brownout can return a structurally valid zero, so a
+    zero only stands once re-observed (the precount confirm-zero rule).
+    Rows whose recount is nonzero are corrected in place; recount
+    failures leave the row untouched and are reported for the next
+    run."""
+    rows = []
+    checked = corrected = failed = 0
+    for ln in out_path.read_text().splitlines():
+        f = ln.split("\t")
+        if len(f) == 4 and f[0] in scoped and f[1] in periods \
+                and f[3] == "0":
+            checked += 1
+            n = _scoped_cell_count(scoped[f[0]], f[2], periods[f[1]])
+            time.sleep(pace)
+            if n is None:
+                failed += 1
+                print(f"VERIFY FAIL {f[0]} {f[1]} {f[2]}", flush=True)
+            elif n != 0:
+                corrected += 1
+                print(f"ZERO CORRECTED {f[0]} {f[1]} {f[2]}: 0 -> {n}",
+                      flush=True)
+                f[3] = str(n)
+        rows.append("\t".join(f))
+    tmp = out_path.with_suffix(".tmp")
+    tmp.write_text("\n".join(rows) + "\n")
+    tmp.replace(out_path)
+    print(f"verify-zeros: {checked} checked, {corrected} corrected, "
+          f"{failed} failed", flush=True)
+
+
 def load(out_path: Path) -> dict[tuple[str, str, str], int]:
     """(org, period, prefix) -> PR count."""
     counts: dict[tuple[str, str, str], int] = {}
@@ -110,9 +144,13 @@ def main() -> None:
     ap.add_argument("--out", default="data/derived/branch_scan.tsv")
     ap.add_argument("--periods", nargs="+", default=list(QUARTER_RANGES),
                     choices=list(QUARTER_RANGES))
+    ap.add_argument("--verify-zeros", action="store_true")
     a = ap.parse_args()
-    scan(population(), Path(a.out),
-         {p: QUARTER_RANGES[p] for p in a.periods}, BRANCH_PREFIXES,
+    periods = {p: QUARTER_RANGES[p] for p in a.periods}
+    if a.verify_zeros:
+        verify_zeros(Path(a.out), periods, scoped_repos())
+        return
+    scan(population(), Path(a.out), periods, BRANCH_PREFIXES,
          scoped=scoped_repos())
     print("branch scan complete")
 

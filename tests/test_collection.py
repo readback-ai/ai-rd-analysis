@@ -154,6 +154,55 @@ def test_sample_branch_prs_filters_out_of_scope_repos(
     assert cells[0]["pop_count"] == 5
 
 
+def test_sample_run_removes_unjustified_orgwide_cells(
+        tmp_path, monkeypatch):
+    """PR #18 review, P1: a repo-scoped org's sample cell without the
+    scoped marker is an org-wide draw — when its cell has NO positive
+    scoped count it can never be re-drawn, so it must be deleted, not
+    left to feed the precision estimates. Full-org cells stay."""
+    scan = tmp_path / "scan.tsv"
+    scan.write_text("bigco\tQ2-2026\tcodex/\t0\n")   # scoped count zero
+    out = tmp_path / "cells"
+    out.mkdir()
+    (out / "bigco__Q2-2026.json").write_text(json.dumps(
+        {"org": "bigco", "period": "Q2-2026", "pop_count": 44,
+         "prs": [{"number": 1}]}))                    # legacy org-wide
+    (out / "acme__Q2-2026.json").write_text(json.dumps(
+        {"org": "acme", "period": "Q2-2026", "pop_count": 9,
+         "prs": [{"number": 2}]}))                    # full-org: keep
+    monkeypatch.setattr(pull_prs, "graphql_nodes",
+                        lambda *a, **k: [])
+    pull_prs.sample_branch_prs("codex/", scan, out, ["Q2-2026"],
+                               in_scope={"bigco": {"bigco/ai-a"}})
+    assert not (out / "bigco__Q2-2026.json").exists()
+    assert (out / "acme__Q2-2026.json").exists()
+
+
+def test_verify_zeros_corrects_poisoned_scoped_zero(
+        tmp_path, monkeypatch):
+    """PR #18 review, P2: a zero scoped cell is only a fact once
+    independently re-observed — a search brownout can return a
+    structurally valid zero. verify_zeros recounts scoped zero cells,
+    corrects rows whose recount is nonzero, leaves twice-observed
+    zeros, and never touches full-org or nonzero rows."""
+    out = tmp_path / "scan.tsv"
+    out.write_text("bigco\tQ1-2024\tcodex/\t0\n"
+                   "bigco\tQ1-2024\tclaude/\t0\n"
+                   "bigco\tQ2-2026\tcodex/\t7\n"
+                   "fullorg\tQ1-2024\tcodex/\t0\n")
+    recounts = {"codex/": 4, "claude/": 0}
+    monkeypatch.setattr(branch_scan, "_scoped_cell_count",
+                        lambda repos, prefix, rng: recounts[prefix])
+    branch_scan.verify_zeros(
+        out, {"Q1-2024": "2024-01-01..2024-03-31"},
+        scoped={"bigco": ["bigco/a"]}, pace=0)
+    assert branch_scan.load(out) == {
+        ("bigco", "Q1-2024", "codex/"): 4,
+        ("bigco", "Q1-2024", "claude/"): 0,
+        ("bigco", "Q2-2026", "codex/"): 7,
+        ("fullorg", "Q1-2024", "codex/"): 0}
+
+
 def test_layer_c_precision_filters_scoped_org_samples(
         tmp_path, monkeypatch, capsys):
     """Issue #8: existing sample cells were drawn org-wide,

@@ -146,6 +146,22 @@ def sample_branch_prs(prefix: str, scan_path: Path, out_dir: Path,
         cell.write_text(json.dumps(payload))
         print(f"ok {org} {per}: {len(nodes)}/{n}", flush=True)
         time.sleep(pace)
+    if in_scope:
+        # A repo-scoped org's cell without the scoped marker is an
+        # org-wide draw. Cells with a positive scoped count were
+        # re-drawn above; the rest have no scoped population weight and
+        # can never be re-drawn — remove them so they cannot feed the
+        # estimates.
+        for f in out_dir.glob("*.json"):
+            try:
+                c = json.loads(f.read_text())
+            except json.JSONDecodeError:
+                continue
+            if c.get("org", "") in in_scope \
+                    and c.get("universe") != "scoped":
+                f.unlink()
+                print(f"REMOVED org-wide cell {f.name} "
+                      f"(no scoped draw)", flush=True)
 
 
 def load_branch_samples(out_dir: Path) -> list[dict]:
