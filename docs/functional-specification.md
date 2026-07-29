@@ -710,13 +710,13 @@ Three independent layers, plus review classification. Source: `detect.py`
   additionally require DET-C3 confirmation. The headline series is
   reported with a standing two-sided bound between the arms (§8.9).
   Layer C is PR-level attribution only, never commit-level proof.
-- **DET-C5 (measured precision, context)** Org-stratified C-only samples
-  (repo-scoped orgs' legacy cells filtered to in-scope repos at read
-  time — INTERIM figures pending the scoped re-sample, issue #8):
-  codex/ 95%, copilot/ 98% confirmed; cursor/ 49%, claude/ 43% (CI-canary
-  FP class 19.6% of C-only claude/); the remainder (cursor/ 51%, claude/
-  38%) is indeterminate — the study's ONLY potential overcount
-  (everything else is a floor).
+- **DET-C5 (measured precision, context)** Org-stratified C-only samples,
+  FINAL under the completed scoped re-draw (issue #8; the re-drawn
+  samples changed no figure — the read-time scope filter had already
+  converged): codex/ 95%, copilot/ 98% confirmed; cursor/ 49%, claude/
+  43% (CI-canary FP class 19.6% of C-only claude/); the remainder
+  (cursor/ 51%, claude/ 38%) is indeterminate — the study's ONLY
+  potential overcount (everything else is a floor).
 
 ### 6.4 AI involvement (the primary metric)
 
@@ -1222,7 +1222,7 @@ Cross-checks: balanced-panel Q2-2026 15.6 [13.4,17.9]; two-sided bound
 Q2-2026 16.85 vs 16.74 pooled (0.11pp; ≤ 0.05pp CW); AI share of
 submitted LOC 22.4% / merged LOC 17.0%; fleet cohort ~42 logins (now
 computed per run, no file — §8.2.15); layer-C precision per DET-C5
-(interim); coverage 8,284/8,568 + 284 waived (pre-refresh manifest).
+(final); coverage 8,284/8,568 + 284 waived (pre-refresh manifest).
 
 ---
 
@@ -1410,7 +1410,11 @@ and a reimplementation must copy it to reproduce published numbers.
   (STU-P1); a repo-scoped org with no manifest repos has an explicit
   empty universe (never org-wide fallback); the org-wide branch-scan
   rows were purged (admission depended on them for 0 of 47 repo-scoped
-  orgs, measured). Scoped re-scan pending.
+  orgs, measured). Scoped re-scan COMPLETED 2026-07-28 (PR #18): all
+  1,150 repo-scoped cells collected (only FunAudioLLM's 25 uncollected —
+  org gone, issue #17), Q1-2024 false-positive control 0 in every scoped
+  cell, samples re-drawn under universe='scoped', no headline number
+  changed (DET-C5 figures final).
 - **F-15** The productivity-decomposition "authors" column counts
   (repo, author) pairs, not people.
 - **F-19** Contributor weights inherit the stats endpoint's top-100
