@@ -458,10 +458,11 @@ def _score_world(tmp_path, monkeypatch, docs_row, results_rows=(),
                         local / "results" / "reservations.jsonl",
                         raising=False)
     monkeypatch.setattr(
-        gptzero_client, "score",
-        lambda sha, text, cache_dir, resv, **kw:
-            ({"version": resp_version,
-              "documents": [{"predicted_class": "ai"}]}, 3))
+        gptzero_client, "score_batch",
+        lambda items, cache_dir, resv, **kw:
+            [({"version": resp_version,
+               "documents": [{"predicted_class": "ai"}]}, 3)
+             for _ in items])
     return gz, results
 
 
@@ -519,11 +520,11 @@ def test_version_mismatch_aborts_before_caching(tmp_path, monkeypatch):
     assert gzc.ledger(resv) == 3                  # attempt still reserved
 
 
-def test_mismatch_does_not_advance_to_the_next_document(
+def test_mismatch_halts_the_run_with_nothing_recorded(
         tmp_path, monkeypatch):
-    """PR re-re-review P1 (contract pin): cmd_score must let the
-    version-mismatch SystemExit propagate — the run halts on the first
-    bad document instead of billing the rest."""
+    """PR re-re-review P1 (contract pin, batch form): the
+    version-mismatch SystemExit from score_batch propagates — the run
+    halts with the whole batch unrecorded instead of billing on."""
     import gptzero_client
     import gz
     gz_mod, results = _score_world(tmp_path, monkeypatch,
@@ -539,14 +540,14 @@ def test_mismatch_does_not_advance_to_the_next_document(
     gz.MANIFEST.write_text(json.dumps(m))
     calls = []
 
-    def bad_score(sha, text, cache_dir, resv, **kw):
-        calls.append(sha)
+    def bad_batch(items, cache_dir, resv, **kw):
+        calls.append(len(items))
         raise SystemExit("version mismatch")
     monkeypatch.setattr(gptzero_client, "PINNED_VERSION", "pinver")
-    monkeypatch.setattr(gptzero_client, "score", bad_score)
+    monkeypatch.setattr(gptzero_client, "score_batch", bad_batch)
     with pytest.raises(SystemExit):
         gz_mod.cmd_score(None)
-    assert len(calls) == 1
+    assert calls == [2]
     assert results.read_text().strip() == ""
 
 
@@ -644,6 +645,95 @@ def test_b3_fingerprint_tracks_pool():
     fp = b3.fingerprint(pool)
     assert b3.fingerprint({**pool, "o/c": 25}) != fp
     assert b3.fingerprint(dict(reversed(pool.items()))) == fp
+
+
+def _batch_resp(shas, version="pinver"):
+    return {"version": version,
+            "documents": [{"filename": f"{s}.txt",
+                           "predicted_class": "ai",
+                           "class_probabilities": {"ai": 1.0}}
+                          for s in shas]}
+
+
+def test_score_batch_caches_per_doc_and_reserves(tmp_path, monkeypatch):
+    """Batch endpoint (support-recommended): one request scores many
+    documents; each doc still gets its own versioned cache entry in the
+    single-doc format and its own reservation row."""
+    import gptzero_client as gzc
+    monkeypatch.setattr(gzc, "PINNED_VERSION", "pinver")
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
+    items = []
+    for sha, text in (("shaA", "one two three"), ("shaB", "four five")):
+        p = docs_dir / f"{sha}.txt"
+        p.write_text(text)
+        items.append((sha, p))
+    sent = []
+
+    def transport(paths):
+        sent.append([p.name for p in paths])
+        return _batch_resp([p.stem for p in paths])
+
+    resv = tmp_path / "resv.jsonl"
+    out = gzc.score_batch(items, tmp_path / "cache", resv,
+                          transport=transport)
+    assert [b for _r, b in out] == [3, 2]
+    assert gzc.ledger(resv) == 5
+    assert sent == [["shaA.txt", "shaB.txt"]]
+    for sha in ("shaA", "shaB"):
+        cached = json.loads(
+            gzc._cache_path(tmp_path / "cache", sha).read_text())
+        assert gzc.doc_fields(cached)["predicted_class"] == "ai"
+        assert gzc.doc_fields(cached)["model_version"] == "pinver"
+
+
+def test_score_batch_skips_cached_documents(tmp_path, monkeypatch):
+    import gptzero_client as gzc
+    monkeypatch.setattr(gzc, "PINNED_VERSION", "pinver")
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
+    items = []
+    for sha, text in (("shaA", "one two three"), ("shaB", "four five")):
+        p = docs_dir / f"{sha}.txt"
+        p.write_text(text)
+        items.append((sha, p))
+    pre = gzc._cache_path(tmp_path / "cache", "shaA")
+    pre.parent.mkdir(parents=True)
+    pre.write_text(json.dumps(_batch_resp(["shaA"])))
+    sent = []
+
+    def transport(paths):
+        sent.append([p.name for p in paths])
+        return _batch_resp([p.stem for p in paths])
+
+    out = gzc.score_batch(items, tmp_path / "cache",
+                          tmp_path / "resv.jsonl", transport=transport)
+    assert sent == [["shaB.txt"]]           # cached doc not resubmitted
+    assert [b for _r, b in out] == [0, 2]
+
+
+def test_score_batch_version_or_shape_mismatch_caches_nothing(
+        tmp_path, monkeypatch):
+    """A batch whose response version differs from the pin, or whose
+    document count doesn't match the upload, aborts before ANY cache
+    write — a misattributed batch would poison every document in it."""
+    import gptzero_client as gzc
+    monkeypatch.setattr(gzc, "PINNED_VERSION", "pinver")
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
+    p = docs_dir / "shaA.txt"
+    p.write_text("one two three")
+    with pytest.raises(SystemExit):
+        gzc.score_batch([("shaA", p)], tmp_path / "cache",
+                        tmp_path / "resv.jsonl",
+                        transport=lambda paths:
+                            _batch_resp(["shaA"], version="other"))
+    with pytest.raises(SystemExit):
+        gzc.score_batch([("shaA", p)], tmp_path / "cache",
+                        tmp_path / "resv.jsonl",
+                        transport=lambda paths:
+                            {"version": "pinver", "documents": []})
+    assert not list((tmp_path / "cache").rglob("*.json"))
 
 
 def test_analysis_paired_sign_and_arm_rates():

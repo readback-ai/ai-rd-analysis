@@ -28,6 +28,8 @@ from pathlib import Path
 from diffs import count_words
 
 API_URL = "https://api.gptzero.me/v2/predict/text"
+FILES_URL = "https://api.gptzero.me/v2/predict/files"
+BATCH_FILES = 50          # API limit per request (support, 2026-07-29)
 BUDGET_WORDS = 50_000
 PINNED_VERSION: str | None = "2026-07-04-base"   # from the 2026-07-29
                                                  # smoke run's responses
@@ -175,6 +177,88 @@ def score(doc_sha: str, text: str, cache_dir: Path,
         time.sleep(5 * 3 ** attempt)
     raise RuntimeError(f"GPTZero request failed after {retries} "
                        f"attempts: {last}")
+
+
+def _post_files_once(paths: list[Path]) -> dict:
+    """One multipart POST to the batch files endpoint via curl (the
+    support-recommended path for many documents — one request instead of
+    a burst). No Content-Type header: curl sets the multipart boundary.
+    The key travels in the 0600 header file, never in argv."""
+    hdr = Path(__file__).resolve().parent / "local" / "curl_headers"
+    hdr.parent.mkdir(parents=True, exist_ok=True)
+    hdr.touch()
+    hdr.chmod(0o600)
+    hdr.write_text(f"x-api-key: {_api_key()}\n")
+    cmd = ["curl", "-sS", "-m", "300", "-X", "POST", FILES_URL,
+           "-H", "Accept: application/json", "-H", f"@{hdr}"]
+    for p in paths:
+        cmd += ["-F", f"files=@{p};type=text/plain"]
+    if PINNED_VERSION:
+        cmd += ["-F", f"version={PINNED_VERSION}"]
+    cmd += ["-w", "\n%{http_code}"]
+    out = subprocess.run(cmd, capture_output=True, text=True)
+    if out.returncode != 0:
+        raise urllib.error.URLError(out.stderr.strip()[:200])
+    payload, _, code_s = out.stdout.rpartition("\n")
+    code = int(code_s) if code_s.isdigit() else 0
+    if code >= 400 or not payload:
+        raise urllib.error.HTTPError(FILES_URL, code or 599,
+                                     payload[:200], None, None)
+    return json.loads(payload)
+
+
+def score_batch(items: list[tuple[str, Path]], cache_dir: Path,
+                reservations_path: Path,
+                transport=_post_files_once) -> list[tuple[dict, int]]:
+    """Score up to BATCH_FILES documents in ONE request. items are
+    (doc_sha, text_path) with filenames '{sha}.txt', so results map back
+    by filename (falling back to upload order when the response carries
+    none). Cache hits are excluded from the upload and billed 0; every
+    uploaded document reserves its words before the request; the whole
+    batch aborts UNCACHED on a version or shape mismatch — a
+    misattributed batch would poison every document in it. Returns
+    (per-doc response in the single-doc cache format, billed words) in
+    items order."""
+    results: dict[str, tuple[dict, int]] = {}
+    misses: list[tuple[str, Path, int]] = []
+    for sha, path in items:
+        cached = _cache_path(cache_dir, sha)
+        if cached.is_file():
+            results[sha] = (json.loads(cached.read_text()), 0)
+        else:
+            misses.append((sha, path, count_words(path.read_text())))
+    if misses:
+        spent = ledger(reservations_path)
+        total = sum(w for _s, _p, w in misses)
+        if spent + total > BUDGET_WORDS:
+            raise SystemExit(
+                f"budget ceiling: {spent} reserved + {total} for this "
+                f"batch > {BUDGET_WORDS}")
+        for sha, _p, w in misses:
+            _reserve(reservations_path, sha, w)
+        resp = transport([p for _s, p, _w in misses])
+        version = resp.get("version")
+        docs = resp.get("documents") or []
+        if PINNED_VERSION is not None and version != PINNED_VERSION:
+            raise SystemExit(
+                f"version mismatch: batch reports {version!r}, pin is "
+                f"{PINNED_VERSION!r} — nothing cached")
+        if len(docs) != len(misses):
+            raise SystemExit(
+                f"batch shape mismatch: {len(misses)} files uploaded, "
+                f"{len(docs)} documents returned — nothing cached")
+        by_name = {d.get("filename"): d for d in docs
+                   if isinstance(d, dict) and d.get("filename")}
+        for i, (sha, path, w) in enumerate(misses):
+            d = by_name.get(f"{sha}.txt", docs[i])
+            single = {"version": version, "documents": [d]}
+            cached = _cache_path(cache_dir, sha)
+            cached.parent.mkdir(parents=True, exist_ok=True)
+            tmp = cached.with_suffix(".tmp")
+            tmp.write_text(json.dumps(single))
+            tmp.replace(cached)
+            results[sha] = (single, w)
+    return [results[sha] for sha, _p in items]
 
 
 def doc_fields(resp: dict) -> dict:

@@ -213,26 +213,28 @@ def cmd_score(limit: int | None) -> None:
         todo = [r for s, r in docs.items() if s not in done]
         if limit is not None:
             todo = todo[:limit]
-        for r in todo:
-            text = (DOC_CACHE / f"{r['doc_sha']}.txt").read_text()
+        for i in range(0, len(todo), gzc.BATCH_FILES):
+            chunk = todo[i:i + gzc.BATCH_FILES]
+            items = [(r["doc_sha"], DOC_CACHE / f"{r['doc_sha']}.txt")
+                     for r in chunk]
             try:
-                resp, billed = gzc.score(r["doc_sha"], text, RESP_CACHE,
-                                         RESERVATIONS)
+                scored = gzc.score_batch(items, RESP_CACHE, RESERVATIONS)
             except RuntimeError as e:
-                print(f"SCORE FAIL {r['slot']}: {e}", flush=True)
+                print(f"BATCH FAIL: {e}", flush=True)
                 continue          # deferred: absent from results, retried
             except urllib.error.HTTPError as e:
                 raise SystemExit(
-                    f"HTTP {e.code} on {r['slot']} — results so far are "
+                    f"HTTP {e.code} on a batch — results so far are "
                     f"recorded; re-run --score to resume. If it "
                     f"persists, check the key.") from e
-            fields = gzc.doc_fields(resp)
-            out.write(json.dumps(
-                {**r, **fields, "billed_words": billed}) + "\n")
-            out.flush()
-            print(f"scored {r['slot']}: {fields['predicted_class']} "
-                  f"({billed} words billed)", flush=True)
-            if billed:
+            for r, (resp, billed) in zip(chunk, scored):
+                fields = gzc.doc_fields(resp)
+                out.write(json.dumps(
+                    {**r, **fields, "billed_words": billed}) + "\n")
+                out.flush()
+                print(f"scored {r['slot']}: {fields['predicted_class']} "
+                      f"({billed} words billed)", flush=True)
+            if i + gzc.BATCH_FILES < len(todo):
                 time.sleep(SCORE_PACE)
     print(f"reserved: {gzc.ledger(RESERVATIONS)}/{gzc.BUDGET_WORDS} "
           f"words")
