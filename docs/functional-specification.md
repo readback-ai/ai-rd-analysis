@@ -477,8 +477,10 @@ For each candidate org (lowercased key `lo`):
   population org has an org-type row. Current run: 2,136 repos (2,142
   before the 2026-07-27 population refresh).
 - **POP-15** The **collectable manifest** = manifest minus the documented
-  inaccessible-repos list (71 repos at the current run — deleted,
+  inaccessible-repos list (71 repos at the pre-refresh run — deleted,
   privatized, or DMCA'd; each is a standing waiver, see COL-10).
+  Unsearchable-but-reachable repos are NOT waivers: they are collected
+  through the object API (COL-10b).
 
 ---
 
@@ -572,8 +574,21 @@ For each candidate org (lowercased key `lo`):
   (manifest repo × censused quarter) either has gap-free valid-cell
   coverage — the repo's parseable cells must union to the whole quarter
   with no gaps — or the repo is on the documented inaccessible list
-  (counted as waived). Current manifest: 8,568 repo-periods = 8,284
-  covered + 284 waived (71 repos × 4 quarters).
+  (counted as waived). Coverage numbers re-derive per run manifest
+  (RPT-2); pre-refresh run: 8,568 repo-periods = 8,284 covered + 284
+  waived (71 repos × 4 quarters).
+- **COL-10b (unsearchable repos)** A public repo GitHub's search index
+  refuses outright (`repo:X` answers a definitive HTTP 422 "cannot be
+  searched") can never have a precount or a search-collected cell; it is
+  collected via `repository.pullRequests` (`census_direct.py`), which
+  bypasses the search index. The connection's own `totalCount` is the
+  completeness denominator — the full history must arrive, verified page
+  by page, or nothing is written — and quarters with no PRs get a
+  VERIFIED empty cell. Only the definitive 422 selects this route; a
+  transient failure still fails the repo-quarter. Such repos are
+  COLLECTED, not waived (measured 2026-07-29: 8 population repos, 364
+  in-window PRs recovered; they skew new and AI-tooling-heavy, so
+  waiving them would bias AI rates down).
 
 ### 5.7 Branch-prefix scan (layer-C counts)
 
@@ -1222,7 +1237,10 @@ Cross-checks: balanced-panel Q2-2026 15.6 [13.4,17.9]; two-sided bound
 Q2-2026 16.85 vs 16.74 pooled (0.11pp; ≤ 0.05pp CW); AI share of
 submitted LOC 22.4% / merged LOC 17.0%; fleet cohort ~42 logins (now
 computed per run, no file — §8.2.15); layer-C precision per DET-C5
-(final); coverage 8,284/8,568 + 284 waived (pre-refresh manifest).
+(final); coverage 8,284/8,568 + 284 waived (pre-refresh manifest;
+the 2026-07-30 regeneration re-derives it — 364 PRs from 8
+unsearchable repos now collected via COL-10b, FunAudioLLM excluded
+per F-51).
 
 ---
 
@@ -1380,6 +1398,18 @@ and a reimplementation must copy it to reproduce published numbers.
   as a record.
 - **F-50** When no window month is mature, the event-study maturity
   labels silently mislabel (negative index) instead of failing.
+- **F-51 (population drift, OPEN — issue #17)** FunAudioLLM (full-org,
+  top5:3) was RENAMED on GitHub to QwenAudio after the population was
+  built: `org:` searches answer 422, `GET /orgs/FunAudioLLM` 404, and
+  search does not follow org renames. Its existing census cells remain
+  valid historical observations; new collection fails loudly
+  (absence-of-evidence rule), and the org is EXCLUDED from the
+  2026-07-30 regeneration. The population is frozen between deliberate
+  revisions (§1c / METHODS), so the handle migration — re-admitting the
+  data under QwenAudio, or converting the org to a documented waiver —
+  is deferred to a deliberate population revision. A `GET /orgs/{org}`
+  sweep over population.tsv before the next collection run would
+  enumerate any further drift.
 - **F-8** The census drift allowance (COL-8) tolerates up to 2% silent,
   possibly non-uniform undercount per repo-period; brownout losses are
   not uniform in time.
@@ -1412,9 +1442,9 @@ and a reimplementation must copy it to reproduce published numbers.
   rows were purged (admission depended on them for 0 of 47 repo-scoped
   orgs, measured). Scoped re-scan COMPLETED 2026-07-28 (PR #18): all
   1,150 repo-scoped cells collected (only FunAudioLLM's 25 uncollected —
-  org gone, issue #17), Q1-2024 false-positive control 0 in every scoped
-  cell, samples re-drawn under universe='scoped', no headline number
-  changed (DET-C5 figures final).
+  org renamed, see F-51 / issue #17), Q1-2024 false-positive control 0
+  in every scoped cell, samples re-drawn under universe='scoped', no
+  headline number changed (DET-C5 figures final).
 - **F-15** The productivity-decomposition "authors" column counts
   (repo, author) pairs, not people.
 - **F-19** Contributor weights inherit the stats endpoint's top-100
@@ -1511,7 +1541,7 @@ and a reimplementation must copy it to reproduce published numbers.
 | Suppression floors | 30 (event study), 20 (fates, responsiveness lanes), 10 (accountability), 2 core authors, > 100 LOC (corpus) | respective modules |
 | Attention size bands | ≤10, 11–100, 101–1k, >1k (capped LOC) | `attention.BANDS` |
 | Aux seeds | accountability 13 (global RNG); corpus 7 | respective modules |
-| Coverage (published run) | 2,142 repos; 8,568 repo-periods = 8,284 covered + 284 waived (71 repos); population refreshed 2026-07-27 to 228 orgs / 2,136 repos, manifest regeneration pending | census manifest |
+| Coverage (published run) | 2,142 repos; 8,568 repo-periods = 8,284 covered + 284 waived (71 repos); population refreshed 2026-07-27 to 228 orgs / 2,136 repos — the 2026-07-30 regeneration re-derives the manifest (unsearchable repos collected per COL-10b; FunAudioLLM excluded per F-51) | census manifest |
 
 
 
