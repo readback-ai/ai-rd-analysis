@@ -347,6 +347,36 @@ def test_unsearchable_repo_falls_back_to_the_direct_route(monkeypatch):
     assert called == ["o/r"]
 
 
+def test_cached_positive_precount_still_reaches_the_direct_route(
+        monkeypatch):
+    """PR #20 review, P1: unsearchability is a property of the REPO, not
+    of whether a precount happens to be cached. A cached positive count
+    kept the repo on the failing search route forever."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount, "get_precount", lambda r, p: 16)
+    monkeypatch.setattr(census, "pull_cell", lambda repo, rng: (None, False))
+    monkeypatch.setattr(census_direct, "repo_unsearchable",
+                        lambda repo: True)
+    monkeypatch.setattr(census_direct, "census_repo_direct",
+                        lambda repo: {"Q1-2026": 16})
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 16
+
+
+def test_cached_zero_precount_still_reaches_the_direct_route(monkeypatch):
+    """PR #20 review, P1: a cached ZERO whose confirmation can never
+    succeed (the recount uses the same refused search) must also route to
+    direct collection instead of failing the period."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount.time, "sleep", lambda s: None)
+    monkeypatch.setattr(precount, "get_precount", lambda r, p: 0)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: None)
+    monkeypatch.setattr(census_direct, "repo_unsearchable",
+                        lambda repo: True)
+    monkeypatch.setattr(census_direct, "census_repo_direct",
+                        lambda repo: {"Q1-2026": 7})
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 7
+
+
 def test_transient_precount_failure_does_not_use_the_direct_route(
         monkeypatch):
     """Only the definitive 422 justifies the fallback: a rate-limited or

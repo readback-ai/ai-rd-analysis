@@ -121,6 +121,22 @@ def pull_cell(repo: str, rng: str) -> tuple[list | None, bool]:
     return nodes, False
 
 
+def _direct_or_none(repo: str, period: str) -> int | None:
+    """Last resort on ANY definitive search-route failure: a repo the
+    search index refuses (HTTP 422) is invisible to every search-based
+    route, whatever the precount cache happens to hold — a cached
+    positive keeps failing the pull, and a cached zero can never be
+    confirmed, since the confirming recount uses the same refused search.
+    Collect it through the object API instead. Only the DEFINITIVE
+    refusal qualifies: a transient failure still fails the period rather
+    than silently switching collection routes."""
+    from pipeline import census_direct
+    if not census_direct.repo_unsearchable(repo):
+        return None
+    written = census_direct.census_repo_direct(repo)
+    return None if written is None else written.get(period)
+
+
 def census_repo_period(repo: str, period: str, k: int) -> int | None:
     """k is a FLOOR on sub-windows; the actual count adapts to the repo's
     PR volume (ceil(total/45) with 10% headroom, capped at one window per
@@ -131,22 +147,13 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
     rng = resolve_period(period)
     total = ensure_precount(repo, period)   # cached, or queried+cache-written
     if total is None:
-        # No precount can exist for a repo the search index refuses (422):
-        # every search-based route is blind to it. Collect it through the
-        # object API instead, which carries its own completeness rule.
-        # Only the DEFINITIVE refusal qualifies — a transient failure must
-        # still fail the period rather than switch collection routes.
-        from pipeline import census_direct
-        if census_direct.repo_unsearchable(repo):
-            written = census_direct.census_repo_direct(repo)
-            return None if written is None else written.get(period)
-        return None
+        return _direct_or_none(repo, period)
     if total == 0:
         # 0 passes both completeness gates trivially, so it may not stand
         # on a single observation — a browned-out search looks identical.
         total = confirm_zero_precount(repo, period)
         if total is None:
-            return None
+            return _direct_or_none(repo, period)
     # fully-cached fast path — only when the cache satisfies the same
     # drift allowance as fresh pulls; a brownout-poisoned empty cached as
     # valid must fall through to the self-heal path (external review P1)
@@ -189,7 +196,7 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
     print(f"FAIL {repo} {period}: collected {n}/{total} PRs with "
           f"{len(ranges)} sub-windows after a fresh re-pull ({reason})",
           file=sys.stderr, flush=True)
-    return None
+    return _direct_or_none(repo, period)
 
 
 def main() -> None:

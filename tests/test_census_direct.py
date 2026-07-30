@@ -162,6 +162,35 @@ def test_census_repo_direct_buckets_into_quarter_cells(monkeypatch):
     assert json.loads(empty.read_text()) == []
 
 
+def test_direct_history_replaces_a_poisoned_empty_cell(monkeypatch):
+    """PR #20 review, P1: the verified direct history is AUTHORITATIVE —
+    a pre-existing cell that disagrees (e.g. the [] a failed search run
+    left behind) must be replaced, not preserved while the fresh count is
+    reported as written. This lost 17 of the 364 recovered PRs."""
+    cell = ghx.cell_path("census-v2", "o/r", "2026-04-01..2026-06-30")
+    cell.parent.mkdir(parents=True, exist_ok=True)
+    cell.write_text("[]")                      # poisoned empty
+    monkeypatch.setattr(census_direct, "pull_repo_prs",
+                        lambda repo: [_pr(1, "2026-05-01T00:00:00Z"),
+                                      _pr(2, "2026-06-01T00:00:00Z")])
+    written = census_direct.census_repo_direct("o/r")
+    assert written["Q2-2026"] == 2
+    assert [p["number"] for p in json.loads(cell.read_text())] == [1, 2]
+
+
+def test_direct_history_leaves_an_agreeing_cell_untouched(monkeypatch):
+    """No needless churn: a cell whose contents already match the
+    verified history keeps its mtime."""
+    cell = ghx.cell_path("census-v2", "o/r", "2026-04-01..2026-06-30")
+    cell.parent.mkdir(parents=True, exist_ok=True)
+    cell.write_text(json.dumps([_pr(1, "2026-05-01T00:00:00Z")]))
+    before = cell.stat().st_mtime_ns
+    monkeypatch.setattr(census_direct, "pull_repo_prs",
+                        lambda repo: [_pr(1, "2026-05-01T00:00:00Z")])
+    census_direct.census_repo_direct("o/r")
+    assert cell.stat().st_mtime_ns == before
+
+
 def test_census_repo_direct_writes_nothing_on_failure(monkeypatch):
     monkeypatch.setattr(census_direct, "pull_repo_prs", lambda repo: None)
     assert census_direct.census_repo_direct("o/r") is None

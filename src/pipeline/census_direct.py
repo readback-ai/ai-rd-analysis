@@ -112,7 +112,11 @@ def census_repo_direct(repo: str) -> dict[str, int] | None:
     """Collect the repo and write one cell per study quarter (keyed by the
     full quarter range, so coverage sees gap-free coverage). Returns
     {period: pr_count} written, or None when the history was incomplete.
-    Existing valid cells are left alone."""
+
+    The verified history is AUTHORITATIVE: a cell that disagrees with it
+    is replaced (a failed search run can leave an empty cell behind, and
+    preserving it would silently drop recovered PRs). A cell that already
+    agrees is left untouched."""
     periods = [p for p in QUARTER_RANGES if p != "Q3-2025"]
     prs = pull_repo_prs(repo)
     if prs is None:
@@ -128,7 +132,10 @@ def census_repo_direct(repo: str) -> dict[str, int] | None:
     out: dict[str, int] = {}
     for per, cell_prs in buckets.items():
         p = cell_path(STAGE, repo, resolve_period(per))
-        if read_cell(p, list) is None:
+        existing = read_cell(p, list)
+        fresh_nums = [pr.get("number") for pr in cell_prs]
+        if existing is None or [pr.get("number") for pr in existing
+                               if isinstance(pr, dict)] != fresh_nums:
             tmp = p.with_suffix(".tmp")
             tmp.write_text(json.dumps(cell_prs))
             tmp.replace(p)
