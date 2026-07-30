@@ -245,6 +245,37 @@ def test_census_repo_direct_writes_nothing_on_failure(monkeypatch):
     assert not list(store.glob("o~r*.json"))
 
 
+def test_cli_repos_exits_nonzero_on_unknown_classification(
+        tmp_path, monkeypatch):
+    """PR #20 re-review, P2: --repos advertises 'collect all listed' — a
+    repo whose classification is transiently UNKNOWN was printed and then
+    silently skipped with exit 0, so a timeout or rate limit could make a
+    scripted collection pass while doing nothing."""
+    lst = tmp_path / "repos.txt"
+    lst.write_text("o/r\n")
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "unknown")
+    monkeypatch.setattr("sys.argv",
+                        ["census_direct", "--repos", str(lst)])
+    with pytest.raises(SystemExit) as exc:
+        census_direct.main()
+    assert exc.value.code           # nonzero / truthy
+
+
+def test_cli_probe_reports_unknowns_without_failing(
+        tmp_path, monkeypatch, capsys):
+    """--probe is a report, not a collection: unknowns appear in the
+    summary but do not fail the run."""
+    lst = tmp_path / "repos.txt"
+    lst.write_text("o/r\n")
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "unknown")
+    monkeypatch.setattr("sys.argv",
+                        ["census_direct", "--probe", str(lst)])
+    census_direct.main()
+    assert "unclassifiable" in capsys.readouterr().out
+
+
 def test_cells_carry_the_census_field_set(monkeypatch):
     """Shape parity: a direct cell must be indistinguishable to the frame
     from a search-collected one."""

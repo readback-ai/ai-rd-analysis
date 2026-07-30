@@ -175,14 +175,18 @@ def main() -> None:
     path = Path(a.repos or a.probe)
     repos = [ln.strip() for ln in path.read_text().splitlines()
              if ln.strip()]
-    unsearchable = []
+    unsearchable, unknown = [], []
     for repo in repos:
         verdict = classify_searchability(repo)
         if verdict == "unsearchable":
             unsearchable.append(repo)
+        elif verdict == "unknown":
+            unknown.append(repo)
         if verdict != "searchable":
             print(f"{verdict.upper()} {repo}", flush=True)
-    print(f"{len(unsearchable)}/{len(repos)} unsearchable", flush=True)
+    print(f"{len(unsearchable)}/{len(repos)} unsearchable"
+          + (f", {len(unknown)} unclassifiable (transient — rerun)"
+             if unknown else ""), flush=True)
     if a.probe:
         return
     failed = []
@@ -194,8 +198,13 @@ def main() -> None:
                   flush=True)
         else:
             print(f"ok   {repo}: {written}", flush=True)
-    if failed:
-        raise SystemExit(f"{len(failed)} repos incomplete: {failed[:5]}")
+    if failed or unknown:
+        # "collect all listed" must not report success while skipping
+        # work: an unclassifiable repo was neither collected nor shown
+        # to be searchable.
+        raise SystemExit(
+            f"{len(failed)} incomplete {failed[:5]}; "
+            f"{len(unknown)} unclassifiable {unknown[:5]} — rerun")
 
 
 if __name__ == "__main__":
