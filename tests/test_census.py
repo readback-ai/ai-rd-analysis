@@ -362,6 +362,48 @@ def test_cached_positive_precount_still_reaches_the_direct_route(
     assert census_repo_period("o/r", "Q1-2026", k=10) == 16
 
 
+def test_small_cached_deficit_does_not_bypass_the_direct_route(
+        monkeypatch, tmp_store):
+    """PR #20 re-review, P1: the drift-allowance fast path accepted a
+    cached cell that DISAGREES with the precount (deficit <= 3) before
+    ever asking whether the repo is unsearchable — the exact former
+    ComposioHQ/skills Q2 state (precount 1, cell []), which returned 0
+    and left the empty cell stored."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount, "get_precount", lambda r, p: 1)
+    cell = census.cell_path(census.STAGE, "o/r", "2026-04-01..2026-06-30")
+    cell.parent.mkdir(parents=True, exist_ok=True)
+    cell.write_text("[]")
+    monkeypatch.setattr(census_direct, "repo_unsearchable",
+                        lambda repo: True)
+    called = []
+
+    def fake_direct(repo):
+        called.append(repo)
+        cell.write_text(json.dumps([{"number": 7}]))
+        return {"Q2-2026": 1}
+    monkeypatch.setattr(census_direct, "census_repo_direct", fake_direct)
+    assert census_repo_period("o/r", "Q2-2026", k=10) == 1
+    assert called == ["o/r"]
+    assert json.loads(cell.read_text()) == [{"number": 7}]
+
+
+def test_searchable_repo_keeps_the_drift_allowance(monkeypatch, tmp_store):
+    """The allowance still holds for searchable repos: a small deficit is
+    legitimate drift (PRs deleted after the precount) and must not cost a
+    probe-and-recollect on every run."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount, "get_precount", lambda r, p: 3)
+    cell = census.cell_path(census.STAGE, "o/r", "2026-04-01..2026-06-30")
+    cell.parent.mkdir(parents=True, exist_ok=True)
+    cell.write_text(json.dumps([{"number": 1}]))
+    monkeypatch.setattr(census_direct, "repo_unsearchable",
+                        lambda repo: False)
+    monkeypatch.setattr(census_direct, "census_repo_direct",
+                        lambda repo: pytest.fail("must not collect"))
+    assert census_repo_period("o/r", "Q2-2026", k=10) == 1
+
+
 def test_cached_zero_precount_still_reaches_the_direct_route(monkeypatch):
     """PR #20 review, P1: a cached ZERO whose confirmation can never
     succeed (the recount uses the same refused search) must also route to

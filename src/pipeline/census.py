@@ -29,7 +29,8 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from pipeline.ghx import cell_path, graphql_nodes, read_cell
-from pipeline.precount import confirm_zero_precount, ensure_precount
+from pipeline.precount import (confirm_zero_precount, ensure_precount,
+                               write_precount)
 from pipeline.scan_orgs import QUARTER_RANGES, resolve_period
 
 PAGE_SIZE = 50   # PRs per GraphQL call; _paginate cursors to the API's
@@ -134,7 +135,15 @@ def _direct_or_none(repo: str, period: str) -> int | None:
     if not census_direct.repo_unsearchable(repo):
         return None
     written = census_direct.census_repo_direct(repo)
-    return None if written is None else written.get(period)
+    if written is None:
+        return None
+    # Record the direct route's own counts as the precount for this repo:
+    # they are its authoritative denominator (the search count is
+    # unreachable), so later runs match the fast path exactly instead of
+    # probing and re-collecting the history every time.
+    for per, count in written.items():
+        write_precount(repo, per, count)
+    return written.get(period)
 
 
 def census_repo_period(repo: str, period: str, k: int) -> int | None:
@@ -158,6 +167,16 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
     # drift allowance as fresh pulls; a brownout-poisoned empty cached as
     # valid must fall through to the self-heal path (external review P1)
     cached = read_cell(cell_path(STAGE, repo, rng), list)
+    if cached is not None and len(cached) != total:
+        # A cell that DISAGREES with the precount may be a search-route
+        # artifact rather than drift: for an unsearchable repo the search
+        # count is unreachable and the cell is whatever a failed run left
+        # behind (an empty passes the <=3 allowance outright). Ask before
+        # accepting the mismatch; searchable repos keep the allowance,
+        # since small deficits there are legitimate drift.
+        direct = _direct_or_none(repo, period)
+        if direct is not None:
+            return direct
     if cached is not None \
             and (len(cached) >= total * 0.98 or total - len(cached) <= 3):
         return len(cached)
