@@ -14,6 +14,13 @@ from pipeline.scan_orgs import QUARTER_RANGES
 def tmp_store(tmp_path, monkeypatch):
     monkeypatch.setenv("AIRD_DATA_DIR", str(tmp_path))
     monkeypatch.setattr(census.time, "sleep", lambda s: None)
+    # Census failure paths classify the repo before giving up. Default to
+    # SEARCHABLE — the case every test here means unless it says otherwise
+    # — so the classification costs no gh call; direct-route tests patch
+    # this same attribute to True.
+    from pipeline import census_direct
+    monkeypatch.setattr(census_direct, "repo_unsearchable",
+                        lambda repo: False)
     return tmp_path
 
 
@@ -386,6 +393,53 @@ def test_small_cached_deficit_does_not_bypass_the_direct_route(
     assert census_repo_period("o/r", "Q2-2026", k=10) == 1
     assert called == ["o/r"]
     assert json.loads(cell.read_text()) == [{"number": 7}]
+
+
+def test_failed_direct_collection_fails_the_period(monkeypatch, tmp_store):
+    """PR #20 re-review, P1: once unsearchability is CONFIRMED, a failed
+    direct collection is a definitive failure — it must not fall through
+    to the drift allowance and report the poisoned cell as fine."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount, "get_precount", lambda r, p: 1)
+    cell = census.cell_path(census.STAGE, "o/r", "2026-04-01..2026-06-30")
+    cell.parent.mkdir(parents=True, exist_ok=True)
+    cell.write_text("[]")
+    monkeypatch.setattr(census_direct, "repo_unsearchable",
+                        lambda repo: True)
+    monkeypatch.setattr(census_direct, "census_repo_direct",
+                        lambda repo: None)          # collection failed
+    assert census_repo_period("o/r", "Q2-2026", k=10) is None
+    assert json.loads(cell.read_text()) == []       # untouched
+
+
+def test_direct_zeros_are_recorded_confirmed(monkeypatch, tmp_store):
+    """PR #20 re-review, P2: a verified full direct history PROVES an
+    empty quarter, so its zero precount is confirmed — otherwise the next
+    run treats it as an unconfirmed search zero, retries the refused
+    search, and re-collects the whole history. A second call must do
+    neither."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount.time, "sleep", lambda s: None)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: None)
+    probes, collects = [], []
+    monkeypatch.setattr(census_direct, "repo_unsearchable",
+                        lambda repo: probes.append(repo) or True)
+
+    def fake_direct(repo):
+        collects.append(repo)
+        for rng in ("2024-01-01..2024-03-31", "2026-04-01..2026-06-30"):
+            p = census.cell_path(census.STAGE, repo, rng)
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text("[]")
+        return {"Q1-2024": 0, "Q2-2026": 0}
+    monkeypatch.setattr(census_direct, "census_repo_direct", fake_direct)
+    assert census_repo_period("o/r", "Q1-2024", k=10) == 0
+    assert precount.get_precount("o/r", "Q1-2024") == 0
+    val = json.loads(precount.precount_path("o/r", "Q1-2024").read_text())
+    assert val.get("confirmed") is True
+    n_probes, n_collects = len(probes), len(collects)
+    assert census_repo_period("o/r", "Q1-2024", k=10) == 0
+    assert (len(probes), len(collects)) == (n_probes, n_collects)
 
 
 def test_searchable_repo_keeps_the_drift_allowance(monkeypatch, tmp_store):

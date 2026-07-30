@@ -38,8 +38,15 @@ def get_precount(repo: str, period: str) -> int | None:
     return val.get("total") if val else None
 
 
-def write_precount(repo: str, period: str, total: int) -> None:
-    precount_path(repo, period).write_text(json.dumps({"total": total}))
+def write_precount(repo: str, period: str, total: int,
+                   confirmed: bool = False) -> None:
+    """confirmed marks a zero that needs no further confirmation — set it
+    only when the count rests on evidence independent of a single search
+    observation (a re-observed zero, or a verified full PR history)."""
+    payload: dict = {"total": total}
+    if confirmed:
+        payload["confirmed"] = True
+    precount_path(repo, period).write_text(json.dumps(payload))
 
 
 def ensure_precount(repo: str, period: str) -> int | None:
