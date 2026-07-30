@@ -1,0 +1,25 @@
+# Declared hand-curated AI-developer orgs — MINIMAL, load-bearing rows only:
+# each line is an org that (a) is a genuine AI developer, (b) has study-window
+# AI evidence, and (c) would NOT be admitted by any other rule (not on Epoch/
+# TechCrunch lists, topic-sparse repos). Trimmed 2026-07-10 from 33 to 14 by
+# counterfactual test (remove list -> rerun engine -> keep only rows whose
+# removal changes the population OR an org's full/repo-scoped status). Orgs that later gain evidence (e.g.
+# thinking-machines-lab) are one line to re-add.
+AI4Bharat
+Aleph-Alpha
+ByteDance-Seed
+HazyResearch
+HumeAI
+MoonshotAI
+SakanaAI
+cartesia-ai
+imbue-ai
+insilicomedicine
+modelscope
+sarvamai
+stanford-crfm
+stepfun-ai
+NousResearch
+OpenBMB
+QwenLM
+thinking-machines-lab

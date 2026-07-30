@@ -1,0 +1,18 @@
+# Population overrides (published; one line each). exclude = adjudicated
+# AI-USER despite AI-washed metadata; include-full = AI developer despite
+# sparse metadata. Evidence rule still applies to includes.
+gitleaks	exclude	secrets scanner; AI-washed topics (llm-training etc.)
+meilisearch	exclude	search engine with AI features
+espeak-ng	exclude	classic formant TTS, pre-neural tech
+daytonaio	exclude	sandboxes FOR AI-generated code; product is not AI
+databendlabs	exclude	data warehouse with vector type
+streamlit	exclude	app framework used by ML developers
+InsForge	exclude	BaaS with AI branding
+VertaAI	exclude	defunct MLOps shell
+beclab	exclude	self-hosted OS with AI apps
+genkit-ai	exclude	Google framework spinoff; usage-side
+shareAI-lab	exclude	tutorial/content org
+flashinfer-ai	include-full	LLM inference kernels (topic-sparse); ev 284/1636 PRs
+embeddings-benchmark	include-full	MTEB benchmark org (topic-sparse)
+AnswerDotAI	include-full	Answer.AI research lab (ModernBERT); ev 13/101 PRs
+datahub-project	exclude	data catalog product; heavy AI user (19% of PRs) but not an AI developer

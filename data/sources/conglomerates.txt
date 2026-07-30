@@ -1,0 +1,18 @@
+# Declared conglomerate umbrella orgs: enter REPO-SCOPED (AI-topic repos only)
+# regardless of list membership. Broad-portfolio companies whose GitHub org
+# mixes AI and non-AI at scale; dedicated AI subsidiary orgs (google-deepmind,
+# bytedance-seed) are separate GitHub orgs and enter on their own merits.
+google
+microsoft
+alibaba
+Tencent
+apple
+facebook
+sony
+IBM
+Netflix
+awslabs
+intel
+GoogleCloudPlatform
+dotnet
+apache
