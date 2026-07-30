@@ -1543,6 +1543,57 @@ and a reimplementation must copy it to reproduce published numbers.
 | Aux seeds | accountability 13 (global RNG); corpus 7 | respective modules |
 | Coverage (published run) | 2,142 repos; 8,568 repo-periods = 8,284 covered + 284 waived (71 repos); population refreshed 2026-07-27 to 228 orgs / 2,136 repos — the 2026-07-30 regeneration re-derives the manifest (unsearchable repos collected per COL-10b; FunAudioLLM excluded per F-51) | census manifest |
 
+---
+
+## Appendix C — Replication protocol (clean-room acceptance criteria)
+
+A clean-room reimplementation validates this study by rebuilding from
+this specification plus the declared `data/sources/` snapshots alone —
+no reference to the original implementation. It need not use the same
+language; a different language is preferred (structural independence).
+Equivalence against the reference output is judged in two tiers:
+
+- **REP-1 (deterministic tier — exact match).** Every quantity whose
+  definition involves no random draw MUST match the reference exactly:
+  population membership and scoping (POP-*), repo manifests and coverage
+  counts, per-PR classifications and layer attributions (DET-*), fate
+  and maturity outcomes, counts, rates, weighted means, medians, trimmed
+  means, decomposition terms — every table's point estimates. Compare
+  VALUES, not rendered strings (REP-3). Any tier-1 deviation is a defect
+  in one of the two implementations: diagnose to root cause and record
+  which side was wrong; never widen a tolerance to absorb it.
+- **REP-2 (stochastic tier — statistical agreement).** Bootstrap CI
+  endpoints depend on the seeded RNG stream, which is implementation-
+  specific (the reference pins Python's Mersenne Twister; a replica
+  needs only a documented, seeded PRNG of its own — reproducibility
+  within each implementation, not across them). The resampled UNITS and
+  their weights are deterministic and therefore tier-1; only the draw
+  stream differs. Endpoints are equivalent when, per table cell: (a) the
+  two intervals mutually overlap; (b) each endpoint differs by at most
+  10% of the reference interval's width; and (c) every categorical
+  claim the text hangs on an interval (sign, exclusion of a value,
+  non-overlap of two groups) holds under both implementations. A tier-2
+  miss under these criteria is expected Monte-Carlo divergence only if
+  re-running the replica under a different seed moves the endpoint by a
+  comparable amount; otherwise treat it as tier-1.
+- **REP-3 (portability watch-list).** Known cross-language traps, to be
+  tested rather than assumed: regex dialect (the spec's patterns are
+  Python-flavored; port each and pin with the spec's positive AND
+  negative examples); login casefolding (ASCII lowercase suffices —
+  document any non-ASCII login encountered); ISO-8601 date arithmetic at
+  day precision with no timezone drift (all bounds are date-inclusive as
+  written); float printing (round-half-even vs round-half-up changes a
+  printed 1-decimal digit — another reason tier-1 compares values);
+  and memory discipline over the ~31k census cells (stream or database
+  them; a whole-store materialization is not required by anything in
+  this spec).
+- **REP-4 (replication report).** The deliverable is a per-table report:
+  tier-1 status (exact / deviating, with root cause and which
+  implementation erred), tier-2 endpoint deltas, and any spec ambiguity
+  discovered en route — an ambiguity that two reasonable readings
+  resolve differently is itself a finding; record it as a spec flag
+  (Appendix A style) rather than silently choosing.
+
 
 
 
