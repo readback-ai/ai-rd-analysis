@@ -26,6 +26,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import time
 from pathlib import Path
@@ -62,10 +63,17 @@ query($owner:String!, $name:String!, $cur:String){
 """ % (PAGE_SIZE, PR_FIELDS)
 
 
+
+@functools.cache
 def repo_unsearchable(repo: str) -> bool:
     """True only for the DEFINITIVE 422 answer. Any other failure (502,
     rate limit, timeout) is transient and must not be mistaken for a
-    permanent property of the repo."""
+    permanent property of the repo.
+
+    Memoized per process: the census probes every cached cell that
+    disagrees with its precount, and drift is the designed-for common
+    case — unmemoized, a full pass would pay one live search per drifted
+    repo-period instead of at most one per repo."""
     err = search_error(f"repo:{repo} is:pr")
     return bool(err) and UNSEARCHABLE in err
 
@@ -91,7 +99,11 @@ def pull_repo_prs(repo: str) -> list[dict] | None:
         total = conn.get("totalCount")
         if not isinstance(total, int) or total > MAX_PRS:
             return None
-        nodes.extend(conn.get("nodes") or [])
+        page = conn.get("nodes") or []
+        if any(not isinstance(n, dict) for n in page):
+            return None            # a null node IS a missing PR: the
+                                   # history is incomplete, fail it
+        nodes.extend(page)
         pi = conn.get("pageInfo") or {}
         if pi.get("hasNextPage") is False:
             break

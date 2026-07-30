@@ -16,6 +16,14 @@ def _clear_fleet_memo():
 
 
 @pytest.fixture(autouse=True)
+def _clear_unsearchable_memo():
+    from pipeline import census_direct
+    census_direct.repo_unsearchable.cache_clear()
+    yield
+    census_direct.repo_unsearchable.cache_clear()
+
+
+@pytest.fixture(autouse=True)
 def _no_live_gh(monkeypatch):
     """No test may shell out to `gh`. Census failure paths classify a repo
     by asking GitHub search, and a fixture repo name like 'o/r' draws the

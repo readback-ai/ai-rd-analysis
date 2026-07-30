@@ -40,12 +40,24 @@ def test_unsearchable_repo_detected_from_the_422_signature(monkeypatch):
         lambda q: "Validation Failed: The listed users and repositories "
                   "cannot be searched either because the resources do "
                   "not exist or you do not have permission")
-    assert census_direct.repo_unsearchable("o/r") is True
+    assert census_direct.repo_unsearchable("o/r1") is True
     monkeypatch.setattr(census_direct, "search_error",
                         lambda q: "502 Bad Gateway")
-    assert census_direct.repo_unsearchable("o/r") is False
+    assert census_direct.repo_unsearchable("o/r2") is False
     monkeypatch.setattr(census_direct, "search_error", lambda q: None)
-    assert census_direct.repo_unsearchable("o/r") is False
+    assert census_direct.repo_unsearchable("o/r3") is False
+
+
+def test_unsearchability_is_probed_once_per_repo(monkeypatch):
+    """Self-review: the census probes every cached cell that disagrees
+    with its precount, and drift is the designed-for common case — the
+    probe must cost at most one live search per repo per process."""
+    calls = []
+    monkeypatch.setattr(census_direct, "search_error",
+                        lambda q: calls.append(q) or None)
+    assert census_direct.repo_unsearchable("o/memo") is False
+    assert census_direct.repo_unsearchable("o/memo") is False
+    assert len(calls) == 1
 
 
 def test_search_error_keeps_the_json_body_not_just_gh_stderr(monkeypatch):
@@ -104,6 +116,17 @@ def test_pull_repo_prs_rejects_a_partial_page(monkeypatch):
             "nodes": [_pr(1, "2026-01-05T00:00:00Z")]})
     assert census_direct.pull_repo_prs("o/r") is None
     assert len(calls) == 1        # fails FAST, not by exhausting pages
+
+
+def test_pull_repo_prs_fails_on_null_nodes(monkeypatch):
+    """Self-review: graphql_nodes tolerates node-level errors, so a
+    connection can carry null entries. A null is a MISSING PR — the
+    history is incomplete and must fail, not crash the bucketing later
+    or store a null in a cell."""
+    monkeypatch.setattr(
+        census_direct, "graphql_nodes",
+        lambda *a, **k: _page([_pr(1, "2026-05-01T00:00:00Z"), None], 2))
+    assert census_direct.pull_repo_prs("o/r") is None
 
 
 def test_pull_repo_prs_requires_totalcount_agreement(monkeypatch):

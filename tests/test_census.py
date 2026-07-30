@@ -395,6 +395,23 @@ def test_small_cached_deficit_does_not_bypass_the_direct_route(
     assert json.loads(cell.read_text()) == [{"number": 7}]
 
 
+def test_post_self_heal_deficit_reaches_the_direct_route(
+        monkeypatch, tmp_store):
+    """Self-review: the fourth failure path — a positive precount whose
+    window pulls come up short even after self-heal — must also consult
+    the direct route (a repo can become unsearchable mid-study with a
+    live precount cached from before)."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount, "get_precount", lambda r, p: 5)
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, rng: ([], False))     # persistent 0/5
+    monkeypatch.setattr(census_direct, "repo_unsearchable",
+                        lambda repo: True)
+    monkeypatch.setattr(census_direct, "census_repo_direct",
+                        lambda repo: {"Q1-2026": 5})
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 5
+
+
 def test_failed_direct_collection_fails_the_period(monkeypatch, tmp_store):
     """PR #20 re-review, P1: once unsearchability is CONFIRMED, a failed
     direct collection is a definitive failure — it must not fall through
