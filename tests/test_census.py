@@ -353,8 +353,9 @@ def test_unsearchable_repo_falls_back_to_the_direct_route(monkeypatch):
     called = []
     monkeypatch.setattr(
         census_direct, "census_repo_direct",
-        lambda repo: called.append(repo) or {"Q1-2024": 0, "Q4-2025": 0,
-                                             "Q1-2026": 7, "Q2-2026": 1})
+        lambda repo, extra_periods=None:
+            called.append(repo) or {"Q1-2024": 0, "Q4-2025": 0,
+                                    "Q1-2026": 7, "Q2-2026": 1})
     assert census_repo_period("o/r", "Q1-2026", k=10) == 7
     assert called == ["o/r"]
 
@@ -370,7 +371,7 @@ def test_cached_positive_precount_still_reaches_the_direct_route(
     monkeypatch.setattr(census_direct, "classify_searchability",
                         lambda repo: "unsearchable")
     monkeypatch.setattr(census_direct, "census_repo_direct",
-                        lambda repo: {"Q1-2026": 16})
+                        lambda repo, extra_periods=None: {"Q1-2026": 16})
     assert census_repo_period("o/r", "Q1-2026", k=10) == 16
 
 
@@ -390,7 +391,7 @@ def test_small_cached_deficit_does_not_bypass_the_direct_route(
                         lambda repo: "unsearchable")
     called = []
 
-    def fake_direct(repo):
+    def fake_direct(repo, extra_periods=None):
         called.append(repo)
         cell.write_text(json.dumps([{"number": 7}]))
         return {"Q2-2026": 1}
@@ -416,7 +417,7 @@ def test_transient_classification_fails_the_period_not_blesses_drift(
     monkeypatch.setattr(census_direct, "search_error",
                         lambda q: "502 Bad Gateway")
     monkeypatch.setattr(census_direct, "census_repo_direct",
-                        lambda repo: pytest.fail("must not collect"))
+                        lambda repo, extra_periods=None: pytest.fail("must not collect"))
     assert census_repo_period("o/r", "Q2-2026", k=10) is None
     assert json.loads(cell.read_text()) == []
 
@@ -434,7 +435,7 @@ def test_post_self_heal_deficit_reaches_the_direct_route(
     monkeypatch.setattr(census_direct, "classify_searchability",
                         lambda repo: "unsearchable")
     monkeypatch.setattr(census_direct, "census_repo_direct",
-                        lambda repo: {"Q1-2026": 5})
+                        lambda repo, extra_periods=None: {"Q1-2026": 5})
     assert census_repo_period("o/r", "Q1-2026", k=10) == 5
 
 
@@ -450,7 +451,7 @@ def test_failed_direct_collection_fails_the_period(monkeypatch, tmp_store):
     monkeypatch.setattr(census_direct, "classify_searchability",
                         lambda repo: "unsearchable")
     monkeypatch.setattr(census_direct, "census_repo_direct",
-                        lambda repo: None)          # collection failed
+                        lambda repo, extra_periods=None: None)          # collection failed
     assert census_repo_period("o/r", "Q2-2026", k=10) is None
     assert json.loads(cell.read_text()) == []       # untouched
 
@@ -469,7 +470,7 @@ def test_direct_zeros_are_recorded_confirmed(monkeypatch, tmp_store):
                         lambda repo: probes.append(repo)
                         or "unsearchable")
 
-    def fake_direct(repo):
+    def fake_direct(repo, extra_periods=None):
         collects.append(repo)
         for rng in ("2024-01-01..2024-03-31", "2026-04-01..2026-06-30"):
             p = census.cell_path(census.STAGE, repo, rng)
@@ -498,7 +499,7 @@ def test_searchable_repo_keeps_the_drift_allowance(monkeypatch, tmp_store):
     monkeypatch.setattr(census_direct, "classify_searchability",
                         lambda repo: "searchable")
     monkeypatch.setattr(census_direct, "census_repo_direct",
-                        lambda repo: pytest.fail("must not collect"))
+                        lambda repo, extra_periods=None: pytest.fail("must not collect"))
     assert census_repo_period("o/r", "Q2-2026", k=10) == 1
 
 
@@ -513,7 +514,7 @@ def test_cached_zero_precount_still_reaches_the_direct_route(monkeypatch):
     monkeypatch.setattr(census_direct, "classify_searchability",
                         lambda repo: "unsearchable")
     monkeypatch.setattr(census_direct, "census_repo_direct",
-                        lambda repo: {"Q1-2026": 7})
+                        lambda repo, extra_periods=None: {"Q1-2026": 7})
     assert census_repo_period("o/r", "Q1-2026", k=10) == 7
 
 
@@ -529,7 +530,7 @@ def test_transient_precount_failure_does_not_use_the_direct_route(
                         lambda repo: "searchable")
     called = []
     monkeypatch.setattr(census_direct, "census_repo_direct",
-                        lambda repo: called.append(repo) or {})
+                        lambda repo, extra_periods=None: called.append(repo) or {})
     assert census_repo_period("o/r", "Q1-2026", k=10) is None
     assert called == []
 

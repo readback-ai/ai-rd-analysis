@@ -137,7 +137,8 @@ def _direct_collect(repo: str, period: str) -> int | None:
     API. None means the collection FAILED — a definitive failure for this
     repo-period, never an invitation to fall back on cached drift."""
     from pipeline import census_direct
-    written = census_direct.census_repo_direct(repo)
+    written = census_direct.census_repo_direct(repo,
+                                               extra_periods=[period])
     if written is None:
         return None
     # Record the direct route's own counts as the precount for this repo:
