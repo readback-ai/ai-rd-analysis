@@ -18,9 +18,9 @@ def _clear_fleet_memo():
 @pytest.fixture(autouse=True)
 def _clear_unsearchable_memo():
     from pipeline import census_direct
-    census_direct.repo_unsearchable.cache_clear()
+    census_direct._SEARCHABILITY.clear()
     yield
-    census_direct.repo_unsearchable.cache_clear()
+    census_direct._SEARCHABILITY.clear()
 
 
 @pytest.fixture(autouse=True)

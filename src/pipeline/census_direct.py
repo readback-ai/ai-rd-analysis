@@ -26,7 +26,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import functools
 import json
 import time
 from pathlib import Path
@@ -64,18 +63,31 @@ query($owner:String!, $name:String!, $cur:String){
 
 
 
-@functools.cache
-def repo_unsearchable(repo: str) -> bool:
-    """True only for the DEFINITIVE 422 answer. Any other failure (502,
-    rate limit, timeout) is transient and must not be mistaken for a
-    permanent property of the repo.
+_SEARCHABILITY: dict[str, str] = {}
 
-    Memoized per process: the census probes every cached cell that
-    disagrees with its precount, and drift is the designed-for common
-    case — unmemoized, a full pass would pay one live search per drifted
-    repo-period instead of at most one per repo."""
+
+def classify_searchability(repo: str) -> str:
+    """'searchable' | 'unsearchable' | 'unknown' — three states, because
+    a probe that times out, 502s, or rate-limits says nothing about the
+    repo: only 'searchable' may permit cached drift, and treating a
+    transient failure as searchable blessed a poisoned cell.
+
+    Definitive answers are memoized per process (the census probes every
+    cached cell that disagrees with its precount, and drift is the
+    designed-for common case); 'unknown' is never memoized, so the next
+    caller re-probes."""
+    hit = _SEARCHABILITY.get(repo)
+    if hit is not None:
+        return hit
     err = search_error(f"repo:{repo} is:pr")
-    return bool(err) and UNSEARCHABLE in err
+    if err is None:
+        verdict = "searchable"
+    elif UNSEARCHABLE in err:
+        verdict = "unsearchable"
+    else:
+        return "unknown"
+    _SEARCHABILITY[repo] = verdict
+    return verdict
 
 
 def pull_repo_prs(repo: str) -> list[dict] | None:
@@ -165,9 +177,11 @@ def main() -> None:
              if ln.strip()]
     unsearchable = []
     for repo in repos:
-        if repo_unsearchable(repo):
+        verdict = classify_searchability(repo)
+        if verdict == "unsearchable":
             unsearchable.append(repo)
-            print(f"UNSEARCHABLE {repo}", flush=True)
+        if verdict != "searchable":
+            print(f"{verdict.upper()} {repo}", flush=True)
     print(f"{len(unsearchable)}/{len(repos)} unsearchable", flush=True)
     if a.probe:
         return

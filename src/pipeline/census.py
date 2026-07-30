@@ -122,13 +122,14 @@ def pull_cell(repo: str, rng: str) -> tuple[list | None, bool]:
     return nodes, False
 
 
-def _is_unsearchable(repo: str) -> bool:
-    """Classification only, kept separate from collection so a FAILED
-    direct collection stays distinguishable from "this repo is searchable,
-    the direct route does not apply" — conflating them let the drift
-    allowance accept a poisoned cell."""
+def _searchability(repo: str) -> str:
+    """'searchable' | 'unsearchable' | 'unknown'. Classification stays
+    separate from collection so a FAILED direct collection remains
+    distinguishable from "the direct route does not apply" — and it is
+    three-state because a transient probe failure says nothing: only a
+    POSITIVE 'searchable' may permit cached drift."""
     from pipeline import census_direct
-    return census_direct.repo_unsearchable(repo)
+    return census_direct.classify_searchability(repo)
 
 
 def _direct_collect(repo: str, period: str) -> int | None:
@@ -160,15 +161,15 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
     rng = resolve_period(period)
     total = ensure_precount(repo, period)   # cached, or queried+cache-written
     if total is None:
-        return _direct_collect(repo, period) if _is_unsearchable(repo) \
-            else None
+        return _direct_collect(repo, period) \
+            if _searchability(repo) == "unsearchable" else None
     if total == 0:
         # 0 passes both completeness gates trivially, so it may not stand
         # on a single observation — a browned-out search looks identical.
         total = confirm_zero_precount(repo, period)
         if total is None:
             return _direct_collect(repo, period) \
-                if _is_unsearchable(repo) else None
+                if _searchability(repo) == "unsearchable" else None
     # fully-cached fast path — only when the cache satisfies the same
     # drift allowance as fresh pulls; a brownout-poisoned empty cached as
     # valid must fall through to the self-heal path (external review P1)
@@ -178,12 +179,17 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
         # artifact rather than drift: for an unsearchable repo the search
         # count is unreachable and the cell is whatever a failed run left
         # behind (an empty passes the <=3 allowance outright). Ask before
-        # accepting the mismatch; searchable repos keep the allowance,
-        # since small deficits there are legitimate drift. Once
-        # unsearchability is CONFIRMED the direct result stands either
-        # way — a failed collection is a failure, not cached drift.
-        if _is_unsearchable(repo):
+        # accepting the mismatch. Three-way: CONFIRMED searchable repos
+        # keep the allowance (small deficits are legitimate drift);
+        # CONFIRMED unsearchable ones take the direct result either way
+        # (a failed collection is a failure, not cached drift); and an
+        # UNKNOWN classification fails the period — "we could not
+        # determine" must never bless the mismatch.
+        verdict = _searchability(repo)
+        if verdict == "unsearchable":
             return _direct_collect(repo, period)
+        if verdict != "searchable":
+            return None
     if cached is not None \
             and (len(cached) >= total * 0.98 or total - len(cached) <= 3):
         return len(cached)
@@ -222,7 +228,8 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
     print(f"FAIL {repo} {period}: collected {n}/{total} PRs with "
           f"{len(ranges)} sub-windows after a fresh re-pull ({reason})",
           file=sys.stderr, flush=True)
-    return _direct_collect(repo, period) if _is_unsearchable(repo) else None
+    return _direct_collect(repo, period) \
+        if _searchability(repo) == "unsearchable" else None
 
 
 def main() -> None:

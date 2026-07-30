@@ -6,8 +6,13 @@ from datetime import date, timedelta
 import pytest
 
 from pipeline import census, precount, ghx
+from pipeline import census_direct as _cd
 from pipeline.census import PAGE_SIZE, census_repo_period, pull_cell, subwindows
 from pipeline.scan_orgs import QUARTER_RANGES
+
+# The real classifier, captured before any fixture patches the module
+# attribute — tests that exercise classification itself restore it.
+_REAL_CLASSIFY = _cd.classify_searchability
 
 
 @pytest.fixture(autouse=True)
@@ -19,8 +24,8 @@ def tmp_store(tmp_path, monkeypatch):
     # — so the classification costs no gh call; direct-route tests patch
     # this same attribute to True.
     from pipeline import census_direct
-    monkeypatch.setattr(census_direct, "repo_unsearchable",
-                        lambda repo: False)
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "searchable")
     return tmp_path
 
 
@@ -343,8 +348,8 @@ def test_unsearchable_repo_falls_back_to_the_direct_route(monkeypatch):
     from pipeline import census_direct
     monkeypatch.setattr(precount.time, "sleep", lambda s: None)
     monkeypatch.setattr(precount, "rest_count", lambda *a, **k: None)
-    monkeypatch.setattr(census_direct, "repo_unsearchable",
-                        lambda repo: True)
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "unsearchable")
     called = []
     monkeypatch.setattr(
         census_direct, "census_repo_direct",
@@ -362,8 +367,8 @@ def test_cached_positive_precount_still_reaches_the_direct_route(
     from pipeline import census_direct
     monkeypatch.setattr(precount, "get_precount", lambda r, p: 16)
     monkeypatch.setattr(census, "pull_cell", lambda repo, rng: (None, False))
-    monkeypatch.setattr(census_direct, "repo_unsearchable",
-                        lambda repo: True)
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "unsearchable")
     monkeypatch.setattr(census_direct, "census_repo_direct",
                         lambda repo: {"Q1-2026": 16})
     assert census_repo_period("o/r", "Q1-2026", k=10) == 16
@@ -381,8 +386,8 @@ def test_small_cached_deficit_does_not_bypass_the_direct_route(
     cell = census.cell_path(census.STAGE, "o/r", "2026-04-01..2026-06-30")
     cell.parent.mkdir(parents=True, exist_ok=True)
     cell.write_text("[]")
-    monkeypatch.setattr(census_direct, "repo_unsearchable",
-                        lambda repo: True)
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "unsearchable")
     called = []
 
     def fake_direct(repo):
@@ -395,6 +400,27 @@ def test_small_cached_deficit_does_not_bypass_the_direct_route(
     assert json.loads(cell.read_text()) == [{"number": 7}]
 
 
+def test_transient_classification_fails_the_period_not_blesses_drift(
+        monkeypatch, tmp_store):
+    """PR #20 re-review, P1: with precount=1, cached [], and the
+    classification probe answering 502, the period must FAIL — 'we could
+    not determine searchability' must not fall through to the drift
+    allowance and report the poisoned cell as fine."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount, "get_precount", lambda r, p: 1)
+    cell = census.cell_path(census.STAGE, "o/r", "2026-04-01..2026-06-30")
+    cell.parent.mkdir(parents=True, exist_ok=True)
+    cell.write_text("[]")
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        _REAL_CLASSIFY)
+    monkeypatch.setattr(census_direct, "search_error",
+                        lambda q: "502 Bad Gateway")
+    monkeypatch.setattr(census_direct, "census_repo_direct",
+                        lambda repo: pytest.fail("must not collect"))
+    assert census_repo_period("o/r", "Q2-2026", k=10) is None
+    assert json.loads(cell.read_text()) == []
+
+
 def test_post_self_heal_deficit_reaches_the_direct_route(
         monkeypatch, tmp_store):
     """Self-review: the fourth failure path — a positive precount whose
@@ -405,8 +431,8 @@ def test_post_self_heal_deficit_reaches_the_direct_route(
     monkeypatch.setattr(precount, "get_precount", lambda r, p: 5)
     monkeypatch.setattr(census, "pull_cell",
                         lambda repo, rng: ([], False))     # persistent 0/5
-    monkeypatch.setattr(census_direct, "repo_unsearchable",
-                        lambda repo: True)
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "unsearchable")
     monkeypatch.setattr(census_direct, "census_repo_direct",
                         lambda repo: {"Q1-2026": 5})
     assert census_repo_period("o/r", "Q1-2026", k=10) == 5
@@ -421,8 +447,8 @@ def test_failed_direct_collection_fails_the_period(monkeypatch, tmp_store):
     cell = census.cell_path(census.STAGE, "o/r", "2026-04-01..2026-06-30")
     cell.parent.mkdir(parents=True, exist_ok=True)
     cell.write_text("[]")
-    monkeypatch.setattr(census_direct, "repo_unsearchable",
-                        lambda repo: True)
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "unsearchable")
     monkeypatch.setattr(census_direct, "census_repo_direct",
                         lambda repo: None)          # collection failed
     assert census_repo_period("o/r", "Q2-2026", k=10) is None
@@ -439,8 +465,9 @@ def test_direct_zeros_are_recorded_confirmed(monkeypatch, tmp_store):
     monkeypatch.setattr(precount.time, "sleep", lambda s: None)
     monkeypatch.setattr(precount, "rest_count", lambda *a, **k: None)
     probes, collects = [], []
-    monkeypatch.setattr(census_direct, "repo_unsearchable",
-                        lambda repo: probes.append(repo) or True)
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: probes.append(repo)
+                        or "unsearchable")
 
     def fake_direct(repo):
         collects.append(repo)
@@ -468,8 +495,8 @@ def test_searchable_repo_keeps_the_drift_allowance(monkeypatch, tmp_store):
     cell = census.cell_path(census.STAGE, "o/r", "2026-04-01..2026-06-30")
     cell.parent.mkdir(parents=True, exist_ok=True)
     cell.write_text(json.dumps([{"number": 1}]))
-    monkeypatch.setattr(census_direct, "repo_unsearchable",
-                        lambda repo: False)
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "searchable")
     monkeypatch.setattr(census_direct, "census_repo_direct",
                         lambda repo: pytest.fail("must not collect"))
     assert census_repo_period("o/r", "Q2-2026", k=10) == 1
@@ -483,8 +510,8 @@ def test_cached_zero_precount_still_reaches_the_direct_route(monkeypatch):
     monkeypatch.setattr(precount.time, "sleep", lambda s: None)
     monkeypatch.setattr(precount, "get_precount", lambda r, p: 0)
     monkeypatch.setattr(precount, "rest_count", lambda *a, **k: None)
-    monkeypatch.setattr(census_direct, "repo_unsearchable",
-                        lambda repo: True)
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "unsearchable")
     monkeypatch.setattr(census_direct, "census_repo_direct",
                         lambda repo: {"Q1-2026": 7})
     assert census_repo_period("o/r", "Q1-2026", k=10) == 7
@@ -498,8 +525,8 @@ def test_transient_precount_failure_does_not_use_the_direct_route(
     from pipeline import census_direct
     monkeypatch.setattr(precount.time, "sleep", lambda s: None)
     monkeypatch.setattr(precount, "rest_count", lambda *a, **k: None)
-    monkeypatch.setattr(census_direct, "repo_unsearchable",
-                        lambda repo: False)
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "searchable")
     called = []
     monkeypatch.setattr(census_direct, "census_repo_direct",
                         lambda repo: called.append(repo) or {})

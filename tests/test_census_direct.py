@@ -33,19 +33,42 @@ def _page(nodes, total, has_next=False, cursor=None):
 
 
 def test_unsearchable_repo_detected_from_the_422_signature(monkeypatch):
-    """The 422 'cannot be searched' answer is a DEFINITIVE property of the
-    repo; any other failure is transient and must not be mistaken for it."""
+    """Three states: the 422 'cannot be searched' answer is a DEFINITIVE
+    property of the repo; a clean search is definitively searchable; any
+    other failure says nothing and is 'unknown'."""
     monkeypatch.setattr(
         census_direct, "search_error",
         lambda q: "Validation Failed: The listed users and repositories "
                   "cannot be searched either because the resources do "
                   "not exist or you do not have permission")
-    assert census_direct.repo_unsearchable("o/r1") is True
+    assert census_direct.classify_searchability("o/r1") == "unsearchable"
     monkeypatch.setattr(census_direct, "search_error",
                         lambda q: "502 Bad Gateway")
-    assert census_direct.repo_unsearchable("o/r2") is False
+    assert census_direct.classify_searchability("o/r2") == "unknown"
     monkeypatch.setattr(census_direct, "search_error", lambda q: None)
-    assert census_direct.repo_unsearchable("o/r3") is False
+    assert census_direct.classify_searchability("o/r3") == "searchable"
+
+
+def test_transient_classification_is_unknown_and_not_memoized(
+        monkeypatch):
+    """PR #20 re-review, P1: a probe that times out / 502s / rate-limits
+    cannot tell us anything about the repo — the answer is 'unknown',
+    and memoizing it as searchable would bless cached drift for the rest
+    of the process. Transient answers re-probe; definitive answers
+    memoize."""
+    answers = iter(["502 Bad Gateway", "502 Bad Gateway", None, None])
+    calls = []
+
+    def flaky(q):
+        calls.append(q)
+        return next(answers)
+    monkeypatch.setattr(census_direct, "search_error", flaky)
+    assert census_direct.classify_searchability("o/t") == "unknown"
+    assert census_direct.classify_searchability("o/t") == "unknown"
+    assert len(calls) == 2                    # transient: re-probed
+    assert census_direct.classify_searchability("o/t") == "searchable"
+    assert census_direct.classify_searchability("o/t") == "searchable"
+    assert len(calls) == 3                    # definitive: memoized
 
 
 def test_unsearchability_is_probed_once_per_repo(monkeypatch):
@@ -55,16 +78,17 @@ def test_unsearchability_is_probed_once_per_repo(monkeypatch):
     calls = []
     monkeypatch.setattr(census_direct, "search_error",
                         lambda q: calls.append(q) or None)
-    assert census_direct.repo_unsearchable("o/memo") is False
-    assert census_direct.repo_unsearchable("o/memo") is False
+    assert census_direct.classify_searchability("o/memo") == "searchable"
+    assert census_direct.classify_searchability("o/memo") == "searchable"
     assert len(calls) == 1
 
 
 def test_search_error_keeps_the_json_body_not_just_gh_stderr(monkeypatch):
     """Real gh behavior: the short line goes to stderr while the JSON
     body carrying the definitive reason goes to stdout. Dropping stdout
-    made every unsearchable repo look merely 'Validation Failed', so
-    repo_unsearchable classified all 8 real cases as searchable."""
+    made every unsearchable repo look merely 'Validation Failed', so the
+    classifier read all 8 real cases as something other than
+    unsearchable."""
     class R:
         returncode = 1
         stdout = ('{"message":"Validation Failed","errors":[{"message":'
@@ -76,7 +100,7 @@ def test_search_error_keeps_the_json_body_not_just_gh_stderr(monkeypatch):
     err = ghx.search_error("repo:o/r is:pr")
     assert "cannot be searched" in err
     monkeypatch.setattr(census_direct, "search_error", ghx.search_error)
-    assert census_direct.repo_unsearchable("o/r") is True
+    assert census_direct.classify_searchability("o/r") == "unsearchable"
 
 
 def test_rate_limit_is_not_mistaken_for_unsearchable(monkeypatch):
@@ -86,7 +110,7 @@ def test_rate_limit_is_not_mistaken_for_unsearchable(monkeypatch):
         stderr = "gh: API rate limit exceeded for user ID 1.\n"
     monkeypatch.setattr(ghx.subprocess, "run", lambda *a, **k: R())
     monkeypatch.setattr(census_direct, "search_error", ghx.search_error)
-    assert census_direct.repo_unsearchable("o/r") is False
+    assert census_direct.classify_searchability("o/r") == "unknown"
 
 
 def test_pull_repo_prs_pages_until_explicit_false(monkeypatch):
