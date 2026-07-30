@@ -29,7 +29,8 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from pipeline.ghx import cell_path, graphql_nodes, read_cell
-from pipeline.precount import confirm_zero_precount, ensure_precount
+from pipeline.precount import (confirm_zero_precount, ensure_precount,
+                               write_precount)
 from pipeline.scan_orgs import QUARTER_RANGES, resolve_period
 
 PAGE_SIZE = 50   # PRs per GraphQL call; _paginate cursors to the API's
@@ -121,6 +122,35 @@ def pull_cell(repo: str, rng: str) -> tuple[list | None, bool]:
     return nodes, False
 
 
+def _searchability(repo: str) -> str:
+    """'searchable' | 'unsearchable' | 'unknown'. Classification stays
+    separate from collection so a FAILED direct collection remains
+    distinguishable from "the direct route does not apply" — and it is
+    three-state because a transient probe failure says nothing: only a
+    POSITIVE 'searchable' may permit cached drift."""
+    from pipeline import census_direct
+    return census_direct.classify_searchability(repo)
+
+
+def _direct_collect(repo: str, period: str) -> int | None:
+    """Collect an already-classified unsearchable repo through the object
+    API. None means the collection FAILED — a definitive failure for this
+    repo-period, never an invitation to fall back on cached drift."""
+    from pipeline import census_direct
+    written = census_direct.census_repo_direct(repo)
+    if written is None:
+        return None
+    # Record the direct route's own counts as the precount for this repo:
+    # they are its authoritative denominator (the search count is
+    # unreachable), so later runs match the fast path exactly instead of
+    # probing and re-collecting the history every time. A zero backed by a
+    # verified full history is CONFIRMED — otherwise it reads as an
+    # unconfirmed search zero and triggers the refused recount again.
+    for per, count in written.items():
+        write_precount(repo, per, count, confirmed=count == 0)
+    return written.get(period)
+
+
 def census_repo_period(repo: str, period: str, k: int) -> int | None:
     """k is a FLOOR on sub-windows; the actual count adapts to the repo's
     PR volume (ceil(total/45) with 10% headroom, capped at one window per
@@ -131,17 +161,35 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
     rng = resolve_period(period)
     total = ensure_precount(repo, period)   # cached, or queried+cache-written
     if total is None:
-        return None
+        return _direct_collect(repo, period) \
+            if _searchability(repo) == "unsearchable" else None
     if total == 0:
         # 0 passes both completeness gates trivially, so it may not stand
         # on a single observation — a browned-out search looks identical.
         total = confirm_zero_precount(repo, period)
         if total is None:
-            return None
+            return _direct_collect(repo, period) \
+                if _searchability(repo) == "unsearchable" else None
     # fully-cached fast path — only when the cache satisfies the same
     # drift allowance as fresh pulls; a brownout-poisoned empty cached as
     # valid must fall through to the self-heal path (external review P1)
     cached = read_cell(cell_path(STAGE, repo, rng), list)
+    if cached is not None and len(cached) != total:
+        # A cell that DISAGREES with the precount may be a search-route
+        # artifact rather than drift: for an unsearchable repo the search
+        # count is unreachable and the cell is whatever a failed run left
+        # behind (an empty passes the <=3 allowance outright). Ask before
+        # accepting the mismatch. Three-way: CONFIRMED searchable repos
+        # keep the allowance (small deficits are legitimate drift);
+        # CONFIRMED unsearchable ones take the direct result either way
+        # (a failed collection is a failure, not cached drift); and an
+        # UNKNOWN classification fails the period — "we could not
+        # determine" must never bless the mismatch.
+        verdict = _searchability(repo)
+        if verdict == "unsearchable":
+            return _direct_collect(repo, period)
+        if verdict != "searchable":
+            return None
     if cached is not None \
             and (len(cached) >= total * 0.98 or total - len(cached) <= 3):
         return len(cached)
@@ -180,7 +228,8 @@ def census_repo_period(repo: str, period: str, k: int) -> int | None:
     print(f"FAIL {repo} {period}: collected {n}/{total} PRs with "
           f"{len(ranges)} sub-windows after a fresh re-pull ({reason})",
           file=sys.stderr, flush=True)
-    return None
+    return _direct_collect(repo, period) \
+        if _searchability(repo) == "unsearchable" else None
 
 
 def main() -> None:

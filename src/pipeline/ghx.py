@@ -88,6 +88,26 @@ def _gh(args: list[str], timeout: int = 90,
         return None
 
 
+def search_error(query: str, endpoint: str = "search/issues") -> str | None:
+    """The API's error text for a search query, or None when it SUCCEEDS.
+    Lets callers tell a definitive refusal ("cannot be searched" — the
+    repo is absent from the search index) from a transient failure;
+    rest_count collapses both to None."""
+    try:
+        r = subprocess.run(
+            ["gh", "api", "-X", "GET", endpoint, "-f", f"q={query}"],
+            capture_output=True, text=True, timeout=90)
+    except subprocess.TimeoutExpired:
+        return "timeout"
+    if r.returncode == 0:
+        return None
+    # BOTH streams: gh prints a short line to stderr while the JSON body
+    # carrying the definitive reason ("cannot be searched") goes to
+    # stdout — a caller matching on the reason needs the body.
+    both = f"{r.stderr or ''}\n{r.stdout or ''}".strip()
+    return (both or "unknown error")[:600]
+
+
 def rest_count(query: str, endpoint: str = "search/commits",
                retries: int = 4, backoff: float = 25.0) -> int | None:
     """total_count for a search query. None = gave up (do NOT record as 0
