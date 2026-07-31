@@ -455,6 +455,27 @@ For each candidate org (lowercased key `lo`):
   weights → recompute census evidence → rebuild population); if membership
   changes in a round, loop; if it fails to converge in 3 rounds the run
   aborts. The published population is the converged one.
+- **POP-10a (why 3 rounds suffice)** Evidence is strictly per-org and the
+  cell store only accumulates, so one org's membership change never
+  alters another org's evidence: the membership DECISION settles in a
+  single recomputation. The loop's extra rounds are not re-adjudication:
+  - The round after an ADDITION does **collection completeness** work —
+    the manifest is assembled before the rebuild, so an org admitted by
+    a round's rebuild has not been collected that round; the next round
+    backfills its cells so the published frame covers every member.
+  - One rule is **non-monotone under that backfill**: R4's rate branch
+    (`e/t ≥ 0.1%`). The absolute branch can only grow with more cells,
+    but full collection grows the rate's denominator, so an org admitted
+    on a partially-collected rate can dilute below threshold once fully
+    collected and drop on the next rebuild.
+  The longest possible chain is therefore: addition → backfill
+  collection → rate-dilution drop → confirming round = 3 rounds. A drop
+  triggers no new collection (census evidence is computed over the whole
+  store, so a dropped org keeps its historical evidence — no
+  oscillation), and no cross-org effect exists, so no fourth-round
+  change is reachable; failing to converge in 3 can only mean
+  nondeterministic collection or a monotonicity-breaking rule change,
+  which is why the run aborts rather than publishing round 3.
 - **POP-11** Census-derived org evidence: for every censused PR of every
   manifest repo, count it as evidence if any detection layer fires (union,
   DET-4); aggregate per org as `(evidence_prs, total_prs)`.
