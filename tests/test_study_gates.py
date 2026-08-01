@@ -60,6 +60,10 @@ def test_attention_counts_w8_windowed_comments_past_cutoff(monkeypatch):
 
 def test_event_study_mature_max_follows_as_of(monkeypatch):
     from pipeline.studies import event_study
+    # Pin BOTH observation points: the contract is that maturity follows
+    # AS_OF, so neither assertion may depend on the module constant's
+    # current value (it advances with every re-pull, METHODS §1c).
+    monkeypatch.setattr(detect, "AS_OF", "2026-06-30T23:59:59Z")
     assert event_study.mature_max() == event_study.WINDOW.index("2026-04")
     monkeypatch.setattr(detect, "AS_OF", "2026-09-05T00:00:00Z")
     assert event_study.mature_max() == event_study.WINDOW.index("2026-06")
