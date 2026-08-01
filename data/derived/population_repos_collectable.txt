@@ -1931,7 +1931,6 @@ tenstorrent/tt-xla
 tenstorrent/ttnn-visualizer
 tenstorrent/vllm-tt-plugin
 thinking-machines-lab/tinker-cookbook
-thu-pacman/chitu
 togethercomputer/detect_agent
 togethercomputer/skills
 togethercomputer/together-kubelogin

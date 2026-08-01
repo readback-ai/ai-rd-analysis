@@ -90,7 +90,13 @@ daytonaio, streamlit, datahub-project, ...) and 3 included topic-sparse AI
 developers (flashinfer-ai, embeddings-benchmark, AnswerDotAI). Exclusion
 beats every rule; inclusion asserts R3 only (quality/evidence still apply).
 
-Result (2026-07-10 run): **229 orgs = 182 full-org + 47 repo-scoped** (`population.tsv` is authoritative; docs quote it).
+Result (2026-07-30 regeneration): **224 orgs = 179 full-org + 45
+repo-scoped** (`population.tsv` is authoritative; docs quote it). Down
+from the 2026-07-10 run's 229 under the corrected distinct-evidence R4
+arithmetic applied uniformly: sony (probe-sum double-counting) and,
+via the census-evidence recompute under current detection (CI-canary
+branch exclusion), physical-intelligence, salesforceairesearch,
+stability-ai, and thu-pacman.
 Consequence for inference: the population is prominence-selected; findings
 describe practices at leading AI organizations, with the Q1-2024 census as
 the temporal control.

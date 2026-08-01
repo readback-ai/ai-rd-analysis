@@ -152,7 +152,6 @@ openvinotoolkit	full	top5:4	4
 oramasearch	full	top5:2	2
 oumi-ai	full	top5:2	2
 PaddlePaddle	full	dev-list	3
-physical-intelligence	full	dev-list	0
 pinecone-io	full	dev-list	3
 plastic-labs	full	top5:3	3
 plotly	repo	ai-flagship	1
@@ -178,7 +177,6 @@ RunanywhereAI	full	top5:2	2
 runwayml	full	dev-list	3
 SakanaAI	full	dev-list	1
 salesforce	full	top5:3	3
-salesforceairesearch	full	dev-list	1
 sambanova	full	dev-list	0
 SandAI-org	full	top5:2	2
 sarvamai	full	dev-list	0
@@ -190,7 +188,6 @@ Significant-Gravitas	repo	ai-flagship	1
 smallcloudai	full	top5:2	2
 spiceai	full	top5:4	4
 spotify	full	top5:2	2
-stability-ai	full	dev-list	2
 stanford-crfm	full	dev-list	0
 stanford-oval	full	top5:3	3
 stanfordnlp	full	dev-list	2
@@ -204,7 +201,6 @@ tensorchord	full	top5:5	5
 tensorzero	repo	ai-flagship	1
 tenstorrent	full	dev-list	1
 thinking-machines-lab	full	dev-list	0
-thu-pacman	repo	ai-flagship	1
 THUDM	full	dev-list	3
 togethercomputer	full	dev-list	0
 topoteretes	full	top5:3	3
