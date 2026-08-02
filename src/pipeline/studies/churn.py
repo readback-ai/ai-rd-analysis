@@ -1,41 +1,59 @@
 """Study: code churn — lines deleted relative to lines added in merged code.
 
-External claim under test (industry report, quoted 2026-08-02): "Code
+External claim under test (Faros, "AI acceleration whiplash"): "Code
 churn, the ratio of lines deleted to lines added for merged code in a
 given quarter, has increased 861% under high AI adoption. At nearly 10
 times the prior rate, significantly more code is being removed relative
-to what is being added." Replication question: does deleted:added over
-merged code move anything like 861% (x9.6) in this population between the
-Q1-2024 baseline and the high-AI-adoption quarters?
+to what is being added." Faros compares each ORGANIZATION's lowest- and
+highest-AI-adoption periods — a within-org adoption contrast, not a
+calendar trend — so the replication headline here is the same contrast
+(`--table adoption`); the calendar view is kept only as a labeled,
+non-comparable sensitivity (PR-review round 1, P1).
 
-PILOT design (2026-08-02, pre-commitment to a full study):
+Churn is assigned by MERGE quarter (the claim's "merged code in a given
+quarter"): each mature merged PR buckets by the censused quarter
+containing its merge timestamp; merges spilling into uncensused quarters
+(<= 56 days past a censused quarter's end) are dropped and counted as a
+reported residual. Arms all / AI-involved / non-AI, with non-AI bots
+dropped (ai_contrast_eligible), so all = AI + nonAI.
 
-1. `--table census` — the claim's own metric needs no collection at all:
-   census cells already carry per-PR additions/deletions, so the
-   deleted:added ratio over mature merged PRs is computed on the COMPLETE
-   census (pooled; capped companion guards mega-PR domination). Arms:
-   all / AI-involved / non-AI, non-AI bots dropped (ai_contrast_eligible),
-   so all = AI + nonAI exactly.
+PILOT design (2026-08-02; revised after review round 1):
 
-2. `--draw` / `--pull` / `--table sample` — a balanced ~0.1% seeded
-   sample of the same frame (equal AI / nonAI per period = deliberate
-   AI oversampling; Q1-2024 backfills from nonAI since no AI PRs exist)
-   hydrated with per-FILE additions/deletions, so the ratio can be
-   recomputed EXCLUDING generated content (lockfiles/vendored/minified/
-   protobuf/snapshots/svg/notebooks — the METHODS 5b objection: deleted
-   lockfiles could manufacture churn). Files are capped at first
-   FILES_PAGE per PR; truncated records are flagged, kept, and reported.
+1. `--table adoption` — the replication headline. Per org (repo owner),
+   per merge-quarter with >= ORG_MIN_PRS mature merged PRs: AI-adoption
+   share and capped-side deleted:added. Orgs with >= 2 qualifying
+   quarters and a nonzero adoption spread contribute the churn multiple
+   (highest-adoption quarter / lowest-adoption quarter); the table
+   reports the geometric-mean multiple with a bootstrap CI over orgs,
+   the median, and the share of orgs whose churn rose — the claim
+   predicts ~x9.6.
 
-3. `--pull-incidents` / `--table incidents` — incidents per merged PR,
-   piloted on the sample's repos: GH issues labeled bug (`label:bug` only
-   — the dominant convention; repos using other label taxonomies read as
-   zero, a documented pilot limitation) CREATED in the quarter, divided
-   by the repo's mature merged PRs that quarter. Repos split into
-   high-AI / low-AI halves by their Q2-2026 AI-involvement share.
+2. `--table census` — calendar-trend SENSITIVITY (not the claim's
+   contrast): complete-census deleted:added per merge-quarter x arm; CW
+   mean of per-repo ratios (capped sides, >= MIN_PRS PRs/repo, per-cell
+   seeded CIs) plus the pooled ratio. Per-PR medians are over PRs with
+   nonzero additions (a deletion-only PR has no defined ratio; its share
+   is the del>add column's business, not the median's).
 
-Not (yet) in the generated report; pilot numbers carry no frozen-
-convention guarantees beyond the frame they share with every study
-(w8 maturity, LOC cap, population manifest).
+3. `--draw` / `--pull` / `--table sample` — balanced ~0.1% seeded sample
+   (equal AI / nonAI per merge-quarter; Q1-2024 backfills from nonAI)
+   hydrated with per-FILE additions/deletions so the ratio can be
+   recomputed EXCLUDING generated content. The sample file always holds
+   EXACTLY the current draw (atomic rewrite; hydration reused only for
+   still-selected PRs) — append-resume kept stale draws once (review
+   round 1, P2).
+
+4. `--pull-bugs` / `--table bugs` — bug-report proxy, NOT production
+   incidents: GH issues labeled bug (`label:bug` only — repos on other
+   taxonomies read zero and are excluded as probable non-users of the
+   label) per 100 mature merged PRs, over the sample's repos. Numerator
+   and denominator share one exposure window: bugs are counted only
+   through the maturity frontier (AS_OF - 56d), exactly the last
+   creation date an included PR can have (review round 1, P2).
+
+Not (yet) in the generated report beyond the churn section; pilot numbers
+carry no frozen-convention guarantees beyond the frame they share with
+every study (w8 maturity, LOC cap, population manifest).
 """
 from __future__ import annotations
 
@@ -44,10 +62,13 @@ import json
 import re
 import time
 from collections import defaultdict
+from datetime import timedelta
 from pathlib import Path
 from random import Random
+from statistics import median
 
 from pipeline.analyze import bootstrap_ci, weighted_mean
+from pipeline.detect import AS_OF, _iso
 from pipeline.frame import ai_contrast_eligible, study_frame
 from pipeline.ghx import graphql_nodes, rest_count
 from pipeline.scan_orgs import QUARTER_RANGES
@@ -56,10 +77,11 @@ PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
 SEED = 20260630
 SAMPLE_RATE = 0.001          # ~0.1% of the eligible merged frame
 MIN_PRS = 5                  # repo floor per (period, arm), house convention
+ORG_MIN_PRS = 20             # org floor per quarter for the adoption contrast
 FILES_PAGE = 100             # per-PR file-list cap (one page; no pagination)
-CAP = 20_000                 # per-side LOC cap for the capped companion
+CAP = 20_000                 # per-side LOC cap for capped ratios
 SAMPLE = Path("data/derived/churn_sample_v1.jsonl")
-INCIDENTS = Path("data/derived/churn_incidents_v1.jsonl")
+BUGS = Path("data/derived/churn_incidents_v1.jsonl")
 BUG_LABEL = "bug"
 
 # Generated-content path patterns (mirrors the METHODS 5b hygiene classes;
@@ -82,34 +104,126 @@ def is_generated(path: str) -> bool:
 
 # ------------------------------------------------------------------ frame
 
-def eligible() -> dict[str, list]:
-    """period -> [(repo, num, ai, additions, deletions)] over mature merged
-    PRs, profile 'all' + ai_contrast_eligible (non-AI bots dropped, so the
-    nonAI arm is human-authored and all = AI + nonAI)."""
+def maturity_frontier(as_of: str = AS_OF) -> str:
+    """Last creation date (YYYY-MM-DD) a w8-mature PR can have."""
+    return (_iso(as_of) - timedelta(days=56)).date().isoformat()
+
+
+def merge_quarter(merged_at: str | None) -> str | None:
+    """The censused quarter containing the merge timestamp, if any."""
+    day = (merged_at or "")[:10]
+    for per in PERIODS:
+        start, end = QUARTER_RANGES[per].split("..")
+        if start <= day <= end:
+            return per
+    return None
+
+
+def eligible() -> tuple[dict[str, list], int]:
+    """merge-quarter -> [(repo, num, ai, additions, deletions)] over mature
+    merged PRs, profile 'all' + ai_contrast_eligible (non-AI bots dropped,
+    so the nonAI arm is human-authored and all = AI + nonAI). Second value:
+    mature merged PRs whose merge fell OUTSIDE every censused quarter
+    (<= 56d spillover past a quarter end) — dropped, reported."""
     pool: dict[str, list] = {p: [] for p in PERIODS}
+    spilled = 0
     for f in study_frame("all"):
         if not ai_contrast_eligible(f):
             continue
         c = f.cls
         if not (c.w8_mature and c.merged):
             continue
-        pool[f.period].append(
+        per = merge_quarter(f.pr.get("mergedAt"))
+        if per is None:
+            spilled += 1
+            continue
+        pool[per].append(
             (f.repo, f.pr["number"], bool(c.ai_involved),
              int(f.pr.get("additions") or 0),
              int(f.pr.get("deletions") or 0)))
-    return pool
+    return pool, spilled
 
-
-# ------------------------------------------------------------ census table
 
 def _ratio(adds: int, dels: int) -> float:
     return dels / adds if adds else float("nan")
 
 
+# --------------------------------------------- adoption contrast (headline)
+
+def adoption_rows(pool: dict[str, list]) -> dict:
+    """The Faros contrast: per org, churn at its highest-AI-adoption
+    quarter relative to its lowest. Org-quarters qualify at >= ORG_MIN_PRS
+    mature merged PRs; orgs need >= 2 qualifying quarters, a strictly
+    positive adoption spread, and nonzero additions in both endpoint
+    quarters. Returns {orgs, dropped_flat, multiples: [(org, low_share,
+    high_share, low_ratio, high_ratio, multiple)]}."""
+    per_org: dict[tuple[str, str], list[int]] = defaultdict(lambda: [0, 0, 0, 0])
+    for per, items in pool.items():
+        for repo, _num, ai, adds, dels in items:
+            a = per_org[(repo.split("/")[0].lower(), per)]
+            a[0] += 1
+            a[1] += bool(ai)
+            a[2] += min(adds, CAP)
+            a[3] += min(dels, CAP)
+    quarters: dict[str, dict[str, tuple]] = defaultdict(dict)
+    for (org, per), (n, ai, adds, dels) in per_org.items():
+        if n >= ORG_MIN_PRS:
+            quarters[org][per] = (ai / n, adds, dels)
+    multiples, flat = [], 0
+    for org, qs in sorted(quarters.items()):
+        if len(qs) < 2:
+            continue
+        low = min(qs, key=lambda p: (qs[p][0], PERIODS.index(p)))
+        high = max(qs, key=lambda p: (qs[p][0], -PERIODS.index(p)))
+        if qs[high][0] <= qs[low][0]:
+            flat += 1                    # no adoption spread to contrast
+            continue
+        lo_r = _ratio(qs[low][1], qs[low][2])
+        hi_r = _ratio(qs[high][1], qs[high][2])
+        if not (lo_r > 0 and hi_r == hi_r and qs[high][1] > 0):
+            continue
+        multiples.append((org, qs[low][0], qs[high][0], lo_r, hi_r,
+                          hi_r / lo_r))
+    return {"orgs": len(quarters), "dropped_flat": flat,
+            "multiples": multiples}
+
+
+def print_adoption(pool: dict[str, list], spilled: int) -> None:
+    import math
+    r = adoption_rows(pool)
+    ms = r["multiples"]
+    print("code churn, WITHIN-ORG ADOPTION CONTRAST (the source study's "
+          "design): per org, deleted:added at its highest-AI-adoption "
+          "merge-quarter vs its lowest (capped sides; org-quarters "
+          f"qualify at >= {ORG_MIN_PRS} mature merged PRs)")
+    print("claim under test predicts the high-adoption ratio ~x9.6 the "
+          "low-adoption ratio (+861%)")
+    if not ms:
+        print("no qualifying orgs")
+        return
+    logs = [(math.log(m[5]), 1.0) for m in ms]
+    gm = math.exp(weighted_mean(logs))
+    lo, hi = bootstrap_ci(logs, key="churn|adoption")
+    med = median(m[5] for m in ms)
+    rose = sum(1 for m in ms if m[5] > 1)
+    print(f"orgs contrasted: {len(ms)} (of {r['orgs']} with >= 2 "
+          f"qualifying quarters; {r['dropped_flat']} dropped for zero "
+          f"adoption spread); merge-spillover PRs dropped: {spilled}")
+    print(f"geomean churn multiple (high/low adoption): {gm:.2f} "
+          f"[{math.exp(lo):.2f},{math.exp(hi):.2f}]  median {med:.2f}  "
+          f"churn rose in {rose}/{len(ms)} orgs "
+          f"({100 * rose / len(ms):.0f}%)")
+    med_spread = median(m[2] - m[1] for m in ms)
+    print(f"median adoption spread low->high: {100 * med_spread:.0f}pp; "
+          "multiples pool adds/dels across each org's population repos")
+
+
+# ------------------------------------------- calendar view (sensitivity)
+
 def census_rows(pool: dict[str, list]) -> dict[tuple[str, str], dict]:
-    """(period, arm) -> pooled churn: n, madds/mdels (raw + capped),
-    deleted:added ratio, median per-PR ratio, share of PRs deleting more
-    than they add."""
+    """(merge-quarter, arm) -> pooled churn. median_pr is over PRs with
+    nonzero additions (deletion-only PRs have no defined ratio and are
+    excluded from the median; they still count in del_dominant)."""
     out: dict[tuple[str, str], dict] = {}
     for per, items in pool.items():
         arms = {"all": items,
@@ -122,20 +236,20 @@ def census_rows(pool: dict[str, list]) -> dict[tuple[str, str], dict]:
             dels = sum(x[4] for x in xs)
             cadds = sum(min(x[3], CAP) for x in xs)
             cdels = sum(min(x[4], CAP) for x in xs)
-            per_pr = sorted(x[4] / max(x[3], 1) for x in xs)
+            ratios = [x[4] / x[3] for x in xs if x[3] > 0]
             out[(per, arm)] = {
                 "n": len(xs), "adds": adds, "dels": dels,
                 "ratio": _ratio(adds, dels),
                 "ratio_capped": _ratio(cadds, cdels),
-                "median_pr": per_pr[len(per_pr) // 2],
+                "median_pr": median(ratios) if ratios else float("nan"),
                 "del_dominant": sum(1 for x in xs if x[4] > x[3]) / len(xs),
             }
     return out
 
 
 def repo_pairs(pool: dict[str, list]) -> dict[tuple[str, str], list]:
-    """(period, arm) -> [(repo_ratio, repo)] for the CW series: per repo,
-    capped-side deletions / capped-side additions over its arm PRs;
+    """(merge-quarter, arm) -> [(repo_ratio, repo)] for the CW series: per
+    repo, capped-side deletions / capped-side additions over its arm PRs;
     qualifies at >= MIN_PRS PRs and nonzero additions (a repo whose arm
     added nothing has no defined ratio — skipped, never zeroed)."""
     acc: dict[tuple[str, str, str], list[int]] = defaultdict(lambda: [0, 0, 0])
@@ -158,13 +272,13 @@ def print_census(pool: dict[str, list]) -> None:
     rows = census_rows(pool)
     pairs = repo_pairs(pool)
     w = weights()
-    print("code churn: deleted:added over mature merged PRs. CW = "
-          "contributor-weighted mean of per-repo ratios (capped sides, "
-          f">= {MIN_PRS} PRs/repo, 95% CI over repos); pooled = the "
-          "external claim's literal metric (raw; capped companion)")
-    print("claim under test: deleted:added rose 861% (x9.6) under high AI "
-          "adoption; xQ1-24 is the pooled ratio vs the same-arm baseline")
-    print(f"{'period':9}{'arm':7}{'repos':>6}{'CW del:add [95% CI]':>22}"
+    print("code churn, CALENDAR-TREND SENSITIVITY (fixed merge-quarters "
+          "and PR-level arms — NOT the source study's within-org "
+          "adoption contrast; see the adoption table for the "
+          "replication). CW = contributor-weighted mean of per-repo "
+          f"deleted:added (capped sides, >= {MIN_PRS} PRs/repo, 95% CI "
+          "over repos); pooled = raw ratio of totals")
+    print(f"{'quarter':9}{'arm':7}{'repos':>6}{'CW del:add [95% CI]':>22}"
           f"{'PRs':>8}{'pooled':>8}{'capped':>8}{'medPR':>7}"
           f"{'del>add':>9}{'xQ1-24':>8}")
     for per in PERIODS:
@@ -194,7 +308,7 @@ def print_census(pool: dict[str, list]) -> None:
 # ------------------------------------------------------------------ sample
 
 def draw(pool: dict[str, list]) -> list[dict]:
-    """Balanced seeded ~0.1% draw: per period, target = max(2,
+    """Balanced seeded ~0.1% draw: per merge-quarter, target = max(2,
     round(SAMPLE_RATE * frame)); half from the AI arm, half from nonAI
     (equal arms = AI oversampled at its population share); an arm short
     of its half (Q1-2024 AI is empty) backfills from the other."""
@@ -219,64 +333,96 @@ def draw(pool: dict[str, list]) -> list[dict]:
     return sorted(out, key=lambda d: (d["per"], d["repo"], d["num"]))
 
 
+def reconcile(selected: list[dict], existing: list[dict],
+              key_fields: tuple[str, ...], payload_field: str,
+              ) -> tuple[dict, list[dict], int]:
+    """Selection-vs-store reconciliation: keep existing records only for
+    keys in the CURRENT selection (and only if hydrated — carrying
+    payload_field); everything else is stale and dropped. Returns
+    (kept records by key, still-missing selections, stale_dropped)."""
+    cur = {tuple(s[f] for f in key_fields): s for s in selected}
+    kept: dict[tuple, dict] = {}
+    stale = 0
+    for d in existing:
+        k = tuple(d.get(f) for f in key_fields)
+        if k in cur and payload_field in d:
+            kept[k] = d                 # later record supersedes
+        elif k not in cur:
+            stale += 1
+    todo = [s for k, s in cur.items() if k not in kept]
+    return kept, todo, stale
+
+
+def _load_jsonl(path: Path) -> list[dict]:
+    if not path.exists():
+        return []
+    return [json.loads(ln) for ln in path.read_text().splitlines()]
+
+
+def _write_jsonl(path: Path, records: list[dict]) -> None:
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text("".join(json.dumps(r) + "\n" for r in records))
+    tmp.replace(path)                   # atomic: complete-or-absent
+
+
 _FILES_Q = ('a%d: repository(owner:"%s", name:"%s"){ pullRequest(number:%d){'
             ' files(first:%d){ pageInfo{ hasNextPage }'
             ' nodes{ path additions deletions } } } }')
 
 
 def pull(selected: list[dict], pace: float = 0.8, batch: int = 10) -> None:
-    """Hydrate per-file additions/deletions for the drawn PRs (append-
-    resume on (repo, num); absent results are retried next run, never
-    faked). files capped at FILES_PAGE — truncated records keep their
-    first page and are flagged files_complete=false (reported, kept)."""
-    done = set()
-    if SAMPLE.exists():
-        for ln in SAMPLE.read_text().splitlines():
-            d = json.loads(ln)
-            done.add((d["repo"], d["num"]))
-    todo = [s for s in selected if (s["repo"], s["num"]) not in done]
-    print(f"hydrating {len(todo)} of {len(selected)} sampled PRs")
-    with SAMPLE.open("a") as out:
-        for i in range(0, len(todo), batch):
-            chunk = todo[i:i + batch]
-            parts = [_FILES_Q % (j, s["repo"].split("/")[0],
-                                 s["repo"].split("/")[1], s["num"],
-                                 FILES_PAGE)
-                     for j, s in enumerate(chunk)]
-            data = graphql_nodes("query{ " + " ".join(parts) + " }", {},
-                                 ".data", expect=dict)
-            if data is None:
-                print(f"WARN batch {i // batch} failed; retry next run")
-                time.sleep(pace)
-                continue
-            for j, s in enumerate(chunk):
-                node = (data.get(f"a{j}") or {}).get("pullRequest") or {}
-                files = node.get("files")
-                if not isinstance(files, dict) or files.get("nodes") is None:
-                    continue                    # absent: retried next run
-                rec = dict(s)
-                rec["files"] = [
-                    {"path": f.get("path") or "",
-                     "adds": int(f.get("additions") or 0),
-                     "dels": int(f.get("deletions") or 0)}
-                    for f in files["nodes"] or [] if f]
-                rec["files_complete"] = \
-                    (files.get("pageInfo") or {}).get("hasNextPage") is False
-                out.write(json.dumps(rec) + "\n")
-                out.flush()
+    """Hydrate per-file additions/deletions for the CURRENT draw. The
+    sample file is atomically rewritten to exactly the current selection:
+    prior hydration is reused for still-selected PRs, stale draws are
+    dropped, missing ones are pulled (absent results stay missing and are
+    retried next run, never faked)."""
+    kept, todo, stale = reconcile(selected, _load_jsonl(SAMPLE),
+                                  ("repo", "num"), "files")
+    print(f"hydrating {len(todo)} of {len(selected)} sampled PRs "
+          f"({len(kept)} reused, {stale} stale dropped)")
+    for i in range(0, len(todo), batch):
+        chunk = todo[i:i + batch]
+        parts = [_FILES_Q % (j, s["repo"].split("/")[0],
+                             s["repo"].split("/")[1], s["num"], FILES_PAGE)
+                 for j, s in enumerate(chunk)]
+        data = graphql_nodes("query{ " + " ".join(parts) + " }", {},
+                             ".data", expect=dict)
+        if data is None:
+            print(f"WARN batch {i // batch} failed; retry next run")
             time.sleep(pace)
+            continue
+        for j, s in enumerate(chunk):
+            node = (data.get(f"a{j}") or {}).get("pullRequest") or {}
+            files = node.get("files")
+            if not isinstance(files, dict) or files.get("nodes") is None:
+                continue                    # absent: retried next run
+            rec = dict(s)
+            rec["files"] = [
+                {"path": f.get("path") or "",
+                 "adds": int(f.get("additions") or 0),
+                 "dels": int(f.get("deletions") or 0)}
+                for f in files["nodes"] or [] if f]
+            rec["files_complete"] = \
+                (files.get("pageInfo") or {}).get("hasNextPage") is False
+            kept[(s["repo"], s["num"])] = rec
+        time.sleep(pace)
+    _write_jsonl(SAMPLE, sorted(kept.values(),
+                                key=lambda d: (d["per"], d["repo"],
+                                               d["num"])))
+    missing = len(selected) - len(kept)
+    if missing:
+        print(f"{missing} selections still unhydrated (re-run --pull)")
 
 
-def print_sample() -> None:
-    recs = [json.loads(ln) for ln in SAMPLE.read_text().splitlines()]
-    seen: dict[tuple, dict] = {}
-    for r in recs:                       # later re-pull supersedes
-        seen[(r["repo"], r["num"])] = r
-    recs = list(seen.values())
+def print_sample(pool: dict[str, list]) -> None:
+    kept, todo, stale = reconcile(draw(pool), _load_jsonl(SAMPLE),
+                                  ("repo", "num"), "files")
+    recs = list(kept.values())
     print("code churn, balanced 0.1% sample with per-FILE splits "
-          f"({len(recs)} PRs hydrated; equal-arm design — pooled numbers "
-          "are per-arm, never blended across arms)")
-    print(f"{'period':9}{'arm':7}{'PRs':>6}{'trunc':>6}{'del:add':>9}"
+          f"({len(recs)} of the current draw hydrated, {len(todo)} "
+          f"missing, {stale} stale ignored; equal-arm design — pooled "
+          "numbers are per-arm, never blended across arms)")
+    print(f"{'quarter':9}{'arm':7}{'PRs':>6}{'trunc':>6}{'del:add':>9}"
           f"{'noGen':>9}{'gen%dels':>9}{'gen%adds':>9}")
     for per in PERIODS:
         for arm, want in (("AI", True), ("nonAI", False)):
@@ -297,43 +443,59 @@ def print_sample() -> None:
                   f"{100 * gadds / adds if adds else 0:>8.1f}%")
 
 
-# --------------------------------------------------------------- incidents
+# ------------------------------------------------------- bug-report proxy
 
-def incident_repos(pool: dict[str, list]) -> list[str]:
-    """The sample's distinct repos — the pilot's repo universe."""
-    return sorted({d["repo"] for d in draw(pool)})
-
-
-def pull_incidents(repos: list[str], pace: float = 2.0) -> None:
-    """Per (repo, quarter): count of GH issues labeled `bug` CREATED in
-    the quarter (label:bug only — repos with other taxonomies read 0;
-    pilot limitation). Append-resume; failures skipped, never zeroed."""
-    done = set()
-    if INCIDENTS.exists():
-        for ln in INCIDENTS.read_text().splitlines():
-            d = json.loads(ln)
-            done.add((d["repo"], d["per"]))
-    todo = [(r, per) for r in repos for per in PERIODS
-            if (r, per) not in done]
-    print(f"pulling bug counts for {len(todo)} repo-quarters")
-    with INCIDENTS.open("a") as out:
-        for r, per in todo:
-            rng = QUARTER_RANGES[per]
-            n = rest_count(f"repo:{r} is:issue label:{BUG_LABEL} "
-                           f"created:{rng}", endpoint="search/issues")
-            time.sleep(pace)
-            if n is None:
-                print(f"WARN {r} {per}: count failed; retry next run")
-                continue
-            out.write(json.dumps({"repo": r, "per": per, "bugs": n}) + "\n")
-            out.flush()
+def bug_window(per: str, as_of: str = AS_OF) -> str | None:
+    """The quarter's bug-count window, truncated at the maturity frontier
+    so numerator exposure matches the mature-PR denominator (a Q2-2026
+    bug created after the last includable PR-creation date would have no
+    matching denominator exposure). None if the whole quarter is past the
+    frontier."""
+    start, end = QUARTER_RANGES[per].split("..")
+    end = min(end, maturity_frontier(as_of))
+    return f"{start}..{end}" if start <= end else None
 
 
-def print_incidents(pool: dict[str, list]) -> None:
-    bugs: dict[tuple[str, str], int] = {}
-    for ln in INCIDENTS.read_text().splitlines():
-        d = json.loads(ln)
-        bugs[(d["repo"], d["per"])] = d["bugs"]
+def bug_cells(pool: dict[str, list]) -> list[dict]:
+    """The current selection of (repo, per, rng) bug-count cells: the
+    sample's distinct repos x quarters with a defined window."""
+    repos = sorted({d["repo"] for d in draw(pool)})
+    return [{"repo": r, "per": per, "rng": bug_window(per)}
+            for r in repos for per in PERIODS
+            if bug_window(per) is not None]
+
+
+def pull_bugs(pool: dict[str, list], pace: float = 2.0) -> None:
+    """Count bug-labeled issues per cell (label:bug only — a documented
+    proxy limitation). The file is atomically rewritten to exactly the
+    current cell selection: counts are reused only when the cell's window
+    matches (a range change, e.g. an AS_OF bump moving the frontier,
+    re-pulls the cell); failures stay missing, never zeroed."""
+    cells = bug_cells(pool)
+    kept, todo, stale = reconcile(cells, _load_jsonl(BUGS),
+                                  ("repo", "per", "rng"), "bugs")
+    print(f"pulling {len(todo)} of {len(cells)} bug cells "
+          f"({len(kept)} reused, {stale} stale dropped)")
+    for s in todo:
+        n = rest_count(f"repo:{s['repo']} is:issue label:{BUG_LABEL} "
+                       f"created:{s['rng']}", endpoint="search/issues")
+        time.sleep(pace)
+        if n is None:
+            print(f"WARN {s['repo']} {s['per']}: count failed; "
+                  "retry next run")
+            continue
+        kept[(s["repo"], s["per"], s["rng"])] = {**s, "bugs": n}
+    _write_jsonl(BUGS, sorted(kept.values(),
+                              key=lambda d: (d["repo"], d["per"])))
+    missing = len(cells) - len(kept)
+    if missing:
+        print(f"{missing} cells still unpulled (re-run --pull-bugs)")
+
+
+def print_bugs(pool: dict[str, list]) -> None:
+    kept, todo, stale = reconcile(bug_cells(pool), _load_jsonl(BUGS),
+                                  ("repo", "per", "rng"), "bugs")
+    bugs = {(d["repo"], d["per"]): d["bugs"] for d in kept.values()}
     merged: dict[tuple[str, str], int] = defaultdict(int)
     ai_share: dict[str, list[int]] = defaultdict(lambda: [0, 0])
     for per, items in pool.items():
@@ -349,12 +511,15 @@ def print_incidents(pool: dict[str, list]) -> None:
                     key=lambda r: (ai_share[r][0] / ai_share[r][1])
                     if ai_share[r][1] else 0.0)
     lo = set(ranked[:len(ranked) // 2])
-    print("incidents pilot: bug-labeled issues created per 100 mature "
-          f"merged PRs, over the churn sample's repos ({len(repos)} "
-          f"pulled; {len(repos) - len(with_bugs)} with zero bug-labeled "
-          "issues in every quarter EXCLUDED as probable non-users of the "
-          "label — label:bug only, a pilot limitation)")
-    print(f"{'period':9}{'group':9}{'repos':>6}{'bugs':>7}{'merged':>8}"
+    print("BUG-REPORT PROXY pilot (bug-labeled GH issues — NOT production "
+          "incidents): issues labeled bug created per 100 mature merged "
+          "PRs, both sides truncated at the maturity frontier "
+          f"({maturity_frontier()}), over the churn sample's repos "
+          f"({len(repos)} pulled, {len(todo)} cells missing, {stale} "
+          f"stale ignored; {len(repos) - len(with_bugs)} repos with zero "
+          "bug-labeled issues in every quarter EXCLUDED as probable "
+          "non-users of the label — label:bug only)")
+    print(f"{'quarter':9}{'group':9}{'repos':>6}{'bugs':>7}{'merged':>8}"
           f"{'per100':>8}")
     for per in PERIODS:
         for label, grp in (("low-AI", lo), ("high-AI", with_bugs - lo),
@@ -368,26 +533,27 @@ def print_incidents(pool: dict[str, list]) -> None:
             print(f"{per:9}{label:9}{len(rs):>6}{b:>7}{m:>8}"
                   f"{100 * b / m:>8.2f}")
     print("groups = halves of the sample repos by Q2-2026 AI-involvement "
-          "share among their sampled-frame merged PRs")
+          "share among their sampled-frame merged PRs; pooled group "
+          "rates can be dominated by single large repos")
 
 
 # ------------------------------------------------------------------- main
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--table", choices=["census", "sample", "incidents"])
+    ap.add_argument("--table",
+                    choices=["report", "adoption", "census", "sample",
+                             "bugs"])
     ap.add_argument("--draw", action="store_true",
                     help="print the balanced 0.1% selection")
     ap.add_argument("--pull", action="store_true",
-                    help="hydrate per-file splits for the drawn sample")
-    ap.add_argument("--pull-incidents", action="store_true",
+                    help="hydrate per-file splits for the current draw")
+    ap.add_argument("--pull-bugs", action="store_true",
                     help="pull bug-label counts for the sample's repos")
     a = ap.parse_args()
-    if a.table in ("census", "sample", "incidents") or a.draw or a.pull \
-            or a.pull_incidents:
-        pool = eligible()
-    else:
-        ap.error("pick --table/--draw/--pull/--pull-incidents")
+    if not (a.table or a.draw or a.pull or a.pull_bugs):
+        ap.error("pick --table/--draw/--pull/--pull-bugs")
+    pool, spilled = eligible()
     if a.draw:
         sel = draw(pool)
         by = defaultdict(int)
@@ -398,14 +564,18 @@ def main() -> None:
             for p in PERIODS))
     if a.pull:
         pull(draw(pool))
-    if a.pull_incidents:
-        pull_incidents(incident_repos(pool))
-    if a.table == "census":
+    if a.pull_bugs:
+        pull_bugs(pool)
+    if a.table in ("report", "adoption"):
+        print_adoption(pool, spilled)
+    if a.table in ("report", "census"):
+        if a.table == "report":
+            print()
         print_census(pool)
-    elif a.table == "sample":
-        print_sample()
-    elif a.table == "incidents":
-        print_incidents(pool)
+    if a.table == "sample":
+        print_sample(pool)
+    elif a.table == "bugs":
+        print_bugs(pool)
 
 
 if __name__ == "__main__":
