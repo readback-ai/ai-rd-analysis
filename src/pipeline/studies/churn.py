@@ -476,7 +476,12 @@ def pull_bugs(pool: dict[str, list], pace: float = 2.0) -> None:
                                   ("repo", "per", "rng"), "bugs")
     print(f"pulling {len(todo)} of {len(cells)} bug cells "
           f"({len(kept)} reused, {stale} stale dropped)")
-    for s in todo:
+
+    def flush() -> None:
+        _write_jsonl(BUGS, sorted(kept.values(),
+                                  key=lambda d: (d["repo"], d["per"])))
+
+    for i, s in enumerate(todo):
         n = rest_count(f"repo:{s['repo']} is:issue label:{BUG_LABEL} "
                        f"created:{s['rng']}", endpoint="search/issues")
         time.sleep(pace)
@@ -485,8 +490,10 @@ def pull_bugs(pool: dict[str, list], pace: float = 2.0) -> None:
                   "retry next run")
             continue
         kept[(s["repo"], s["per"], s["rng"])] = {**s, "bugs": n}
-    _write_jsonl(BUGS, sorted(kept.values(),
-                              key=lambda d: (d["repo"], d["per"])))
+        if i % 25 == 24:
+            flush()          # checkpoint: an interrupted run keeps its
+                             # completed cells (each flush is atomic)
+    flush()
     missing = len(cells) - len(kept)
     if missing:
         print(f"{missing} cells still unpulled (re-run --pull-bugs)")
