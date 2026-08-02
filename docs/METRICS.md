@@ -132,8 +132,10 @@ inaccessibility waiver). The monthly twin (`report_monthly.md`,
 `--granularity month`) runs the same sections; sections whose module is
 inherently quarterly carry an explicit `[quarterly]` tag there.
 
-The 20 sections, in order (each title names its producing module and
-argument — one section = one module invocation):
+The 22 sections, in order (each title names its producing module and
+argument — one section = one module invocation; the botcheck slices
+section, added 2026-07-28, is documented in the pending docs-branch
+renumbering):
 
 1. **Contributor-weighted metrics** (`pipeline.analyze`) — per period ×
    {equal-weight, contrib-weight}; columns = `ai_code` (layer A),
@@ -192,6 +194,15 @@ argument — one section = one module invocation):
 20. **Adoption event-study** (`studies.event_study`) — merged (w8,
     mature-months-only) and submitted kLOC in event time around each
     author's first AI-marker month.
+21. **Code churn** (`studies.churn --table census`, added 2026-08-02) —
+    deleted:added over mature merged PRs, complete census, arms
+    all/AI/nonAI (profile `all` + `ai_contrast_eligible`, so
+    all = AI + nonAI). CW = contributor-weighted mean of per-repo
+    ratios (capped sides, ≥5 PRs/repo floor, per-cell 95% CI); pooled
+    raw ratio + capped companion + per-arm multiple vs Q1-2024 test the
+    external "churn rose 861%" claim. The 0.1% balanced file-level
+    sample and the incidents pilot stay auxiliary
+    (`churn --pull/--table sample/--table incidents`; §6).
 
 Alongside the report, `data/derived/census_manifest.json` records SHA-256
 prefixes of the population files, repo count, and cell-coverage numbers
@@ -205,6 +216,10 @@ prefixes of the population files, repo count, and cell-coverage numbers
   the final population before citing.
 - `data/derived/branch_sample_classifications.tsv` — minimized (identity-free)
   per-PR classifications of the branch-prefix samples.
+- `data/derived/churn_sample_v1.jsonl` — the churn pilot's balanced 0.1%
+  per-file sample (generated-content sensitivity);
+  `churn_incidents_v1.jsonl` — bug-labeled issue counts per sampled
+  repo-quarter (incidents-per-merged-PR pilot, label:bug only).
 
 ## 6b. Complete census vs. sampled studies
 

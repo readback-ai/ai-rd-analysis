@@ -47,6 +47,7 @@ from collections import defaultdict
 from pathlib import Path
 from random import Random
 
+from pipeline.analyze import bootstrap_ci, weighted_mean
 from pipeline.frame import ai_contrast_eligible, study_frame
 from pipeline.ghx import graphql_nodes, rest_count
 from pipeline.scan_orgs import QUARTER_RANGES
@@ -54,6 +55,7 @@ from pipeline.scan_orgs import QUARTER_RANGES
 PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
 SEED = 20260630
 SAMPLE_RATE = 0.001          # ~0.1% of the eligible merged frame
+MIN_PRS = 5                  # repo floor per (period, arm), house convention
 FILES_PAGE = 100             # per-PR file-list cap (one page; no pagination)
 CAP = 20_000                 # per-side LOC cap for the capped companion
 SAMPLE = Path("data/derived/churn_sample_v1.jsonl")
@@ -131,28 +133,62 @@ def census_rows(pool: dict[str, list]) -> dict[tuple[str, str], dict]:
     return out
 
 
+def repo_pairs(pool: dict[str, list]) -> dict[tuple[str, str], list]:
+    """(period, arm) -> [(repo_ratio, repo)] for the CW series: per repo,
+    capped-side deletions / capped-side additions over its arm PRs;
+    qualifies at >= MIN_PRS PRs and nonzero additions (a repo whose arm
+    added nothing has no defined ratio — skipped, never zeroed)."""
+    acc: dict[tuple[str, str, str], list[int]] = defaultdict(lambda: [0, 0, 0])
+    for per, items in pool.items():
+        for repo, _num, ai, adds, dels in items:
+            for arm in ("all", "AI" if ai else "nonAI"):
+                a = acc[(per, arm, repo)]
+                a[0] += min(adds, CAP)
+                a[1] += min(dels, CAP)
+                a[2] += 1
+    out: dict[tuple[str, str], list] = defaultdict(list)
+    for (per, arm, repo), (adds, dels, n) in sorted(acc.items()):
+        if n >= MIN_PRS and adds > 0:
+            out[(per, arm)].append((dels / adds, repo))
+    return dict(out)
+
+
 def print_census(pool: dict[str, list]) -> None:
+    from pipeline.studies.slices import weights
     rows = census_rows(pool)
-    print("code churn, complete census: deleted:added over mature merged "
-          "PRs (pooled; capped = both sides capped at 20k/PR)")
+    pairs = repo_pairs(pool)
+    w = weights()
+    print("code churn: deleted:added over mature merged PRs. CW = "
+          "contributor-weighted mean of per-repo ratios (capped sides, "
+          f">= {MIN_PRS} PRs/repo, 95% CI over repos); pooled = the "
+          "external claim's literal metric (raw; capped companion)")
     print("claim under test: deleted:added rose 861% (x9.6) under high AI "
-          "adoption; multiple below is vs the Q1-2024 same-arm ratio")
-    print(f"{'period':9}{'arm':7}{'PRs':>8}{'Madds':>9}{'Mdels':>9}"
-          f"{'del:add':>9}{'capped':>9}{'medPR':>7}{'del>add':>9}"
-          f"{'xQ1-24':>8}")
+          "adoption; xQ1-24 is the pooled ratio vs the same-arm baseline")
+    print(f"{'period':9}{'arm':7}{'repos':>6}{'CW del:add [95% CI]':>22}"
+          f"{'PRs':>8}{'pooled':>8}{'capped':>8}{'medPR':>7}"
+          f"{'del>add':>9}{'xQ1-24':>8}")
     for per in PERIODS:
         for arm in ("all", "AI", "nonAI"):
             r = rows.get((per, arm))
             if not r:
                 continue
+            ps = [(ratio, w.get(repo, 1.0))
+                  for ratio, repo in pairs.get((per, arm), [])]
+            if ps:
+                m = weighted_mean(ps)
+                lo, hi = bootstrap_ci(ps, key=f"churn|{per}|{arm}")
+                cw = f"{m:6.3f} [{lo:5.3f},{hi:5.3f}]"
+            else:
+                cw = "n/a"
             base = rows.get(("Q1-2024", arm))
             mult = (r["ratio"] / base["ratio"]
                     if base and base["ratio"] else float("nan"))
-            print(f"{per:9}{arm:7}{r['n']:>8}"
-                  f"{r['adds'] / 1e6:>9.1f}{r['dels'] / 1e6:>9.1f}"
-                  f"{r['ratio']:>9.3f}{r['ratio_capped']:>9.3f}"
+            print(f"{per:9}{arm:7}{len(ps):>6}{cw:>22}{r['n']:>8}"
+                  f"{r['ratio']:>8.3f}{r['ratio_capped']:>8.3f}"
                   f"{r['median_pr']:>7.3f}{100 * r['del_dominant']:>8.1f}%"
                   f"{mult:>8.2f}")
+    print("Q1-2024 caption: detector-validity baseline, not an AI-usage "
+          "estimate; AI arm has no 2024 baseline by construction")
 
 
 # ------------------------------------------------------------------ sample

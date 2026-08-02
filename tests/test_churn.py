@@ -50,6 +50,28 @@ def test_census_rows_ratio_and_arms_partition():
     assert r_all["adds"] == 4 * 100 + 6 * 200
 
 
+def test_repo_pairs_floor_and_zero_adds_skip():
+    """CW series: repos qualify per (period, arm) at >= MIN_PRS PRs with
+    nonzero additions; delete-only repos are skipped, never zeroed."""
+    pool = {p: [] for p in churn.PERIODS}
+    pool["Q2-2026"] = (
+        [("o/big", i, False, 100, 40) for i in range(5)]      # qualifies
+        + [("o/tiny", i, False, 100, 10) for i in range(4)]   # under floor
+        + [("o/delonly", i, False, 0, 50) for i in range(6)])  # no adds
+    pairs = churn.repo_pairs(pool)
+    got = pairs[("Q2-2026", "all")]
+    assert [r for _v, r in got] == ["o/big"]
+    assert got[0][0] == (5 * 40) / (5 * 100)
+    assert ("Q2-2026", "AI") not in pairs
+
+
+def test_repo_pairs_caps_each_side_per_pr():
+    pool = {p: [] for p in churn.PERIODS}
+    pool["Q2-2026"] = [("o/mega", i, True, 100_000, 10) for i in range(5)]
+    (val, _repo), = churn.repo_pairs(pool)[("Q2-2026", "AI")]
+    assert val == (5 * 10) / (5 * churn.CAP)   # adds capped at 20k/PR
+
+
 def test_generated_path_classifier():
     for p in ("package-lock.json", "a/b/yarn.lock", "vendor/x.go",
               "web/dist/app.min.js", "proto/x_pb2.py", "img/logo.svg",
