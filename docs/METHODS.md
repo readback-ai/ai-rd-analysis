@@ -111,7 +111,10 @@ AI-topic repos. Appendix cuts (org-type public/private/community via
 `scripts/monthly_update.py YYYY-MM` adds a month of activity data:
 1. RE-COLLECTS the previous TWO months first (wipes their census cells;
    cells are immutable snapshots, so refresh is always wipe + full
-   re-query, reconciled against fresh precounts) — N-1 for creation
+   re-query, reconciled against fresh precounts). The wipe happens ONCE
+   per target month (logged in raw/monthly_wipes.json), so rerunning the
+   update after a mid-collection failure RESUMES the checkpointed
+   census instead of discarding it — N-1 for creation
    recency, and N-2 because under the w8 rule its last 8-week windows
    only just closed: a month's fate metrics are FINAL once it has been
    revised as N-2, i.e. two updates after first collection. Until then
