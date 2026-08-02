@@ -61,6 +61,41 @@ def test_broken_pair_month_geometry():
     figstyle.plt.close(fig)
 
 
+def test_broken_pair_month_custom_window():
+    """Monthly figures restricted to w8-final months pass their own
+    window: the right panel's domain and tick set follow it (ticks at
+    months [0, 3, 6, last])."""
+    fig = figstyle.plt.figure()
+    sf = fig.subfigures(1, 1)
+    window = WINDOW[:8]                       # through 2026-05
+    axl, axr = broken_pair(sf, "t", span="month", window=window)
+    assert axl.get_xlim() == (-0.5, len(BASELINE) - 0.5)
+    assert axr.get_xlim() == (-0.5, len(window) - 0.5)
+    assert list(axr.get_xticks()) == [0, 3, 6, 7]
+    assert _labels(axr) == [window[i][2:7] for i in (0, 3, 6, 7)]
+    figstyle.plt.close(fig)
+
+
+def test_broken_pair_month_marks_every_month():
+    """Figure 3 companion: month_marks=True draws an (unlabeled) tick
+    mark at every plotted month on both panels; the default keeps the
+    legacy sparse-ticks-only axes."""
+    fig = figstyle.plt.figure()
+    sf = fig.subfigures(1, 2)
+    window = WINDOW[:8]
+    axl, axr = broken_pair(sf.flat[0], "t", span="month", window=window,
+                           month_marks=True)
+    # minor ticks coinciding with major ones are dropped by matplotlib;
+    # the mark set is the union of both
+    for ax, n in ((axl, len(BASELINE)), (axr, len(window))):
+        marks = set(ax.get_xticks()) | set(ax.get_xticks(minor=True))
+        assert marks == set(range(n))
+    dl, dr = broken_pair(sf.flat[1], "t", span="month")
+    assert list(dl.get_xticks(minor=True)) == []
+    assert list(dr.get_xticks(minor=True)) == []
+    figstyle.plt.close(fig)
+
+
 def test_broken_axes_paper_variant():
     """Legacy plot_paper_tables.broken_axes verbatim: its own figure,
     full-length quarter labels, ylabel on the left panel, caption below."""
@@ -122,6 +157,20 @@ def test_month_series_split():
     figstyle.plt.close(fig)
 
 
+def test_month_series_follows_value_length():
+    """month_series plots however many window values it is given, so a
+    shortened (w8-final-only) window needs no special casing."""
+    fig = figstyle.plt.figure()
+    sf = fig.subfigures(1, 1)
+    window = WINDOW[:8]
+    axl, axr = broken_pair(sf, "t", span="month", window=window)
+    n_r = len(axr.lines)
+    month_series(axl, axr, [1, 2, 3], [None] * len(window), "tab:blue")
+    (right,) = axr.lines[n_r:]
+    assert list(right.get_xdata()) == list(range(len(window)))
+    figstyle.plt.close(fig)
+
+
 def test_cell_suppresses_ai_slice_at_baseline():
     """Architecture review 2026-07-22 candidate 2: the zero-denominator
     suppression rule DIVERGED between copies — plot_fig3_comp_audits.py
@@ -139,6 +188,18 @@ def test_cell_suppresses_ai_slice_at_baseline():
     assert cell(rows, "Q4-2025", "ai", "humanRev_pr") is None   # absent cell
     assert cell(rows, "Q2-2026", "ai", "humanRev_pr", scale=100) == 60.0
     assert cell(rows, "Q1-2024", "ai", "humanRev_pr", scale=100) is None
+
+
+def test_cell_suppresses_ai_slice_at_monthly_baseline():
+    """Monthly variant of the baseline rule: an AI-conditioned rate is
+    undefined in every Q1-2024 baseline MONTH too — a stray detector FP
+    cell there must read None while other slices pass through."""
+    rows = {("2024-02", "ai"): {"humanRev_pr": 0.5},     # stray detector FP
+            ("2024-02", "nonai"): {"humanRev_pr": 0.7},
+            ("2026-04", "ai"): {"humanRev_pr": 0.6}}
+    assert cell(rows, "2024-02", "ai", "humanRev_pr") is None
+    assert cell(rows, "2024-02", "nonai", "humanRev_pr") == 0.7
+    assert cell(rows, "2026-04", "ai", "humanRev_pr") == 0.6
 
 
 def test_paired_series6_matches_legacy_tuples():

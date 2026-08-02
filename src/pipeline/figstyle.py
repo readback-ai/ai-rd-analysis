@@ -69,13 +69,17 @@ def _break_marks(axl, axr, markersize=9):
         ax.plot([x], [1], transform=ax.transAxes, **kw)
 
 
-def broken_pair(subfig, title, span="quarter"):
+def broken_pair(subfig, title, span="quarter", window=None,
+                month_marks=False):
     """Left/right broken-axis panel pair inside a subfigure, shared y.
 
     span="quarter": Q1-24 at x=0 on the left; Q4-25..Q2-26 at x=0..2 on
-    the right (fig6/7/8 and the fig3 companion).
-    span="month": BASELINE months on the left, WINDOW months on the right
-    with ticks at months [0, 3, 6, 8] (fig5, A1)."""
+    the right (fig6/7/8).
+    span="month": BASELINE months on the left; on the right the `window`
+    month list (default WINDOW; the fig3 companion passes only its
+    w8-final months) with labeled ticks at months [0, 3, 6, last] (fig3
+    companion, fig5, A1). month_marks=True adds an unlabeled tick mark
+    at EVERY plotted month on both panels."""
     axl, axr = subfig.subplots(
         1, 2, sharey=True,
         gridspec_kw={"width_ratios": [1, 3], "wspace": 0.08})
@@ -85,11 +89,15 @@ def broken_pair(subfig, title, span="quarter"):
         axr.set_xlim(-0.4, 2.4)
         axr.set_xticks([0, 1, 2], ["Q4-25", "Q1-26", "Q2-26"])
     elif span == "month":
+        window = WINDOW if window is None else list(window)
         axl.set_xlim(-0.5, len(BASELINE) - 0.5)
         axl.set_xticks([1], ["Q1-24"])
-        axr.set_xlim(-0.5, len(WINDOW) - 0.5)
-        ticks = [0, 3, 6, 8]
-        axr.set_xticks(ticks, [WINDOW[i][2:7] for i in ticks], fontsize=8)
+        axr.set_xlim(-0.5, len(window) - 0.5)
+        ticks = [0, 3, 6, len(window) - 1]
+        axr.set_xticks(ticks, [window[i][2:7] for i in ticks], fontsize=8)
+        if month_marks:
+            axl.set_xticks(range(len(BASELINE)), minor=True)
+            axr.set_xticks(range(len(window)), minor=True)
     else:
         raise ValueError(f"unknown span {span!r}")
     axl.spines.right.set_visible(False)
@@ -129,11 +137,13 @@ def quarter_series(axl, axr, y, color, label=None, ms=(4, 3), **kw):
 
 def month_series(axl, axr, vals_baseline, vals_window, color, ls="-",
                  label=None):
-    """Plot a monthly series across a month broken_pair: BASELINE values
-    on the left panel (unlabeled), WINDOW values on the right."""
-    axl.plot(range(len(BASELINE)), vals_baseline, marker="o", ms=2.5,
+    """Plot a monthly series across a month broken_pair: baseline values
+    on the left panel (unlabeled), window values on the right — one x
+    position per value, so it fits whatever window the pair was built
+    with."""
+    axl.plot(range(len(vals_baseline)), vals_baseline, marker="o", ms=2.5,
              ls=ls, color=color)
-    axr.plot(range(len(WINDOW)), vals_window, marker="o", ms=2.5,
+    axr.plot(range(len(vals_window)), vals_window, marker="o", ms=2.5,
              ls=ls, color=color, label=label)
 
 
@@ -153,10 +163,11 @@ def shade_q2_partial(axr, label="Q2 partial (w8 windows open)"):
 def cell(rows, per, sl, key, scale=1):
     """Zero-denominator suppression, unified (candidate-2 divergence): an
     absent (period, slice) cell is undefined — never a plotted zero — and
-    an AI-conditioned rate is undefined at the Q1-2024 baseline even if a
-    stray detector false positive creates a tiny cell (the guard
-    plot_fig3_comp_audits.py had and the fig6 twins lacked)."""
-    if sl == "ai" and per == "Q1-2024":
+    an AI-conditioned rate is undefined at the Q1-2024 baseline (the
+    quarter or any of its months) even if a stray detector false positive
+    creates a tiny cell (the guard plot_fig3_comp_audits.py had and the
+    fig6 twins lacked)."""
+    if sl == "ai" and (per == "Q1-2024" or per in BASELINE):
         return None
     v = rows.get((per, sl), {}).get(key)
     return None if v is None else scale * v
