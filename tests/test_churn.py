@@ -237,6 +237,71 @@ def test_drift_line_reports_frozen_vs_live_frame():
     assert "unknown" in churn._drift_line({}, "abc")
 
 
+def test_freeze_verify_roundtrip_and_refusal(tmp_path):
+    """Review round 4, P2: every freeze writes data + manifest
+    crash-consistently (manifest carries a data digest and row count);
+    print paths refuse on any skew instead of reporting mixed state."""
+    import pytest
+    data, mani = tmp_path / "d.jsonl", tmp_path / "m.json"
+    recs = [{"repo": "o/a", "per": "Q2-2026", "bugs": 3}]
+    churn._freeze(data, mani, recs, "fp123", selected=2)
+    rows, manifest = churn._verify(data, mani)
+    assert rows == recs
+    assert (manifest["held"], manifest["selected"]) == (1, 2)
+    data.write_text(data.read_text() + '{"repo":"o/b"}\n')   # tamper
+    with pytest.raises(SystemExit, match="does not match its manifest"):
+        churn._verify(data, mani)
+    with pytest.raises(SystemExit, match="missing"):
+        churn._verify(data, tmp_path / "absent.json")
+
+
+def test_bug_stats_come_only_from_frozen_records():
+    """Review round 4, P2: denominators and Q2 AI group counts are read
+    from the stamped records — no live-frame input at print time."""
+    rows = [
+        {"repo": "o/a", "per": "Q1-2024", "bugs": 4, "merged": 100},
+        {"repo": "o/a", "per": "Q2-2026", "bugs": 2, "merged": 50,
+         "ai_num": 30},
+    ]
+    bugs, merged, ai_share = churn.bug_stats(rows)
+    assert bugs[("o/a", "Q1-2024")] == 4
+    assert merged[("o/a", "Q2-2026")] == 50
+    assert ai_share["o/a"] == (30, 50)
+
+
+def test_stamp_denominators_freezes_created_frame_values():
+    """Review round 4, P2: stamping embeds the creation-bucketed
+    denominator per cell and the Q2 AI numerator per repo, refreshed on
+    every freeze (reused bug counts, re-stamped denominators)."""
+    created = {p: [] for p in churn.PERIODS}
+    created["Q1-2024"] = [("o/a", i, False, 1, 1) for i in range(7)]
+    created["Q2-2026"] = ([("o/a", i, True, 1, 1) for i in range(3)]
+                         + [("o/a", 10 + i, False, 1, 1) for i in range(2)])
+    records = {
+        ("o/a", "Q1-2024", "r"): {"repo": "o/a", "per": "Q1-2024",
+                                  "rng": "r", "bugs": 1},
+        ("o/a", "Q2-2026", "r"): {"repo": "o/a", "per": "Q2-2026",
+                                  "rng": "r", "bugs": 2,
+                                  "merged": 999, "ai_num": 999},  # stale
+    }
+    churn._stamp_denominators(records, created)
+    assert records[("o/a", "Q1-2024", "r")]["merged"] == 7
+    assert records[("o/a", "Q2-2026", "r")]["merged"] == 5
+    assert records[("o/a", "Q2-2026", "r")]["ai_num"] == 3
+
+
+def test_fingerprint_covers_ai_flags_and_both_pools():
+    """Review round 4, P2: the fingerprint changes when an item's AI flag
+    flips (group membership input) and when a second pool is passed
+    (the bug freeze depends on trimmed AND created)."""
+    a = {p: [] for p in churn.PERIODS}
+    a["Q2-2026"] = [("o/r", 1, False, 10, 5)]
+    b = {p: [] for p in churn.PERIODS}
+    b["Q2-2026"] = [("o/r", 1, True, 10, 5)]
+    assert churn.frame_fingerprint(a) != churn.frame_fingerprint(b)
+    assert churn.frame_fingerprint(a) != churn.frame_fingerprint(a, b)
+
+
 def test_generated_path_classifier():
     for p in ("package-lock.json", "a/b/yarn.lock", "vendor/x.go",
               "web/dist/app.min.js", "proto/x_pb2.py", "img/logo.svg",

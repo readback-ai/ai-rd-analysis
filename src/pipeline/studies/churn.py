@@ -398,28 +398,70 @@ def reconcile(selected: list[dict], existing: list[dict],
     return kept, todo, stale
 
 
-def frame_fingerprint(pool: dict[str, list]) -> str:
-    """Identity of the frame a selection was drawn from: hash of the
-    draw-determining config plus every (period, repo, num) in the pool.
-    The store is LIVE (monthly updates), so committed selections carry
-    this stamp; tables report the FROZEN selection and flag drift
-    instead of silently re-drawing on a moved frame."""
+def frame_fingerprint(*pools: dict[str, list]) -> str:
+    """Identity of the frame(s) a frozen artifact depends on: hash of the
+    draw-determining config plus every (period, repo, num, ai) of each
+    pool, in order. The AI flag is included because it drives arm
+    assignment and group membership; the bug freeze passes BOTH pools
+    (trimmed drives the draw, created drives denominators/groups). The
+    store is LIVE (monthly updates), so committed artifacts carry this
+    stamp; tables report the FROZEN data and flag drift instead of
+    silently rebuilding on a moved frame."""
     import hashlib
     h = hashlib.sha256(f"{AS_OF}|{SEED}|{SAMPLE_RATE}".encode())
-    for per in PERIODS:
-        for repo, num, *_ in sorted(pool[per], key=lambda x: (x[0], x[1])):
-            h.update(f"{per}|{repo}|{num}\n".encode())
+    for pool in pools:
+        for per in PERIODS:
+            for repo, num, ai, *_ in sorted(pool[per],
+                                            key=lambda x: (x[0], x[1])):
+                h.update(f"{per}|{repo}|{num}|{int(ai)}\n".encode())
+        h.update(b"--\n")
     return h.hexdigest()[:16]
 
 
-def _write_manifest(path: Path, fp: str, selected: int, held: int) -> None:
-    path.write_text(json.dumps(
-        {"frame": fp, "as_of": AS_OF, "selected": selected,
-         "held": held}) + "\n")
+def _freeze(path: Path, mpath: Path, records: list[dict], fp: str,
+            selected: int) -> None:
+    """Crash-consistent freeze: write the data atomically, then the
+    manifest atomically, with the manifest carrying a digest of the data
+    bytes and the row count — a crash between the two writes leaves a
+    digest mismatch the print paths refuse on, never a silent
+    data/manifest skew."""
+    import hashlib
+    blob = "".join(json.dumps(r) + "\n" for r in records)
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(blob)
+    tmp.replace(path)
+    m = {"frame": fp, "as_of": AS_OF, "selected": selected,
+         "held": len(records),
+         "digest": hashlib.sha256(blob.encode()).hexdigest()[:16]}
+    mtmp = mpath.with_suffix(".tmp")
+    mtmp.write_text(json.dumps(m) + "\n")
+    mtmp.replace(mpath)
 
 
 def _read_manifest(path: Path) -> dict:
     return json.loads(path.read_text()) if path.exists() else {}
+
+
+def _verify(path: Path, mpath: Path) -> tuple[list[dict], dict]:
+    """Load a frozen artifact, refusing on any data/manifest skew: the
+    manifest's digest must match the file bytes and its held count the
+    row count. A held < selected shortfall is honest (documented
+    nonresponse) and left to the caller to report."""
+    import hashlib
+    manifest = _read_manifest(mpath)
+    if not manifest:
+        raise SystemExit(f"{mpath} missing — run the pull to freeze a "
+                         "selection before printing")
+    blob = path.read_text() if path.exists() else ""
+    digest = hashlib.sha256(blob.encode()).hexdigest()[:16]
+    rows = [json.loads(ln) for ln in blob.splitlines()]
+    if digest != manifest.get("digest") or len(rows) != manifest.get("held"):
+        raise SystemExit(
+            f"{path} does not match its manifest (digest {digest} vs "
+            f"{manifest.get('digest')}, rows {len(rows)} vs held "
+            f"{manifest.get('held')}) — an interrupted or partial write; "
+            "re-run the pull to re-freeze")
+    return rows, manifest
 
 
 def _drift_line(manifest: dict, live_fp: str) -> str:
@@ -438,12 +480,6 @@ def _load_jsonl(path: Path) -> list[dict]:
     if not path.exists():
         return []
     return [json.loads(ln) for ln in path.read_text().splitlines()]
-
-
-def _write_jsonl(path: Path, records: list[dict]) -> None:
-    tmp = path.with_suffix(".tmp")
-    tmp.write_text("".join(json.dumps(r) + "\n" for r in records))
-    tmp.replace(path)                   # atomic: complete-or-absent
 
 
 _FILES_Q = ('a%d: repository(owner:"%s", name:"%s"){ pullRequest(number:%d){'
@@ -489,11 +525,10 @@ def pull(pool: dict[str, list], pace: float = 0.8, batch: int = 10) -> int:
                 (files.get("pageInfo") or {}).get("hasNextPage") is False
             kept[(s["repo"], s["num"])] = rec
         time.sleep(pace)
-    _write_jsonl(SAMPLE, sorted(kept.values(),
-                                key=lambda d: (d["per"], d["repo"],
-                                               d["num"])))
-    _write_manifest(SAMPLE_MANIFEST, frame_fingerprint(pool),
-                    len(selected), len(kept))
+    _freeze(SAMPLE, SAMPLE_MANIFEST,
+            sorted(kept.values(),
+                   key=lambda d: (d["per"], d["repo"], d["num"])),
+            frame_fingerprint(pool), len(selected))
     missing = len(selected) - len(kept)
     if missing:
         print(f"{missing} selections still unhydrated (re-run --pull)")
@@ -501,12 +536,15 @@ def pull(pool: dict[str, list], pace: float = 0.8, batch: int = 10) -> int:
 
 
 def print_sample(pool: dict[str, list]) -> None:
-    recs = _load_jsonl(SAMPLE)          # the FROZEN committed selection
+    recs, manifest = _verify(SAMPLE, SAMPLE_MANIFEST)
+    short = manifest["selected"] - manifest["held"]
     print("code churn, balanced 0.1% sample with per-FILE splits "
-          f"({len(recs)} frozen-selection records; equal-arm design — "
-          "pooled numbers are per-arm, never blended across arms)")
-    print(_drift_line(_read_manifest(SAMPLE_MANIFEST),
-                      frame_fingerprint(pool)))
+          f"({len(recs)} frozen-selection records"
+          + (f", {short} of the selection unhydrated at freeze" if short
+             else "")
+          + "; equal-arm design — pooled numbers are per-arm, never "
+            "blended across arms)")
+    print(_drift_line(manifest, frame_fingerprint(pool)))
     print(f"{'quarter':9}{'arm':7}{'PRs':>6}{'trunc':>6}{'del:add':>9}"
           f"{'noGen':>9}{'gen%dels':>9}{'gen%adds':>9}")
     for per in PERIODS:
@@ -561,22 +599,48 @@ def bug_cells(pool: dict[str, list]) -> list[dict]:
             if bug_window(per) is not None]
 
 
-def pull_bugs(pool: dict[str, list], pace: float = 2.0) -> None:
+def _stamp_denominators(records: dict, created: dict[str, list]) -> None:
+    """Freeze the table's OTHER inputs into the records: each cell gets
+    its creation-bucketed mature-merged denominator, and Q2 cells get the
+    repo's AI numerator (group membership). Stamped on every freeze —
+    reused bug counts stay valid (they depend only on repo+window) while
+    denominators/groups always reflect the frozen frame."""
+    merged: dict[tuple[str, str], int] = defaultdict(int)
+    ai_num: dict[str, int] = defaultdict(int)
+    for per, items in created.items():
+        for repo, _num, ai, _a, _d in items:
+            merged[(repo, per)] += 1
+            if per == "Q2-2026" and ai:
+                ai_num[repo] += 1
+    for rec in records.values():
+        rec["merged"] = merged.get((rec["repo"], rec["per"]), 0)
+        if rec["per"] == "Q2-2026":
+            rec["ai_num"] = ai_num.get(rec["repo"], 0)
+
+
+def pull_bugs(trimmed: dict[str, list], created: dict[str, list],
+              pace: float = 2.0) -> None:
     """Count bug-labeled issues per cell (label:bug only — a documented
     proxy limitation). The file is atomically rewritten to exactly the
     current cell selection: counts are reused only when the cell's window
     matches (pre-stamp rows are migrated first; a range change, e.g. an
     AS_OF bump moving the frontier, re-pulls the cell); failures stay
-    missing, never zeroed. Checkpoints every 25 cells."""
-    cells = bug_cells(pool)
+    missing, never zeroed. Denominators and Q2 AI group counts are
+    frozen into the records (_stamp_denominators) so the table needs no
+    live frame. Checkpoints every 25 cells, each writing data + manifest
+    crash-consistently (_freeze)."""
+    cells = bug_cells(trimmed)
     kept, todo, stale = reconcile(cells, migrate_bug_rows(_load_jsonl(BUGS)),
                                   ("repo", "per", "rng"), "bugs")
     print(f"pulling {len(todo)} of {len(cells)} bug cells "
           f"({len(kept)} reused, {stale} stale dropped)")
+    fp = frame_fingerprint(trimmed, created)
 
     def flush() -> None:
-        _write_jsonl(BUGS, sorted(kept.values(),
-                                  key=lambda d: (d["repo"], d["per"])))
+        _stamp_denominators(kept, created)
+        _freeze(BUGS, BUGS_MANIFEST,
+                sorted(kept.values(), key=lambda d: (d["repo"], d["per"])),
+                fp, len(cells))
 
     for i, s in enumerate(todo):
         n = rest_count(f"repo:{s['repo']} is:issue label:{BUG_LABEL} "
@@ -589,46 +653,49 @@ def pull_bugs(pool: dict[str, list], pace: float = 2.0) -> None:
         kept[(s["repo"], s["per"], s["rng"])] = {**s, "bugs": n}
         if i % 25 == 24:
             flush()          # checkpoint: an interrupted run keeps its
-                             # completed cells (each flush is atomic)
+                             # completed cells, data+manifest in step
     flush()
-    _write_manifest(BUGS_MANIFEST, frame_fingerprint(pool), len(cells),
-                    len(kept))
     missing = len(cells) - len(kept)
     if missing:
         print(f"{missing} cells still unpulled (re-run --pull-bugs)")
 
 
+def bug_stats(rows: list[dict]) -> tuple[dict, dict, dict]:
+    """(bugs, merged, ai_share) built ONLY from frozen records — the
+    denominators and Q2 AI group counts were stamped at freeze time, so
+    a moved live store cannot shift this table."""
+    bugs = {(d["repo"], d["per"]): d["bugs"] for d in rows if "bugs" in d}
+    merged = {(d["repo"], d["per"]): d.get("merged", 0) for d in rows}
+    ai_share = {d["repo"]: (d.get("ai_num", 0), d.get("merged", 0))
+                for d in rows if d["per"] == "Q2-2026"}
+    return bugs, merged, ai_share
+
+
 def print_bugs(trimmed: dict[str, list], created: dict[str, list]) -> None:
-    rows = _load_jsonl(BUGS)            # the FROZEN committed selection
-    bugs = {(d["repo"], d["per"]): d["bugs"] for d in rows
-            if "bugs" in d}
-    merged: dict[tuple[str, str], int] = defaultdict(int)
-    ai_share: dict[str, list[int]] = defaultdict(lambda: [0, 0])
-    for per, items in created.items():
-        for repo, _num, ai, _a, _d in items:
-            merged[(repo, per)] += 1
-            if per == "Q2-2026":
-                ai_share[repo][0] += bool(ai)
-                ai_share[repo][1] += 1
+    rows, manifest = _verify(BUGS, BUGS_MANIFEST)
+    bugs, merged, ai_share = bug_stats(rows)
     repos = sorted({r for (r, _p) in bugs})
     with_bugs = {r for r in repos
                  if any(bugs.get((r, p)) for p in PERIODS)}
     ranked = sorted(with_bugs,
-                    key=lambda r: (ai_share[r][0] / ai_share[r][1])
-                    if ai_share[r][1] else 0.0)
+                    key=lambda r: (ai_share.get(r, (0, 0))[0]
+                                   / ai_share.get(r, (0, 1))[1])
+                    if ai_share.get(r, (0, 0))[1] else 0.0)
     lo = set(ranked[:len(ranked) // 2])
+    short = manifest["selected"] - manifest["held"]
     print("BUG-REPORT PROXY pilot (bug-labeled GH issues — NOT production "
           "incidents): issues labeled bug created per 100 mature merged "
           "PRs. Exposure is creation-bucketed on BOTH sides: denominator "
           "= mature merged PRs by creation quarter, numerator window = "
           f"the quarter truncated at the maturity frontier "
-          f"({maturity_frontier()}). Over the FROZEN selection's repos "
-          f"({len(repos)}; {len(repos) - len(with_bugs)} with zero "
-          "bug-labeled issues in every quarter EXCLUDED as probable "
-          "non-users of the label — label:bug only; denominators from "
-          "the current store for those repos)")
-    print(_drift_line(_read_manifest(BUGS_MANIFEST),
-                      frame_fingerprint(trimmed)))
+          f"({maturity_frontier()}). Fully FROZEN table — counts, "
+          "denominators and Q2 AI groups all from the frozen records "
+          f"({len(repos)} repos"
+          + (f", {short} cells unpulled at freeze" if short else "")
+          + f"; {len(repos) - len(with_bugs)} with zero bug-labeled "
+            "issues in every quarter EXCLUDED as probable non-users of "
+            "the label — label:bug only)")
+    print(_drift_line(manifest, frame_fingerprint(trimmed, created)))
     print(f"{'quarter':9}{'group':9}{'repos':>6}{'bugs':>7}{'merged':>8}"
           f"{'per100':>8}")
     for per in PERIODS:
@@ -675,7 +742,7 @@ def main() -> None:
     if a.pull:
         pull(trimmed)
     if a.pull_bugs:
-        pull_bugs(trimmed)
+        pull_bugs(trimmed, created)
     if a.table in ("report", "adoption"):
         print_adoption(trimmed, cross)
     if a.table in ("report", "census"):
