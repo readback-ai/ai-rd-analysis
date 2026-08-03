@@ -78,8 +78,9 @@ def broken_pair(subfig, title, span="quarter", window=None,
     span="month": BASELINE months on the left; on the right the `window`
     month list (default WINDOW; the fig3 companion passes only its
     w8-final months) with labeled ticks at months [0, 3, 6, last] (fig3
-    companion, fig5, A1). month_marks=True adds an unlabeled tick mark
-    at EVERY plotted month on both panels."""
+    companion, fig5, A1). month_marks=True labels EVERY plotted month
+    on both panels instead (replacing the sparse tick set and the Q1-24
+    baseline label)."""
     axl, axr = subfig.subplots(
         1, 2, sharey=True,
         gridspec_kw={"width_ratios": [1, 3], "wspace": 0.08})
@@ -91,13 +92,17 @@ def broken_pair(subfig, title, span="quarter", window=None,
     elif span == "month":
         window = WINDOW if window is None else list(window)
         axl.set_xlim(-0.5, len(BASELINE) - 0.5)
-        axl.set_xticks([1], ["Q1-24"])
         axr.set_xlim(-0.5, len(window) - 0.5)
-        ticks = [0, 3, 6, len(window) - 1]
-        axr.set_xticks(ticks, [window[i][2:7] for i in ticks], fontsize=8)
         if month_marks:
-            axl.set_xticks(range(len(BASELINE)), minor=True)
-            axr.set_xticks(range(len(window)), minor=True)
+            axl.set_xticks(range(len(BASELINE)),
+                           [m[2:7] for m in BASELINE], fontsize=8)
+            axr.set_xticks(range(len(window)),
+                           [m[2:7] for m in window], fontsize=8)
+        else:
+            axl.set_xticks([1], ["Q1-24"])
+            ticks = [0, 3, 6, len(window) - 1]
+            axr.set_xticks(ticks, [window[i][2:7] for i in ticks],
+                           fontsize=8)
     else:
         raise ValueError(f"unknown span {span!r}")
     axl.spines.right.set_visible(False)

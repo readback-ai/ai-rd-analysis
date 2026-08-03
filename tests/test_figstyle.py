@@ -77,22 +77,21 @@ def test_broken_pair_month_custom_window():
 
 
 def test_broken_pair_month_marks_every_month():
-    """Figure 3 companion: month_marks=True draws an (unlabeled) tick
-    mark at every plotted month on both panels; the default keeps the
-    legacy sparse-ticks-only axes."""
+    """Figure 3 companion: month_marks=True labels EVERY plotted month
+    on both panels (replacing the sparse tick set and the Q1-24 baseline
+    label); the default keeps the legacy sparse-ticks-only axes."""
     fig = figstyle.plt.figure()
     sf = fig.subfigures(1, 2)
     window = WINDOW[:8]
     axl, axr = broken_pair(sf.flat[0], "t", span="month", window=window,
                            month_marks=True)
-    # minor ticks coinciding with major ones are dropped by matplotlib;
-    # the mark set is the union of both
-    for ax, n in ((axl, len(BASELINE)), (axr, len(window))):
-        marks = set(ax.get_xticks()) | set(ax.get_xticks(minor=True))
-        assert marks == set(range(n))
+    assert list(axl.get_xticks()) == list(range(len(BASELINE)))
+    assert _labels(axl) == [m[2:7] for m in BASELINE]
+    assert list(axr.get_xticks()) == list(range(len(window)))
+    assert _labels(axr) == [m[2:7] for m in window]
     dl, dr = broken_pair(sf.flat[1], "t", span="month")
-    assert list(dl.get_xticks(minor=True)) == []
-    assert list(dr.get_xticks(minor=True)) == []
+    assert list(dl.get_xticks()) == [1] and _labels(dl) == ["Q1-24"]
+    assert list(dr.get_xticks()) == [0, 3, 6, 8]
     figstyle.plt.close(fig)
 
 

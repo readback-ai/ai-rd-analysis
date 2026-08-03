@@ -7,8 +7,7 @@ passed w8 finalization at the AS_OF (at AS_OF 2026-08-01: first AI use
 submitted/merged (blue/green) x total/non-AI/AI-involved
 (solid/dashed/dotted), raw mean kLOC per author per month. Every offset
 is a finalized calendar month, so the merged series are final and no
-provisional shading is needed; each x tick names its offset AND its
-calendar month.
+provisional shading is needed.
 
 Output: artifacts/figure_2_comp_audits.png
 Usage:  PYTHONPATH=src python scripts/plot_fig2_comp_audits.py
@@ -33,10 +32,7 @@ def main() -> None:
                     marker="o", ms=3, ls=ls, color=color, label=label)
         ax.set_title(f"first AI use {t0_mon} (n={c['n']})",
                      fontsize=10, loc="left")
-        ax.set_xticks(offs,
-                      [(f"t{e:+d}" if e else "t0")
-                       + f"\n{c['offsets'][e]['month'][2:]}" for e in offs],
-                      fontsize=8)
+        ax.set_xticks(offs, [f"t{e:+d}" if e else "t0" for e in offs])
         ax.set_xlabel("months from first observed AI use")
         ax.set_ylabel("kLOC / contributor / month")
         ax.set_ylim(bottom=0)
