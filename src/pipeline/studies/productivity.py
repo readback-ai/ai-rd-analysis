@@ -391,6 +391,7 @@ def adoption_monthly() -> dict:
     return out
 
 
+BASELINE_MONTHS = ["2024-01", "2024-02", "2024-03"]
 WINDOW_MONTHS = ["2025-10", "2025-11", "2025-12", "2026-01", "2026-02",
                  "2026-03", "2026-04", "2026-05", "2026-06"]
 
@@ -479,13 +480,15 @@ def adoption_event(max_off: int = 2, balanced: bool = True) -> dict:
 def event_by_adoption_month(max_off: int = 2) -> dict:
     """Figure 4: per-author kLOC (six metrics: submitted/merged x
     total/AI/non-AI) at offsets [-2..+2] around first observed AI use,
-    one BALANCED cohort per ADOPTION MONTH (2025-12..2026-04 — exactly
-    the months whose full window fits the data). Non-fleet adopters only;
+    one BALANCED cohort per ADOPTION MONTH — exactly the months whose
+    full window fits the data AND has passed w8 finalization at the
+    AS_OF, so every plotted offset is a finalized calendar month (merged
+    series final, nothing provisional). Non-fleet adopters only;
     inactive months count as zero volume. Within a cohort each offset
-    maps to ONE calendar month, so w8 maturity per offset is exact.
+    maps to ONE calendar month.
 
     Returns {t0_month: {"n": int, "offsets": {e: {six metrics,
-    "month": str, "mature": bool}}}}."""
+    "month": str}}}}."""
     acc, cohort_of_login, _q_of, _fleet = _author_months_and_cohorts()
     zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
 
@@ -501,7 +504,8 @@ def event_by_adoption_month(max_off: int = 2) -> dict:
             continue
         t0 = next((i for i, m in enumerate(WINDOW_MONTHS)
                    if acc[login].get(m, zero)[2] > 0), None)
-        if t0 is not None and max_off <= t0 < len(WINDOW_MONTHS) - max_off:
+        if t0 is not None and max_off <= t0 < len(WINDOW_MONTHS) - max_off \
+                and month_w8_mature(WINDOW_MONTHS[t0 + max_off]):
             by_t0[t0].append(login)
     out = {}
     for t0, members in sorted(by_t0.items()):
@@ -510,7 +514,7 @@ def event_by_adoption_month(max_off: int = 2) -> dict:
             mon = WINDOW_MONTHS[t0 + e]
             vals = [metrics(acc[login].get(mon) or zero)
                     for login in members]
-            offsets[e] = {"month": mon, "mature": month_w8_mature(mon),
+            offsets[e] = {"month": mon,
                           **{k: sum(v[k] for v in vals) / len(vals)
                              for k in vals[0]}}
         out[WINDOW_MONTHS[t0]] = {"n": len(members), "offsets": offsets}
@@ -556,7 +560,8 @@ def fleet_logins() -> set[str]:
 
 
 def review_mix(by: str = "role", exclude_fleet: bool = True,
-               fleet_slice: bool = False) -> dict:
+               fleet_slice: bool = False,
+               granularity: str = "quarter") -> dict:
     """Figure 6: review mix of MERGED PRs, insider vs external, per
     quarter — the substitution hypothesis (human review declining, AI/bot
     review rising). For each (period, slice in {ins, ext}): share of
@@ -578,11 +583,16 @@ def review_mix(by: str = "role", exclude_fleet: bool = True,
     exclude_fleet (default): PRs authored by fleet operators are dropped.
     fleet_slice=True: fleet-authored PRs become their OWN slice ("fleet")
     instead of being dropped (Figure 3 companion).
+    granularity="month": rows are keyed by calendar month over the
+    baseline + window months instead of by quarter (the Figure 3
+    companion; display-side callers gate to w8-final months).
 
     Returns {(period, slice): {n, loc, <ch>_pr, <ch>_loc ...}}."""
     fleet = fleet_logins() if (exclude_fleet or fleet_slice) else set()
+    frame_kw = {} if granularity == "quarter" else \
+        {"periods": BASELINE_MONTHS + WINDOW_MONTHS, "granularity": "month"}
     agg: dict = defaultdict(lambda: defaultdict(float))
-    for f in study_frame("all" if by == "ai" else "author"):
+    for f in study_frame("all" if by == "ai" else "author", **frame_kw):
         if by == "ai" and not ai_contrast_eligible(f):
             continue          # bots/ghosts would swell the nonai arm
         is_fleet = f.author in fleet
