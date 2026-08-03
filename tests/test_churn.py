@@ -1,8 +1,42 @@
-"""Churn pilot study (studies.churn): merge-quarter bucketing, the
-within-org adoption contrast, balanced seeded draw, true medians,
-selection-vs-store reconciliation, bug-window frontier alignment,
-generated-path classifier. Round-1 PR-review items are named inline."""
+"""Churn pilot study (studies.churn): frame construction, same-quarter
+trimming, the within-org adoption contrast, balanced seeded draw, true
+medians, selection-vs-store reconciliation, frozen-selection manifests,
+bug-window frontier alignment, generated-path classifier. PR-review
+items are named inline."""
+from pipeline import detect, frame
 from pipeline.studies import churn
+
+
+def _fact(created: str, merged: str, repo: str = "o/r", num: int = 1):
+    pr = {"number": num, "createdAt": created, "mergedAt": merged,
+          "additions": 10, "deletions": 5,
+          "author": {"login": "alice", "__typename": "User"}}
+    period = churn.merge_quarter(created)      # = the creation quarter
+    return frame.PRFact(repo, period, pr, detect.classify_pr(pr), 15,
+                        "alice", False, False)
+
+
+def test_eligible_splits_trimmed_churn_frame_from_created_denominator(
+        monkeypatch):
+    """Review round 3, P2 — regression pins for the round-2 frame fixes:
+    (a) an IMMATURE but already-merged same-quarter PR enters the churn
+    frame (an observed merge is terminal; maturity must not truncate the
+    trailing quarter); (b) a mature PR created in Q1-2026 and merged in
+    Q2-2026 enters created["Q1-2026"] but never the trimmed frame;
+    (c) an in-quarter mature merge enters both frames."""
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-01T00:00:00Z")
+    facts = [
+        _fact("2026-06-20T00:00:00Z", "2026-06-25T00:00:00Z", num=1),
+        _fact("2026-03-20T00:00:00Z", "2026-04-02T00:00:00Z", num=2),
+        _fact("2026-01-10T00:00:00Z", "2026-01-20T00:00:00Z", num=3),
+    ]
+    monkeypatch.setattr(churn, "study_frame", lambda level: iter(facts))
+    trimmed, created, cross = churn.eligible()
+    assert [x[1] for x in trimmed["Q2-2026"]] == [1]   # (a) immature kept
+    assert created["Q2-2026"] == []                    # (a) not mature
+    assert [x[1] for x in created["Q1-2026"]] == [2, 3]  # (b)+(c)
+    assert [x[1] for x in trimmed["Q1-2026"]] == [3]   # (b) cross excluded
+    assert cross == 1
 
 
 def _pool(n_ai: int, n_non: int, per: str = "Q2-2026") -> dict:
@@ -53,7 +87,8 @@ def test_adoption_endpoints_exclude_q1_2024():
     pool["Q2-2026"] = [("a/r", i, True, 100, 60) for i in range(20)]
     r = churn.adoption_rows(pool)
     assert r["multiples"] == []
-    assert r["orgs"] == 1                      # one org, one ERA quarter
+    assert r["orgs_any"] == 1                  # one org, one ERA quarter
+    assert r["orgs_ge2"] == 0                  # never reaches contrast
 
 
 def test_migrate_bug_rows_stamps_full_quarter_range():
@@ -172,6 +207,34 @@ def test_bug_window_truncates_at_maturity_frontier():
     assert churn.maturity_frontier(as_of) == "2026-06-06"
     assert churn.bug_window("Q2-2026", as_of) == "2026-04-01..2026-06-06"
     assert churn.bug_window("Q1-2026", as_of) == "2026-01-01..2026-03-31"
+
+
+def test_adoption_attrition_counts_are_separated():
+    """Review round 3, P2: orgs with >= 1 vs >= 2 qualifying era quarters
+    are tracked separately, and endpoint-ratio exclusions get their own
+    counter (they are not silently folded into either)."""
+    pool = {p: [] for p in churn.PERIODS}
+    # contrastable org
+    pool["Q4-2025"] = [("a/r", i, False, 100, 20) for i in range(20)]
+    pool["Q2-2026"] = [("a/r", i, True, 100, 60) for i in range(20)]
+    # one era quarter only
+    pool["Q4-2025"] += [("solo/r", i, False, 100, 10) for i in range(20)]
+    # two quarters, spread, but zero-addition low endpoint
+    pool["Q4-2025"] += [("badr/r", i, False, 0, 10) for i in range(20)]
+    pool["Q2-2026"] += [("badr/r", i, True, 100, 10) for i in range(20)]
+    r = churn.adoption_rows(pool)
+    assert (r["orgs_any"], r["orgs_ge2"]) == (3, 2)
+    assert r["dropped_ratio"] == 1
+    assert [m[0] for m in r["multiples"]] == ["a"]
+
+
+def test_drift_line_reports_frozen_vs_live_frame():
+    """Review round 3, P2: tables report the FROZEN selection; a moved
+    live store is flagged, never silently re-drawn."""
+    m = {"frame": "abc", "as_of": "X"}
+    assert "MATCHES" in churn._drift_line(m, "abc")
+    assert "MOVED" in churn._drift_line(m, "def")
+    assert "unknown" in churn._drift_line({}, "abc")
 
 
 def test_generated_path_classifier():

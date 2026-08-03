@@ -96,12 +96,14 @@ ORG_MIN_PRS = 20             # org floor per quarter for the adoption contrast
 FILES_PAGE = 100             # per-PR file-list cap (one page; no pagination)
 CAP = 20_000                 # per-side LOC cap for capped ratios
 SAMPLE = Path("data/derived/churn_sample_v1.jsonl")
+SAMPLE_MANIFEST = Path("data/derived/churn_sample_manifest_v1.json")
 BUGS = Path("data/derived/churn_incidents_v1.jsonl")
+BUGS_MANIFEST = Path("data/derived/churn_incidents_manifest_v1.json")
 BUG_LABEL = "bug"
 
-# Generated-content path patterns (mirrors the METHODS 5b hygiene classes;
-# the loc-hygiene sample's generator predates the repo, so the list lives
-# here for this study).
+# Generated-content path patterns (the METHODS 5b hygiene classes:
+# lockfiles, vendored trees, minified/compiled outputs, protobuf,
+# snapshots, svg, notebooks).
 _GEN = re.compile(
     r"(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|poetry\.lock|"
     r"uv\.lock|cargo\.lock|composer\.lock|gemfile\.lock|go\.sum|"
@@ -197,11 +199,13 @@ def adoption_rows(pool: dict[str, list]) -> dict:
     for (org, per), (n, ai, adds, dels) in per_org.items():
         if n >= ORG_MIN_PRS:
             quarters[org][per] = (ai / n, adds, dels)
-    multiples, flat = [], 0
+    multiples, flat, badratio = [], 0, 0
+    orgs_ge2 = 0
     idx = ADOPTION_PERIODS.index
     for org, qs in sorted(quarters.items()):
         if len(qs) < 2:
             continue
+        orgs_ge2 += 1
         low = min(qs, key=lambda p: (qs[p][0], idx(p)))
         high = max(qs, key=lambda p: (qs[p][0], -idx(p)))
         if qs[high][0] <= qs[low][0]:
@@ -210,10 +214,12 @@ def adoption_rows(pool: dict[str, list]) -> dict:
         lo_r = _ratio(qs[low][1], qs[low][2])
         hi_r = _ratio(qs[high][1], qs[high][2])
         if not (lo_r > 0 and hi_r == hi_r and qs[high][1] > 0):
+            badratio += 1                # endpoint ratio undefined/zero
             continue
         multiples.append((org, qs[low][0], qs[high][0], lo_r, hi_r,
                           hi_r / lo_r))
-    return {"orgs": len(quarters), "dropped_flat": flat,
+    return {"orgs_any": len(quarters), "orgs_ge2": orgs_ge2,
+            "dropped_flat": flat, "dropped_ratio": badratio,
             "multiples": multiples}
 
 
@@ -240,9 +246,11 @@ def print_adoption(pool: dict[str, list], cross: int) -> None:
     lo, hi = bootstrap_ci(logs, key="churn|adoption")
     med = median(m[5] for m in ms)
     rose = sum(1 for m in ms if m[5] > 1)
-    print(f"orgs contrasted: {len(ms)} (of {r['orgs']} with >= 2 "
-          f"qualifying era quarters; {r['dropped_flat']} dropped for "
-          f"zero adoption spread); cross-quarter merges trimmed: {cross}")
+    print(f"orgs contrasted: {len(ms)} — attrition: {r['orgs_any']} orgs "
+          f"with >= 1 qualifying era quarter, {r['orgs_ge2']} with >= 2, "
+          f"minus {r['dropped_flat']} with zero adoption spread and "
+          f"{r['dropped_ratio']} with an undefined/zero endpoint ratio; "
+          f"cross-quarter merges trimmed: {cross}")
     print(f"geomean churn multiple (high/low adoption): {gm:.2f} "
           f"[{math.exp(lo):.2f},{math.exp(hi):.2f}]  median {med:.2f}  "
           f"churn rose in {rose}/{len(ms)} orgs "
@@ -390,6 +398,42 @@ def reconcile(selected: list[dict], existing: list[dict],
     return kept, todo, stale
 
 
+def frame_fingerprint(pool: dict[str, list]) -> str:
+    """Identity of the frame a selection was drawn from: hash of the
+    draw-determining config plus every (period, repo, num) in the pool.
+    The store is LIVE (monthly updates), so committed selections carry
+    this stamp; tables report the FROZEN selection and flag drift
+    instead of silently re-drawing on a moved frame."""
+    import hashlib
+    h = hashlib.sha256(f"{AS_OF}|{SEED}|{SAMPLE_RATE}".encode())
+    for per in PERIODS:
+        for repo, num, *_ in sorted(pool[per], key=lambda x: (x[0], x[1])):
+            h.update(f"{per}|{repo}|{num}\n".encode())
+    return h.hexdigest()[:16]
+
+
+def _write_manifest(path: Path, fp: str, selected: int, held: int) -> None:
+    path.write_text(json.dumps(
+        {"frame": fp, "as_of": AS_OF, "selected": selected,
+         "held": held}) + "\n")
+
+
+def _read_manifest(path: Path) -> dict:
+    return json.loads(path.read_text()) if path.exists() else {}
+
+
+def _drift_line(manifest: dict, live_fp: str) -> str:
+    if not manifest:
+        return "no manifest: selection provenance unknown (re-run pull)"
+    if manifest.get("frame") == live_fp:
+        return (f"frame {manifest['frame']} (as_of {manifest['as_of']}) "
+                "— live store MATCHES the frozen selection")
+    return (f"frame {manifest.get('frame')} (as_of "
+            f"{manifest.get('as_of')}) — live store has MOVED (now "
+            f"{live_fp}); table reports the FROZEN selection; re-run the "
+            "pull to re-freeze")
+
+
 def _load_jsonl(path: Path) -> list[dict]:
     if not path.exists():
         return []
@@ -407,12 +451,14 @@ _FILES_Q = ('a%d: repository(owner:"%s", name:"%s"){ pullRequest(number:%d){'
             ' nodes{ path additions deletions } } } }')
 
 
-def pull(selected: list[dict], pace: float = 0.8, batch: int = 10) -> None:
-    """Hydrate per-file additions/deletions for the CURRENT draw. The
-    sample file is atomically rewritten to exactly the current selection:
-    prior hydration is reused for still-selected PRs, stale draws are
-    dropped, missing ones are pulled (absent results stay missing and are
-    retried next run, never faked)."""
+def pull(pool: dict[str, list], pace: float = 0.8, batch: int = 10) -> int:
+    """Hydrate per-file additions/deletions for the CURRENT draw and
+    freeze it: the sample file is atomically rewritten to exactly the
+    current selection (prior hydration reused for still-selected PRs,
+    stale draws dropped, missing ones pulled — absent results stay
+    missing and are retried next run, never faked) and the manifest
+    records the frame fingerprint the selection was drawn from."""
+    selected = draw(pool)
     kept, todo, stale = reconcile(selected, _load_jsonl(SAMPLE),
                                   ("repo", "num"), "files")
     print(f"hydrating {len(todo)} of {len(selected)} sampled PRs "
@@ -446,19 +492,21 @@ def pull(selected: list[dict], pace: float = 0.8, batch: int = 10) -> None:
     _write_jsonl(SAMPLE, sorted(kept.values(),
                                 key=lambda d: (d["per"], d["repo"],
                                                d["num"])))
+    _write_manifest(SAMPLE_MANIFEST, frame_fingerprint(pool),
+                    len(selected), len(kept))
     missing = len(selected) - len(kept)
     if missing:
         print(f"{missing} selections still unhydrated (re-run --pull)")
+    return missing
 
 
 def print_sample(pool: dict[str, list]) -> None:
-    kept, todo, stale = reconcile(draw(pool), _load_jsonl(SAMPLE),
-                                  ("repo", "num"), "files")
-    recs = list(kept.values())
+    recs = _load_jsonl(SAMPLE)          # the FROZEN committed selection
     print("code churn, balanced 0.1% sample with per-FILE splits "
-          f"({len(recs)} of the current draw hydrated, {len(todo)} "
-          f"missing, {stale} stale ignored; equal-arm design — pooled "
-          "numbers are per-arm, never blended across arms)")
+          f"({len(recs)} frozen-selection records; equal-arm design — "
+          "pooled numbers are per-arm, never blended across arms)")
+    print(_drift_line(_read_manifest(SAMPLE_MANIFEST),
+                      frame_fingerprint(pool)))
     print(f"{'quarter':9}{'arm':7}{'PRs':>6}{'trunc':>6}{'del:add':>9}"
           f"{'noGen':>9}{'gen%dels':>9}{'gen%adds':>9}")
     for per in PERIODS:
@@ -543,16 +591,17 @@ def pull_bugs(pool: dict[str, list], pace: float = 2.0) -> None:
             flush()          # checkpoint: an interrupted run keeps its
                              # completed cells (each flush is atomic)
     flush()
+    _write_manifest(BUGS_MANIFEST, frame_fingerprint(pool), len(cells),
+                    len(kept))
     missing = len(cells) - len(kept)
     if missing:
         print(f"{missing} cells still unpulled (re-run --pull-bugs)")
 
 
 def print_bugs(trimmed: dict[str, list], created: dict[str, list]) -> None:
-    kept, todo, stale = reconcile(bug_cells(trimmed),
-                                  migrate_bug_rows(_load_jsonl(BUGS)),
-                                  ("repo", "per", "rng"), "bugs")
-    bugs = {(d["repo"], d["per"]): d["bugs"] for d in kept.values()}
+    rows = _load_jsonl(BUGS)            # the FROZEN committed selection
+    bugs = {(d["repo"], d["per"]): d["bugs"] for d in rows
+            if "bugs" in d}
     merged: dict[tuple[str, str], int] = defaultdict(int)
     ai_share: dict[str, list[int]] = defaultdict(lambda: [0, 0])
     for per, items in created.items():
@@ -573,11 +622,13 @@ def print_bugs(trimmed: dict[str, list], created: dict[str, list]) -> None:
           "PRs. Exposure is creation-bucketed on BOTH sides: denominator "
           "= mature merged PRs by creation quarter, numerator window = "
           f"the quarter truncated at the maturity frontier "
-          f"({maturity_frontier()}). Over the churn sample's repos "
-          f"({len(repos)} pulled, {len(todo)} cells missing, {stale} "
-          f"stale ignored; {len(repos) - len(with_bugs)} repos with zero "
+          f"({maturity_frontier()}). Over the FROZEN selection's repos "
+          f"({len(repos)}; {len(repos) - len(with_bugs)} with zero "
           "bug-labeled issues in every quarter EXCLUDED as probable "
-          "non-users of the label — label:bug only)")
+          "non-users of the label — label:bug only; denominators from "
+          "the current store for those repos)")
+    print(_drift_line(_read_manifest(BUGS_MANIFEST),
+                      frame_fingerprint(trimmed)))
     print(f"{'quarter':9}{'group':9}{'repos':>6}{'bugs':>7}{'merged':>8}"
           f"{'per100':>8}")
     for per in PERIODS:
@@ -622,7 +673,7 @@ def main() -> None:
             f"{p} AI={by[(p, True)]}/nonAI={by[(p, False)]}"
             for p in PERIODS))
     if a.pull:
-        pull(draw(trimmed))
+        pull(trimmed)
     if a.pull_bugs:
         pull_bugs(trimmed)
     if a.table in ("report", "adoption"):
