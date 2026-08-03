@@ -197,19 +197,27 @@ argument — one section = one module invocation):
 21. **Adoption event-study** (`studies.event_study`) — merged (w8,
     mature-months-only) and submitted kLOC in event time around each
     author's first AI-marker month.
-22. **Code churn** (`studies.churn --table report`, added 2026-08-02;
-    revised after review round 1) — deleted:added over mature merged
-    code, bucketed by MERGE quarter, arms all/AI/nonAI (profile `all` +
-    `ai_contrast_eligible`, so all = AI + nonAI). Headline = the source
-    study's WITHIN-ORG contrast: per org (≥20 merged PRs/quarter, ≥2
-    qualifying quarters, nonzero adoption spread), churn at its
-    highest-AI-adoption quarter over its lowest — geometric-mean
-    multiple with bootstrap CI over orgs, median, share of orgs rising.
-    Companion: calendar-trend sensitivity (CW mean of per-repo ratios,
-    capped sides, ≥5 PRs/repo, per-cell CIs; pooled ratio; per-PR
-    medians over nonzero-addition PRs). The 0.1% balanced file-level
-    sample and the bug-report proxy stay auxiliary
-    (`churn --pull/--table sample/--table bugs`; §6).
+22. **Code churn** (`studies.churn --table report`, added 2026-08-02) —
+    deleted:added over merged code in SAME-QUARTER-TRIMMED windows (a PR
+    counts iff created AND merged in the quarter, regardless of w8
+    maturity — an observed merge is terminal, and the trim gives every
+    quarter identical observability; cross-quarter merges dropped and
+    reported), arms all/AI/nonAI (profile `all` + `ai_contrast_eligible`,
+    so all = AI + nonAI). Headline = within-org contrast on TRACEABLE
+    adoption (an evidence floor, not literal adoption): per org (≥20
+    PRs/quarter, ≥2 qualifying quarters among Q4-2025..Q2-2026 —
+    Q1-2024 is excluded as an endpoint since its zero is by
+    construction — and nonzero adoption spread), churn at the
+    highest-adoption quarter over the lowest: geometric-mean multiple
+    with bootstrap CI over orgs, median, share of orgs rising. Faros's
+    +861% figure is quoted as an external reference for a DIFFERENT
+    population, not a replication target. Companion: calendar-trend
+    sensitivity (CW mean of per-repo ratios, capped sides, ≥5 PRs/repo,
+    per-cell CIs; pooled ratio; per-PR medians over nonzero-addition
+    PRs). The 0.1% balanced file-level sample and the bug-report proxy
+    (creation-bucketed mature-merged denominator, bug windows truncated
+    at the maturity frontier) stay auxiliary
+    (`churn --pull/--table sample/--pull-bugs/--table bugs`; §6).
 
 Alongside the report, `data/derived/census_manifest.json` records SHA-256
 prefixes of the population files, repo count, and cell-coverage numbers

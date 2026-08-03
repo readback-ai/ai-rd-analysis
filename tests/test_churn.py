@@ -44,6 +44,31 @@ def test_adoption_contrast_is_within_org_low_vs_high():
     assert abs(mult - 3.0) < 1e-12
 
 
+def test_adoption_endpoints_exclude_q1_2024():
+    """Review round 2, P1: Q1-2024's zero adoption is by construction
+    (marker availability), so it is never an endpoint — an org whose only
+    other qualifying quarter is Q1-2024 is not contrasted."""
+    pool = {p: [] for p in churn.PERIODS}
+    pool["Q1-2024"] = [("a/r", i, False, 100, 20) for i in range(20)]
+    pool["Q2-2026"] = [("a/r", i, True, 100, 60) for i in range(20)]
+    r = churn.adoption_rows(pool)
+    assert r["multiples"] == []
+    assert r["orgs"] == 1                      # one org, one ERA quarter
+
+
+def test_migrate_bug_rows_stamps_full_quarter_range():
+    """Review round 2, P2: pre-stamp bug rows were queried with the full
+    quarter range — migration stamps exactly that, so unchanged windows
+    are reused and frontier-trimmed ones (Q2-2026) retire as stale."""
+    rows = churn.migrate_bug_rows([
+        {"repo": "o/r", "per": "Q1-2026", "bugs": 3},
+        {"repo": "o/r", "per": "Q2-2026", "bugs": 5},
+        {"repo": "o/r", "per": "Q4-2025", "rng": "keep..asis", "bugs": 1}])
+    assert rows[0]["rng"] == "2026-01-01..2026-03-31"
+    assert rows[1]["rng"] == "2026-04-01..2026-06-30"   # full Q2 = stale
+    assert rows[2]["rng"] == "keep..asis"
+
+
 def test_adoption_contrast_caps_sides_per_pr():
     pool = {p: [] for p in churn.PERIODS}
     pool["Q4-2025"] = [("a/r", i, False, 100_000, 100) for i in range(20)]

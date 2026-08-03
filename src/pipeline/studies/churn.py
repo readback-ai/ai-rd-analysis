@@ -1,55 +1,69 @@
 """Study: code churn — lines deleted relative to lines added in merged code.
 
-External claim under test (Faros, "AI acceleration whiplash"): "Code
-churn, the ratio of lines deleted to lines added for merged code in a
-given quarter, has increased 861% under high AI adoption. At nearly 10
-times the prior rate, significantly more code is being removed relative
-to what is being added." Faros compares each ORGANIZATION's lowest- and
-highest-AI-adoption periods — a within-org adoption contrast, not a
-calendar trend — so the replication headline here is the same contrast
-(`--table adoption`); the calendar view is kept only as a labeled,
-non-comparable sensitivity (PR-review round 1, P1).
+Measures churn trends in THIS population (leading AI organizations) with
+metrics similar to an external industry report (Faros, "AI acceleration
+whiplash": churn "increased 861% under high AI adoption", ~x9.6,
+contrasting each org's lowest- and highest-AI-adoption periods). This is
+NOT a replication of that report — the populations differ fundamentally
+(prominence-selected AI builders vs a broad-industry sample) — the Faros
+figure is quoted only as the external reference point the numbers here
+are read against. The headline is the same style of within-org contrast
+(`--table adoption`); a calendar view is kept as a labeled sensitivity.
 
-Churn is assigned by MERGE quarter (the claim's "merged code in a given
-quarter"): each mature merged PR buckets by the censused quarter
-containing its merge timestamp; merges spilling into uncensused quarters
-(<= 56 days past a censused quarter's end) are dropped and counted as a
-reported residual. Arms all / AI-involved / non-AI, with non-AI bots
-dropped (ai_contrast_eligible), so all = AI + nonAI.
+CHURN WINDOWS — identically trimmed per quarter: a PR counts toward a
+quarter's churn iff it was CREATED AND MERGED in that same quarter,
+REGARDLESS of w8 maturity: an observed merge is terminal, so a same-
+quarter merge is fully observable even while the PR's 56-day fate
+window is still open (requiring maturity would truncate the trailing
+quarter's tail relative to earlier ones — the w8 rule governs fate
+metrics, not already-observed merges). The census collects by creation
+quarter, so a merge-bucketed quarter would silently miss inbound PRs
+created in the preceding (uncensused) window while only out-spill is
+observable; same-quarter trimming gives every quarter the same
+observability instead. The cross-quarter residual (merges outside the
+creation quarter) is dropped and reported.
 
-PILOT design (2026-08-02; revised after review round 1):
+ADOPTION MEASUREMENT — traceable-adoption share, a floor (METHODS: all
+detection is evidence-based). Q1-2024 is EXCLUDED from the adoption
+contrast: its zero is by construction (no detectable channel existed),
+so a low-endpoint there measures marker availability, not low adoption.
+Endpoints come from the adoption-era quarters (Q4-2025..Q2-2026) only.
 
-1. `--table adoption` — the replication headline. Per org (repo owner),
-   per merge-quarter with >= ORG_MIN_PRS mature merged PRs: AI-adoption
-   share and capped-side deleted:added. Orgs with >= 2 qualifying
-   quarters and a nonzero adoption spread contribute the churn multiple
-   (highest-adoption quarter / lowest-adoption quarter); the table
-   reports the geometric-mean multiple with a bootstrap CI over orgs,
-   the median, and the share of orgs whose churn rose — the claim
-   predicts ~x9.6.
+PILOT design (2026-08-02):
+
+1. `--table adoption` — per org (repo owner), per adoption-era quarter
+   with >= ORG_MIN_PRS trimmed merged PRs: traceable-adoption share and
+   capped-side deleted:added. Orgs with >= 2 qualifying era quarters and
+   a strictly positive adoption spread contribute the churn multiple
+   (highest-adoption quarter / lowest); reported as the geometric-mean
+   multiple with a bootstrap CI over orgs, the median, and the share of
+   orgs whose churn rose — the claim predicts ~x9.6.
 
 2. `--table census` — calendar-trend SENSITIVITY (not the claim's
-   contrast): complete-census deleted:added per merge-quarter x arm; CW
-   mean of per-repo ratios (capped sides, >= MIN_PRS PRs/repo, per-cell
-   seeded CIs) plus the pooled ratio. Per-PR medians are over PRs with
-   nonzero additions (a deletion-only PR has no defined ratio; its share
-   is the del>add column's business, not the median's).
+   contrast), Q1-2024 included under the standard caption: per quarter x
+   arm (all / AI / nonAI; non-AI bots dropped via ai_contrast_eligible,
+   so all = AI + nonAI), CW mean of per-repo deleted:added (capped
+   sides, >= MIN_PRS PRs/repo, per-cell seeded CIs) plus the pooled
+   ratio. Per-PR medians are over PRs with nonzero additions (a
+   deletion-only PR has no defined ratio; it still counts in del>add).
 
 3. `--draw` / `--pull` / `--table sample` — balanced ~0.1% seeded sample
-   (equal AI / nonAI per merge-quarter; Q1-2024 backfills from nonAI)
-   hydrated with per-FILE additions/deletions so the ratio can be
-   recomputed EXCLUDING generated content. The sample file always holds
-   EXACTLY the current draw (atomic rewrite; hydration reused only for
-   still-selected PRs) — append-resume kept stale draws once (review
-   round 1, P2).
+   of the trimmed frame (equal AI / nonAI per quarter; Q1-2024 backfills
+   from nonAI) hydrated with per-FILE additions/deletions so the ratio
+   can be recomputed EXCLUDING generated content. The sample file always
+   holds EXACTLY the current draw (atomic rewrite; hydration reused only
+   for still-selected PRs).
 
 4. `--pull-bugs` / `--table bugs` — bug-report proxy, NOT production
    incidents: GH issues labeled bug (`label:bug` only — repos on other
    taxonomies read zero and are excluded as probable non-users of the
-   label) per 100 mature merged PRs, over the sample's repos. Numerator
-   and denominator share one exposure window: bugs are counted only
-   through the maturity frontier (AS_OF - 56d), exactly the last
-   creation date an included PR can have (review round 1, P2).
+   label) per 100 mature merged PRs over the sample's repos. Exposure is
+   CREATION-bucketed on both sides: the denominator is mature merged PRs
+   by creation quarter, and the bug window is the same quarter truncated
+   at the maturity frontier (AS_OF - 56d) — exactly the last creation
+   date an included PR can have. Cells are keyed by (repo, per, range)
+   so a frontier move re-pulls them; rows predating the range stamp are
+   migrated to the full-quarter range they were queried with.
 
 Not (yet) in the generated report beyond the churn section; pilot numbers
 carry no frozen-convention guarantees beyond the frame they share with
@@ -74,6 +88,7 @@ from pipeline.ghx import graphql_nodes, rest_count
 from pipeline.scan_orgs import QUARTER_RANGES
 
 PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
+ADOPTION_PERIODS = ["Q4-2025", "Q1-2026", "Q2-2026"]   # Q1-2024 excluded
 SEED = 20260630
 SAMPLE_RATE = 0.001          # ~0.1% of the eligible merged frame
 MIN_PRS = 5                  # repo floor per (period, arm), house convention
@@ -119,29 +134,40 @@ def merge_quarter(merged_at: str | None) -> str | None:
     return None
 
 
-def eligible() -> tuple[dict[str, list], int]:
-    """merge-quarter -> [(repo, num, ai, additions, deletions)] over mature
-    merged PRs, profile 'all' + ai_contrast_eligible (non-AI bots dropped,
-    so the nonAI arm is human-authored and all = AI + nonAI). Second value:
-    mature merged PRs whose merge fell OUTSIDE every censused quarter
-    (<= 56d spillover past a quarter end) — dropped, reported."""
-    pool: dict[str, list] = {p: [] for p in PERIODS}
-    spilled = 0
+def eligible() -> tuple[dict[str, list], dict[str, list], int]:
+    """Two frames over merged PRs (profile 'all' + ai_contrast_eligible:
+    non-AI bots dropped, all = AI + nonAI), items
+    (repo, num, ai, additions, deletions):
+
+    - trimmed (the CHURN frame): created AND merged in the same quarter,
+      regardless of w8 maturity — an observed merge is terminal, so
+      every quarter is identically observable (module docstring);
+    - created (the BUG-PROXY denominator): w8-mature merged (frozen fate
+      convention), bucketed by creation quarter — maturity is what
+      aligns the denominator's exposure with the frontier-truncated bug
+      windows.
+
+    Third value: merged PRs whose merge fell outside their creation
+    quarter (the cross-quarter residual the churn trim drops)."""
+    trimmed: dict[str, list] = {p: [] for p in PERIODS}
+    created: dict[str, list] = {p: [] for p in PERIODS}
+    cross = 0
     for f in study_frame("all"):
         if not ai_contrast_eligible(f):
             continue
         c = f.cls
-        if not (c.w8_mature and c.merged):
+        if not c.merged_ever:
             continue
-        per = merge_quarter(f.pr.get("mergedAt"))
-        if per is None:
-            spilled += 1
-            continue
-        pool[per].append(
-            (f.repo, f.pr["number"], bool(c.ai_involved),
-             int(f.pr.get("additions") or 0),
-             int(f.pr.get("deletions") or 0)))
-    return pool, spilled
+        item = (f.repo, f.pr["number"], bool(c.ai_involved),
+                int(f.pr.get("additions") or 0),
+                int(f.pr.get("deletions") or 0))
+        if merge_quarter(f.pr.get("mergedAt")) == f.period:
+            trimmed[f.period].append(item)
+        else:
+            cross += 1
+        if c.w8_mature and c.merged:
+            created[f.period].append(item)
+    return trimmed, created, cross
 
 
 def _ratio(adds: int, dels: int) -> float:
@@ -151,15 +177,17 @@ def _ratio(adds: int, dels: int) -> float:
 # --------------------------------------------- adoption contrast (headline)
 
 def adoption_rows(pool: dict[str, list]) -> dict:
-    """The Faros contrast: per org, churn at its highest-AI-adoption
-    quarter relative to its lowest. Org-quarters qualify at >= ORG_MIN_PRS
-    mature merged PRs; orgs need >= 2 qualifying quarters, a strictly
-    positive adoption spread, and nonzero additions in both endpoint
-    quarters. Returns {orgs, dropped_flat, multiples: [(org, low_share,
-    high_share, low_ratio, high_ratio, multiple)]}."""
+    """Within-org contrast on traceable adoption: per org, churn at
+    its highest-adoption era quarter relative to its lowest. Org-quarters
+    qualify at >= ORG_MIN_PRS trimmed merged PRs; only ADOPTION_PERIODS
+    are eligible endpoints (Q1-2024's zero is by construction). Orgs need
+    >= 2 qualifying era quarters, a strictly positive adoption spread,
+    and nonzero additions in both endpoint quarters. Returns {orgs,
+    dropped_flat, multiples: [(org, low_share, high_share, low_ratio,
+    high_ratio, multiple)]}."""
     per_org: dict[tuple[str, str], list[int]] = defaultdict(lambda: [0, 0, 0, 0])
-    for per, items in pool.items():
-        for repo, _num, ai, adds, dels in items:
+    for per in ADOPTION_PERIODS:
+        for repo, _num, ai, adds, dels in pool[per]:
             a = per_org[(repo.split("/")[0].lower(), per)]
             a[0] += 1
             a[1] += bool(ai)
@@ -170,11 +198,12 @@ def adoption_rows(pool: dict[str, list]) -> dict:
         if n >= ORG_MIN_PRS:
             quarters[org][per] = (ai / n, adds, dels)
     multiples, flat = [], 0
+    idx = ADOPTION_PERIODS.index
     for org, qs in sorted(quarters.items()):
         if len(qs) < 2:
             continue
-        low = min(qs, key=lambda p: (qs[p][0], PERIODS.index(p)))
-        high = max(qs, key=lambda p: (qs[p][0], -PERIODS.index(p)))
+        low = min(qs, key=lambda p: (qs[p][0], idx(p)))
+        high = max(qs, key=lambda p: (qs[p][0], -idx(p)))
         if qs[high][0] <= qs[low][0]:
             flat += 1                    # no adoption spread to contrast
             continue
@@ -188,16 +217,21 @@ def adoption_rows(pool: dict[str, list]) -> dict:
             "multiples": multiples}
 
 
-def print_adoption(pool: dict[str, list], spilled: int) -> None:
+def print_adoption(pool: dict[str, list], cross: int) -> None:
     import math
     r = adoption_rows(pool)
     ms = r["multiples"]
-    print("code churn, WITHIN-ORG ADOPTION CONTRAST (the source study's "
-          "design): per org, deleted:added at its highest-AI-adoption "
-          "merge-quarter vs its lowest (capped sides; org-quarters "
-          f"qualify at >= {ORG_MIN_PRS} mature merged PRs)")
-    print("claim under test predicts the high-adoption ratio ~x9.6 the "
-          "low-adoption ratio (+861%)")
+    print("code churn, WITHIN-ORG ADOPTION CONTRAST on TRACEABLE "
+          "adoption (an evidence floor): per org, deleted:added at its "
+          "highest-adoption quarter vs its lowest, endpoints from "
+          f"{ADOPTION_PERIODS[0]}..{ADOPTION_PERIODS[-1]} only "
+          "(Q1-2024's zero is by construction — a low endpoint there "
+          "would contrast marker availability, not adoption); "
+          "same-quarter-trimmed merge windows (capped sides; "
+          f"org-quarters qualify at >= {ORG_MIN_PRS} PRs)")
+    print("external reference, NOT a replication target (different "
+          "population): Faros's broad-industry report has this multiple "
+          "at ~x9.6 (+861%)")
     if not ms:
         print("no qualifying orgs")
         return
@@ -207,8 +241,8 @@ def print_adoption(pool: dict[str, list], spilled: int) -> None:
     med = median(m[5] for m in ms)
     rose = sum(1 for m in ms if m[5] > 1)
     print(f"orgs contrasted: {len(ms)} (of {r['orgs']} with >= 2 "
-          f"qualifying quarters; {r['dropped_flat']} dropped for zero "
-          f"adoption spread); merge-spillover PRs dropped: {spilled}")
+          f"qualifying era quarters; {r['dropped_flat']} dropped for "
+          f"zero adoption spread); cross-quarter merges trimmed: {cross}")
     print(f"geomean churn multiple (high/low adoption): {gm:.2f} "
           f"[{math.exp(lo):.2f},{math.exp(hi):.2f}]  median {med:.2f}  "
           f"churn rose in {rose}/{len(ms)} orgs "
@@ -221,9 +255,9 @@ def print_adoption(pool: dict[str, list], spilled: int) -> None:
 # ------------------------------------------- calendar view (sensitivity)
 
 def census_rows(pool: dict[str, list]) -> dict[tuple[str, str], dict]:
-    """(merge-quarter, arm) -> pooled churn. median_pr is over PRs with
-    nonzero additions (deletion-only PRs have no defined ratio and are
-    excluded from the median; they still count in del_dominant)."""
+    """(quarter, arm) -> pooled churn. median_pr is over PRs with nonzero
+    additions (deletion-only PRs have no defined ratio and are excluded
+    from the median; they still count in del_dominant)."""
     out: dict[tuple[str, str], dict] = {}
     for per, items in pool.items():
         arms = {"all": items,
@@ -248,7 +282,7 @@ def census_rows(pool: dict[str, list]) -> dict[tuple[str, str], dict]:
 
 
 def repo_pairs(pool: dict[str, list]) -> dict[tuple[str, str], list]:
-    """(merge-quarter, arm) -> [(repo_ratio, repo)] for the CW series: per
+    """(quarter, arm) -> [(repo_ratio, repo)] for the CW series: per
     repo, capped-side deletions / capped-side additions over its arm PRs;
     qualifies at >= MIN_PRS PRs and nonzero additions (a repo whose arm
     added nothing has no defined ratio — skipped, never zeroed)."""
@@ -272,12 +306,12 @@ def print_census(pool: dict[str, list]) -> None:
     rows = census_rows(pool)
     pairs = repo_pairs(pool)
     w = weights()
-    print("code churn, CALENDAR-TREND SENSITIVITY (fixed merge-quarters "
-          "and PR-level arms — NOT the source study's within-org "
-          "adoption contrast; see the adoption table for the "
-          "replication). CW = contributor-weighted mean of per-repo "
-          f"deleted:added (capped sides, >= {MIN_PRS} PRs/repo, 95% CI "
-          "over repos); pooled = raw ratio of totals")
+    print("code churn, CALENDAR-TREND SENSITIVITY (fixed quarters and "
+          "PR-level arms — a different cut than the within-org adoption "
+          "contrast above, and not comparable to any external figure). "
+          "Same-quarter-trimmed merge windows. CW = contributor-weighted "
+          f"mean of per-repo deleted:added (capped sides, >= {MIN_PRS} "
+          "PRs/repo, 95% CI over repos); pooled = raw ratio of totals")
     print(f"{'quarter':9}{'arm':7}{'repos':>6}{'CW del:add [95% CI]':>22}"
           f"{'PRs':>8}{'pooled':>8}{'capped':>8}{'medPR':>7}"
           f"{'del>add':>9}{'xQ1-24':>8}")
@@ -301,17 +335,20 @@ def print_census(pool: dict[str, list]) -> None:
                   f"{r['ratio']:>8.3f}{r['ratio_capped']:>8.3f}"
                   f"{r['median_pr']:>7.3f}{100 * r['del_dominant']:>8.1f}%"
                   f"{mult:>8.2f}")
-    print("Q1-2024 caption: detector-validity baseline, not an AI-usage "
-          "estimate; AI arm has no 2024 baseline by construction")
+    print("Q1-2024 caption: detector-validity baseline and review-practice "
+          "control, not an AI-usage estimate; AI arm has no 2024 baseline "
+          "by construction (and Q1-2024 is excluded from the adoption "
+          "contrast above)")
 
 
 # ------------------------------------------------------------------ sample
 
 def draw(pool: dict[str, list]) -> list[dict]:
-    """Balanced seeded ~0.1% draw: per merge-quarter, target = max(2,
-    round(SAMPLE_RATE * frame)); half from the AI arm, half from nonAI
-    (equal arms = AI oversampled at its population share); an arm short
-    of its half (Q1-2024 AI is empty) backfills from the other."""
+    """Balanced seeded ~0.1% draw over the trimmed churn frame: per
+    quarter, target = max(2, round(SAMPLE_RATE * frame)); half from the
+    AI arm, half from nonAI (equal arms = AI oversampled at its
+    population share); an arm short of its half (Q1-2024 AI is empty)
+    backfills from the other."""
     out = []
     for per in PERIODS:
         items = sorted(pool[per], key=lambda x: (x[0], x[1]))
@@ -447,13 +484,24 @@ def print_sample(pool: dict[str, list]) -> None:
 
 def bug_window(per: str, as_of: str = AS_OF) -> str | None:
     """The quarter's bug-count window, truncated at the maturity frontier
-    so numerator exposure matches the mature-PR denominator (a Q2-2026
-    bug created after the last includable PR-creation date would have no
-    matching denominator exposure). None if the whole quarter is past the
-    frontier."""
+    so numerator exposure matches the creation-bucketed mature-PR
+    denominator. None if the whole quarter is past the frontier."""
     start, end = QUARTER_RANGES[per].split("..")
     end = min(end, maturity_frontier(as_of))
     return f"{start}..{end}" if start <= end else None
+
+
+def migrate_bug_rows(rows: list[dict]) -> list[dict]:
+    """Rows written before range-stamping were queried with the FULL
+    quarter range — stamp them with it, so reconciliation keeps them
+    exactly where that is still the current window and retires them
+    (stale) where the frontier has trimmed it."""
+    out = []
+    for d in rows:
+        if "rng" not in d and d.get("per") in QUARTER_RANGES:
+            d = {**d, "rng": QUARTER_RANGES[d["per"]]}
+        out.append(d)
+    return out
 
 
 def bug_cells(pool: dict[str, list]) -> list[dict]:
@@ -469,10 +517,11 @@ def pull_bugs(pool: dict[str, list], pace: float = 2.0) -> None:
     """Count bug-labeled issues per cell (label:bug only — a documented
     proxy limitation). The file is atomically rewritten to exactly the
     current cell selection: counts are reused only when the cell's window
-    matches (a range change, e.g. an AS_OF bump moving the frontier,
-    re-pulls the cell); failures stay missing, never zeroed."""
+    matches (pre-stamp rows are migrated first; a range change, e.g. an
+    AS_OF bump moving the frontier, re-pulls the cell); failures stay
+    missing, never zeroed. Checkpoints every 25 cells."""
     cells = bug_cells(pool)
-    kept, todo, stale = reconcile(cells, _load_jsonl(BUGS),
+    kept, todo, stale = reconcile(cells, migrate_bug_rows(_load_jsonl(BUGS)),
                                   ("repo", "per", "rng"), "bugs")
     print(f"pulling {len(todo)} of {len(cells)} bug cells "
           f"({len(kept)} reused, {stale} stale dropped)")
@@ -499,13 +548,14 @@ def pull_bugs(pool: dict[str, list], pace: float = 2.0) -> None:
         print(f"{missing} cells still unpulled (re-run --pull-bugs)")
 
 
-def print_bugs(pool: dict[str, list]) -> None:
-    kept, todo, stale = reconcile(bug_cells(pool), _load_jsonl(BUGS),
+def print_bugs(trimmed: dict[str, list], created: dict[str, list]) -> None:
+    kept, todo, stale = reconcile(bug_cells(trimmed),
+                                  migrate_bug_rows(_load_jsonl(BUGS)),
                                   ("repo", "per", "rng"), "bugs")
     bugs = {(d["repo"], d["per"]): d["bugs"] for d in kept.values()}
     merged: dict[tuple[str, str], int] = defaultdict(int)
     ai_share: dict[str, list[int]] = defaultdict(lambda: [0, 0])
-    for per, items in pool.items():
+    for per, items in created.items():
         for repo, _num, ai, _a, _d in items:
             merged[(repo, per)] += 1
             if per == "Q2-2026":
@@ -520,8 +570,10 @@ def print_bugs(pool: dict[str, list]) -> None:
     lo = set(ranked[:len(ranked) // 2])
     print("BUG-REPORT PROXY pilot (bug-labeled GH issues — NOT production "
           "incidents): issues labeled bug created per 100 mature merged "
-          "PRs, both sides truncated at the maturity frontier "
-          f"({maturity_frontier()}), over the churn sample's repos "
+          "PRs. Exposure is creation-bucketed on BOTH sides: denominator "
+          "= mature merged PRs by creation quarter, numerator window = "
+          f"the quarter truncated at the maturity frontier "
+          f"({maturity_frontier()}). Over the churn sample's repos "
           f"({len(repos)} pulled, {len(todo)} cells missing, {stale} "
           f"stale ignored; {len(repos) - len(with_bugs)} repos with zero "
           "bug-labeled issues in every quarter EXCLUDED as probable "
@@ -540,7 +592,7 @@ def print_bugs(pool: dict[str, list]) -> None:
             print(f"{per:9}{label:9}{len(rs):>6}{b:>7}{m:>8}"
                   f"{100 * b / m:>8.2f}")
     print("groups = halves of the sample repos by Q2-2026 AI-involvement "
-          "share among their sampled-frame merged PRs; pooled group "
+          "share among their created-bucketed merged PRs; pooled group "
           "rates can be dominated by single large repos")
 
 
@@ -560,9 +612,9 @@ def main() -> None:
     a = ap.parse_args()
     if not (a.table or a.draw or a.pull or a.pull_bugs):
         ap.error("pick --table/--draw/--pull/--pull-bugs")
-    pool, spilled = eligible()
+    trimmed, created, cross = eligible()
     if a.draw:
-        sel = draw(pool)
+        sel = draw(trimmed)
         by = defaultdict(int)
         for s in sel:
             by[(s["per"], s["ai"])] += 1
@@ -570,19 +622,19 @@ def main() -> None:
             f"{p} AI={by[(p, True)]}/nonAI={by[(p, False)]}"
             for p in PERIODS))
     if a.pull:
-        pull(draw(pool))
+        pull(draw(trimmed))
     if a.pull_bugs:
-        pull_bugs(pool)
+        pull_bugs(trimmed)
     if a.table in ("report", "adoption"):
-        print_adoption(pool, spilled)
+        print_adoption(trimmed, cross)
     if a.table in ("report", "census"):
         if a.table == "report":
             print()
-        print_census(pool)
+        print_census(trimmed)
     if a.table == "sample":
-        print_sample(pool)
+        print_sample(trimmed)
     elif a.table == "bugs":
-        print_bugs(pool)
+        print_bugs(trimmed, created)
 
 
 if __name__ == "__main__":
