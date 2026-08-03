@@ -1,768 +1,768 @@
-{"repo": "Arize-ai/openinference", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 24, "merged": 145}
-{"repo": "Arize-ai/openinference", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 52, "merged": 177}
-{"repo": "Arize-ai/openinference", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 28, "merged": 157, "ai_num": 33}
-{"repo": "Arize-ai/openinference", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 71, "merged": 128}
-{"repo": "Arize-ai/phoenix", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 76, "merged": 269}
-{"repo": "Arize-ai/phoenix", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 97, "merged": 876}
-{"repo": "Arize-ai/phoenix", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 68, "merged": 663, "ai_num": 85}
-{"repo": "Arize-ai/phoenix", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 83, "merged": 530}
-{"repo": "BerriAI/litellm", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 278, "merged": 377}
-{"repo": "BerriAI/litellm", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 821, "merged": 2735}
-{"repo": "BerriAI/litellm", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 448, "merged": 1507, "ai_num": 458}
-{"repo": "BerriAI/litellm", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 796, "merged": 1657}
-{"repo": "ComposioHQ/composio", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 6}
-{"repo": "ComposioHQ/composio", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 24, "merged": 466}
-{"repo": "ComposioHQ/composio", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 25, "merged": 181, "ai_num": 95}
-{"repo": "ComposioHQ/composio", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 25, "merged": 164}
-{"repo": "ComposioHQ/helm-charts", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "ComposioHQ/helm-charts", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 70}
-{"repo": "ComposioHQ/helm-charts", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 33, "ai_num": 13}
-{"repo": "ComposioHQ/helm-charts", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 44}
-{"repo": "EleutherAI/bergson", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "EleutherAI/bergson", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 2, "merged": 70}
-{"repo": "EleutherAI/bergson", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 43, "ai_num": 25}
-{"repo": "EleutherAI/bergson", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 35}
-{"repo": "FlowiseAI/Flowise", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 37, "merged": 148}
-{"repo": "FlowiseAI/Flowise", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 53, "merged": 190}
-{"repo": "FlowiseAI/Flowise", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 18, "merged": 115, "ai_num": 16}
-{"repo": "FlowiseAI/Flowise", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 81, "merged": 83}
-{"repo": "Giskard-AI/giskard-hub-python", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "Giskard-AI/giskard-hub-python", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 39}
-{"repo": "Giskard-AI/giskard-hub-python", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 12, "ai_num": 1}
-{"repo": "Giskard-AI/giskard-hub-python", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "GoogleCloudPlatform/cymbal-air-toolbox-demo", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 73}
-{"repo": "GoogleCloudPlatform/cymbal-air-toolbox-demo", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0}
-{"repo": "GoogleCloudPlatform/cymbal-air-toolbox-demo", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "ai_num": 0}
-{"repo": "GoogleCloudPlatform/cymbal-air-toolbox-demo", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1}
-{"repo": "GoogleCloudPlatform/generative-ai", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 105}
-{"repo": "GoogleCloudPlatform/generative-ai", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 57}
-{"repo": "GoogleCloudPlatform/generative-ai", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 77, "ai_num": 0}
-{"repo": "GoogleCloudPlatform/generative-ai", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 126}
-{"repo": "HKUDS/DeepTutor", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "HKUDS/DeepTutor", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 57, "merged": 41}
-{"repo": "HKUDS/DeepTutor", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 64, "merged": 88, "ai_num": 13}
-{"repo": "HKUDS/DeepTutor", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 2, "merged": 5}
-{"repo": "HKUDS/LightRAG", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "HKUDS/LightRAG", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 21, "merged": 63}
-{"repo": "HKUDS/LightRAG", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 10, "merged": 192, "ai_num": 117}
-{"repo": "HKUDS/LightRAG", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 54, "merged": 132}
-{"repo": "HKUDS/nanobot", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "HKUDS/nanobot", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 19, "merged": 427}
-{"repo": "HKUDS/nanobot", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 86, "merged": 518, "ai_num": 91}
-{"repo": "HKUDS/nanobot", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "Helicone/helicone", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 380}
-{"repo": "Helicone/helicone", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 6, "merged": 105}
-{"repo": "Helicone/helicone", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 3, "merged": 8, "ai_num": 6}
-{"repo": "Helicone/helicone", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 9, "merged": 458}
-{"repo": "IBM/mcp-context-forge", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "IBM/mcp-context-forge", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 435, "merged": 731}
-{"repo": "IBM/mcp-context-forge", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 182, "merged": 351, "ai_num": 13}
-{"repo": "IBM/mcp-context-forge", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 97, "merged": 314}
-{"repo": "IBM/watsonx-ai-java-sdk", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "IBM/watsonx-ai-java-sdk", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 35}
-{"repo": "IBM/watsonx-ai-java-sdk", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 12, "ai_num": 0}
-{"repo": "IBM/watsonx-ai-java-sdk", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 68}
-{"repo": "InternLM/lmdeploy", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 237}
-{"repo": "InternLM/lmdeploy", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 139}
-{"repo": "InternLM/lmdeploy", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 105, "ai_num": 11}
-{"repo": "InternLM/lmdeploy", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 119}
-{"repo": "InternLM/xtuner", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 1, "merged": 101}
-{"repo": "InternLM/xtuner", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 164}
-{"repo": "InternLM/xtuner", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 1, "merged": 174, "ai_num": 4}
-{"repo": "InternLM/xtuner", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 204}
-{"repo": "Kiln-AI/Kiln", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "Kiln-AI/Kiln", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 3, "merged": 183}
-{"repo": "Kiln-AI/Kiln", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 1, "merged": 201, "ai_num": 89}
-{"repo": "Kiln-AI/Kiln", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 8, "merged": 207}
-{"repo": "Mintplex-Labs/anything-llm", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 33, "merged": 157}
-{"repo": "Mintplex-Labs/anything-llm", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 10, "merged": 143}
-{"repo": "Mintplex-Labs/anything-llm", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 9, "merged": 100, "ai_num": 3}
-{"repo": "Mintplex-Labs/anything-llm", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 4, "merged": 104}
-{"repo": "NVIDIA-NeMo/Automodel", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA-NeMo/Automodel", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 63, "merged": 404}
-{"repo": "NVIDIA-NeMo/Automodel", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 25, "merged": 508, "ai_num": 202}
-{"repo": "NVIDIA-NeMo/Automodel", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 38, "merged": 262}
-{"repo": "NVIDIA-NeMo/Gym", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA-NeMo/Gym", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 207}
-{"repo": "NVIDIA-NeMo/Gym", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 1, "merged": 244, "ai_num": 59}
-{"repo": "NVIDIA-NeMo/Gym", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 161}
-{"repo": "NVIDIA-NeMo/Megatron-Bridge", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA-NeMo/Megatron-Bridge", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 126, "merged": 641}
-{"repo": "NVIDIA-NeMo/Megatron-Bridge", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 57, "merged": 576, "ai_num": 173}
-{"repo": "NVIDIA-NeMo/Megatron-Bridge", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 112, "merged": 503}
-{"repo": "NVIDIA-NeMo/Run", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA-NeMo/Run", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 4, "merged": 45}
-{"repo": "NVIDIA-NeMo/Run", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 22, "ai_num": 8}
-{"repo": "NVIDIA-NeMo/Run", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 3, "merged": 36}
-{"repo": "NVIDIA-NeMo/Safe-Synthesizer", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA-NeMo/Safe-Synthesizer", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 21, "merged": 160}
-{"repo": "NVIDIA-NeMo/Safe-Synthesizer", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 11, "merged": 115, "ai_num": 14}
-{"repo": "NVIDIA-NeMo/Safe-Synthesizer", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA-NeMo/nemo-platform", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA-NeMo/nemo-platform", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA-NeMo/nemo-platform", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 173, "ai_num": 7}
-{"repo": "NVIDIA-NeMo/nemo-platform", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA/DALI", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 5, "merged": 105}
-{"repo": "NVIDIA/DALI", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 2, "merged": 110}
-{"repo": "NVIDIA/DALI", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 98, "ai_num": 1}
-{"repo": "NVIDIA/DALI", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 1, "merged": 84}
-{"repo": "NVIDIA/Megatron-LM", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 7, "merged": 0}
-{"repo": "NVIDIA/Megatron-LM", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 54, "merged": 760}
-{"repo": "NVIDIA/Megatron-LM", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 63, "merged": 555, "ai_num": 140}
-{"repo": "NVIDIA/Megatron-LM", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 73, "merged": 533}
-{"repo": "NVIDIA/Model-Optimizer", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA/Model-Optimizer", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 19, "merged": 266}
-{"repo": "NVIDIA/Model-Optimizer", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 6, "merged": 268, "ai_num": 76}
-{"repo": "NVIDIA/Model-Optimizer", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 29, "merged": 233}
-{"repo": "NVIDIA/NVFlare", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 6, "merged": 163}
-{"repo": "NVIDIA/NVFlare", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 372}
-{"repo": "NVIDIA/NVFlare", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 308, "ai_num": 167}
-{"repo": "NVIDIA/NVFlare", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 3, "merged": 154}
-{"repo": "NVIDIA/NVSentinel", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA/NVSentinel", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 28, "merged": 140}
-{"repo": "NVIDIA/NVSentinel", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 24, "merged": 116, "ai_num": 23}
-{"repo": "NVIDIA/NVSentinel", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 33, "merged": 252}
-{"repo": "NVIDIA/NeMo-Retriever", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA/NeMo-Retriever", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 8, "merged": 368}
-{"repo": "NVIDIA/NeMo-Retriever", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 6, "merged": 309, "ai_num": 64}
-{"repo": "NVIDIA/NeMo-Retriever", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 2, "merged": 144}
-{"repo": "NVIDIA/NemoClaw", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA/NemoClaw", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 301}
-{"repo": "NVIDIA/NemoClaw", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1610, "ai_num": 291}
-{"repo": "NVIDIA/NemoClaw", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA/OSMO", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA/OSMO", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 14, "merged": 359}
-{"repo": "NVIDIA/OSMO", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 3, "merged": 157, "ai_num": 81}
-{"repo": "NVIDIA/OSMO", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 8, "merged": 134}
-{"repo": "NVIDIA/SkillSpector", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA/SkillSpector", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA/SkillSpector", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 4, "ai_num": 0}
-{"repo": "NVIDIA/SkillSpector", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA/TensorRT-LLM", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 213, "merged": 28}
-{"repo": "NVIDIA/TensorRT-LLM", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 104, "merged": 1398}
-{"repo": "NVIDIA/TensorRT-LLM", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 41, "merged": 1399, "ai_num": 41}
-{"repo": "NVIDIA/TensorRT-LLM", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 109, "merged": 1456}
-{"repo": "NVIDIA/ai-cloud-validation", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA/ai-cloud-validation", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 61}
-{"repo": "NVIDIA/ai-cloud-validation", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 110, "ai_num": 57}
-{"repo": "NVIDIA/ai-cloud-validation", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA/cccl", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 21, "merged": 143}
-{"repo": "NVIDIA/cccl", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 5, "merged": 591}
-{"repo": "NVIDIA/cccl", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 5, "merged": 635, "ai_num": 7}
-{"repo": "NVIDIA/cccl", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 34, "merged": 575}
-{"repo": "NVIDIA/cudf-spark", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 136, "merged": 224}
-{"repo": "NVIDIA/cudf-spark", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 108, "merged": 190}
-{"repo": "NVIDIA/cudf-spark", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 101, "merged": 238, "ai_num": 53}
-{"repo": "NVIDIA/cudf-spark", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 117, "merged": 230}
-{"repo": "NVIDIA/cuopt", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA/cuopt", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 28, "merged": 115}
-{"repo": "NVIDIA/cuopt", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 25, "merged": 204, "ai_num": 65}
-{"repo": "NVIDIA/cuopt", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 25, "merged": 142}
-{"repo": "NVIDIA/cutlass", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 13, "merged": 19}
-{"repo": "NVIDIA/cutlass", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 42, "merged": 48}
-{"repo": "NVIDIA/cutlass", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 38, "merged": 35, "ai_num": 1}
-{"repo": "NVIDIA/cutlass", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 55, "merged": 39}
-{"repo": "NVIDIA/nv-cloud-function-helpers", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA/nv-cloud-function-helpers", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 4}
-{"repo": "NVIDIA/nv-cloud-function-helpers", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1, "ai_num": 1}
-{"repo": "NVIDIA/nv-cloud-function-helpers", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA/physicsnemo", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 8, "merged": 66}
-{"repo": "NVIDIA/physicsnemo", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 18, "merged": 156}
-{"repo": "NVIDIA/physicsnemo", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 7, "merged": 114, "ai_num": 6}
-{"repo": "NVIDIA/physicsnemo", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 14, "merged": 107}
-{"repo": "NVIDIA/skills", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NVIDIA/skills", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 1}
-{"repo": "NVIDIA/skills", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 131, "ai_num": 35}
-{"repo": "NVIDIA/skills", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "NousResearch/hermes-agent", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "NousResearch/hermes-agent", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 1183}
-{"repo": "NousResearch/hermes-agent", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 4355, "ai_num": 214}
-{"repo": "NousResearch/hermes-agent", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 6}
-{"repo": "OpenHands/OpenHands", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 93, "merged": 177}
-{"repo": "OpenHands/OpenHands", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 125, "merged": 627}
-{"repo": "OpenHands/OpenHands", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 75, "merged": 422, "ai_num": 317}
-{"repo": "OpenHands/OpenHands", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 113, "merged": 509}
-{"repo": "PaddlePaddle/Paddle", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 1896}
-{"repo": "PaddlePaddle/Paddle", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 905}
-{"repo": "PaddlePaddle/Paddle", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 385, "ai_num": 60}
-{"repo": "PaddlePaddle/Paddle", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1110}
-{"repo": "PaddlePaddle/PaddleFleet", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "PaddlePaddle/PaddleFleet", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 300}
-{"repo": "PaddlePaddle/PaddleFleet", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 292, "ai_num": 22}
-{"repo": "PaddlePaddle/PaddleFleet", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 217}
-{"repo": "PaddlePaddle/PaddleFormers", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "PaddlePaddle/PaddleFormers", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 4, "merged": 553}
-{"repo": "PaddlePaddle/PaddleFormers", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 274, "ai_num": 10}
-{"repo": "PaddlePaddle/PaddleFormers", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 499}
-{"repo": "PrefectHQ/fastmcp", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "PrefectHQ/fastmcp", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 147, "merged": 464}
-{"repo": "PrefectHQ/fastmcp", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 105, "merged": 223, "ai_num": 103}
-{"repo": "PrefectHQ/fastmcp", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 167, "merged": 365}
-{"repo": "PrefectHQ/graphs", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 2, "merged": 55}
-{"repo": "PrefectHQ/graphs", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 1}
-{"repo": "PrefectHQ/graphs", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "ai_num": 0}
-{"repo": "PrefectHQ/graphs", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1}
-{"repo": "PrefectHQ/prefect", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 96, "merged": 515}
-{"repo": "PrefectHQ/prefect", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 113, "merged": 766}
-{"repo": "PrefectHQ/prefect", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 70, "merged": 375, "ai_num": 311}
-{"repo": "PrefectHQ/prefect", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 115, "merged": 514}
-{"repo": "PrefectHQ/prefect-mcp-server", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "PrefectHQ/prefect-mcp-server", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 9}
-{"repo": "PrefectHQ/prefect-mcp-server", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1, "ai_num": 1}
-{"repo": "PrefectHQ/prefect-mcp-server", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 1, "merged": 39}
-{"repo": "PrefectHQ/terraform-provider-prefect", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 3, "merged": 8}
-{"repo": "PrefectHQ/terraform-provider-prefect", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 10, "merged": 22}
-{"repo": "PrefectHQ/terraform-provider-prefect", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 4, "ai_num": 0}
-{"repo": "PrefectHQ/terraform-provider-prefect", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 5, "merged": 21}
-{"repo": "PrimeIntellect-ai/prime-rl", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "PrimeIntellect-ai/prime-rl", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 403}
-{"repo": "PrimeIntellect-ai/prime-rl", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 3, "merged": 277, "ai_num": 168}
-{"repo": "PrimeIntellect-ai/prime-rl", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 4, "merged": 253}
-{"repo": "PrimeIntellect-ai/research-environments", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "PrimeIntellect-ai/research-environments", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 114}
-{"repo": "PrimeIntellect-ai/research-environments", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 148, "ai_num": 102}
-{"repo": "PrimeIntellect-ai/research-environments", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 67}
-{"repo": "PrimeIntellect-ai/verifiers", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "PrimeIntellect-ai/verifiers", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 281}
-{"repo": "PrimeIntellect-ai/verifiers", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 306, "ai_num": 219}
-{"repo": "PrimeIntellect-ai/verifiers", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 129}
-{"repo": "QwenLM/qwen-code", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "QwenLM/qwen-code", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 405}
-{"repo": "QwenLM/qwen-code", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 839, "ai_num": 120}
-{"repo": "QwenLM/qwen-code", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 162}
-{"repo": "Significant-Gravitas/AutoGPT", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 1, "merged": 34}
-{"repo": "Significant-Gravitas/AutoGPT", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 6, "merged": 460}
-{"repo": "Significant-Gravitas/AutoGPT", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 8, "merged": 360, "ai_num": 99}
-{"repo": "Significant-Gravitas/AutoGPT", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 54, "merged": 298}
-{"repo": "Tencent/WeKnora", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "Tencent/WeKnora", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 59, "merged": 179}
-{"repo": "Tencent/WeKnora", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 77, "merged": 423, "ai_num": 31}
-{"repo": "Tencent/WeKnora", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 40, "merged": 58}
-{"repo": "Tencent/ncnn", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 5, "merged": 58}
-{"repo": "Tencent/ncnn", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 2, "merged": 78}
-{"repo": "Tencent/ncnn", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 71, "ai_num": 1}
-{"repo": "Tencent/ncnn", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 1, "merged": 62}
-{"repo": "Unstructured-IO/unstructured", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 71, "merged": 161}
-{"repo": "Unstructured-IO/unstructured", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 5, "merged": 87}
-{"repo": "Unstructured-IO/unstructured", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 1, "merged": 21, "ai_num": 5}
-{"repo": "Unstructured-IO/unstructured", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 4, "merged": 16}
-{"repo": "Unstructured-IO/unstructured-inference", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 10}
-{"repo": "Unstructured-IO/unstructured-inference", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 18}
-{"repo": "Unstructured-IO/unstructured-inference", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 13, "ai_num": 0}
-{"repo": "Unstructured-IO/unstructured-inference", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 11}
-{"repo": "aaif-goose/goose", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "aaif-goose/goose", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 937}
-{"repo": "aaif-goose/goose", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 563, "ai_num": 72}
-{"repo": "aaif-goose/goose", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 725}
-{"repo": "agno-agi/docs", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "agno-agi/docs", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 3, "merged": 125}
-{"repo": "agno-agi/docs", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 64, "ai_num": 20}
-{"repo": "agno-agi/docs", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 190}
-{"repo": "aiming-lab/MetaClaw", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "aiming-lab/MetaClaw", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 10}
-{"repo": "aiming-lab/MetaClaw", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "ai_num": 0}
-{"repo": "aiming-lab/MetaClaw", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "algorithmicsuperintelligence/optillm", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "algorithmicsuperintelligence/optillm", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 4}
-{"repo": "algorithmicsuperintelligence/optillm", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 2, "ai_num": 2}
-{"repo": "algorithmicsuperintelligence/optillm", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 3, "merged": 13}
-{"repo": "alibaba/rtp-llm", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 5}
-{"repo": "alibaba/rtp-llm", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 175}
-{"repo": "alibaba/rtp-llm", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 105, "ai_num": 23}
-{"repo": "alibaba/rtp-llm", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 192}
-{"repo": "allenai/S2APLER", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "allenai/S2APLER", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0}
-{"repo": "allenai/S2APLER", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 2, "ai_num": 1}
-{"repo": "allenai/S2APLER", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1}
-{"repo": "allenai/asta-extension", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "allenai/asta-extension", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 1}
-{"repo": "allenai/asta-extension", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "ai_num": 0}
-{"repo": "allenai/asta-extension", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 18}
-{"repo": "allenai/open-instruct", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 21}
-{"repo": "allenai/open-instruct", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 191}
-{"repo": "allenai/open-instruct", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 75, "ai_num": 54}
-{"repo": "allenai/open-instruct", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 191}
-{"repo": "anthropics/buffa", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "anthropics/buffa", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 15}
-{"repo": "anthropics/buffa", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 95, "ai_num": 5}
-{"repo": "anthropics/buffa", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "anthropics/claude-code-action", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "anthropics/claude-code-action", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 121, "merged": 59}
-{"repo": "anthropics/claude-code-action", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 77, "merged": 52, "ai_num": 16}
-{"repo": "anthropics/claude-code-action", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 56, "merged": 38}
-{"repo": "apache/airflow", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 1256}
-{"repo": "apache/airflow", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 2296}
-{"repo": "apache/airflow", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1743, "ai_num": 67}
-{"repo": "apache/airflow", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1951}
-{"repo": "apache/doris", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 2823}
-{"repo": "apache/doris", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 1259}
-{"repo": "apache/doris", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1127, "ai_num": 161}
-{"repo": "apache/doris", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1449}
-{"repo": "basetenlabs/truss", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 1, "merged": 77}
-{"repo": "basetenlabs/truss", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 170}
-{"repo": "basetenlabs/truss", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 103, "ai_num": 51}
-{"repo": "basetenlabs/truss", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 94}
-{"repo": "browser-use/browser-harness", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "browser-use/browser-harness", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0}
-{"repo": "browser-use/browser-harness", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 5, "merged": 200, "ai_num": 53}
-{"repo": "browser-use/browser-harness", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "bytedance/deer-flow", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "bytedance/deer-flow", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 5, "merged": 299}
-{"repo": "bytedance/deer-flow", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 46, "merged": 384, "ai_num": 78}
-{"repo": "bytedance/deer-flow", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 2, "merged": 96}
-{"repo": "cactus-compute/cactus", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "cactus-compute/cactus", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 144}
-{"repo": "cactus-compute/cactus", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 1, "merged": 72, "ai_num": 3}
-{"repo": "cactus-compute/cactus", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 64}
-{"repo": "character-ai/claude-agent-sdk-go", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "character-ai/claude-agent-sdk-go", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 21}
-{"repo": "character-ai/claude-agent-sdk-go", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 8, "ai_num": 8}
-{"repo": "character-ai/claude-agent-sdk-go", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "character-ai/larch", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "character-ai/larch", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0}
-{"repo": "character-ai/larch", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 51, "merged": 1698, "ai_num": 1348}
-{"repo": "character-ai/larch", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "chroma-core/chroma", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 56, "merged": 164}
-{"repo": "chroma-core/chroma", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 23, "merged": 463}
-{"repo": "chroma-core/chroma", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 11, "merged": 225, "ai_num": 26}
-{"repo": "chroma-core/chroma", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 40, "merged": 428}
-{"repo": "comet-ml/opik", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 5}
-{"repo": "comet-ml/opik", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 9, "merged": 980}
-{"repo": "comet-ml/opik", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 5, "merged": 737, "ai_num": 339}
-{"repo": "comet-ml/opik", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 15, "merged": 764}
-{"repo": "crewAIInc/crewAI", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 4, "merged": 56}
-{"repo": "crewAIInc/crewAI", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 65, "merged": 275}
-{"repo": "crewAIInc/crewAI", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 33, "merged": 319, "ai_num": 15}
-{"repo": "crewAIInc/crewAI", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 88, "merged": 191}
-{"repo": "dataelement/Clawith", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "dataelement/Clawith", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 46, "merged": 53}
-{"repo": "dataelement/Clawith", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 102, "merged": 75, "ai_num": 10}
-{"repo": "dataelement/Clawith", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "deepset-ai/haystack-core-integrations", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 27, "merged": 293}
-{"repo": "deepset-ai/haystack-core-integrations", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 6, "merged": 311}
-{"repo": "deepset-ai/haystack-core-integrations", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 204, "ai_num": 27}
-{"repo": "deepset-ai/haystack-core-integrations", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 7, "merged": 209}
-{"repo": "dotnet/machinelearning", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 10, "merged": 57}
-{"repo": "dotnet/machinelearning", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 13}
-{"repo": "dotnet/machinelearning", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 3, "ai_num": 0}
-{"repo": "dotnet/machinelearning", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 19}
-{"repo": "fal-ai/fal", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 89}
-{"repo": "fal-ai/fal", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 162}
-{"repo": "fal-ai/fal", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 79, "ai_num": 17}
-{"repo": "fal-ai/fal", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 91}
-{"repo": "flashinfer-ai/flashinfer", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 109}
-{"repo": "flashinfer-ai/flashinfer", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 26, "merged": 290}
-{"repo": "flashinfer-ai/flashinfer", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 5, "merged": 256, "ai_num": 60}
-{"repo": "flashinfer-ai/flashinfer", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 40, "merged": 256}
-{"repo": "flyteorg/flyte-sdk", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "flyteorg/flyte-sdk", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 285}
-{"repo": "flyteorg/flyte-sdk", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 188, "ai_num": 37}
-{"repo": "flyteorg/flyte-sdk", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 221}
-{"repo": "ggml-org/llama.cpp", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 27, "merged": 688}
-{"repo": "ggml-org/llama.cpp", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 76, "merged": 1011}
-{"repo": "ggml-org/llama.cpp", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 32, "merged": 910, "ai_num": 7}
-{"repo": "ggml-org/llama.cpp", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 101, "merged": 919}
-{"repo": "google-gemini/gemini-cli", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "google-gemini/gemini-cli", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 1816}
-{"repo": "google-gemini/gemini-cli", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 505, "ai_num": 2}
-{"repo": "google-gemini/gemini-cli", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1121}
-{"repo": "google/generative-ai-docs", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 62}
-{"repo": "google/generative-ai-docs", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 2}
-{"repo": "google/generative-ai-docs", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "ai_num": 0}
-{"repo": "google/generative-ai-docs", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 5}
-{"repo": "google/torchax", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "google/torchax", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 16}
-{"repo": "google/torchax", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 8, "ai_num": 0}
-{"repo": "google/torchax", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 40}
-{"repo": "groq/openbench", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "groq/openbench", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 2, "merged": 0}
-{"repo": "groq/openbench", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "ai_num": 0}
-{"repo": "groq/openbench", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 110}
-{"repo": "hao-ai-lab/FastVideo", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "hao-ai-lab/FastVideo", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 143}
-{"repo": "hao-ai-lab/FastVideo", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 145, "ai_num": 5}
-{"repo": "hao-ai-lab/FastVideo", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 8, "merged": 77}
-{"repo": "huggingface/ai-deadlines", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "huggingface/ai-deadlines", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 90}
-{"repo": "huggingface/ai-deadlines", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 6, "ai_num": 0}
-{"repo": "huggingface/ai-deadlines", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 36}
-{"repo": "huggingface/candle", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 226}
-{"repo": "huggingface/candle", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 39}
-{"repo": "huggingface/candle", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 30, "ai_num": 0}
-{"repo": "huggingface/candle", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 83}
-{"repo": "huggingface/diffusers", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 225, "merged": 441}
-{"repo": "huggingface/diffusers", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 49, "merged": 239}
-{"repo": "huggingface/diffusers", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 28, "merged": 175, "ai_num": 12}
-{"repo": "huggingface/diffusers", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 72, "merged": 224}
-{"repo": "huggingface/huggingface_hub", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 41, "merged": 114}
-{"repo": "huggingface/huggingface_hub", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 36, "merged": 209}
-{"repo": "huggingface/huggingface_hub", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 21, "merged": 172, "ai_num": 89}
-{"repo": "huggingface/huggingface_hub", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 40, "merged": 134}
-{"repo": "huggingface/kernels", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "huggingface/kernels", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 160}
-{"repo": "huggingface/kernels", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 5, "merged": 141, "ai_num": 0}
-{"repo": "huggingface/kernels", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 34}
-{"repo": "huggingface/kernels-community", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "huggingface/kernels-community", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 310}
-{"repo": "huggingface/kernels-community", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 222, "ai_num": 0}
-{"repo": "huggingface/kernels-community", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 72}
-{"repo": "huggingface/optimum-intel", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 2, "merged": 121}
-{"repo": "huggingface/optimum-intel", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 39}
-{"repo": "huggingface/optimum-intel", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 25, "ai_num": 0}
-{"repo": "huggingface/optimum-intel", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 83}
-{"repo": "huggingface/skills", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "huggingface/skills", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 38}
-{"repo": "huggingface/skills", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 20, "ai_num": 1}
-{"repo": "huggingface/skills", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 17}
-{"repo": "huggingface/transformers", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 30, "merged": 647}
-{"repo": "huggingface/transformers", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 267, "merged": 888}
-{"repo": "huggingface/transformers", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 118, "merged": 535, "ai_num": 27}
-{"repo": "huggingface/transformers", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 243, "merged": 909}
-{"repo": "imbue-ai/mngr", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "imbue-ai/mngr", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 21, "merged": 694}
-{"repo": "imbue-ai/mngr", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 533, "ai_num": 434}
-{"repo": "imbue-ai/mngr", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "infiniflow/ragflow", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 155}
-{"repo": "infiniflow/ragflow", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 697}
-{"repo": "infiniflow/ragflow", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 974, "ai_num": 92}
-{"repo": "infiniflow/ragflow", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 925}
-{"repo": "intel/ipex-llm", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 536}
-{"repo": "intel/ipex-llm", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0}
-{"repo": "intel/ipex-llm", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "ai_num": 0}
-{"repo": "intel/ipex-llm", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1}
-{"repo": "jina-ai/cli", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "jina-ai/cli", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 3}
-{"repo": "jina-ai/cli", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1, "ai_num": 0}
-{"repo": "jina-ai/cli", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "kserve/kserve", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 83}
-{"repo": "kserve/kserve", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 212}
-{"repo": "kserve/kserve", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 146, "ai_num": 18}
-{"repo": "kserve/kserve", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 79}
-{"repo": "lance-format/lance", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 15, "merged": 219}
-{"repo": "lance-format/lance", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 16, "merged": 384}
-{"repo": "lance-format/lance", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 6, "merged": 342, "ai_num": 131}
-{"repo": "lance-format/lance", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 18, "merged": 365}
-{"repo": "lancedb/lancedb", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 59, "merged": 198}
-{"repo": "lancedb/lancedb", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 35, "merged": 132}
-{"repo": "lancedb/lancedb", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 10, "merged": 111, "ai_num": 44}
-{"repo": "lancedb/lancedb", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 23, "merged": 89}
-{"repo": "langchain-ai/deepagents", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "langchain-ai/deepagents", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 106, "merged": 963}
-{"repo": "langchain-ai/deepagents", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 67, "merged": 609, "ai_num": 17}
-{"repo": "langchain-ai/deepagents", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 19, "merged": 195}
-{"repo": "langchain-ai/langchain", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 721, "merged": 1787}
-{"repo": "langchain-ai/langchain", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 151, "merged": 462}
-{"repo": "langchain-ai/langchain", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 100, "merged": 261, "ai_num": 7}
-{"repo": "langchain-ai/langchain", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 147, "merged": 713}
-{"repo": "langchain-ai/langchain-datastax", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 12}
-{"repo": "langchain-ai/langchain-datastax", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 2}
-{"repo": "langchain-ai/langchain-datastax", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "ai_num": 0}
-{"repo": "langchain-ai/langchain-datastax", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 8}
-{"repo": "langchain-ai/langchain-meta", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "langchain-ai/langchain-meta", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 3}
-{"repo": "langchain-ai/langchain-meta", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "ai_num": 0}
-{"repo": "langchain-ai/langchain-meta", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "langchain-ai/langgraph", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 1, "merged": 127}
-{"repo": "langchain-ai/langgraph", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 48, "merged": 151}
-{"repo": "langchain-ai/langgraph", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 36, "merged": 153, "ai_num": 32}
-{"repo": "langchain-ai/langgraph", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 93, "merged": 117}
-{"repo": "langflow-ai/langflow", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 93, "merged": 119}
-{"repo": "langflow-ai/langflow", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 80, "merged": 513}
-{"repo": "langflow-ai/langflow", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 54, "merged": 630, "ai_num": 47}
-{"repo": "langflow-ai/langflow", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 127, "merged": 490}
-{"repo": "langfuse/langfuse", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 23, "merged": 306}
-{"repo": "langfuse/langfuse", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 205, "merged": 638}
-{"repo": "langfuse/langfuse", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 127, "merged": 559, "ai_num": 189}
-{"repo": "langfuse/langfuse", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 236, "merged": 859}
-{"repo": "langfuse/langfuse-docs", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 83}
-{"repo": "langfuse/langfuse-docs", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 3, "merged": 223}
-{"repo": "langfuse/langfuse-docs", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 5, "merged": 214, "ai_num": 106}
-{"repo": "langfuse/langfuse-docs", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 3, "merged": 233}
-{"repo": "langgenius/dify", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 653}
-{"repo": "langgenius/dify", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 1228}
-{"repo": "langgenius/dify", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 281, "merged": 1173, "ai_num": 220}
-{"repo": "langgenius/dify", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1047}
-{"repo": "lightly-ai/lightly-studio", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "lightly-ai/lightly-studio", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 4, "merged": 430}
-{"repo": "lightly-ai/lightly-studio", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 444, "ai_num": 48}
-{"repo": "lightly-ai/lightly-studio", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 327}
-{"repo": "maximhq/bifrost", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "maximhq/bifrost", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 114, "merged": 809}
-{"repo": "maximhq/bifrost", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 135, "merged": 1083, "ai_num": 10}
-{"repo": "maximhq/bifrost", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 33, "merged": 441}
-{"repo": "mem0ai/mem0", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 9, "merged": 136}
-{"repo": "mem0ai/mem0", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 42, "merged": 162}
-{"repo": "mem0ai/mem0", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 61, "merged": 193, "ai_num": 43}
-{"repo": "mem0ai/mem0", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 42, "merged": 73}
-{"repo": "microsoft/Build26-BRK231-deploy-observe-learn-reinforcement-learning-for-production-agents", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "microsoft/Build26-BRK231-deploy-observe-learn-reinforcement-learning-for-production-agents", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0}
-{"repo": "microsoft/Build26-BRK231-deploy-observe-learn-reinforcement-learning-for-production-agents", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 2, "ai_num": 2}
-{"repo": "microsoft/Build26-BRK231-deploy-observe-learn-reinforcement-learning-for-production-agents", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "microsoft/agent-framework", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "microsoft/agent-framework", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 336, "merged": 667}
-{"repo": "microsoft/agent-framework", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 177, "merged": 496, "ai_num": 22}
-{"repo": "microsoft/agent-framework", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 28, "merged": 693}
-{"repo": "microsoft/agent-governance-toolkit", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "microsoft/agent-governance-toolkit", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 27, "merged": 216}
-{"repo": "microsoft/agent-governance-toolkit", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 18, "merged": 1220, "ai_num": 108}
-{"repo": "microsoft/agent-governance-toolkit", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "microsoft/agent-lightning", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "microsoft/agent-lightning", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 4, "merged": 7}
-{"repo": "microsoft/agent-lightning", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1, "ai_num": 0}
-{"repo": "microsoft/agent-lightning", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 2, "merged": 196}
-{"repo": "microsoft/ai-agents-for-beginners", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "microsoft/ai-agents-for-beginners", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0}
-{"repo": "microsoft/ai-agents-for-beginners", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 27, "ai_num": 2}
-{"repo": "microsoft/ai-agents-for-beginners", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 59}
-{"repo": "microsoft/debug-gym", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "microsoft/debug-gym", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 26}
-{"repo": "microsoft/debug-gym", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "ai_num": 0}
-{"repo": "microsoft/debug-gym", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 2, "merged": 47}
-{"repo": "microsoft/promptflow", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 65, "merged": 629}
-{"repo": "microsoft/promptflow", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 3}
-{"repo": "microsoft/promptflow", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 4, "merged": 13, "ai_num": 0}
-{"repo": "microsoft/promptflow", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 2, "merged": 8}
-{"repo": "microsoft/semantic-kernel", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 52, "merged": 459}
-{"repo": "microsoft/semantic-kernel", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 28, "merged": 87}
-{"repo": "microsoft/semantic-kernel", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 6, "merged": 41, "ai_num": 1}
-{"repo": "microsoft/semantic-kernel", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 42, "merged": 74}
-{"repo": "milvus-io/milvus", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 979}
-{"repo": "milvus-io/milvus", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 889}
-{"repo": "milvus-io/milvus", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 819, "ai_num": 246}
-{"repo": "milvus-io/milvus", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1100}
-{"repo": "milvus-io/milvus-docs", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 80}
-{"repo": "milvus-io/milvus-docs", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 51}
-{"repo": "milvus-io/milvus-docs", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 39, "ai_num": 0}
-{"repo": "milvus-io/milvus-docs", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 70}
-{"repo": "milvus-io/milvus-sdk-node", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 18}
-{"repo": "milvus-io/milvus-sdk-node", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 32}
-{"repo": "milvus-io/milvus-sdk-node", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 39, "ai_num": 10}
-{"repo": "milvus-io/milvus-sdk-node", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 16}
-{"repo": "milvus-io/milvus-sdk-rust", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 7}
-{"repo": "milvus-io/milvus-sdk-rust", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0}
-{"repo": "milvus-io/milvus-sdk-rust", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 9, "ai_num": 0}
-{"repo": "milvus-io/milvus-sdk-rust", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "mindsdb/cowork", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "mindsdb/cowork", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 5}
-{"repo": "mindsdb/cowork", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 105, "ai_num": 28}
-{"repo": "mindsdb/cowork", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "ml-explore/mlx", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 45, "merged": 294}
-{"repo": "ml-explore/mlx", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 19, "merged": 180}
-{"repo": "ml-explore/mlx", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 23, "merged": 104, "ai_num": 6}
-{"repo": "ml-explore/mlx", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 14, "merged": 181}
-{"repo": "mlflow/mlflow", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 98, "merged": 483}
-{"repo": "mlflow/mlflow", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 130, "merged": 1614}
-{"repo": "mlflow/mlflow", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 94, "merged": 831, "ai_num": 685}
-{"repo": "mlflow/mlflow", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 116, "merged": 1045}
-{"repo": "modelscope/ms-swift", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 7, "merged": 217}
-{"repo": "modelscope/ms-swift", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 214, "merged": 276}
-{"repo": "modelscope/ms-swift", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 126, "merged": 235, "ai_num": 4}
-{"repo": "modelscope/ms-swift", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 66, "merged": 390}
-{"repo": "mozilla/bigquery-etl", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 1, "merged": 373}
-{"repo": "mozilla/bigquery-etl", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 389}
-{"repo": "mozilla/bigquery-etl", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 321, "ai_num": 0}
-{"repo": "mozilla/bigquery-etl", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 400}
-{"repo": "mozilla/fx-desktop-qa-automation", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "mozilla/fx-desktop-qa-automation", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 204}
-{"repo": "mozilla/fx-desktop-qa-automation", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 86, "ai_num": 0}
-{"repo": "mozilla/fx-desktop-qa-automation", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 145}
-{"repo": "mozilla/fxa", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 244}
-{"repo": "mozilla/fxa", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 331}
-{"repo": "mozilla/fxa", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 277, "ai_num": 2}
-{"repo": "mozilla/fxa", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 235}
-{"repo": "neuralmagic/nyann-bench", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "neuralmagic/nyann-bench", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 21}
-{"repo": "neuralmagic/nyann-bench", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 24, "ai_num": 22}
-{"repo": "neuralmagic/nyann-bench", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "nexu-io/nexu", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "nexu-io/nexu", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 98, "merged": 324}
-{"repo": "nexu-io/nexu", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 168, "merged": 103, "ai_num": 5}
-{"repo": "nexu-io/nexu", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "nexu-io/open-design", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "nexu-io/open-design", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0}
-{"repo": "nexu-io/open-design", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 736, "merged": 1337, "ai_num": 242}
-{"repo": "nexu-io/open-design", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "oceanbase/seekdb-bindings", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "oceanbase/seekdb-bindings", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0}
-{"repo": "oceanbase/seekdb-bindings", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 7, "ai_num": 3}
-{"repo": "oceanbase/seekdb-bindings", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "onyx-dot-app/onyx", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 219}
-{"repo": "onyx-dot-app/onyx", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 1896}
-{"repo": "onyx-dot-app/onyx", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1258, "ai_num": 276}
-{"repo": "onyx-dot-app/onyx", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 1, "merged": 1087}
-{"repo": "openai/codex", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "openai/codex", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 2700, "merged": 2357}
-{"repo": "openai/codex", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 5080, "merged": 2281, "ai_num": 309}
-{"repo": "openai/codex", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 1408, "merged": 1152}
-{"repo": "openai/tart", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 1, "merged": 38}
-{"repo": "openai/tart", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 21}
-{"repo": "openai/tart", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 5, "ai_num": 2}
-{"repo": "openai/tart", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 8}
-{"repo": "openvinotoolkit/openvino", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 36, "merged": 1247}
-{"repo": "openvinotoolkit/openvino", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 65, "merged": 725}
-{"repo": "openvinotoolkit/openvino", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 113, "merged": 542, "ai_num": 12}
-{"repo": "openvinotoolkit/openvino", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 71, "merged": 635}
-{"repo": "plastic-labs/sillytavern-honcho", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "plastic-labs/sillytavern-honcho", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 1}
-{"repo": "plastic-labs/sillytavern-honcho", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 11, "ai_num": 4}
-{"repo": "plastic-labs/sillytavern-honcho", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "plotly/dash", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 14, "merged": 33}
-{"repo": "plotly/dash", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 3, "merged": 40}
-{"repo": "plotly/dash", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 43, "ai_num": 3}
-{"repo": "plotly/dash", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 8, "merged": 38}
-{"repo": "promptfoo/modelaudit", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "promptfoo/modelaudit", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 3, "merged": 269}
-{"repo": "promptfoo/modelaudit", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 610, "ai_num": 25}
-{"repo": "promptfoo/modelaudit", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 68}
-{"repo": "promptfoo/promptfoo", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 118}
-{"repo": "promptfoo/promptfoo", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 678}
-{"repo": "promptfoo/promptfoo", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 689, "ai_num": 144}
-{"repo": "promptfoo/promptfoo", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 2, "merged": 783}
-{"repo": "pytorch/torchtitan", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 4, "merged": 91}
-{"repo": "pytorch/torchtitan", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 4, "merged": 234}
-{"repo": "pytorch/torchtitan", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 380, "ai_num": 9}
-{"repo": "pytorch/torchtitan", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 3, "merged": 197}
-{"repo": "qdrant/qdrant", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 57, "merged": 263}
-{"repo": "qdrant/qdrant", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 27, "merged": 364}
-{"repo": "qdrant/qdrant", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 38, "merged": 476, "ai_num": 165}
-{"repo": "qdrant/qdrant", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 28, "merged": 279}
-{"repo": "qdrant/qdrant-cloud-public-api", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "qdrant/qdrant-cloud-public-api", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 54}
-{"repo": "qdrant/qdrant-cloud-public-api", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 36, "ai_num": 4}
-{"repo": "qdrant/qdrant-cloud-public-api", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 49}
-{"repo": "ray-project/ray", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 699, "merged": 971}
-{"repo": "ray-project/ray", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 150, "merged": 1185}
-{"repo": "ray-project/ray", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 83, "merged": 816, "ai_num": 191}
-{"repo": "ray-project/ray", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 624, "merged": 1313}
-{"repo": "replicate/cog", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 41}
-{"repo": "replicate/cog", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 165}
-{"repo": "replicate/cog", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 80, "ai_num": 0}
-{"repo": "replicate/cog", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 9}
-{"repo": "rtk-ai/rtk", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "rtk-ai/rtk", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 120, "merged": 253}
-{"repo": "rtk-ai/rtk", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 307, "merged": 139, "ai_num": 35}
-{"repo": "rtk-ai/rtk", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "run-llama/llama-ui", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "run-llama/llama-ui", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 71}
-{"repo": "run-llama/llama-ui", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 4, "ai_num": 0}
-{"repo": "run-llama/llama-ui", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 56}
-{"repo": "scikit-learn/scikit-learn", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 66, "merged": 333}
-{"repo": "scikit-learn/scikit-learn", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 55, "merged": 190}
-{"repo": "scikit-learn/scikit-learn", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 33, "merged": 185, "ai_num": 4}
-{"repo": "scikit-learn/scikit-learn", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 44, "merged": 310}
-{"repo": "sgl-project/sgl-kernel-npu", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "sgl-project/sgl-kernel-npu", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 82}
-{"repo": "sgl-project/sgl-kernel-npu", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 64, "ai_num": 3}
-{"repo": "sgl-project/sgl-kernel-npu", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 120}
-{"repo": "sgl-project/sglang", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 7, "merged": 139}
-{"repo": "sgl-project/sglang", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 11, "merged": 2729}
-{"repo": "sgl-project/sglang", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 8, "merged": 2597, "ai_num": 561}
-{"repo": "sgl-project/sglang", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 36, "merged": 2760}
-{"repo": "sgl-project/sglang-jax", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "sgl-project/sglang-jax", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 10, "merged": 130}
-{"repo": "sgl-project/sglang-jax", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 4, "merged": 200, "ai_num": 94}
-{"repo": "sgl-project/sglang-jax", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 24, "merged": 180}
-{"repo": "spiceai/spiceai", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 308}
-{"repo": "spiceai/spiceai", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 718}
-{"repo": "spiceai/spiceai", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 648, "ai_num": 45}
-{"repo": "spiceai/spiceai", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 732}
-{"repo": "spotify/confidence-resolver", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "spotify/confidence-resolver", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 75}
-{"repo": "spotify/confidence-resolver", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 39, "ai_num": 35}
-{"repo": "spotify/confidence-resolver", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 114}
-{"repo": "stanford-crfm/helm", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 18, "merged": 219}
-{"repo": "stanford-crfm/helm", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 93}
-{"repo": "stanford-crfm/helm", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 93, "ai_num": 5}
-{"repo": "stanford-crfm/helm", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 50}
-{"repo": "tenstorrent/tt-blacksmith", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "tenstorrent/tt-blacksmith", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 3, "merged": 111}
-{"repo": "tenstorrent/tt-blacksmith", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 68, "ai_num": 2}
-{"repo": "tenstorrent/tt-blacksmith", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 3, "merged": 71}
-{"repo": "tenstorrent/tt-emule", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "tenstorrent/tt-emule", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0}
-{"repo": "tenstorrent/tt-emule", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 1, "merged": 31, "ai_num": 15}
-{"repo": "tenstorrent/tt-emule", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "tenstorrent/tt-forge-models", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "tenstorrent/tt-forge-models", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 130}
-{"repo": "tenstorrent/tt-forge-models", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 106, "ai_num": 21}
-{"repo": "tenstorrent/tt-forge-models", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 3, "merged": 159}
-{"repo": "tenstorrent/tt-forge-onnx", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "tenstorrent/tt-forge-onnx", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 5, "merged": 88}
-{"repo": "tenstorrent/tt-forge-onnx", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 83, "ai_num": 3}
-{"repo": "tenstorrent/tt-forge-onnx", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 8, "merged": 90}
-{"repo": "tenstorrent/tt-metal", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 362, "merged": 1049}
-{"repo": "tenstorrent/tt-metal", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 347, "merged": 2566}
-{"repo": "tenstorrent/tt-metal", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 263, "merged": 2048, "ai_num": 469}
-{"repo": "tenstorrent/tt-metal", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 434, "merged": 2504}
-{"repo": "tenstorrent/tt-umd", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "tenstorrent/tt-umd", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 6, "merged": 350}
-{"repo": "tenstorrent/tt-umd", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 13, "merged": 183, "ai_num": 42}
-{"repo": "tenstorrent/tt-umd", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 5, "merged": 185}
-{"repo": "tenstorrent/tt-xla", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "tenstorrent/tt-xla", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 320, "merged": 529}
-{"repo": "tenstorrent/tt-xla", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 320, "merged": 369, "ai_num": 60}
-{"repo": "tenstorrent/tt-xla", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 186, "merged": 553}
-{"repo": "thinking-machines-lab/tinker-cookbook", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "thinking-machines-lab/tinker-cookbook", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 181}
-{"repo": "thinking-machines-lab/tinker-cookbook", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 108, "ai_num": 86}
-{"repo": "thinking-machines-lab/tinker-cookbook", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 160}
-{"repo": "topoteretes/cognee-hackathons", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "topoteretes/cognee-hackathons", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0}
-{"repo": "topoteretes/cognee-hackathons", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1, "ai_num": 1}
-{"repo": "topoteretes/cognee-hackathons", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "truefoundry/models", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "truefoundry/models", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 297}
-{"repo": "truefoundry/models", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 334, "ai_num": 4}
-{"repo": "truefoundry/models", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "vllm-project/llm-compressor", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "vllm-project/llm-compressor", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 33, "merged": 195}
-{"repo": "vllm-project/llm-compressor", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 19, "merged": 71, "ai_num": 10}
-{"repo": "vllm-project/llm-compressor", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 54, "merged": 125}
-{"repo": "vllm-project/recipes", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "vllm-project/recipes", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 75}
-{"repo": "vllm-project/recipes", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 147, "ai_num": 32}
-{"repo": "vllm-project/recipes", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 73}
-{"repo": "vllm-project/vime", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "vllm-project/vime", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0}
-{"repo": "vllm-project/vime", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 87, "ai_num": 56}
-{"repo": "vllm-project/vime", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "vllm-project/vllm", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 79, "merged": 395}
-{"repo": "vllm-project/vllm", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 897, "merged": 2805}
-{"repo": "vllm-project/vllm", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 633, "merged": 1902, "ai_num": 259}
-{"repo": "vllm-project/vllm", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 919, "merged": 2499}
-{"repo": "vllm-project/vllm-ascend", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "vllm-project/vllm-ascend", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 335, "merged": 1032}
-{"repo": "vllm-project/vllm-ascend", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 401, "merged": 850, "ai_num": 22}
-{"repo": "vllm-project/vllm-ascend", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 362, "merged": 1055}
-{"repo": "vllm-project/vllm-gaudi", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "vllm-project/vllm-gaudi", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 341}
-{"repo": "vllm-project/vllm-gaudi", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 156, "ai_num": 7}
-{"repo": "vllm-project/vllm-gaudi", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 367}
-{"repo": "vllm-project/vllm-omni", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "vllm-project/vllm-omni", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 302, "merged": 806}
-{"repo": "vllm-project/vllm-omni", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 294, "merged": 785, "ai_num": 109}
-{"repo": "vllm-project/vllm-omni", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 79, "merged": 254}
-{"repo": "weaviate/weaviate", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 56, "merged": 364}
-{"repo": "weaviate/weaviate", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 11, "merged": 556}
-{"repo": "weaviate/weaviate", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 28, "merged": 473, "ai_num": 97}
-{"repo": "weaviate/weaviate", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 19, "merged": 534}
-{"repo": "weaviate/weaviate-python-client", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 8, "merged": 190}
-{"repo": "weaviate/weaviate-python-client", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 45}
-{"repo": "weaviate/weaviate-python-client", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 1, "merged": 23, "ai_num": 3}
-{"repo": "weaviate/weaviate-python-client", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 1, "merged": 44}
-{"repo": "writer/cerebro", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "writer/cerebro", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 141}
-{"repo": "writer/cerebro", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 54, "merged": 368, "ai_num": 193}
-{"repo": "writer/cerebro", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
-{"repo": "zenml-io/zenml", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 20, "merged": 254}
-{"repo": "zenml-io/zenml", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 3, "merged": 142}
-{"repo": "zenml-io/zenml", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 3, "merged": 116, "ai_num": 7}
-{"repo": "zenml-io/zenml", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 10, "merged": 190}
-{"repo": "zilliztech/VectorDBBench", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 4, "merged": 20}
-{"repo": "zilliztech/VectorDBBench", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 24}
-{"repo": "zilliztech/VectorDBBench", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 1, "merged": 25, "ai_num": 8}
-{"repo": "zilliztech/VectorDBBench", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 39}
-{"repo": "zilliztech/memsearch", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0}
-{"repo": "zilliztech/memsearch", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 5, "merged": 151}
-{"repo": "zilliztech/memsearch", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 6, "merged": 84, "ai_num": 4}
-{"repo": "zilliztech/memsearch", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0}
+{"repo": "Arize-ai/openinference", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 24, "merged": 145, "q2": [33, 157]}
+{"repo": "Arize-ai/openinference", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 52, "merged": 177, "q2": [33, 157]}
+{"repo": "Arize-ai/openinference", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 28, "merged": 157, "q2": [33, 157]}
+{"repo": "Arize-ai/openinference", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 71, "merged": 128, "q2": [33, 157]}
+{"repo": "Arize-ai/phoenix", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 76, "merged": 269, "q2": [85, 663]}
+{"repo": "Arize-ai/phoenix", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 97, "merged": 876, "q2": [85, 663]}
+{"repo": "Arize-ai/phoenix", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 68, "merged": 663, "q2": [85, 663]}
+{"repo": "Arize-ai/phoenix", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 83, "merged": 530, "q2": [85, 663]}
+{"repo": "BerriAI/litellm", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 278, "merged": 377, "q2": [458, 1507]}
+{"repo": "BerriAI/litellm", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 821, "merged": 2735, "q2": [458, 1507]}
+{"repo": "BerriAI/litellm", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 448, "merged": 1507, "q2": [458, 1507]}
+{"repo": "BerriAI/litellm", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 796, "merged": 1657, "q2": [458, 1507]}
+{"repo": "ComposioHQ/composio", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 6, "q2": [95, 181]}
+{"repo": "ComposioHQ/composio", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 24, "merged": 466, "q2": [95, 181]}
+{"repo": "ComposioHQ/composio", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 25, "merged": 181, "q2": [95, 181]}
+{"repo": "ComposioHQ/composio", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 25, "merged": 164, "q2": [95, 181]}
+{"repo": "ComposioHQ/helm-charts", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [13, 33]}
+{"repo": "ComposioHQ/helm-charts", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 70, "q2": [13, 33]}
+{"repo": "ComposioHQ/helm-charts", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 33, "q2": [13, 33]}
+{"repo": "ComposioHQ/helm-charts", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 44, "q2": [13, 33]}
+{"repo": "EleutherAI/bergson", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [25, 43]}
+{"repo": "EleutherAI/bergson", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 2, "merged": 70, "q2": [25, 43]}
+{"repo": "EleutherAI/bergson", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 43, "q2": [25, 43]}
+{"repo": "EleutherAI/bergson", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 35, "q2": [25, 43]}
+{"repo": "FlowiseAI/Flowise", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 37, "merged": 148, "q2": [16, 115]}
+{"repo": "FlowiseAI/Flowise", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 53, "merged": 190, "q2": [16, 115]}
+{"repo": "FlowiseAI/Flowise", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 18, "merged": 115, "q2": [16, 115]}
+{"repo": "FlowiseAI/Flowise", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 81, "merged": 83, "q2": [16, 115]}
+{"repo": "Giskard-AI/giskard-hub-python", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [1, 12]}
+{"repo": "Giskard-AI/giskard-hub-python", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 39, "q2": [1, 12]}
+{"repo": "Giskard-AI/giskard-hub-python", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 12, "q2": [1, 12]}
+{"repo": "Giskard-AI/giskard-hub-python", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [1, 12]}
+{"repo": "GoogleCloudPlatform/cymbal-air-toolbox-demo", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 73, "q2": [0, 0]}
+{"repo": "GoogleCloudPlatform/cymbal-air-toolbox-demo", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "GoogleCloudPlatform/cymbal-air-toolbox-demo", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "GoogleCloudPlatform/cymbal-air-toolbox-demo", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1, "q2": [0, 0]}
+{"repo": "GoogleCloudPlatform/generative-ai", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 105, "q2": [0, 77]}
+{"repo": "GoogleCloudPlatform/generative-ai", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 57, "q2": [0, 77]}
+{"repo": "GoogleCloudPlatform/generative-ai", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 77, "q2": [0, 77]}
+{"repo": "GoogleCloudPlatform/generative-ai", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 126, "q2": [0, 77]}
+{"repo": "HKUDS/DeepTutor", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [13, 88]}
+{"repo": "HKUDS/DeepTutor", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 57, "merged": 41, "q2": [13, 88]}
+{"repo": "HKUDS/DeepTutor", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 64, "merged": 88, "q2": [13, 88]}
+{"repo": "HKUDS/DeepTutor", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 2, "merged": 5, "q2": [13, 88]}
+{"repo": "HKUDS/LightRAG", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [117, 192]}
+{"repo": "HKUDS/LightRAG", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 21, "merged": 63, "q2": [117, 192]}
+{"repo": "HKUDS/LightRAG", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 10, "merged": 192, "q2": [117, 192]}
+{"repo": "HKUDS/LightRAG", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 54, "merged": 132, "q2": [117, 192]}
+{"repo": "HKUDS/nanobot", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [91, 518]}
+{"repo": "HKUDS/nanobot", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 19, "merged": 427, "q2": [91, 518]}
+{"repo": "HKUDS/nanobot", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 86, "merged": 518, "q2": [91, 518]}
+{"repo": "HKUDS/nanobot", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [91, 518]}
+{"repo": "Helicone/helicone", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 380, "q2": [6, 8]}
+{"repo": "Helicone/helicone", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 6, "merged": 105, "q2": [6, 8]}
+{"repo": "Helicone/helicone", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 3, "merged": 8, "q2": [6, 8]}
+{"repo": "Helicone/helicone", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 9, "merged": 458, "q2": [6, 8]}
+{"repo": "IBM/mcp-context-forge", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [13, 351]}
+{"repo": "IBM/mcp-context-forge", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 435, "merged": 731, "q2": [13, 351]}
+{"repo": "IBM/mcp-context-forge", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 182, "merged": 351, "q2": [13, 351]}
+{"repo": "IBM/mcp-context-forge", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 97, "merged": 314, "q2": [13, 351]}
+{"repo": "IBM/watsonx-ai-java-sdk", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [0, 12]}
+{"repo": "IBM/watsonx-ai-java-sdk", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 35, "q2": [0, 12]}
+{"repo": "IBM/watsonx-ai-java-sdk", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 12, "q2": [0, 12]}
+{"repo": "IBM/watsonx-ai-java-sdk", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 68, "q2": [0, 12]}
+{"repo": "InternLM/lmdeploy", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 237, "q2": [11, 105]}
+{"repo": "InternLM/lmdeploy", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 139, "q2": [11, 105]}
+{"repo": "InternLM/lmdeploy", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 105, "q2": [11, 105]}
+{"repo": "InternLM/lmdeploy", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 119, "q2": [11, 105]}
+{"repo": "InternLM/xtuner", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 1, "merged": 101, "q2": [4, 174]}
+{"repo": "InternLM/xtuner", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 164, "q2": [4, 174]}
+{"repo": "InternLM/xtuner", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 1, "merged": 174, "q2": [4, 174]}
+{"repo": "InternLM/xtuner", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 204, "q2": [4, 174]}
+{"repo": "Kiln-AI/Kiln", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [89, 201]}
+{"repo": "Kiln-AI/Kiln", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 3, "merged": 183, "q2": [89, 201]}
+{"repo": "Kiln-AI/Kiln", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 1, "merged": 201, "q2": [89, 201]}
+{"repo": "Kiln-AI/Kiln", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 8, "merged": 207, "q2": [89, 201]}
+{"repo": "Mintplex-Labs/anything-llm", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 33, "merged": 157, "q2": [3, 100]}
+{"repo": "Mintplex-Labs/anything-llm", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 10, "merged": 143, "q2": [3, 100]}
+{"repo": "Mintplex-Labs/anything-llm", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 9, "merged": 100, "q2": [3, 100]}
+{"repo": "Mintplex-Labs/anything-llm", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 4, "merged": 104, "q2": [3, 100]}
+{"repo": "NVIDIA-NeMo/Automodel", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [202, 508]}
+{"repo": "NVIDIA-NeMo/Automodel", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 63, "merged": 404, "q2": [202, 508]}
+{"repo": "NVIDIA-NeMo/Automodel", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 25, "merged": 508, "q2": [202, 508]}
+{"repo": "NVIDIA-NeMo/Automodel", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 38, "merged": 262, "q2": [202, 508]}
+{"repo": "NVIDIA-NeMo/Gym", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [59, 244]}
+{"repo": "NVIDIA-NeMo/Gym", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 207, "q2": [59, 244]}
+{"repo": "NVIDIA-NeMo/Gym", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 1, "merged": 244, "q2": [59, 244]}
+{"repo": "NVIDIA-NeMo/Gym", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 161, "q2": [59, 244]}
+{"repo": "NVIDIA-NeMo/Megatron-Bridge", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [173, 576]}
+{"repo": "NVIDIA-NeMo/Megatron-Bridge", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 126, "merged": 641, "q2": [173, 576]}
+{"repo": "NVIDIA-NeMo/Megatron-Bridge", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 57, "merged": 576, "q2": [173, 576]}
+{"repo": "NVIDIA-NeMo/Megatron-Bridge", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 112, "merged": 503, "q2": [173, 576]}
+{"repo": "NVIDIA-NeMo/Run", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [8, 22]}
+{"repo": "NVIDIA-NeMo/Run", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 4, "merged": 45, "q2": [8, 22]}
+{"repo": "NVIDIA-NeMo/Run", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 22, "q2": [8, 22]}
+{"repo": "NVIDIA-NeMo/Run", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 3, "merged": 36, "q2": [8, 22]}
+{"repo": "NVIDIA-NeMo/Safe-Synthesizer", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [14, 115]}
+{"repo": "NVIDIA-NeMo/Safe-Synthesizer", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 21, "merged": 160, "q2": [14, 115]}
+{"repo": "NVIDIA-NeMo/Safe-Synthesizer", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 11, "merged": 115, "q2": [14, 115]}
+{"repo": "NVIDIA-NeMo/Safe-Synthesizer", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [14, 115]}
+{"repo": "NVIDIA-NeMo/nemo-platform", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [7, 173]}
+{"repo": "NVIDIA-NeMo/nemo-platform", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0, "q2": [7, 173]}
+{"repo": "NVIDIA-NeMo/nemo-platform", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 173, "q2": [7, 173]}
+{"repo": "NVIDIA-NeMo/nemo-platform", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [7, 173]}
+{"repo": "NVIDIA/DALI", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 5, "merged": 105, "q2": [1, 98]}
+{"repo": "NVIDIA/DALI", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 2, "merged": 110, "q2": [1, 98]}
+{"repo": "NVIDIA/DALI", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 98, "q2": [1, 98]}
+{"repo": "NVIDIA/DALI", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 1, "merged": 84, "q2": [1, 98]}
+{"repo": "NVIDIA/Megatron-LM", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 7, "merged": 0, "q2": [140, 555]}
+{"repo": "NVIDIA/Megatron-LM", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 54, "merged": 760, "q2": [140, 555]}
+{"repo": "NVIDIA/Megatron-LM", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 63, "merged": 555, "q2": [140, 555]}
+{"repo": "NVIDIA/Megatron-LM", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 73, "merged": 533, "q2": [140, 555]}
+{"repo": "NVIDIA/Model-Optimizer", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [76, 268]}
+{"repo": "NVIDIA/Model-Optimizer", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 19, "merged": 266, "q2": [76, 268]}
+{"repo": "NVIDIA/Model-Optimizer", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 6, "merged": 268, "q2": [76, 268]}
+{"repo": "NVIDIA/Model-Optimizer", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 29, "merged": 233, "q2": [76, 268]}
+{"repo": "NVIDIA/NVFlare", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 6, "merged": 163, "q2": [167, 308]}
+{"repo": "NVIDIA/NVFlare", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 372, "q2": [167, 308]}
+{"repo": "NVIDIA/NVFlare", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 308, "q2": [167, 308]}
+{"repo": "NVIDIA/NVFlare", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 3, "merged": 154, "q2": [167, 308]}
+{"repo": "NVIDIA/NVSentinel", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [23, 116]}
+{"repo": "NVIDIA/NVSentinel", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 28, "merged": 140, "q2": [23, 116]}
+{"repo": "NVIDIA/NVSentinel", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 24, "merged": 116, "q2": [23, 116]}
+{"repo": "NVIDIA/NVSentinel", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 33, "merged": 252, "q2": [23, 116]}
+{"repo": "NVIDIA/NeMo-Retriever", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [64, 309]}
+{"repo": "NVIDIA/NeMo-Retriever", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 8, "merged": 368, "q2": [64, 309]}
+{"repo": "NVIDIA/NeMo-Retriever", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 6, "merged": 309, "q2": [64, 309]}
+{"repo": "NVIDIA/NeMo-Retriever", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 2, "merged": 144, "q2": [64, 309]}
+{"repo": "NVIDIA/NemoClaw", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [291, 1610]}
+{"repo": "NVIDIA/NemoClaw", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 301, "q2": [291, 1610]}
+{"repo": "NVIDIA/NemoClaw", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1610, "q2": [291, 1610]}
+{"repo": "NVIDIA/NemoClaw", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [291, 1610]}
+{"repo": "NVIDIA/OSMO", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [81, 157]}
+{"repo": "NVIDIA/OSMO", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 14, "merged": 359, "q2": [81, 157]}
+{"repo": "NVIDIA/OSMO", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 3, "merged": 157, "q2": [81, 157]}
+{"repo": "NVIDIA/OSMO", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 8, "merged": 134, "q2": [81, 157]}
+{"repo": "NVIDIA/SkillSpector", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [0, 4]}
+{"repo": "NVIDIA/SkillSpector", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0, "q2": [0, 4]}
+{"repo": "NVIDIA/SkillSpector", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 4, "q2": [0, 4]}
+{"repo": "NVIDIA/SkillSpector", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [0, 4]}
+{"repo": "NVIDIA/TensorRT-LLM", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 213, "merged": 28, "q2": [41, 1399]}
+{"repo": "NVIDIA/TensorRT-LLM", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 104, "merged": 1398, "q2": [41, 1399]}
+{"repo": "NVIDIA/TensorRT-LLM", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 41, "merged": 1399, "q2": [41, 1399]}
+{"repo": "NVIDIA/TensorRT-LLM", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 109, "merged": 1456, "q2": [41, 1399]}
+{"repo": "NVIDIA/ai-cloud-validation", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [57, 110]}
+{"repo": "NVIDIA/ai-cloud-validation", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 61, "q2": [57, 110]}
+{"repo": "NVIDIA/ai-cloud-validation", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 110, "q2": [57, 110]}
+{"repo": "NVIDIA/ai-cloud-validation", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [57, 110]}
+{"repo": "NVIDIA/cccl", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 21, "merged": 143, "q2": [7, 635]}
+{"repo": "NVIDIA/cccl", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 5, "merged": 591, "q2": [7, 635]}
+{"repo": "NVIDIA/cccl", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 5, "merged": 635, "q2": [7, 635]}
+{"repo": "NVIDIA/cccl", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 34, "merged": 575, "q2": [7, 635]}
+{"repo": "NVIDIA/cudf-spark", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 136, "merged": 224, "q2": [53, 238]}
+{"repo": "NVIDIA/cudf-spark", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 108, "merged": 190, "q2": [53, 238]}
+{"repo": "NVIDIA/cudf-spark", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 101, "merged": 238, "q2": [53, 238]}
+{"repo": "NVIDIA/cudf-spark", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 117, "merged": 230, "q2": [53, 238]}
+{"repo": "NVIDIA/cuopt", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [65, 204]}
+{"repo": "NVIDIA/cuopt", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 28, "merged": 115, "q2": [65, 204]}
+{"repo": "NVIDIA/cuopt", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 25, "merged": 204, "q2": [65, 204]}
+{"repo": "NVIDIA/cuopt", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 25, "merged": 142, "q2": [65, 204]}
+{"repo": "NVIDIA/cutlass", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 13, "merged": 19, "q2": [1, 35]}
+{"repo": "NVIDIA/cutlass", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 42, "merged": 48, "q2": [1, 35]}
+{"repo": "NVIDIA/cutlass", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 38, "merged": 35, "q2": [1, 35]}
+{"repo": "NVIDIA/cutlass", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 55, "merged": 39, "q2": [1, 35]}
+{"repo": "NVIDIA/nv-cloud-function-helpers", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [1, 1]}
+{"repo": "NVIDIA/nv-cloud-function-helpers", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 4, "q2": [1, 1]}
+{"repo": "NVIDIA/nv-cloud-function-helpers", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1, "q2": [1, 1]}
+{"repo": "NVIDIA/nv-cloud-function-helpers", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [1, 1]}
+{"repo": "NVIDIA/physicsnemo", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 8, "merged": 66, "q2": [6, 114]}
+{"repo": "NVIDIA/physicsnemo", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 18, "merged": 156, "q2": [6, 114]}
+{"repo": "NVIDIA/physicsnemo", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 7, "merged": 114, "q2": [6, 114]}
+{"repo": "NVIDIA/physicsnemo", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 14, "merged": 107, "q2": [6, 114]}
+{"repo": "NVIDIA/skills", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [35, 131]}
+{"repo": "NVIDIA/skills", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 1, "q2": [35, 131]}
+{"repo": "NVIDIA/skills", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 131, "q2": [35, 131]}
+{"repo": "NVIDIA/skills", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [35, 131]}
+{"repo": "NousResearch/hermes-agent", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [214, 4355]}
+{"repo": "NousResearch/hermes-agent", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 1183, "q2": [214, 4355]}
+{"repo": "NousResearch/hermes-agent", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 4355, "q2": [214, 4355]}
+{"repo": "NousResearch/hermes-agent", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 6, "q2": [214, 4355]}
+{"repo": "OpenHands/OpenHands", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 93, "merged": 177, "q2": [317, 422]}
+{"repo": "OpenHands/OpenHands", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 125, "merged": 627, "q2": [317, 422]}
+{"repo": "OpenHands/OpenHands", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 75, "merged": 422, "q2": [317, 422]}
+{"repo": "OpenHands/OpenHands", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 113, "merged": 509, "q2": [317, 422]}
+{"repo": "PaddlePaddle/Paddle", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 1896, "q2": [60, 385]}
+{"repo": "PaddlePaddle/Paddle", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 905, "q2": [60, 385]}
+{"repo": "PaddlePaddle/Paddle", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 385, "q2": [60, 385]}
+{"repo": "PaddlePaddle/Paddle", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1110, "q2": [60, 385]}
+{"repo": "PaddlePaddle/PaddleFleet", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [22, 292]}
+{"repo": "PaddlePaddle/PaddleFleet", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 300, "q2": [22, 292]}
+{"repo": "PaddlePaddle/PaddleFleet", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 292, "q2": [22, 292]}
+{"repo": "PaddlePaddle/PaddleFleet", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 217, "q2": [22, 292]}
+{"repo": "PaddlePaddle/PaddleFormers", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [10, 274]}
+{"repo": "PaddlePaddle/PaddleFormers", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 4, "merged": 553, "q2": [10, 274]}
+{"repo": "PaddlePaddle/PaddleFormers", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 274, "q2": [10, 274]}
+{"repo": "PaddlePaddle/PaddleFormers", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 499, "q2": [10, 274]}
+{"repo": "PrefectHQ/fastmcp", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [103, 223]}
+{"repo": "PrefectHQ/fastmcp", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 147, "merged": 464, "q2": [103, 223]}
+{"repo": "PrefectHQ/fastmcp", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 105, "merged": 223, "q2": [103, 223]}
+{"repo": "PrefectHQ/fastmcp", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 167, "merged": 365, "q2": [103, 223]}
+{"repo": "PrefectHQ/graphs", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 2, "merged": 55, "q2": [0, 0]}
+{"repo": "PrefectHQ/graphs", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 1, "q2": [0, 0]}
+{"repo": "PrefectHQ/graphs", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "PrefectHQ/graphs", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1, "q2": [0, 0]}
+{"repo": "PrefectHQ/prefect", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 96, "merged": 515, "q2": [311, 375]}
+{"repo": "PrefectHQ/prefect", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 113, "merged": 766, "q2": [311, 375]}
+{"repo": "PrefectHQ/prefect", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 70, "merged": 375, "q2": [311, 375]}
+{"repo": "PrefectHQ/prefect", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 115, "merged": 514, "q2": [311, 375]}
+{"repo": "PrefectHQ/prefect-mcp-server", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [1, 1]}
+{"repo": "PrefectHQ/prefect-mcp-server", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 9, "q2": [1, 1]}
+{"repo": "PrefectHQ/prefect-mcp-server", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1, "q2": [1, 1]}
+{"repo": "PrefectHQ/prefect-mcp-server", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 1, "merged": 39, "q2": [1, 1]}
+{"repo": "PrefectHQ/terraform-provider-prefect", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 3, "merged": 8, "q2": [0, 4]}
+{"repo": "PrefectHQ/terraform-provider-prefect", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 10, "merged": 22, "q2": [0, 4]}
+{"repo": "PrefectHQ/terraform-provider-prefect", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 4, "q2": [0, 4]}
+{"repo": "PrefectHQ/terraform-provider-prefect", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 5, "merged": 21, "q2": [0, 4]}
+{"repo": "PrimeIntellect-ai/prime-rl", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [168, 277]}
+{"repo": "PrimeIntellect-ai/prime-rl", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 403, "q2": [168, 277]}
+{"repo": "PrimeIntellect-ai/prime-rl", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 3, "merged": 277, "q2": [168, 277]}
+{"repo": "PrimeIntellect-ai/prime-rl", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 4, "merged": 253, "q2": [168, 277]}
+{"repo": "PrimeIntellect-ai/research-environments", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [102, 148]}
+{"repo": "PrimeIntellect-ai/research-environments", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 114, "q2": [102, 148]}
+{"repo": "PrimeIntellect-ai/research-environments", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 148, "q2": [102, 148]}
+{"repo": "PrimeIntellect-ai/research-environments", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 67, "q2": [102, 148]}
+{"repo": "PrimeIntellect-ai/verifiers", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [219, 306]}
+{"repo": "PrimeIntellect-ai/verifiers", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 281, "q2": [219, 306]}
+{"repo": "PrimeIntellect-ai/verifiers", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 306, "q2": [219, 306]}
+{"repo": "PrimeIntellect-ai/verifiers", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 129, "q2": [219, 306]}
+{"repo": "QwenLM/qwen-code", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [120, 839]}
+{"repo": "QwenLM/qwen-code", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 405, "q2": [120, 839]}
+{"repo": "QwenLM/qwen-code", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 839, "q2": [120, 839]}
+{"repo": "QwenLM/qwen-code", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 162, "q2": [120, 839]}
+{"repo": "Significant-Gravitas/AutoGPT", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 1, "merged": 34, "q2": [99, 360]}
+{"repo": "Significant-Gravitas/AutoGPT", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 6, "merged": 460, "q2": [99, 360]}
+{"repo": "Significant-Gravitas/AutoGPT", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 8, "merged": 360, "q2": [99, 360]}
+{"repo": "Significant-Gravitas/AutoGPT", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 54, "merged": 298, "q2": [99, 360]}
+{"repo": "Tencent/WeKnora", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [31, 423]}
+{"repo": "Tencent/WeKnora", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 59, "merged": 179, "q2": [31, 423]}
+{"repo": "Tencent/WeKnora", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 77, "merged": 423, "q2": [31, 423]}
+{"repo": "Tencent/WeKnora", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 40, "merged": 58, "q2": [31, 423]}
+{"repo": "Tencent/ncnn", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 5, "merged": 58, "q2": [1, 71]}
+{"repo": "Tencent/ncnn", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 2, "merged": 78, "q2": [1, 71]}
+{"repo": "Tencent/ncnn", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 71, "q2": [1, 71]}
+{"repo": "Tencent/ncnn", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 1, "merged": 62, "q2": [1, 71]}
+{"repo": "Unstructured-IO/unstructured", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 71, "merged": 161, "q2": [5, 21]}
+{"repo": "Unstructured-IO/unstructured", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 5, "merged": 87, "q2": [5, 21]}
+{"repo": "Unstructured-IO/unstructured", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 1, "merged": 21, "q2": [5, 21]}
+{"repo": "Unstructured-IO/unstructured", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 4, "merged": 16, "q2": [5, 21]}
+{"repo": "Unstructured-IO/unstructured-inference", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 10, "q2": [0, 13]}
+{"repo": "Unstructured-IO/unstructured-inference", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 18, "q2": [0, 13]}
+{"repo": "Unstructured-IO/unstructured-inference", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 13, "q2": [0, 13]}
+{"repo": "Unstructured-IO/unstructured-inference", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 11, "q2": [0, 13]}
+{"repo": "aaif-goose/goose", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [72, 563]}
+{"repo": "aaif-goose/goose", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 937, "q2": [72, 563]}
+{"repo": "aaif-goose/goose", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 563, "q2": [72, 563]}
+{"repo": "aaif-goose/goose", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 725, "q2": [72, 563]}
+{"repo": "agno-agi/docs", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [20, 64]}
+{"repo": "agno-agi/docs", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 3, "merged": 125, "q2": [20, 64]}
+{"repo": "agno-agi/docs", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 64, "q2": [20, 64]}
+{"repo": "agno-agi/docs", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 190, "q2": [20, 64]}
+{"repo": "aiming-lab/MetaClaw", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "aiming-lab/MetaClaw", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 10, "q2": [0, 0]}
+{"repo": "aiming-lab/MetaClaw", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "aiming-lab/MetaClaw", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "algorithmicsuperintelligence/optillm", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [2, 2]}
+{"repo": "algorithmicsuperintelligence/optillm", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 4, "q2": [2, 2]}
+{"repo": "algorithmicsuperintelligence/optillm", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 2, "q2": [2, 2]}
+{"repo": "algorithmicsuperintelligence/optillm", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 3, "merged": 13, "q2": [2, 2]}
+{"repo": "alibaba/rtp-llm", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 5, "q2": [23, 105]}
+{"repo": "alibaba/rtp-llm", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 175, "q2": [23, 105]}
+{"repo": "alibaba/rtp-llm", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 105, "q2": [23, 105]}
+{"repo": "alibaba/rtp-llm", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 192, "q2": [23, 105]}
+{"repo": "allenai/S2APLER", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [1, 2]}
+{"repo": "allenai/S2APLER", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0, "q2": [1, 2]}
+{"repo": "allenai/S2APLER", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 2, "q2": [1, 2]}
+{"repo": "allenai/S2APLER", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1, "q2": [1, 2]}
+{"repo": "allenai/asta-extension", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "allenai/asta-extension", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 1, "q2": [0, 0]}
+{"repo": "allenai/asta-extension", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "allenai/asta-extension", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 18, "q2": [0, 0]}
+{"repo": "allenai/open-instruct", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 21, "q2": [54, 75]}
+{"repo": "allenai/open-instruct", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 191, "q2": [54, 75]}
+{"repo": "allenai/open-instruct", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 75, "q2": [54, 75]}
+{"repo": "allenai/open-instruct", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 191, "q2": [54, 75]}
+{"repo": "anthropics/buffa", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [5, 95]}
+{"repo": "anthropics/buffa", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 15, "q2": [5, 95]}
+{"repo": "anthropics/buffa", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 95, "q2": [5, 95]}
+{"repo": "anthropics/buffa", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [5, 95]}
+{"repo": "anthropics/claude-code-action", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [16, 52]}
+{"repo": "anthropics/claude-code-action", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 121, "merged": 59, "q2": [16, 52]}
+{"repo": "anthropics/claude-code-action", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 77, "merged": 52, "q2": [16, 52]}
+{"repo": "anthropics/claude-code-action", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 56, "merged": 38, "q2": [16, 52]}
+{"repo": "apache/airflow", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 1256, "q2": [67, 1743]}
+{"repo": "apache/airflow", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 2296, "q2": [67, 1743]}
+{"repo": "apache/airflow", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1743, "q2": [67, 1743]}
+{"repo": "apache/airflow", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1951, "q2": [67, 1743]}
+{"repo": "apache/doris", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 2823, "q2": [161, 1127]}
+{"repo": "apache/doris", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 1259, "q2": [161, 1127]}
+{"repo": "apache/doris", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1127, "q2": [161, 1127]}
+{"repo": "apache/doris", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1449, "q2": [161, 1127]}
+{"repo": "basetenlabs/truss", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 1, "merged": 77, "q2": [51, 103]}
+{"repo": "basetenlabs/truss", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 170, "q2": [51, 103]}
+{"repo": "basetenlabs/truss", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 103, "q2": [51, 103]}
+{"repo": "basetenlabs/truss", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 94, "q2": [51, 103]}
+{"repo": "browser-use/browser-harness", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [53, 200]}
+{"repo": "browser-use/browser-harness", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0, "q2": [53, 200]}
+{"repo": "browser-use/browser-harness", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 5, "merged": 200, "q2": [53, 200]}
+{"repo": "browser-use/browser-harness", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [53, 200]}
+{"repo": "bytedance/deer-flow", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [78, 384]}
+{"repo": "bytedance/deer-flow", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 5, "merged": 299, "q2": [78, 384]}
+{"repo": "bytedance/deer-flow", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 46, "merged": 384, "q2": [78, 384]}
+{"repo": "bytedance/deer-flow", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 2, "merged": 96, "q2": [78, 384]}
+{"repo": "cactus-compute/cactus", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [3, 72]}
+{"repo": "cactus-compute/cactus", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 144, "q2": [3, 72]}
+{"repo": "cactus-compute/cactus", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 1, "merged": 72, "q2": [3, 72]}
+{"repo": "cactus-compute/cactus", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 64, "q2": [3, 72]}
+{"repo": "character-ai/claude-agent-sdk-go", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [8, 8]}
+{"repo": "character-ai/claude-agent-sdk-go", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 21, "q2": [8, 8]}
+{"repo": "character-ai/claude-agent-sdk-go", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 8, "q2": [8, 8]}
+{"repo": "character-ai/claude-agent-sdk-go", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [8, 8]}
+{"repo": "character-ai/larch", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [1348, 1698]}
+{"repo": "character-ai/larch", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0, "q2": [1348, 1698]}
+{"repo": "character-ai/larch", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 51, "merged": 1698, "q2": [1348, 1698]}
+{"repo": "character-ai/larch", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [1348, 1698]}
+{"repo": "chroma-core/chroma", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 56, "merged": 164, "q2": [26, 225]}
+{"repo": "chroma-core/chroma", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 23, "merged": 463, "q2": [26, 225]}
+{"repo": "chroma-core/chroma", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 11, "merged": 225, "q2": [26, 225]}
+{"repo": "chroma-core/chroma", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 40, "merged": 428, "q2": [26, 225]}
+{"repo": "comet-ml/opik", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 5, "q2": [339, 737]}
+{"repo": "comet-ml/opik", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 9, "merged": 980, "q2": [339, 737]}
+{"repo": "comet-ml/opik", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 5, "merged": 737, "q2": [339, 737]}
+{"repo": "comet-ml/opik", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 15, "merged": 764, "q2": [339, 737]}
+{"repo": "crewAIInc/crewAI", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 4, "merged": 56, "q2": [15, 319]}
+{"repo": "crewAIInc/crewAI", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 65, "merged": 275, "q2": [15, 319]}
+{"repo": "crewAIInc/crewAI", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 33, "merged": 319, "q2": [15, 319]}
+{"repo": "crewAIInc/crewAI", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 88, "merged": 191, "q2": [15, 319]}
+{"repo": "dataelement/Clawith", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [10, 75]}
+{"repo": "dataelement/Clawith", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 46, "merged": 53, "q2": [10, 75]}
+{"repo": "dataelement/Clawith", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 102, "merged": 75, "q2": [10, 75]}
+{"repo": "dataelement/Clawith", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [10, 75]}
+{"repo": "deepset-ai/haystack-core-integrations", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 27, "merged": 293, "q2": [27, 204]}
+{"repo": "deepset-ai/haystack-core-integrations", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 6, "merged": 311, "q2": [27, 204]}
+{"repo": "deepset-ai/haystack-core-integrations", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 204, "q2": [27, 204]}
+{"repo": "deepset-ai/haystack-core-integrations", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 7, "merged": 209, "q2": [27, 204]}
+{"repo": "dotnet/machinelearning", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 10, "merged": 57, "q2": [0, 3]}
+{"repo": "dotnet/machinelearning", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 13, "q2": [0, 3]}
+{"repo": "dotnet/machinelearning", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 3, "q2": [0, 3]}
+{"repo": "dotnet/machinelearning", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 19, "q2": [0, 3]}
+{"repo": "fal-ai/fal", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 89, "q2": [17, 79]}
+{"repo": "fal-ai/fal", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 162, "q2": [17, 79]}
+{"repo": "fal-ai/fal", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 79, "q2": [17, 79]}
+{"repo": "fal-ai/fal", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 91, "q2": [17, 79]}
+{"repo": "flashinfer-ai/flashinfer", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 109, "q2": [60, 256]}
+{"repo": "flashinfer-ai/flashinfer", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 26, "merged": 290, "q2": [60, 256]}
+{"repo": "flashinfer-ai/flashinfer", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 5, "merged": 256, "q2": [60, 256]}
+{"repo": "flashinfer-ai/flashinfer", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 40, "merged": 256, "q2": [60, 256]}
+{"repo": "flyteorg/flyte-sdk", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [37, 188]}
+{"repo": "flyteorg/flyte-sdk", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 285, "q2": [37, 188]}
+{"repo": "flyteorg/flyte-sdk", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 188, "q2": [37, 188]}
+{"repo": "flyteorg/flyte-sdk", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 221, "q2": [37, 188]}
+{"repo": "ggml-org/llama.cpp", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 27, "merged": 688, "q2": [7, 910]}
+{"repo": "ggml-org/llama.cpp", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 76, "merged": 1011, "q2": [7, 910]}
+{"repo": "ggml-org/llama.cpp", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 32, "merged": 910, "q2": [7, 910]}
+{"repo": "ggml-org/llama.cpp", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 101, "merged": 919, "q2": [7, 910]}
+{"repo": "google-gemini/gemini-cli", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [2, 505]}
+{"repo": "google-gemini/gemini-cli", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 1816, "q2": [2, 505]}
+{"repo": "google-gemini/gemini-cli", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 505, "q2": [2, 505]}
+{"repo": "google-gemini/gemini-cli", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1121, "q2": [2, 505]}
+{"repo": "google/generative-ai-docs", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 62, "q2": [0, 0]}
+{"repo": "google/generative-ai-docs", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 2, "q2": [0, 0]}
+{"repo": "google/generative-ai-docs", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "google/generative-ai-docs", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 5, "q2": [0, 0]}
+{"repo": "google/torchax", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [0, 8]}
+{"repo": "google/torchax", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 16, "q2": [0, 8]}
+{"repo": "google/torchax", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 8, "q2": [0, 8]}
+{"repo": "google/torchax", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 40, "q2": [0, 8]}
+{"repo": "groq/openbench", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "groq/openbench", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 2, "merged": 0, "q2": [0, 0]}
+{"repo": "groq/openbench", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "groq/openbench", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 110, "q2": [0, 0]}
+{"repo": "hao-ai-lab/FastVideo", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [5, 145]}
+{"repo": "hao-ai-lab/FastVideo", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 143, "q2": [5, 145]}
+{"repo": "hao-ai-lab/FastVideo", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 145, "q2": [5, 145]}
+{"repo": "hao-ai-lab/FastVideo", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 8, "merged": 77, "q2": [5, 145]}
+{"repo": "huggingface/ai-deadlines", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [0, 6]}
+{"repo": "huggingface/ai-deadlines", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 90, "q2": [0, 6]}
+{"repo": "huggingface/ai-deadlines", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 6, "q2": [0, 6]}
+{"repo": "huggingface/ai-deadlines", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 36, "q2": [0, 6]}
+{"repo": "huggingface/candle", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 226, "q2": [0, 30]}
+{"repo": "huggingface/candle", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 39, "q2": [0, 30]}
+{"repo": "huggingface/candle", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 30, "q2": [0, 30]}
+{"repo": "huggingface/candle", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 83, "q2": [0, 30]}
+{"repo": "huggingface/diffusers", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 225, "merged": 441, "q2": [12, 175]}
+{"repo": "huggingface/diffusers", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 49, "merged": 239, "q2": [12, 175]}
+{"repo": "huggingface/diffusers", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 28, "merged": 175, "q2": [12, 175]}
+{"repo": "huggingface/diffusers", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 72, "merged": 224, "q2": [12, 175]}
+{"repo": "huggingface/huggingface_hub", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 41, "merged": 114, "q2": [89, 172]}
+{"repo": "huggingface/huggingface_hub", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 36, "merged": 209, "q2": [89, 172]}
+{"repo": "huggingface/huggingface_hub", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 21, "merged": 172, "q2": [89, 172]}
+{"repo": "huggingface/huggingface_hub", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 40, "merged": 134, "q2": [89, 172]}
+{"repo": "huggingface/kernels", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [0, 141]}
+{"repo": "huggingface/kernels", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 160, "q2": [0, 141]}
+{"repo": "huggingface/kernels", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 5, "merged": 141, "q2": [0, 141]}
+{"repo": "huggingface/kernels", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 34, "q2": [0, 141]}
+{"repo": "huggingface/kernels-community", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [0, 222]}
+{"repo": "huggingface/kernels-community", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 310, "q2": [0, 222]}
+{"repo": "huggingface/kernels-community", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 222, "q2": [0, 222]}
+{"repo": "huggingface/kernels-community", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 72, "q2": [0, 222]}
+{"repo": "huggingface/optimum-intel", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 2, "merged": 121, "q2": [0, 25]}
+{"repo": "huggingface/optimum-intel", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 39, "q2": [0, 25]}
+{"repo": "huggingface/optimum-intel", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 25, "q2": [0, 25]}
+{"repo": "huggingface/optimum-intel", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 83, "q2": [0, 25]}
+{"repo": "huggingface/skills", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [1, 20]}
+{"repo": "huggingface/skills", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 38, "q2": [1, 20]}
+{"repo": "huggingface/skills", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 20, "q2": [1, 20]}
+{"repo": "huggingface/skills", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 17, "q2": [1, 20]}
+{"repo": "huggingface/transformers", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 30, "merged": 647, "q2": [27, 535]}
+{"repo": "huggingface/transformers", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 267, "merged": 888, "q2": [27, 535]}
+{"repo": "huggingface/transformers", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 118, "merged": 535, "q2": [27, 535]}
+{"repo": "huggingface/transformers", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 243, "merged": 909, "q2": [27, 535]}
+{"repo": "imbue-ai/mngr", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [434, 533]}
+{"repo": "imbue-ai/mngr", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 21, "merged": 694, "q2": [434, 533]}
+{"repo": "imbue-ai/mngr", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 533, "q2": [434, 533]}
+{"repo": "imbue-ai/mngr", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [434, 533]}
+{"repo": "infiniflow/ragflow", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 155, "q2": [92, 974]}
+{"repo": "infiniflow/ragflow", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 697, "q2": [92, 974]}
+{"repo": "infiniflow/ragflow", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 974, "q2": [92, 974]}
+{"repo": "infiniflow/ragflow", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 925, "q2": [92, 974]}
+{"repo": "intel/ipex-llm", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 536, "q2": [0, 0]}
+{"repo": "intel/ipex-llm", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "intel/ipex-llm", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "intel/ipex-llm", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1, "q2": [0, 0]}
+{"repo": "jina-ai/cli", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [0, 1]}
+{"repo": "jina-ai/cli", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 3, "q2": [0, 1]}
+{"repo": "jina-ai/cli", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1, "q2": [0, 1]}
+{"repo": "jina-ai/cli", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [0, 1]}
+{"repo": "kserve/kserve", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 83, "q2": [18, 146]}
+{"repo": "kserve/kserve", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 212, "q2": [18, 146]}
+{"repo": "kserve/kserve", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 146, "q2": [18, 146]}
+{"repo": "kserve/kserve", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 79, "q2": [18, 146]}
+{"repo": "lance-format/lance", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 15, "merged": 219, "q2": [131, 342]}
+{"repo": "lance-format/lance", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 16, "merged": 384, "q2": [131, 342]}
+{"repo": "lance-format/lance", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 6, "merged": 342, "q2": [131, 342]}
+{"repo": "lance-format/lance", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 18, "merged": 365, "q2": [131, 342]}
+{"repo": "lancedb/lancedb", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 59, "merged": 198, "q2": [44, 111]}
+{"repo": "lancedb/lancedb", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 35, "merged": 132, "q2": [44, 111]}
+{"repo": "lancedb/lancedb", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 10, "merged": 111, "q2": [44, 111]}
+{"repo": "lancedb/lancedb", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 23, "merged": 89, "q2": [44, 111]}
+{"repo": "langchain-ai/deepagents", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [17, 609]}
+{"repo": "langchain-ai/deepagents", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 106, "merged": 963, "q2": [17, 609]}
+{"repo": "langchain-ai/deepagents", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 67, "merged": 609, "q2": [17, 609]}
+{"repo": "langchain-ai/deepagents", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 19, "merged": 195, "q2": [17, 609]}
+{"repo": "langchain-ai/langchain", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 721, "merged": 1787, "q2": [7, 261]}
+{"repo": "langchain-ai/langchain", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 151, "merged": 462, "q2": [7, 261]}
+{"repo": "langchain-ai/langchain", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 100, "merged": 261, "q2": [7, 261]}
+{"repo": "langchain-ai/langchain", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 147, "merged": 713, "q2": [7, 261]}
+{"repo": "langchain-ai/langchain-datastax", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 12, "q2": [0, 0]}
+{"repo": "langchain-ai/langchain-datastax", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 2, "q2": [0, 0]}
+{"repo": "langchain-ai/langchain-datastax", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "langchain-ai/langchain-datastax", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 8, "q2": [0, 0]}
+{"repo": "langchain-ai/langchain-meta", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "langchain-ai/langchain-meta", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 3, "q2": [0, 0]}
+{"repo": "langchain-ai/langchain-meta", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "langchain-ai/langchain-meta", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "langchain-ai/langgraph", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 1, "merged": 127, "q2": [32, 153]}
+{"repo": "langchain-ai/langgraph", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 48, "merged": 151, "q2": [32, 153]}
+{"repo": "langchain-ai/langgraph", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 36, "merged": 153, "q2": [32, 153]}
+{"repo": "langchain-ai/langgraph", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 93, "merged": 117, "q2": [32, 153]}
+{"repo": "langflow-ai/langflow", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 93, "merged": 119, "q2": [47, 630]}
+{"repo": "langflow-ai/langflow", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 80, "merged": 513, "q2": [47, 630]}
+{"repo": "langflow-ai/langflow", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 54, "merged": 630, "q2": [47, 630]}
+{"repo": "langflow-ai/langflow", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 127, "merged": 490, "q2": [47, 630]}
+{"repo": "langfuse/langfuse", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 23, "merged": 306, "q2": [189, 559]}
+{"repo": "langfuse/langfuse", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 205, "merged": 638, "q2": [189, 559]}
+{"repo": "langfuse/langfuse", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 127, "merged": 559, "q2": [189, 559]}
+{"repo": "langfuse/langfuse", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 236, "merged": 859, "q2": [189, 559]}
+{"repo": "langfuse/langfuse-docs", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 83, "q2": [106, 214]}
+{"repo": "langfuse/langfuse-docs", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 3, "merged": 223, "q2": [106, 214]}
+{"repo": "langfuse/langfuse-docs", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 5, "merged": 214, "q2": [106, 214]}
+{"repo": "langfuse/langfuse-docs", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 3, "merged": 233, "q2": [106, 214]}
+{"repo": "langgenius/dify", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 653, "q2": [220, 1173]}
+{"repo": "langgenius/dify", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 1228, "q2": [220, 1173]}
+{"repo": "langgenius/dify", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 281, "merged": 1173, "q2": [220, 1173]}
+{"repo": "langgenius/dify", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1047, "q2": [220, 1173]}
+{"repo": "lightly-ai/lightly-studio", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [48, 444]}
+{"repo": "lightly-ai/lightly-studio", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 4, "merged": 430, "q2": [48, 444]}
+{"repo": "lightly-ai/lightly-studio", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 444, "q2": [48, 444]}
+{"repo": "lightly-ai/lightly-studio", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 327, "q2": [48, 444]}
+{"repo": "maximhq/bifrost", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [10, 1083]}
+{"repo": "maximhq/bifrost", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 114, "merged": 809, "q2": [10, 1083]}
+{"repo": "maximhq/bifrost", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 135, "merged": 1083, "q2": [10, 1083]}
+{"repo": "maximhq/bifrost", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 33, "merged": 441, "q2": [10, 1083]}
+{"repo": "mem0ai/mem0", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 9, "merged": 136, "q2": [43, 193]}
+{"repo": "mem0ai/mem0", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 42, "merged": 162, "q2": [43, 193]}
+{"repo": "mem0ai/mem0", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 61, "merged": 193, "q2": [43, 193]}
+{"repo": "mem0ai/mem0", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 42, "merged": 73, "q2": [43, 193]}
+{"repo": "microsoft/Build26-BRK231-deploy-observe-learn-reinforcement-learning-for-production-agents", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [2, 2]}
+{"repo": "microsoft/Build26-BRK231-deploy-observe-learn-reinforcement-learning-for-production-agents", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0, "q2": [2, 2]}
+{"repo": "microsoft/Build26-BRK231-deploy-observe-learn-reinforcement-learning-for-production-agents", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 2, "q2": [2, 2]}
+{"repo": "microsoft/Build26-BRK231-deploy-observe-learn-reinforcement-learning-for-production-agents", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [2, 2]}
+{"repo": "microsoft/agent-framework", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [22, 496]}
+{"repo": "microsoft/agent-framework", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 336, "merged": 667, "q2": [22, 496]}
+{"repo": "microsoft/agent-framework", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 177, "merged": 496, "q2": [22, 496]}
+{"repo": "microsoft/agent-framework", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 28, "merged": 693, "q2": [22, 496]}
+{"repo": "microsoft/agent-governance-toolkit", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [108, 1220]}
+{"repo": "microsoft/agent-governance-toolkit", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 27, "merged": 216, "q2": [108, 1220]}
+{"repo": "microsoft/agent-governance-toolkit", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 18, "merged": 1220, "q2": [108, 1220]}
+{"repo": "microsoft/agent-governance-toolkit", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [108, 1220]}
+{"repo": "microsoft/agent-lightning", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [0, 1]}
+{"repo": "microsoft/agent-lightning", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 4, "merged": 7, "q2": [0, 1]}
+{"repo": "microsoft/agent-lightning", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1, "q2": [0, 1]}
+{"repo": "microsoft/agent-lightning", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 2, "merged": 196, "q2": [0, 1]}
+{"repo": "microsoft/ai-agents-for-beginners", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [2, 27]}
+{"repo": "microsoft/ai-agents-for-beginners", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0, "q2": [2, 27]}
+{"repo": "microsoft/ai-agents-for-beginners", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 27, "q2": [2, 27]}
+{"repo": "microsoft/ai-agents-for-beginners", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 59, "q2": [2, 27]}
+{"repo": "microsoft/debug-gym", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "microsoft/debug-gym", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 26, "q2": [0, 0]}
+{"repo": "microsoft/debug-gym", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 0, "q2": [0, 0]}
+{"repo": "microsoft/debug-gym", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 2, "merged": 47, "q2": [0, 0]}
+{"repo": "microsoft/promptflow", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 65, "merged": 629, "q2": [0, 13]}
+{"repo": "microsoft/promptflow", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 3, "q2": [0, 13]}
+{"repo": "microsoft/promptflow", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 4, "merged": 13, "q2": [0, 13]}
+{"repo": "microsoft/promptflow", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 2, "merged": 8, "q2": [0, 13]}
+{"repo": "microsoft/semantic-kernel", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 52, "merged": 459, "q2": [1, 41]}
+{"repo": "microsoft/semantic-kernel", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 28, "merged": 87, "q2": [1, 41]}
+{"repo": "microsoft/semantic-kernel", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 6, "merged": 41, "q2": [1, 41]}
+{"repo": "microsoft/semantic-kernel", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 42, "merged": 74, "q2": [1, 41]}
+{"repo": "milvus-io/milvus", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 979, "q2": [246, 819]}
+{"repo": "milvus-io/milvus", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 889, "q2": [246, 819]}
+{"repo": "milvus-io/milvus", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 819, "q2": [246, 819]}
+{"repo": "milvus-io/milvus", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 1100, "q2": [246, 819]}
+{"repo": "milvus-io/milvus-docs", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 80, "q2": [0, 39]}
+{"repo": "milvus-io/milvus-docs", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 51, "q2": [0, 39]}
+{"repo": "milvus-io/milvus-docs", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 39, "q2": [0, 39]}
+{"repo": "milvus-io/milvus-docs", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 70, "q2": [0, 39]}
+{"repo": "milvus-io/milvus-sdk-node", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 18, "q2": [10, 39]}
+{"repo": "milvus-io/milvus-sdk-node", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 32, "q2": [10, 39]}
+{"repo": "milvus-io/milvus-sdk-node", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 39, "q2": [10, 39]}
+{"repo": "milvus-io/milvus-sdk-node", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 16, "q2": [10, 39]}
+{"repo": "milvus-io/milvus-sdk-rust", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 7, "q2": [0, 9]}
+{"repo": "milvus-io/milvus-sdk-rust", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0, "q2": [0, 9]}
+{"repo": "milvus-io/milvus-sdk-rust", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 9, "q2": [0, 9]}
+{"repo": "milvus-io/milvus-sdk-rust", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [0, 9]}
+{"repo": "mindsdb/cowork", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [28, 105]}
+{"repo": "mindsdb/cowork", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 5, "q2": [28, 105]}
+{"repo": "mindsdb/cowork", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 105, "q2": [28, 105]}
+{"repo": "mindsdb/cowork", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [28, 105]}
+{"repo": "ml-explore/mlx", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 45, "merged": 294, "q2": [6, 104]}
+{"repo": "ml-explore/mlx", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 19, "merged": 180, "q2": [6, 104]}
+{"repo": "ml-explore/mlx", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 23, "merged": 104, "q2": [6, 104]}
+{"repo": "ml-explore/mlx", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 14, "merged": 181, "q2": [6, 104]}
+{"repo": "mlflow/mlflow", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 98, "merged": 483, "q2": [685, 831]}
+{"repo": "mlflow/mlflow", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 130, "merged": 1614, "q2": [685, 831]}
+{"repo": "mlflow/mlflow", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 94, "merged": 831, "q2": [685, 831]}
+{"repo": "mlflow/mlflow", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 116, "merged": 1045, "q2": [685, 831]}
+{"repo": "modelscope/ms-swift", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 7, "merged": 217, "q2": [4, 235]}
+{"repo": "modelscope/ms-swift", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 214, "merged": 276, "q2": [4, 235]}
+{"repo": "modelscope/ms-swift", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 126, "merged": 235, "q2": [4, 235]}
+{"repo": "modelscope/ms-swift", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 66, "merged": 390, "q2": [4, 235]}
+{"repo": "mozilla/bigquery-etl", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 1, "merged": 373, "q2": [0, 321]}
+{"repo": "mozilla/bigquery-etl", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 389, "q2": [0, 321]}
+{"repo": "mozilla/bigquery-etl", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 321, "q2": [0, 321]}
+{"repo": "mozilla/bigquery-etl", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 400, "q2": [0, 321]}
+{"repo": "mozilla/fx-desktop-qa-automation", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [0, 86]}
+{"repo": "mozilla/fx-desktop-qa-automation", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 204, "q2": [0, 86]}
+{"repo": "mozilla/fx-desktop-qa-automation", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 86, "q2": [0, 86]}
+{"repo": "mozilla/fx-desktop-qa-automation", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 145, "q2": [0, 86]}
+{"repo": "mozilla/fxa", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 244, "q2": [2, 277]}
+{"repo": "mozilla/fxa", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 331, "q2": [2, 277]}
+{"repo": "mozilla/fxa", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 277, "q2": [2, 277]}
+{"repo": "mozilla/fxa", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 235, "q2": [2, 277]}
+{"repo": "neuralmagic/nyann-bench", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [22, 24]}
+{"repo": "neuralmagic/nyann-bench", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 21, "q2": [22, 24]}
+{"repo": "neuralmagic/nyann-bench", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 24, "q2": [22, 24]}
+{"repo": "neuralmagic/nyann-bench", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [22, 24]}
+{"repo": "nexu-io/nexu", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [5, 103]}
+{"repo": "nexu-io/nexu", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 98, "merged": 324, "q2": [5, 103]}
+{"repo": "nexu-io/nexu", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 168, "merged": 103, "q2": [5, 103]}
+{"repo": "nexu-io/nexu", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [5, 103]}
+{"repo": "nexu-io/open-design", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [242, 1337]}
+{"repo": "nexu-io/open-design", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0, "q2": [242, 1337]}
+{"repo": "nexu-io/open-design", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 736, "merged": 1337, "q2": [242, 1337]}
+{"repo": "nexu-io/open-design", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [242, 1337]}
+{"repo": "oceanbase/seekdb-bindings", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [3, 7]}
+{"repo": "oceanbase/seekdb-bindings", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0, "q2": [3, 7]}
+{"repo": "oceanbase/seekdb-bindings", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 7, "q2": [3, 7]}
+{"repo": "oceanbase/seekdb-bindings", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [3, 7]}
+{"repo": "onyx-dot-app/onyx", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 219, "q2": [276, 1258]}
+{"repo": "onyx-dot-app/onyx", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 1896, "q2": [276, 1258]}
+{"repo": "onyx-dot-app/onyx", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1258, "q2": [276, 1258]}
+{"repo": "onyx-dot-app/onyx", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 1, "merged": 1087, "q2": [276, 1258]}
+{"repo": "openai/codex", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [309, 2281]}
+{"repo": "openai/codex", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 2700, "merged": 2357, "q2": [309, 2281]}
+{"repo": "openai/codex", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 5080, "merged": 2281, "q2": [309, 2281]}
+{"repo": "openai/codex", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 1408, "merged": 1152, "q2": [309, 2281]}
+{"repo": "openai/tart", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 1, "merged": 38, "q2": [2, 5]}
+{"repo": "openai/tart", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 21, "q2": [2, 5]}
+{"repo": "openai/tart", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 5, "q2": [2, 5]}
+{"repo": "openai/tart", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 8, "q2": [2, 5]}
+{"repo": "openvinotoolkit/openvino", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 36, "merged": 1247, "q2": [12, 542]}
+{"repo": "openvinotoolkit/openvino", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 65, "merged": 725, "q2": [12, 542]}
+{"repo": "openvinotoolkit/openvino", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 113, "merged": 542, "q2": [12, 542]}
+{"repo": "openvinotoolkit/openvino", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 71, "merged": 635, "q2": [12, 542]}
+{"repo": "plastic-labs/sillytavern-honcho", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [4, 11]}
+{"repo": "plastic-labs/sillytavern-honcho", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 1, "q2": [4, 11]}
+{"repo": "plastic-labs/sillytavern-honcho", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 11, "q2": [4, 11]}
+{"repo": "plastic-labs/sillytavern-honcho", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [4, 11]}
+{"repo": "plotly/dash", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 14, "merged": 33, "q2": [3, 43]}
+{"repo": "plotly/dash", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 3, "merged": 40, "q2": [3, 43]}
+{"repo": "plotly/dash", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 43, "q2": [3, 43]}
+{"repo": "plotly/dash", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 8, "merged": 38, "q2": [3, 43]}
+{"repo": "promptfoo/modelaudit", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [25, 610]}
+{"repo": "promptfoo/modelaudit", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 3, "merged": 269, "q2": [25, 610]}
+{"repo": "promptfoo/modelaudit", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 610, "q2": [25, 610]}
+{"repo": "promptfoo/modelaudit", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 68, "q2": [25, 610]}
+{"repo": "promptfoo/promptfoo", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 118, "q2": [144, 689]}
+{"repo": "promptfoo/promptfoo", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 678, "q2": [144, 689]}
+{"repo": "promptfoo/promptfoo", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 689, "q2": [144, 689]}
+{"repo": "promptfoo/promptfoo", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 2, "merged": 783, "q2": [144, 689]}
+{"repo": "pytorch/torchtitan", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 4, "merged": 91, "q2": [9, 380]}
+{"repo": "pytorch/torchtitan", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 4, "merged": 234, "q2": [9, 380]}
+{"repo": "pytorch/torchtitan", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 380, "q2": [9, 380]}
+{"repo": "pytorch/torchtitan", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 3, "merged": 197, "q2": [9, 380]}
+{"repo": "qdrant/qdrant", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 57, "merged": 263, "q2": [165, 476]}
+{"repo": "qdrant/qdrant", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 27, "merged": 364, "q2": [165, 476]}
+{"repo": "qdrant/qdrant", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 38, "merged": 476, "q2": [165, 476]}
+{"repo": "qdrant/qdrant", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 28, "merged": 279, "q2": [165, 476]}
+{"repo": "qdrant/qdrant-cloud-public-api", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [4, 36]}
+{"repo": "qdrant/qdrant-cloud-public-api", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 54, "q2": [4, 36]}
+{"repo": "qdrant/qdrant-cloud-public-api", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 36, "q2": [4, 36]}
+{"repo": "qdrant/qdrant-cloud-public-api", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 49, "q2": [4, 36]}
+{"repo": "ray-project/ray", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 699, "merged": 971, "q2": [191, 816]}
+{"repo": "ray-project/ray", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 150, "merged": 1185, "q2": [191, 816]}
+{"repo": "ray-project/ray", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 83, "merged": 816, "q2": [191, 816]}
+{"repo": "ray-project/ray", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 624, "merged": 1313, "q2": [191, 816]}
+{"repo": "replicate/cog", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 41, "q2": [0, 80]}
+{"repo": "replicate/cog", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 165, "q2": [0, 80]}
+{"repo": "replicate/cog", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 80, "q2": [0, 80]}
+{"repo": "replicate/cog", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 9, "q2": [0, 80]}
+{"repo": "rtk-ai/rtk", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [35, 139]}
+{"repo": "rtk-ai/rtk", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 120, "merged": 253, "q2": [35, 139]}
+{"repo": "rtk-ai/rtk", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 307, "merged": 139, "q2": [35, 139]}
+{"repo": "rtk-ai/rtk", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [35, 139]}
+{"repo": "run-llama/llama-ui", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [0, 4]}
+{"repo": "run-llama/llama-ui", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 71, "q2": [0, 4]}
+{"repo": "run-llama/llama-ui", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 4, "q2": [0, 4]}
+{"repo": "run-llama/llama-ui", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 56, "q2": [0, 4]}
+{"repo": "scikit-learn/scikit-learn", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 66, "merged": 333, "q2": [4, 185]}
+{"repo": "scikit-learn/scikit-learn", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 55, "merged": 190, "q2": [4, 185]}
+{"repo": "scikit-learn/scikit-learn", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 33, "merged": 185, "q2": [4, 185]}
+{"repo": "scikit-learn/scikit-learn", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 44, "merged": 310, "q2": [4, 185]}
+{"repo": "sgl-project/sgl-kernel-npu", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [3, 64]}
+{"repo": "sgl-project/sgl-kernel-npu", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 82, "q2": [3, 64]}
+{"repo": "sgl-project/sgl-kernel-npu", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 64, "q2": [3, 64]}
+{"repo": "sgl-project/sgl-kernel-npu", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 120, "q2": [3, 64]}
+{"repo": "sgl-project/sglang", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 7, "merged": 139, "q2": [561, 2597]}
+{"repo": "sgl-project/sglang", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 11, "merged": 2729, "q2": [561, 2597]}
+{"repo": "sgl-project/sglang", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 8, "merged": 2597, "q2": [561, 2597]}
+{"repo": "sgl-project/sglang", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 36, "merged": 2760, "q2": [561, 2597]}
+{"repo": "sgl-project/sglang-jax", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [94, 200]}
+{"repo": "sgl-project/sglang-jax", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 10, "merged": 130, "q2": [94, 200]}
+{"repo": "sgl-project/sglang-jax", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 4, "merged": 200, "q2": [94, 200]}
+{"repo": "sgl-project/sglang-jax", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 24, "merged": 180, "q2": [94, 200]}
+{"repo": "spiceai/spiceai", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 308, "q2": [45, 648]}
+{"repo": "spiceai/spiceai", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 718, "q2": [45, 648]}
+{"repo": "spiceai/spiceai", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 648, "q2": [45, 648]}
+{"repo": "spiceai/spiceai", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 732, "q2": [45, 648]}
+{"repo": "spotify/confidence-resolver", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [35, 39]}
+{"repo": "spotify/confidence-resolver", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 75, "q2": [35, 39]}
+{"repo": "spotify/confidence-resolver", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 39, "q2": [35, 39]}
+{"repo": "spotify/confidence-resolver", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 114, "q2": [35, 39]}
+{"repo": "stanford-crfm/helm", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 18, "merged": 219, "q2": [5, 93]}
+{"repo": "stanford-crfm/helm", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 93, "q2": [5, 93]}
+{"repo": "stanford-crfm/helm", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 93, "q2": [5, 93]}
+{"repo": "stanford-crfm/helm", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 50, "q2": [5, 93]}
+{"repo": "tenstorrent/tt-blacksmith", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [2, 68]}
+{"repo": "tenstorrent/tt-blacksmith", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 3, "merged": 111, "q2": [2, 68]}
+{"repo": "tenstorrent/tt-blacksmith", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 68, "q2": [2, 68]}
+{"repo": "tenstorrent/tt-blacksmith", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 3, "merged": 71, "q2": [2, 68]}
+{"repo": "tenstorrent/tt-emule", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [15, 31]}
+{"repo": "tenstorrent/tt-emule", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0, "q2": [15, 31]}
+{"repo": "tenstorrent/tt-emule", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 1, "merged": 31, "q2": [15, 31]}
+{"repo": "tenstorrent/tt-emule", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [15, 31]}
+{"repo": "tenstorrent/tt-forge-models", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [21, 106]}
+{"repo": "tenstorrent/tt-forge-models", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 130, "q2": [21, 106]}
+{"repo": "tenstorrent/tt-forge-models", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 106, "q2": [21, 106]}
+{"repo": "tenstorrent/tt-forge-models", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 3, "merged": 159, "q2": [21, 106]}
+{"repo": "tenstorrent/tt-forge-onnx", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [3, 83]}
+{"repo": "tenstorrent/tt-forge-onnx", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 5, "merged": 88, "q2": [3, 83]}
+{"repo": "tenstorrent/tt-forge-onnx", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 83, "q2": [3, 83]}
+{"repo": "tenstorrent/tt-forge-onnx", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 8, "merged": 90, "q2": [3, 83]}
+{"repo": "tenstorrent/tt-metal", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 362, "merged": 1049, "q2": [469, 2048]}
+{"repo": "tenstorrent/tt-metal", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 347, "merged": 2566, "q2": [469, 2048]}
+{"repo": "tenstorrent/tt-metal", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 263, "merged": 2048, "q2": [469, 2048]}
+{"repo": "tenstorrent/tt-metal", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 434, "merged": 2504, "q2": [469, 2048]}
+{"repo": "tenstorrent/tt-umd", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [42, 183]}
+{"repo": "tenstorrent/tt-umd", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 6, "merged": 350, "q2": [42, 183]}
+{"repo": "tenstorrent/tt-umd", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 13, "merged": 183, "q2": [42, 183]}
+{"repo": "tenstorrent/tt-umd", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 5, "merged": 185, "q2": [42, 183]}
+{"repo": "tenstorrent/tt-xla", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [60, 369]}
+{"repo": "tenstorrent/tt-xla", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 320, "merged": 529, "q2": [60, 369]}
+{"repo": "tenstorrent/tt-xla", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 320, "merged": 369, "q2": [60, 369]}
+{"repo": "tenstorrent/tt-xla", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 186, "merged": 553, "q2": [60, 369]}
+{"repo": "thinking-machines-lab/tinker-cookbook", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [86, 108]}
+{"repo": "thinking-machines-lab/tinker-cookbook", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 181, "q2": [86, 108]}
+{"repo": "thinking-machines-lab/tinker-cookbook", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 108, "q2": [86, 108]}
+{"repo": "thinking-machines-lab/tinker-cookbook", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 160, "q2": [86, 108]}
+{"repo": "topoteretes/cognee-hackathons", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [1, 1]}
+{"repo": "topoteretes/cognee-hackathons", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0, "q2": [1, 1]}
+{"repo": "topoteretes/cognee-hackathons", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 1, "q2": [1, 1]}
+{"repo": "topoteretes/cognee-hackathons", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [1, 1]}
+{"repo": "truefoundry/models", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [4, 334]}
+{"repo": "truefoundry/models", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 297, "q2": [4, 334]}
+{"repo": "truefoundry/models", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 334, "q2": [4, 334]}
+{"repo": "truefoundry/models", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [4, 334]}
+{"repo": "vllm-project/llm-compressor", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [10, 71]}
+{"repo": "vllm-project/llm-compressor", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 33, "merged": 195, "q2": [10, 71]}
+{"repo": "vllm-project/llm-compressor", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 19, "merged": 71, "q2": [10, 71]}
+{"repo": "vllm-project/llm-compressor", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 54, "merged": 125, "q2": [10, 71]}
+{"repo": "vllm-project/recipes", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [32, 147]}
+{"repo": "vllm-project/recipes", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 75, "q2": [32, 147]}
+{"repo": "vllm-project/recipes", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 147, "q2": [32, 147]}
+{"repo": "vllm-project/recipes", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 73, "q2": [32, 147]}
+{"repo": "vllm-project/vime", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [56, 87]}
+{"repo": "vllm-project/vime", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 0, "q2": [56, 87]}
+{"repo": "vllm-project/vime", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 2, "merged": 87, "q2": [56, 87]}
+{"repo": "vllm-project/vime", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [56, 87]}
+{"repo": "vllm-project/vllm", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 79, "merged": 395, "q2": [259, 1902]}
+{"repo": "vllm-project/vllm", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 897, "merged": 2805, "q2": [259, 1902]}
+{"repo": "vllm-project/vllm", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 633, "merged": 1902, "q2": [259, 1902]}
+{"repo": "vllm-project/vllm", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 919, "merged": 2499, "q2": [259, 1902]}
+{"repo": "vllm-project/vllm-ascend", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [22, 850]}
+{"repo": "vllm-project/vllm-ascend", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 335, "merged": 1032, "q2": [22, 850]}
+{"repo": "vllm-project/vllm-ascend", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 401, "merged": 850, "q2": [22, 850]}
+{"repo": "vllm-project/vllm-ascend", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 362, "merged": 1055, "q2": [22, 850]}
+{"repo": "vllm-project/vllm-gaudi", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [7, 156]}
+{"repo": "vllm-project/vllm-gaudi", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 341, "q2": [7, 156]}
+{"repo": "vllm-project/vllm-gaudi", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 0, "merged": 156, "q2": [7, 156]}
+{"repo": "vllm-project/vllm-gaudi", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 367, "q2": [7, 156]}
+{"repo": "vllm-project/vllm-omni", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [109, 785]}
+{"repo": "vllm-project/vllm-omni", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 302, "merged": 806, "q2": [109, 785]}
+{"repo": "vllm-project/vllm-omni", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 294, "merged": 785, "q2": [109, 785]}
+{"repo": "vllm-project/vllm-omni", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 79, "merged": 254, "q2": [109, 785]}
+{"repo": "weaviate/weaviate", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 56, "merged": 364, "q2": [97, 473]}
+{"repo": "weaviate/weaviate", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 11, "merged": 556, "q2": [97, 473]}
+{"repo": "weaviate/weaviate", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 28, "merged": 473, "q2": [97, 473]}
+{"repo": "weaviate/weaviate", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 19, "merged": 534, "q2": [97, 473]}
+{"repo": "weaviate/weaviate-python-client", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 8, "merged": 190, "q2": [3, 23]}
+{"repo": "weaviate/weaviate-python-client", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 1, "merged": 45, "q2": [3, 23]}
+{"repo": "weaviate/weaviate-python-client", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 1, "merged": 23, "q2": [3, 23]}
+{"repo": "weaviate/weaviate-python-client", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 1, "merged": 44, "q2": [3, 23]}
+{"repo": "writer/cerebro", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [193, 368]}
+{"repo": "writer/cerebro", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 141, "q2": [193, 368]}
+{"repo": "writer/cerebro", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 54, "merged": 368, "q2": [193, 368]}
+{"repo": "writer/cerebro", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [193, 368]}
+{"repo": "zenml-io/zenml", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 20, "merged": 254, "q2": [7, 116]}
+{"repo": "zenml-io/zenml", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 3, "merged": 142, "q2": [7, 116]}
+{"repo": "zenml-io/zenml", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 3, "merged": 116, "q2": [7, 116]}
+{"repo": "zenml-io/zenml", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 10, "merged": 190, "q2": [7, 116]}
+{"repo": "zilliztech/VectorDBBench", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 4, "merged": 20, "q2": [8, 25]}
+{"repo": "zilliztech/VectorDBBench", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 0, "merged": 24, "q2": [8, 25]}
+{"repo": "zilliztech/VectorDBBench", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 1, "merged": 25, "q2": [8, 25]}
+{"repo": "zilliztech/VectorDBBench", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 39, "q2": [8, 25]}
+{"repo": "zilliztech/memsearch", "per": "Q1-2024", "rng": "2024-01-01..2024-03-31", "bugs": 0, "merged": 0, "q2": [4, 84]}
+{"repo": "zilliztech/memsearch", "per": "Q1-2026", "rng": "2026-01-01..2026-03-31", "bugs": 5, "merged": 151, "q2": [4, 84]}
+{"repo": "zilliztech/memsearch", "per": "Q2-2026", "rng": "2026-04-01..2026-06-06", "bugs": 6, "merged": 84, "q2": [4, 84]}
+{"repo": "zilliztech/memsearch", "per": "Q4-2025", "rng": "2025-10-01..2025-12-31", "bugs": 0, "merged": 0, "q2": [4, 84]}

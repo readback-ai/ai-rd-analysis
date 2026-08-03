@@ -256,17 +256,31 @@ def test_freeze_verify_roundtrip_and_refusal(tmp_path):
 
 
 def test_bug_stats_come_only_from_frozen_records():
-    """Review round 4, P2: denominators and Q2 AI group counts are read
-    from the stamped records — no live-frame input at print time."""
+    """Review round 4, P2: denominators and Q2 group inputs are read
+    from the stamped records — no live-frame input at print time. The
+    q2 stamp rides EVERY row (round 5), so a repo missing its Q2 cell
+    still carries group membership."""
     rows = [
-        {"repo": "o/a", "per": "Q1-2024", "bugs": 4, "merged": 100},
-        {"repo": "o/a", "per": "Q2-2026", "bugs": 2, "merged": 50,
-         "ai_num": 30},
+        {"repo": "o/a", "per": "Q1-2024", "bugs": 4, "merged": 100,
+         "q2": [30, 50]},
     ]
     bugs, merged, ai_share = churn.bug_stats(rows)
     assert bugs[("o/a", "Q1-2024")] == 4
-    assert merged[("o/a", "Q2-2026")] == 50
+    assert merged[("o/a", "Q1-2024")] == 100
     assert ai_share["o/a"] == (30, 50)
+
+
+def test_rank_groups_excludes_undefined_q2_shares():
+    """Review round 5, P2: a zero Q2 denominator is an UNDEFINED adoption
+    share — the repo joins neither AI half (treating it as 0.0 silently
+    filed it under low-AI) while still counting in 'all'."""
+    with_bugs = {"a", "b", "c", "d", "nodata"}
+    ai_share = {"a": (0, 10), "b": (2, 10), "c": (5, 10), "d": (9, 10),
+                "nodata": (0, 0)}
+    lo, hi, unranked = churn.rank_groups(with_bugs, ai_share)
+    assert lo == {"a", "b"}
+    assert hi == {"c", "d"}
+    assert unranked == {"nodata"}
 
 
 def test_stamp_denominators_freezes_created_frame_values():
@@ -287,7 +301,10 @@ def test_stamp_denominators_freezes_created_frame_values():
     churn._stamp_denominators(records, created)
     assert records[("o/a", "Q1-2024", "r")]["merged"] == 7
     assert records[("o/a", "Q2-2026", "r")]["merged"] == 5
-    assert records[("o/a", "Q2-2026", "r")]["ai_num"] == 3
+    # round 5: q2 group inputs stamped on EVERY row; legacy ai_num gone
+    assert records[("o/a", "Q1-2024", "r")]["q2"] == [3, 5]
+    assert records[("o/a", "Q2-2026", "r")]["q2"] == [3, 5]
+    assert "ai_num" not in records[("o/a", "Q2-2026", "r")]
 
 
 def test_fingerprint_covers_ai_flags_and_both_pools():

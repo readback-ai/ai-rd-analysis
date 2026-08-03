@@ -601,10 +601,13 @@ def bug_cells(pool: dict[str, list]) -> list[dict]:
 
 def _stamp_denominators(records: dict, created: dict[str, list]) -> None:
     """Freeze the table's OTHER inputs into the records: each cell gets
-    its creation-bucketed mature-merged denominator, and Q2 cells get the
-    repo's AI numerator (group membership). Stamped on every freeze —
-    reused bug counts stay valid (they depend only on repo+window) while
-    denominators/groups always reflect the frozen frame."""
+    its creation-bucketed mature-merged denominator, and EVERY row gets
+    the repo's Q2 group inputs `q2: [ai_numerator, merged_denominator]`
+    (on every row, not just Q2 rows — a repo whose Q2 cell is missing
+    from an honest partial freeze must still carry its group membership).
+    Stamped on every freeze — reused bug counts stay valid (they depend
+    only on repo+window) while denominators/groups always reflect the
+    frozen frame."""
     merged: dict[tuple[str, str], int] = defaultdict(int)
     ai_num: dict[str, int] = defaultdict(int)
     for per, items in created.items():
@@ -614,8 +617,9 @@ def _stamp_denominators(records: dict, created: dict[str, list]) -> None:
                 ai_num[repo] += 1
     for rec in records.values():
         rec["merged"] = merged.get((rec["repo"], rec["per"]), 0)
-        if rec["per"] == "Q2-2026":
-            rec["ai_num"] = ai_num.get(rec["repo"], 0)
+        rec["q2"] = [ai_num.get(rec["repo"], 0),
+                     merged.get((rec["repo"], "Q2-2026"), 0)]
+        rec.pop("ai_num", None)         # superseded Q2-only stamp
 
 
 def pull_bugs(trimmed: dict[str, list], created: dict[str, list],
@@ -662,13 +666,25 @@ def pull_bugs(trimmed: dict[str, list], created: dict[str, list],
 
 def bug_stats(rows: list[dict]) -> tuple[dict, dict, dict]:
     """(bugs, merged, ai_share) built ONLY from frozen records — the
-    denominators and Q2 AI group counts were stamped at freeze time, so
-    a moved live store cannot shift this table."""
+    denominators and Q2 group inputs were stamped at freeze time (on
+    every row), so a moved live store cannot shift this table."""
     bugs = {(d["repo"], d["per"]): d["bugs"] for d in rows if "bugs" in d}
     merged = {(d["repo"], d["per"]): d.get("merged", 0) for d in rows}
-    ai_share = {d["repo"]: (d.get("ai_num", 0), d.get("merged", 0))
-                for d in rows if d["per"] == "Q2-2026"}
+    ai_share = {d["repo"]: tuple(d["q2"]) for d in rows if d.get("q2")}
     return bugs, merged, ai_share
+
+
+def rank_groups(with_bugs: set, ai_share: dict,
+                ) -> tuple[set, set, set]:
+    """(low-AI half, high-AI half, unranked). A repo with a ZERO Q2
+    denominator has an UNDEFINED adoption share and belongs to neither
+    half (treating undefined as 0.0 silently filed such repos under
+    low-AI); it still counts in the 'all' row."""
+    rankable = [r for r in with_bugs if ai_share.get(r, (0, 0))[1] > 0]
+    ranked = sorted(rankable,
+                    key=lambda r: ai_share[r][0] / ai_share[r][1])
+    lo = set(ranked[:len(ranked) // 2])
+    return lo, set(ranked) - lo, with_bugs - set(ranked)
 
 
 def print_bugs(trimmed: dict[str, list], created: dict[str, list]) -> None:
@@ -677,29 +693,28 @@ def print_bugs(trimmed: dict[str, list], created: dict[str, list]) -> None:
     repos = sorted({r for (r, _p) in bugs})
     with_bugs = {r for r in repos
                  if any(bugs.get((r, p)) for p in PERIODS)}
-    ranked = sorted(with_bugs,
-                    key=lambda r: (ai_share.get(r, (0, 0))[0]
-                                   / ai_share.get(r, (0, 1))[1])
-                    if ai_share.get(r, (0, 0))[1] else 0.0)
-    lo = set(ranked[:len(ranked) // 2])
+    lo, hi, unranked = rank_groups(with_bugs, ai_share)
     short = manifest["selected"] - manifest["held"]
+    frontier = maturity_frontier(manifest.get("as_of", AS_OF))
     print("BUG-REPORT PROXY pilot (bug-labeled GH issues — NOT production "
           "incidents): issues labeled bug created per 100 mature merged "
           "PRs. Exposure is creation-bucketed on BOTH sides: denominator "
           "= mature merged PRs by creation quarter, numerator window = "
-          f"the quarter truncated at the maturity frontier "
-          f"({maturity_frontier()}). Fully FROZEN table — counts, "
-          "denominators and Q2 AI groups all from the frozen records "
+          f"the quarter truncated at the FROZEN maturity frontier "
+          f"({frontier}). Fully FROZEN table — counts, denominators and "
+          "Q2 group inputs all from the frozen records "
           f"({len(repos)} repos"
           + (f", {short} cells unpulled at freeze" if short else "")
           + f"; {len(repos) - len(with_bugs)} with zero bug-labeled "
             "issues in every quarter EXCLUDED as probable non-users of "
-            "the label — label:bug only)")
+            f"the label — label:bug only; {len(unranked)} with an "
+            "UNDEFINED Q2 adoption share (zero Q2 merged) in 'all' but "
+            "neither AI half)")
     print(_drift_line(manifest, frame_fingerprint(trimmed, created)))
     print(f"{'quarter':9}{'group':9}{'repos':>6}{'bugs':>7}{'merged':>8}"
           f"{'per100':>8}")
     for per in PERIODS:
-        for label, grp in (("low-AI", lo), ("high-AI", with_bugs - lo),
+        for label, grp in (("low-AI", lo), ("high-AI", hi),
                            ("all", with_bugs)):
             rs = [r for r in grp
                   if (r, per) in bugs and merged.get((r, per))]
