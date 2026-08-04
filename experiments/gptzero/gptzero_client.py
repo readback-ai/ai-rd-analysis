@@ -30,7 +30,7 @@ from diffs import count_words
 API_URL = "https://api.gptzero.me/v2/predict/text"
 FILES_URL = "https://api.gptzero.me/v2/predict/files"
 BATCH_FILES = 50          # API limit per request (support, 2026-07-29)
-BUDGET_WORDS = 85_000
+BUDGET_WORDS = 150_000
 PINNED_VERSION: str | None = "2026-07-04-base"   # from the 2026-07-29
                                                  # smoke run's responses
 TRANSIENT_HTTP = (408, 429, 500, 502, 503, 504)
@@ -125,7 +125,7 @@ def _cache_path(cache_dir: Path, doc_sha: str) -> Path:
 
 
 def score(doc_sha: str, text: str, cache_dir: Path,
-          reservations_path: Path, transport=_post_once,
+          reservations_path: Path, transport=None,
           retries: int = 3) -> tuple[dict, int]:
     """(raw response, billed words); 0 billed on a cache hit. Each HTTP
     attempt first checks the ceiling against the reservation ledger and
@@ -134,6 +134,9 @@ def score(doc_sha: str, text: str, cache_dir: Path,
     network) back off and retry; anything else raises immediately;
     exhausted retries raise RuntimeError so the caller defers the
     document."""
+    if transport is None:
+        transport = _post_once      # resolved at call time so a patched
+                                    # module attribute always wins
     cached = _cache_path(cache_dir, doc_sha)
     if cached.is_file():
         return json.loads(cached.read_text()), 0
@@ -218,7 +221,7 @@ def _dump_mismatch(dir_: Path, resp: dict) -> Path:
 
 def score_batch(items: list[tuple[str, Path]], cache_dir: Path,
                 reservations_path: Path,
-                transport=_post_files_once,
+                transport=None,
                 retries: int = 3) -> list[tuple[dict, int]]:
     """Score up to BATCH_FILES documents in ONE request. items are
     (doc_sha, text_path) with filenames '{sha}.txt', so results map back
@@ -232,6 +235,8 @@ def score_batch(items: list[tuple[str, Path]], cache_dir: Path,
     version or shape mismatch — a misattributed batch would poison
     every document in it. Returns (per-doc response in the single-doc
     cache format, billed words) in items order."""
+    if transport is None:
+        transport = _post_files_once
     results: dict[str, tuple[dict, int]] = {}
     misses: list[tuple[str, Path, int]] = []
     for sha, path in items:

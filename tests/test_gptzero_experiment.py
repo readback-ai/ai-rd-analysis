@@ -835,6 +835,115 @@ def test_analysis_pairs_within_one_quarter_only():
     assert (pr["pairs"], pr["wins"]) == (1, 1)
 
 
+def test_default_transports_resolve_at_call_time(tmp_path, monkeypatch):
+    """No-network-guard bypass: score()/score_batch() bound their live
+    transports as import-time default arguments, so calls that omit the
+    transport (the cmd paths) sidestepped the autouse guard and reached
+    the live API from tests. Defaults must resolve the module attribute
+    at call time."""
+    import gptzero_client as gzc
+    monkeypatch.setattr(gzc.subprocess, "run", lambda *a, **k:
+                        (_ for _ in ()).throw(RuntimeError("live curl")))
+    monkeypatch.setattr(gzc.time, "sleep", lambda s: None)
+    with pytest.raises(AssertionError, match="live GPTZero call"):
+        gzc.score("shaX", "one two", tmp_path / "cache",
+                  tmp_path / "resv.jsonl")
+    p = tmp_path / "shaY.txt"
+    p.write_text("one two")
+    with pytest.raises(AssertionError, match="live GPTZero call"):
+        gzc.score_batch([("shaY", p)], tmp_path / "cache",
+                        tmp_path / "resv.jsonl")
+
+
+def _rt(slot, sha600, p, cls, arm="P", ai=True, cap=1200,
+        truncated=False):
+    return {"slot": slot, "arm": arm, "ai": ai, "period": "Q2-2026",
+            "sha600": sha600, "doc_sha": f"{sha600}:long",
+            "word_cap": cap, "truncated": truncated,
+            "class_probabilities": {"ai": p}, "predicted_class": cls,
+            "model_version": "pinver"}
+
+
+def _v1(slot, sha, p, cls, arm="P", ai=True):
+    return {"slot": slot, "arm": arm, "ai": ai, "period": "Q2-2026",
+            "doc_sha": sha, "class_probabilities": {"ai": p},
+            "predicted_class": cls, "truncated": True,
+            "model_version": "pinver"}
+
+
+def test_retest_stats_pair_by_slot_and_source_sha():
+    """Dose-response pairs bind by slot AND the design-cap doc_sha the
+    retest row was built from: a redrawn document never pairs across
+    assemblies, and deltas/flips are computed over true pairs only."""
+    rows = [_v1("s1", "aaa", 0.2, "human"),
+            _v1("s2", "bbb", 0.9, "ai"),
+            _v1("s3", "ccc", 0.5, "human")]
+    rt = [_rt("s1", "aaa", 0.7, "ai"),
+          _rt("s2", "bbb", 0.8, "ai"),
+          _rt("s3", "STALE", 0.1, "human")]      # redrawn: must not pair
+    s = analyze.retest_stats(rows, rt, lambda r: r["arm"] == "P")
+    assert s["n"] == 2
+    assert s["mean_delta"] == pytest.approx((0.5 - 0.1) / 2)
+    assert (s["wins"], s["losses"]) == (1, 1)
+    assert s["flips"] == {"human->ai": 1}
+
+
+def test_retest_command_targets_truncated_scored_docs_only(
+        tmp_path, monkeypatch):
+    """--retest re-assembles at RETEST_CAP exactly the filled, TRUNCATED
+    docs whose current document is scored; untruncated and unscored docs
+    are excluded, and already-retested slots are not re-billed."""
+    import gz
+    for name in ("LOCAL", "DOCS", "DOCS_RETEST", "RESULTS",
+                 "RESULTS_RETEST", "DIFF_CACHE", "DOC_CACHE",
+                 "RESP_CACHE", "RESERVATIONS"):
+        monkeypatch.setattr(gz, name, tmp_path / getattr(gz, name).name)
+    (tmp_path / "results").mkdir()
+    monkeypatch.setattr(gz, "RESULTS",
+                        tmp_path / "results" / "scores_v1.jsonl")
+    monkeypatch.setattr(gz, "RESULTS_RETEST",
+                        tmp_path / "results" / "scores_retest.jsonl")
+    monkeypatch.setattr(gz, "RESERVATIONS",
+                        tmp_path / "results" / "resv.jsonl")
+    docrow = {"slot": "P:a:ai", "arm": "P", "author": "a",
+              "period": "Q2-2026", "ai": True, "repo": "o/r", "num": 1,
+              "doc_sha": "sha600", "words": 600, "truncated": True,
+              "word_cap": 600, "word_floor": 100}
+    unt = {**docrow, "slot": "P:a:nonai", "num": 2, "doc_sha": "shaU",
+           "truncated": False}
+    gz.DOCS.write_text(json.dumps(docrow) + "\n" + json.dumps(unt) + "\n")
+    gz.RESULTS.write_text(json.dumps(
+        {"slot": "P:a:ai", "doc_sha": "sha600",
+         "model_version": "pinver"}) + "\n")
+    import diffs as diffs_mod
+    monkeypatch.setattr(diffs_mod, "fetch_diff",
+                        lambda repo, num, cache: "RAW")
+    monkeypatch.setattr(diffs_mod, "parse_diff", lambda raw: raw)
+    monkeypatch.setattr(
+        diffs_mod, "build_document",
+        lambda parsed, cap, floor: ("long text " * 3,
+                                    {"words": 6, "truncated": False}))
+    import gptzero_client as gzc
+    monkeypatch.setattr(gzc, "PINNED_VERSION", "pinver")
+    sent = []
+
+    def transport(paths):
+        sent.append([p.name for p in paths])
+        return _batch_resp([p.stem for p in paths], version="pinver")
+
+    monkeypatch.setattr(gzc, "_post_files_once", transport)
+    gz.cmd_retest()
+    assert len(sent) == 1 and len(sent[0]) == 1     # truncated doc only
+    out = [json.loads(l) for l in
+           gz.RESULTS_RETEST.read_text().splitlines()]
+    assert [r["slot"] for r in out] == ["P:a:ai"]
+    assert out[0]["sha600"] == "sha600"
+    assert out[0]["word_cap"] == gz.RETEST_CAP
+    sent.clear()
+    gz.cmd_retest()                                  # idempotent resume
+    assert sent == []
+
+
 def _eras_pools(q4=("alice", "bob"), q1_26=("alice",)):
     def entry():
         return {"ai": [("o/r", 1, 100), ("o/r", 3, 200)],

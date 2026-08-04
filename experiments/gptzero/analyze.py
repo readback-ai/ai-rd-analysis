@@ -123,13 +123,85 @@ def paired(rows: list[dict], period: str = "Q2-2026",
             "sign_p": p}
 
 
-def report(results_path: Path) -> None:
+RETEST_GROUPS = (("paired-AI", lambda r: r["arm"] == "P" and r["ai"]),
+                 ("paired-nonAI",
+                  lambda r: r["arm"] == "P" and not r["ai"]),
+                 ("baselines",
+                  lambda r: r["arm"] in ("B1", "B2", "B3")))
+
+
+def _sign_p(wins: int, n: int) -> float:
+    return (sum(math.comb(n, k) for k in range(wins, n + 1)) / 2 ** n
+            if n else float("nan"))
+
+
+def retest_stats(rows: list[dict], retest_rows: list[dict],
+                 pred) -> dict | None:
+    """Dose-response over slots scored at BOTH caps: delta = long-cap
+    score minus design-cap score per document, one-sided sign test for
+    'longer scores higher', and predicted-class flips. Pairs bind by
+    slot AND the design-cap doc_sha the retest row was built from, so a
+    redrawn document never pairs across assemblies."""
+    v1 = {r["slot"]: r for r in rows if pred(r)}
+    pairs = []
+    for rt in retest_rows:
+        v = v1.get(rt["slot"])
+        if v is None or v["doc_sha"] != rt.get("sha600"):
+            continue
+        p0, p1 = ai_prob(v), ai_prob(rt)
+        if p0 is None or p1 is None:
+            continue
+        pairs.append((p0, p1, v.get("predicted_class"),
+                      rt.get("predicted_class")))
+    if not pairs:
+        return None
+    deltas = [p1 - p0 for p0, p1, _c0, _c1 in pairs]
+    wins = sum(1 for d in deltas if d > 0)
+    losses = sum(1 for d in deltas if d < 0)
+    flips: dict[str, int] = {}
+    for _p0, _p1, c0, c1 in pairs:
+        if c0 != c1:
+            key = f"{c0}->{c1}"
+            flips[key] = flips.get(key, 0) + 1
+    return {"n": len(pairs),
+            "mean0": statistics.fmean(p for p, _1, _c0, _c1 in pairs),
+            "mean1": statistics.fmean(p for _0, p, _c0, _c1 in pairs),
+            "mean_delta": statistics.fmean(deltas),
+            "wins": wins, "losses": losses,
+            "sign_p": _sign_p(wins, wins + losses), "flips": flips}
+
+
+def report_retest(rows: list[dict], retest_rows: list[dict]) -> None:
+    cap = max((r.get("word_cap", 0) for r in retest_rows), default=0)
+    print(f"\nretest @{cap} (documents truncated at the design cap; "
+          f"delta = score@{cap} - score@design-cap):")
+    print(f"{'group':14}{'n':>4}{'mean@600':>10}{'mean@'+str(cap):>11}"
+          f"{'Δmean':>8}{'higher':>9}{'sign_p':>8}  flips")
+    for name, pred in RETEST_GROUPS:
+        s = retest_stats(rows, retest_rows, pred)
+        if s is None:
+            print(f"{name:14}   —")
+            continue
+        flips = ", ".join(f"{k} {v}" for k, v in
+                          sorted(s["flips"].items())) or "none"
+        print(f"{name:14}{s['n']:>4}{s['mean0']:>10.2f}{s['mean1']:>11.2f}"
+              f"{s['mean_delta']:>+8.2f}"
+              f"{s['wins']:>6}/{s['wins'] + s['losses']:<2}"
+              f"{s['sign_p']:>8.3f}  {flips}")
+    still = sum(1 for r in retest_rows if r.get("truncated"))
+    print(f"still truncated at {cap}: {still}/{len(retest_rows)}")
+
+
+def report(results_path: Path,
+           retest_path: Path | None = None) -> None:
     rows = load_rows(results_path)
     if not rows:
         print(f"no results at {results_path} — run --score first")
         return
+    retest_rows = (load_rows(retest_path) if retest_path is not None
+                   else [])
     versions = sorted({r.get("model_version") or "unknown"
-                       for r in rows})
+                       for r in rows + retest_rows})
     if len(versions) > 1:
         print(f"REFUSING pooled analysis: results mix detector versions "
               f"{versions} — pin gptzero_client.PINNED_VERSION and "
@@ -161,6 +233,8 @@ def report(results_path: Path) -> None:
                   f"{LENGTH_MATCH_WORDS}): n={lm['pairs']}, "
                   f"{lm['wins']}/{lm['wins'] + lm['losses']} decided, "
                   f"mean gap {lm['mean_gap']:+.2f}, p={lm['sign_p']:.3f}")
+    if retest_rows:
+        report_retest(rows, retest_rows)
     print(f"\nGPTZero model version(s): {versions or 'unknown'}")
     print()
     print(CAVEATS)

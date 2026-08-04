@@ -32,7 +32,11 @@ MANIFEST_B3 = LOCAL / "manifest_b3.json"
 MANIFEST_ERAS = LOCAL / "manifest_eras.json"
 B3_PAGES = LOCAL / "cache" / "q3_2022_pages"
 DOCS = LOCAL / "docs_v1.jsonl"
+DOCS_RETEST = LOCAL / "docs_retest.jsonl"
 RESULTS = LOCAL / "results" / "scores_v1.jsonl"
+RESULTS_RETEST = LOCAL / "results" / "scores_retest.jsonl"
+RETEST_CAP = 1200   # dose-response stage: docs truncated at the design
+                    # cap are re-assembled and re-scored at this cap
 RESERVATIONS = LOCAL / "results" / "reservations_v1.jsonl"
 DIFF_CACHE = LOCAL / "cache" / "diffs"
 DOC_CACHE = LOCAL / "cache" / "docs"
@@ -260,6 +264,85 @@ def cmd_score(limit: int | None) -> None:
           f"words")
 
 
+def cmd_retest() -> None:
+    """Dose-response stage: every scored document that was truncated at
+    its design cap is re-assembled from the cached diff at RETEST_CAP
+    and re-scored into RESULTS_RETEST. scores_v1 rows stay untouched —
+    the analysis pairs the two scores per slot to measure what document
+    length does to the detector."""
+    import diffs
+    import gptzero_client as gzc
+    if gzc.PINNED_VERSION is None:
+        raise SystemExit("retest requires a pinned detector version")
+    scored = {r["slot"]: r for r in
+              (json.loads(ln) for ln in
+               RESULTS.read_text().splitlines() if ln.strip())}
+    targets = [r for r in _doc_rows().values()
+               if not r.get("unfilled") and r.get("truncated")
+               and r["slot"] in scored
+               and scored[r["slot"]]["doc_sha"] == r["doc_sha"]]
+    rows = []
+    for r in targets:
+        raw = diffs.fetch_diff(r["repo"], r["num"], DIFF_CACHE)
+        if raw is None:
+            print(f"FETCH FAIL {r['repo']}#{r['num']} "
+                  f"(slot {r['slot']})", flush=True)
+            continue
+        text, meta = diffs.build_document(
+            diffs.parse_diff(raw), RETEST_CAP, r["word_floor"])
+        if text is None:
+            continue
+        sha = hashlib.sha256(text.encode()).hexdigest()
+        DOC_CACHE.mkdir(parents=True, exist_ok=True)
+        (DOC_CACHE / f"{sha}.txt").write_text(text)
+        rows.append({**{k: r[k] for k in
+                        ("slot", "arm", "author", "period", "ai",
+                         "repo", "num")},
+                     "sha600": r["doc_sha"], "doc_sha": sha,
+                     "word_cap": RETEST_CAP, **meta})
+    DOCS_RETEST.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    by_slot = {r["slot"]: r for r in rows}
+    old = []
+    if RESULTS_RETEST.is_file():
+        old = [json.loads(ln) for ln in
+               RESULTS_RETEST.read_text().splitlines() if ln.strip()]
+    valid = [r for r in old
+             if by_slot.get(r["slot"], {}).get("doc_sha") == r["doc_sha"]
+             and r.get("model_version") == gzc.PINNED_VERSION]
+    RESULTS_RETEST.parent.mkdir(parents=True, exist_ok=True)
+    with RESULTS_RETEST.open("w") as out:
+        for r in valid:
+            out.write(json.dumps(r) + "\n")
+        done = {r["slot"] for r in valid}
+        todo = [r for r in rows if r["slot"] not in done]
+        for i in range(0, len(todo), gzc.BATCH_FILES):
+            chunk = todo[i:i + gzc.BATCH_FILES]
+            items = [(r["doc_sha"], DOC_CACHE / f"{r['doc_sha']}.txt")
+                     for r in chunk]
+            try:
+                scored_batch = gzc.score_batch(items, RESP_CACHE,
+                                               RESERVATIONS)
+            except RuntimeError as e:
+                print(f"BATCH FAIL: {e}", flush=True)
+                continue
+            except urllib.error.HTTPError as e:
+                raise SystemExit(
+                    f"HTTP {e.code} on a batch — results so far are "
+                    f"recorded; re-run --retest to resume.") from e
+            for r, (resp, billed) in zip(chunk, scored_batch):
+                fields = gzc.doc_fields(resp)
+                out.write(json.dumps(
+                    {**r, **fields, "billed_words": billed}) + "\n")
+                out.flush()
+                print(f"retested {r['slot']}: "
+                      f"{fields['predicted_class']} "
+                      f"({billed} words billed)", flush=True)
+            if i + gzc.BATCH_FILES < len(todo):
+                time.sleep(SCORE_PACE)
+    print(f"reserved: {gzc.ledger(RESERVATIONS)}/{gzc.BUDGET_WORDS} "
+          f"words")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--sample", action="store_true")
@@ -267,6 +350,7 @@ def main() -> None:
     ap.add_argument("--sample-eras", action="store_true")
     ap.add_argument("--fetch", action="store_true")
     ap.add_argument("--score", action="store_true")
+    ap.add_argument("--retest", action="store_true")
     ap.add_argument("--limit", type=int, default=None)
     a = ap.parse_args()
     if a.sample:
@@ -279,9 +363,11 @@ def main() -> None:
         cmd_fetch()
     elif a.score:
         cmd_score(a.limit)
+    elif a.retest:
+        cmd_retest()
     else:
         import analyze
-        analyze.report(RESULTS)
+        analyze.report(RESULTS, RESULTS_RETEST)
 
 
 if __name__ == "__main__":
