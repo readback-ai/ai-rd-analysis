@@ -31,7 +31,8 @@ def test_eligible_splits_trimmed_churn_frame_from_created_denominator(
         _fact("2026-01-10T00:00:00Z", "2026-01-20T00:00:00Z", num=3),
     ]
     monkeypatch.setattr(churn, "study_frame", lambda level: iter(facts))
-    trimmed, created, cross = churn.eligible()
+    trimmed, created, cross, periods = churn.eligible()
+    assert periods == churn.PERIODS
     assert [x[1] for x in trimmed["Q2-2026"]] == [1]   # (a) immature kept
     assert created["Q2-2026"] == []                    # (a) not mature
     assert [x[1] for x in created["Q1-2026"]] == [2, 3]  # (b)+(c)
@@ -209,6 +210,16 @@ def test_bug_window_truncates_at_maturity_frontier():
     assert churn.bug_window("Q1-2026", as_of) == "2026-01-01..2026-03-31"
 
 
+def test_bug_window_accepts_month_tokens():
+    """Monthly pull crashed with KeyError('2024-01'): bug_window resolved
+    tokens via QUARTER_RANGES instead of resolve_period. Month tokens
+    must resolve, with the frontier a no-op on finalized months."""
+    as_of = "2026-08-01T00:00:00Z"
+    assert churn.bug_window("2024-01", as_of) == "2024-01-01..2024-01-31"
+    assert churn.bug_window("2026-05", as_of) == "2026-05-01..2026-05-31"
+    assert churn.bug_window("2026-06", as_of) == "2026-06-01..2026-06-06"
+
+
 def test_adoption_attrition_counts_are_separated():
     """Review round 3, P2: orgs with >= 1 vs >= 2 qualifying era quarters
     are tracked separately, and endpoint-ratio exclusions get their own
@@ -317,6 +328,117 @@ def test_fingerprint_covers_ai_flags_and_both_pools():
     b["Q2-2026"] = [("o/r", 1, True, 10, 5)]
     assert churn.frame_fingerprint(a) != churn.frame_fingerprint(b)
     assert churn.frame_fingerprint(a) != churn.frame_fingerprint(a, b)
+
+
+def test_fingerprint_accepts_monthly_pools():
+    """Monthly pull crashed with KeyError('Q1-2024'): frame_fingerprint
+    iterated the quarterly PERIODS constant instead of the pool's own
+    keys. Monthly pools must fingerprint, and distinct months must yield
+    distinct stamps."""
+    a = {"2024-01": [("o/r", 1, False, 10, 5)], "2026-05": []}
+    b = {"2024-01": [], "2026-05": [("o/r", 1, False, 10, 5)]}
+    assert churn.frame_fingerprint(a) != churn.frame_fingerprint(b)
+
+
+def test_finalized_months_apply_w8_finalization(monkeypatch):
+    """Monthly mode: a month reports only once month_end + 56d <= AS_OF —
+    at AS_OF 2026-08-01, May 2026 is the last reportable month (June
+    finalizes ~Aug 25, July ~Sep 25)."""
+    from pipeline.studies import productivity
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-01T00:00:00Z")
+    assert productivity.month_w8_mature("2026-05")
+    assert not productivity.month_w8_mature("2026-06")
+    assert not productivity.month_w8_mature("2026-07")
+
+
+def test_adoption_era_and_group_periods_by_granularity():
+    """Monthly endpoints start at the adoption era (2024 baseline months
+    never rank); the grouping window is the latest era quarter or the
+    last three finalized era months."""
+    months = ["2024-01", "2024-02", "2025-10", "2025-11", "2025-12",
+              "2026-01", "2026-02", "2026-03", "2026-04", "2026-05"]
+    assert churn.adoption_era(months) == months[2:]
+    assert churn.group_periods(months) == ["2026-03", "2026-04", "2026-05"]
+    assert churn.adoption_era(churn.PERIODS) == churn.ADOPTION_PERIODS
+    assert churn.group_periods(churn.PERIODS) == ["Q2-2026"]
+
+
+def test_stamp_denominators_monthly_grouping_window():
+    """Monthly grouping inputs sum over the passed window (last three
+    finalized months), stamped on every row."""
+    created = {"2026-04": [("o/a", 1, True, 1, 1), ("o/a", 2, False, 1, 1)],
+               "2026-05": [("o/a", 3, True, 1, 1)],
+               "2026-03": [("o/a", 4, False, 1, 1)],
+               "2024-01": [("o/a", 5, False, 1, 1)]}
+    records = {("o/a", "2024-01", "r"): {"repo": "o/a", "per": "2024-01",
+                                         "rng": "r", "bugs": 0}}
+    churn._stamp_denominators(records, created,
+                              ("2026-03", "2026-04", "2026-05"))
+    rec = records[("o/a", "2024-01", "r")]
+    assert rec["merged"] == 1
+    assert rec["q2"] == [2, 4]      # 2 AI of 4 merged in the window
+
+
+def test_eligible_monthly_passes_extended_ranges(monkeypatch):
+    """Review round (monthly), P1: monthly eligible() must group cells
+    under extended_quarters() — the default QUARTER_RANGES silently
+    discards finalized INCREMENTAL months' cells (July's month-shaped
+    cells map to no frozen quarter), breaking the September rollover."""
+    seen = {}
+
+    def fake_frame(level, periods=None, ranges=None, granularity="quarter"):
+        seen["ranges"] = ranges
+        return iter([])
+
+    monkeypatch.setattr(churn, "study_frame", fake_frame)
+    monkeypatch.setattr(churn, "finalized_months", lambda: ["2024-01"])
+    churn.eligible("month")
+    from pipeline.analyze import extended_quarters
+    assert seen["ranges"] == extended_quarters()
+
+
+def test_monthly_bugs_fingerprint_covers_sample_universe():
+    """Review round (monthly), P2: the monthly bug selection comes from
+    the frozen quarterly sample, so its fingerprint must cover that
+    sample's digest — a sample refresh must never leave MATCHES standing
+    on a different pilot universe. Quarterly stamps are unchanged."""
+    pool = {"2026-05": [("o/r", 1, True, 10, 5)]}
+    fp_a = churn.bugs_fingerprint(pool, pool, sample_digest="aaaa")
+    fp_b = churn.bugs_fingerprint(pool, pool, sample_digest="bbbb")
+    assert fp_a != fp_b
+    assert churn.bugs_fingerprint(pool, pool) \
+        == churn.frame_fingerprint(pool, pool)
+
+
+def test_bugs_fingerprint_uses_caller_verified_digest(
+        tmp_path, monkeypatch):
+    """Review round (monthly), follow-up P2 — TOCTOU: the monthly stamp
+    must derive from the digest returned by the SAME _verify() call that
+    produced the sample rows, never a re-read of SAMPLE_MANIFEST (which
+    a concurrent re-freeze can change between the two operations,
+    stamping old rows with a new digest and faking MATCHES)."""
+    import json
+    poisoned = tmp_path / "m.json"
+    poisoned.write_text(json.dumps({"digest": "NEWER"}))
+    monkeypatch.setattr(churn, "SAMPLE_MANIFEST", poisoned)
+    pool = {"2026-05": [("o/r", 1, True, 10, 5)]}
+    fp = churn.bugs_fingerprint(pool, pool, sample_digest="OLDROWS")
+    assert fp == churn.frame_fingerprint(pool, pool,
+                                         extra="sample:OLDROWS")
+    assert fp != churn.frame_fingerprint(pool, pool,
+                                         extra="sample:NEWER")
+
+
+def test_adoption_attrition_line_uses_the_periods_unit(capsys):
+    """Review round (monthly), P3: monthly output must say cross-month,
+    not cross-quarter."""
+    pool = {"2025-10": [("a/r", i, False, 100, 20) for i in range(7)],
+            "2026-05": [("a/r", i, True, 100, 60) for i in range(7)]}
+    churn.print_adoption(pool, cross=3, periods=["2025-10", "2026-05"],
+                         org_min=7)
+    out = capsys.readouterr().out
+    assert "cross-month merges trimmed: 3" in out
+    assert "cross-quarter" not in out
 
 
 def test_generated_path_classifier():

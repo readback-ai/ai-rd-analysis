@@ -81,7 +81,7 @@ def sections(granularity: str, repos: Path) -> list[tuple[str, list[str]]]:
          "in event time)",
          ["pipeline.studies.event_study"]),
         ("Code churn: within-org adoption contrast + calendar sensitivity",
-         ["pipeline.studies.churn", "--table", "report"]),
+         ["pipeline.studies.churn", *g, "--table", "report"]),
     ]
 
 
