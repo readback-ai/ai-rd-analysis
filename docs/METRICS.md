@@ -132,7 +132,7 @@ inaccessibility waiver). The monthly twin (`report_monthly.md`,
 `--granularity month`) runs the same sections; sections whose module is
 inherently quarterly carry an explicit `[quarterly]` tag there.
 
-The 20 sections, in order (each title names its producing module and
+The 22 sections, in order (each title names its producing module and
 argument — one section = one module invocation):
 
 1. **Contributor-weighted metrics** (`pipeline.analyze`) — per period ×
@@ -161,37 +161,63 @@ argument — one section = one module invocation):
 9. **Two-sided bound** (`--table bounds`) — headline with/without
    weak-prefix (cursor/, claude/, droid/) indeterminates; 0.05pp at the
    Q2-2026 headline.
-10. **Productivity decomposition** (`productivity --cut decomposition`) —
+10. **Involvement sensitivity to bot-authored PRs** (`--table botcheck`,
+    added 2026-07-28) — three `ai_involved` variants on one shared repo
+    set: published (profile `all`), no-dilution (non-AI bot PRs dropped,
+    layer-B agents kept), no-bots (profile `pr`); CW, 1,000-draw CIs,
+    plus non-AI-bot and all-bot authorship shares.
+11. **Productivity decomposition** (`productivity --cut decomposition`) —
     PRs = authors × PRs/author on the balanced repo panel.
-11. **Persistent-author productivity** (`--cut persistent`) — same person,
+12. **Persistent-author productivity** (`--cut persistent`) — same person,
     same repo, 2024↔2026, AI-split.
-12. **Core-contributor merged LOC** (`--cut core`) — the Figure 3 series.
-13. **Core-contributor LOC split by AI involvement** (`--cut aisplit`) —
+13. **Core-contributor merged LOC** (`--cut core`) — the Figure 3 series.
+14. **Core-contributor LOC split by AI involvement** (`--cut aisplit`) —
     noAI-author kLOC (flat) vs AI users' AI-PR + nonAI-PR kLOC.
-14. **Figure A1: adoption cohorts** (`--cut adoption`) — fixed cohorts
+15. **Figure A1: adoption cohorts** (`--cut adoption`) — fixed cohorts
     early/medium/late/never/**fleet** (≥300 merged PRs/quarter, assigned
     first); AI/nonAI/total kLOC per author with CI + median. Rendered as
     `fig_a1_adoption_cohorts.png`; companions: `figure_2_comp_audits.png`
     (balanced event panels per adoption month), `fig5_fleet_vs_nonadopters.png`,
     `fig_a2_adoption_event.png` (event time net of non-adopters).
-15. **Merged LOC by approval channel** (`--cut channels`) — humanRev /
+16. **Merged LOC by approval channel** (`--cut channels`) — humanRev /
     botOnly / selfUnrev / otherUnrev shares of merged LOC.
-16. **Figure 6: review mix of merged PRs/LOC** (`productivity --cut
+17. **Figure 6: review mix of merged PRs/LOC** (`productivity --cut
     reviewmix`) — per quarter × {core, external}: PR and LOC shares of
     humanRev / botOnly / selfUnrev / otherUnrev over mature merged PRs
     (the substitution hypothesis). Rendered as `fig6_review_mix.png`.
-17. **Attention per line** (`studies.attention`) — HUMAN comments/kLOC
+18. **Attention per line** (`studies.attention`) — HUMAN comments/kLOC
     (bot-clean) + window h/kLOC, all/ins/ext + size bands.
-18. **PR fates at matched horizons** (`studies.fates`) — w8 primary, w26
+19. **PR fates at matched horizons** (`studies.fates`) — w8 primary, w26
     sensitivity, per cohort; immature PRs excluded per horizon.
-19. **Responsiveness to human asks** (`studies.review_action`) — CLEAN
+20. **Responsiveness to human asks** (`studies.review_action`) — CLEAN
     lane identified; two designs over one frame: responded% is the
     equal-probability sample share (unweighted), post-ask LOC share is
     Horvitz–Thompson over the PPS-by-LOC sample; commit lists paginated
     with completeness metadata.
-20. **Adoption event-study** (`studies.event_study`) — merged (w8,
+21. **Adoption event-study** (`studies.event_study`) — merged (w8,
     mature-months-only) and submitted kLOC in event time around each
     author's first AI-marker month.
+22. **Code churn** (`studies.churn --table report`, added 2026-08-02) —
+    deleted:added over merged code in SAME-QUARTER-TRIMMED windows (a PR
+    counts iff created AND merged in the quarter, regardless of w8
+    maturity — an observed merge is terminal, and the trim gives every
+    quarter identical observability; cross-quarter merges dropped and
+    reported), arms all/AI/nonAI (profile `all` + `ai_contrast_eligible`,
+    so all = AI + nonAI). Headline = within-org contrast on TRACEABLE
+    adoption (an evidence floor, not literal adoption): per org (≥20
+    PRs/quarter, ≥2 qualifying quarters among Q4-2025..Q2-2026 —
+    Q1-2024 is excluded as an endpoint since its zero is by
+    construction — and nonzero adoption spread), churn at the
+    highest-adoption quarter over the lowest: geometric-mean multiple
+    with bootstrap CI over orgs, median, share of orgs rising. Faros's
+    +861% figure is quoted as an external reference for a DIFFERENT
+    population, not a replication target. Companion: calendar-trend
+    sensitivity (CW mean of per-repo ratios, capped sides, ≥5 PRs/repo,
+    per-cell CIs; pooled ratio; per-PR medians over nonzero-addition
+    PRs). The 0.1% balanced file-level sample and the bug-report proxy
+    (creation-bucketed mature-merged denominator, bug windows truncated
+    at the maturity frontier) stay auxiliary
+    (`churn --pull/--table sample/--pull-bugs/--table bugs`; §6).
 
 Alongside the report, `data/derived/census_manifest.json` records SHA-256
 prefixes of the population files, repo count, and cell-coverage numbers
@@ -205,6 +231,12 @@ prefixes of the population files, repo count, and cell-coverage numbers
   the final population before citing.
 - `data/derived/branch_sample_classifications.tsv` — minimized (identity-free)
   per-PR classifications of the branch-prefix samples.
+- `data/derived/churn_sample_v1.jsonl` — the churn pilot's balanced 0.1%
+  per-file sample (generated-content sensitivity);
+  `churn_incidents_v1.jsonl` — bug-labeled issue counts per sampled
+  repo-quarter (bug-report PROXY pilot, label:bug only, windows
+  truncated at the maturity frontier). Both files always hold exactly
+  the current seeded selection (atomic rewrite; stale draws dropped).
 
 ## 6b. Complete census vs. sampled studies
 
