@@ -210,6 +210,16 @@ def test_bug_window_truncates_at_maturity_frontier():
     assert churn.bug_window("Q1-2026", as_of) == "2026-01-01..2026-03-31"
 
 
+def test_bug_window_accepts_month_tokens():
+    """Monthly pull crashed with KeyError('2024-01'): bug_window resolved
+    tokens via QUARTER_RANGES instead of resolve_period. Month tokens
+    must resolve, with the frontier a no-op on finalized months."""
+    as_of = "2026-08-01T00:00:00Z"
+    assert churn.bug_window("2024-01", as_of) == "2024-01-01..2024-01-31"
+    assert churn.bug_window("2026-05", as_of) == "2026-05-01..2026-05-31"
+    assert churn.bug_window("2026-06", as_of) == "2026-06-01..2026-06-06"
+
+
 def test_adoption_attrition_counts_are_separated():
     """Review round 3, P2: orgs with >= 1 vs >= 2 qualifying era quarters
     are tracked separately, and endpoint-ratio exclusions get their own

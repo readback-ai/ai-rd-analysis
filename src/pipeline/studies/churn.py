@@ -651,7 +651,7 @@ def bug_window(per: str, as_of: str = AS_OF) -> str | None:
     """The quarter's bug-count window, truncated at the maturity frontier
     so numerator exposure matches the creation-bucketed mature-PR
     denominator. None if the whole quarter is past the frontier."""
-    start, end = QUARTER_RANGES[per].split("..")
+    start, end = resolve_period(per).split("..")
     end = min(end, maturity_frontier(as_of))
     return f"{start}..{end}" if start <= end else None
 
