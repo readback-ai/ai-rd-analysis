@@ -113,7 +113,11 @@ def eligible_nodes(nodes: list[dict]) -> list[tuple[str, int, int]]:
 def slots_for(ranked_repos: list[str], pages: dict[str, list[dict]]) \
         -> list[dict]:
     """One slot per repo, first n_docs repos with any eligible node;
-    one document per author across the whole arm (diversity)."""
+    one document per author across the whole arm (diversity). The
+    slot's author is drawn FIRST (seeded shuffle) and its candidates
+    are that author's PRs only, so a floor miss during fetch can only
+    promote another PR by the same author — the recorded author is the
+    document's author by construction."""
     slots: list[dict] = []
     used_authors: set[str] = set()
     for repo in ranked_repos:
@@ -129,10 +133,12 @@ def slots_for(ranked_repos: list[str], pages: dict[str, list[dict]]) \
         crng = random.Random(f"{SEED}:gptzero:v1:cand:{repo}:b3")
         order = sorted(elig)
         crng.shuffle(order)
-        cands = order[:B3_PARAMS["k_cand"]]
-        used_authors.add(cands[0][0])
+        author = order[0][0]
+        cands = [t for t in order
+                 if t[0] == author][:B3_PARAMS["k_cand"]]
+        used_authors.add(author)
         slots.append({
-            "slot": f"B3:{repo}", "arm": "B3", "author": cands[0][0],
+            "slot": f"B3:{repo}", "arm": "B3", "author": author,
             "period": PERIOD, "ai": False,
             "candidates": [[repo, num, loc] for _a, num, loc in cands]})
     return slots

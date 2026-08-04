@@ -308,10 +308,28 @@ def score_batch(items: list[tuple[str, Path]], cache_dir: Path,
                 f"batch shape mismatch: {len(misses)} files uploaded, "
                 f"{len(docs)} documents returned — nothing cached; "
                 f"response dumped to {dump}")
-        by_name = {d.get("filename"): d for d in docs
-                   if isinstance(d, dict) and d.get("filename")}
+        # Filename mapping is all-or-nothing: a complete, unique set
+        # exactly matching the upload (any order), or no filenames at
+        # all (upload order). A partial/duplicate/unknown mapping could
+        # assign one response to two files and poison the SHA-keyed
+        # cache, so it aborts with nothing written.
+        names = [d.get("filename") for d in docs
+                 if isinstance(d, dict) and d.get("filename")]
+        by_name: dict[str, dict] = {}
+        if names:
+            expected = {f"{sha}.txt" for sha, _p, _w in misses}
+            if (len(names) != len(docs)
+                    or len(set(names)) != len(names)
+                    or set(names) != expected):
+                dump = _dump_mismatch(reservations_path.parent, resp)
+                raise SystemExit(
+                    f"batch filename mapping mismatch: {len(names)} "
+                    f"named of {len(docs)} documents, "
+                    f"{len(set(names) - expected)} unknown — nothing "
+                    f"cached; response dumped to {dump}")
+            by_name = {d["filename"]: d for d in docs}
         for i, (sha, path, w) in enumerate(misses):
-            d = by_name.get(f"{sha}.txt", docs[i])
+            d = by_name.get(f"{sha}.txt") if by_name else docs[i]
             single = {"version": version, "documents": [d]}
             cached = _cache_path(cache_dir, sha)
             cached.parent.mkdir(parents=True, exist_ok=True)

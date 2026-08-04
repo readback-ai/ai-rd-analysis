@@ -656,6 +656,28 @@ def test_b3_draw_is_deterministic_and_one_doc_per_author():
     assert all(s["arm"] == "B3" and s["ai"] is False for s in slots)
 
 
+def test_b3_candidates_all_belong_to_the_slot_author():
+    """PR #28 review P1: B3 candidate lists mixed several authors' PRs
+    under the first candidate's author label, so a floor miss made
+    cmd_fetch fill the slot with ANOTHER author's PR while keeping the
+    recorded author (5/19 frozen rows misattributed). The slot's author
+    is selected first and every candidate must be that author's PR."""
+    import b3
+    pages = {"o/r": [_b3_node(1, login="ann"),
+                     _b3_node(2, login="bob"),
+                     _b3_node(3, login="ann"),
+                     _b3_node(4, login="bob"),
+                     _b3_node(5, login="cyd")]}
+    slots = b3.slots_for(["o/r"], pages)
+    assert len(slots) == 1
+    author = slots[0]["author"]
+    by_author = {a: {num for a2, num, _l in
+                     b3.eligible_nodes(pages["o/r"]) if a2 == a}
+                 for a in ("ann", "bob", "cyd")}
+    nums = {num for _r, num, _l in slots[0]["candidates"]}
+    assert nums == by_author[author]     # every candidate, one author
+
+
 def test_b3_fingerprint_tracks_pool():
     import b3
     pool = {"o/a": 30, "o/b": 40}
@@ -801,6 +823,79 @@ def _row(author, ai, p, cls="human", arm="P", period="Q2-2026"):
     return {"arm": arm, "author": author, "ai": ai, "period": period,
             "class_probabilities": {"ai": p},
             "predicted_class": cls, "truncated": False}
+
+
+def test_score_batch_rejects_partial_or_inexact_filename_mapping(
+        tmp_path, monkeypatch):
+    """PR #28 review P1: the per-item filename fallback could assign one
+    response document to two uploaded files (reordered response with one
+    unnamed document) and permanently cache the wrong score under a
+    document SHA. The mapping must be all-or-nothing: a complete, unique,
+    exact filename set (any order), or no filenames at all (upload
+    order); anything partial, duplicate, or unknown aborts uncached."""
+    import gptzero_client as gzc
+    monkeypatch.setattr(gzc, "PINNED_VERSION", "pinver")
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
+    items = []
+    for sha, text in (("shaA", "one two three"), ("shaB", "four five")):
+        p = docs_dir / f"{sha}.txt"
+        p.write_text(text)
+        items.append((sha, p))
+
+    def reordered_one_unnamed(paths):
+        return {"version": "pinver", "documents": [
+            {"filename": "shaB.txt", "predicted_class": "ai",
+             "class_probabilities": {"ai": 1.0}},
+            {"predicted_class": "human",
+             "class_probabilities": {"ai": 0.0}}]}
+
+    with pytest.raises(SystemExit):
+        gzc.score_batch(items, tmp_path / "cache",
+                        tmp_path / "resv.jsonl",
+                        transport=reordered_one_unnamed)
+    assert not list((tmp_path / "cache").rglob("*.json"))
+
+    def unknown_name(paths):
+        return {"version": "pinver", "documents": [
+            {"filename": "shaA.txt", "predicted_class": "ai",
+             "class_probabilities": {"ai": 1.0}},
+            {"filename": "OTHER.txt", "predicted_class": "human",
+             "class_probabilities": {"ai": 0.0}}]}
+
+    with pytest.raises(SystemExit):
+        gzc.score_batch(items, tmp_path / "cache",
+                        tmp_path / "resv2.jsonl", transport=unknown_name)
+    assert not list((tmp_path / "cache").rglob("*.json"))
+
+    def complete_reordered(paths):
+        return {"version": "pinver", "documents": [
+            {"filename": "shaB.txt", "predicted_class": "human",
+             "class_probabilities": {"ai": 0.25}},
+            {"filename": "shaA.txt", "predicted_class": "ai",
+             "class_probabilities": {"ai": 0.75}}]}
+
+    out = gzc.score_batch(items, tmp_path / "cache",
+                          tmp_path / "resv3.jsonl",
+                          transport=complete_reordered)
+    assert analyze.ai_prob(
+        {"class_probabilities":
+         gzc.doc_fields(out[0][0])["class_probabilities"]}) == 0.75
+    assert gzc.doc_fields(out[1][0])["predicted_class"] == "human"
+
+    for f in (tmp_path / "cache").rglob("*.json"):
+        f.unlink()
+
+    def all_unnamed(paths):
+        return {"version": "pinver", "documents": [
+            {"predicted_class": "ai", "class_probabilities": {"ai": 0.9}},
+            {"predicted_class": "human",
+             "class_probabilities": {"ai": 0.1}}]}
+
+    out = gzc.score_batch(items, tmp_path / "cache",
+                          tmp_path / "resv4.jsonl", transport=all_unnamed)
+    assert gzc.doc_fields(out[0][0])["predicted_class"] == "ai"
+    assert gzc.doc_fields(out[1][0])["predicted_class"] == "human"
 
 
 def test_analysis_paired_sign_and_arm_rates():
@@ -1005,7 +1100,7 @@ def test_retest_command_targets_truncated_scored_docs_only(
     monkeypatch.setattr(gzc, "_post_files_once", transport)
     gz.cmd_retest()
     assert len(sent) == 1 and len(sent[0]) == 1     # truncated doc only
-    out = [json.loads(l) for l in
+    out = [json.loads(ln) for ln in
            gz.RESULTS_RETEST.read_text().splitlines()]
     assert [r["slot"] for r in out] == ["P:a:ai"]
     assert out[0]["sha600"] == "sha600"
