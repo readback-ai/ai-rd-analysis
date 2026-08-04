@@ -1,4 +1,4 @@
-# GPTZero code-detection calibration (design v1-50k)
+# GPTZero code-detection calibration (designs v1-50k + eras-v1 + retest)
 
 Can GPTZero detect LLM-generated **code**? The study's detection layers
 (markers / agent authors / branch prefixes, A∪B∪C) are floors; a text
@@ -34,13 +34,23 @@ experiment calibrates GPTZero against the study's own labels.
   fingerprints AS_OF/CUTOFF/params/pool and is rebuilt-not-trusted.
   Candidate lists are seeded whole-pool shuffles, so deepening `k_cand`
   refills unfilled slots without disturbing fetched ones.
-- **Budget**: ≤80 docs × ≤600 words ≤ 48k, under a hard 50k ceiling
-  enforced against a durable **reservation ledger** — one row is
-  appended before EVERY HTTP attempt, because an attempt can be billed
-  server-side even when its response is lost (connection drop, crash
-  before the cache write). Responses are cached by (detector version,
-  document sha256) and a cached document is never re-billed under the
-  same version.
+- **Budget**: a hard ceiling (`gptzero_client.BUDGET_WORDS`, raised
+  only with the user's explicit approval — history in git) enforced
+  against a durable **reservation ledger** — one row is appended before
+  EVERY HTTP attempt, because an attempt can be billed server-side even
+  when its response is lost (connection drop, crash before the cache
+  write). Responses are cached by (detector version, document sha256)
+  and a cached document is never re-billed under the same version.
+  The ledger therefore over-counts after failures; **reconcile against
+  the GPTZero dashboard**: archive
+  `local/results/reservations_v1.jsonl` beside itself and seed a fresh
+  ledger with one `{"doc_sha": "reconcile:<date>:gptzero-dashboard",
+  "words": <dashboard credits>}` row. GPTZero credits equal this
+  pipeline's word counts 1:1; refused/timed-out batches have never
+  been billed at three reconciliations.
+- **Batching**: `/v2/predict/files`, ≤50 files AND ≤20k words per
+  request (bigger uploads time out server-side, returning HTTP 200
+  error envelopes); transient failures retry with fresh reservations.
 - **Version discipline**: the full run requires a pinned detector
   version. The smoke run may go unpinned; once pinned, requests carry
   the version, responses that report a different version are refused,
@@ -53,12 +63,19 @@ experiment calibrates GPTZero against the study's own labels.
 python experiments/gptzero/gz.py --sample            # manifest + pool sizes
 python experiments/gptzero/gz.py --sample-eras       # Q4-2025/Q1-2026 arms
 python experiments/gptzero/gz.py --fetch             # diffs -> documents
+python experiments/gptzero/gz.py --sample-b3         # Q3-2022 arm
 python experiments/gptzero/gz.py --score --limit 2   # unpinned smoke
 # read the smoke output's model version, then set
 #   gptzero_client.PINNED_VERSION = "<that version>"
 python experiments/gptzero/gz.py --score             # refuses while unpinned
+python experiments/gptzero/gz.py --retest            # 1200-word sensitivity
 python experiments/gptzero/gz.py                     # analysis report
+python experiments/gptzero/gz.py --freeze            # commit-ready audit set
 ```
+
+`frozen/` holds the committed audit set for the reported numbers
+(manifests, row metadata, scores, generated report, provenance);
+regenerate it with `--freeze` after any scoring change.
 
 API key: `GPTZERO_API_KEY` env var, or paste into `local/api_key`.
 Everything data-shaped (manifest, documents, diffs, responses,

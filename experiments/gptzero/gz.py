@@ -373,6 +373,52 @@ def cmd_retest() -> None:
           f"words")
 
 
+FROZEN = BASE / "frozen"
+
+
+def cmd_freeze() -> None:
+    """Copy the audit set — manifests, document metadata rows, score
+    rows, and the generated report — into the committed frozen/
+    directory, so the reported numbers can be reviewed and reproduced
+    from a fresh checkout without a paid rerun. Raw diffs, document
+    texts, and API response caches stay local-only. Repos, PR numbers,
+    and author logins in the frozen set are public GitHub metadata."""
+    import contextlib
+    import io
+    import shutil
+    from datetime import date
+
+    import analyze
+    import gptzero_client as gzc
+    FROZEN.mkdir(exist_ok=True)
+    kept = []
+    for p in (MANIFEST, MANIFEST_B3, MANIFEST_ERAS, DOCS, DOCS_RETEST,
+              RESULTS, RESULTS_RETEST):
+        if p.is_file():
+            shutil.copy(p, FROZEN / p.name)
+            kept.append(p.name)
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        analyze.report(RESULTS, RESULTS_RETEST)
+    (FROZEN / "report.txt").write_text(buf.getvalue())
+    (FROZEN / "PROVENANCE.md").write_text(
+        f"# Frozen audit set ({date.today().isoformat()})\n\n"
+        f"- detector version pin: {gzc.PINNED_VERSION}\n"
+        f"- reservation ledger: {ledger_total()} words reserved, "
+        f"ceiling {gzc.BUDGET_WORDS}\n"
+        f"- files: {', '.join(kept)} + report.txt\n\n"
+        f"The ledger deliberately over-counts on transport failures "
+        f"(every HTTP attempt reserves before it runs); reconcile "
+        f"against the GPTZero dashboard by archiving the ledger and "
+        f"seeding it with one dashboard-confirmed row (see README).\n")
+    print(f"frozen: {len(kept) + 2} files -> {FROZEN}")
+
+
+def ledger_total() -> int:
+    import gptzero_client as gzc
+    return gzc.ledger(RESERVATIONS)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--sample", action="store_true")
@@ -381,6 +427,7 @@ def main() -> None:
     ap.add_argument("--fetch", action="store_true")
     ap.add_argument("--score", action="store_true")
     ap.add_argument("--retest", action="store_true")
+    ap.add_argument("--freeze", action="store_true")
     ap.add_argument("--limit", type=int, default=None)
     a = ap.parse_args()
     if a.sample:
@@ -395,6 +442,8 @@ def main() -> None:
         cmd_score(a.limit)
     elif a.retest:
         cmd_retest()
+    elif a.freeze:
+        cmd_freeze()
     else:
         import analyze
         analyze.report(RESULTS, RESULTS_RETEST)

@@ -1110,6 +1110,31 @@ def test_retest_command_targets_truncated_scored_docs_only(
     assert sent == []
 
 
+def test_freeze_writes_the_audit_set(tmp_path, monkeypatch):
+    """--freeze snapshots manifests, row files, the generated report,
+    and provenance into the committed frozen/ dir — the review artifact
+    for the reported numbers (PR #28 review P2)."""
+    import gz
+    for name in ("MANIFEST", "MANIFEST_B3", "MANIFEST_ERAS", "DOCS",
+                 "DOCS_RETEST", "RESULTS", "RESULTS_RETEST",
+                 "RESERVATIONS"):
+        monkeypatch.setattr(gz, name, tmp_path / getattr(gz, name).name)
+    monkeypatch.setattr(gz, "FROZEN", tmp_path / "frozen")
+    monkeypatch.setattr(gptzero_client, "PINNED_VERSION", "pinver")
+    gz.MANIFEST.write_text(json.dumps({"slots": []}))
+    gz.RESULTS.write_text(json.dumps(
+        {"slot": "B3:o/r", "arm": "B3", "ai": False, "period": "Q3-2022",
+         "doc_sha": "s", "class_probabilities": {"ai": 0.1},
+         "predicted_class": "human", "truncated": False,
+         "model_version": "pinver"}) + "\n")
+    gz.cmd_freeze()
+    names = {f.name for f in gz.FROZEN.iterdir()}
+    assert {"manifest_v1_50k.json", "scores_v1.jsonl", "report.txt",
+            "PROVENANCE.md"} <= names
+    assert "Q3-22-era" in (gz.FROZEN / "report.txt").read_text()
+    assert "pinver" in (gz.FROZEN / "PROVENANCE.md").read_text()
+
+
 def _eras_pools(q4=("alice", "bob"), q1_26=("alice",),
                 q2_26=("carol", "dana")):
     def entry():

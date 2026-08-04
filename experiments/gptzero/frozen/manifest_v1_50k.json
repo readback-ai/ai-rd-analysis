@@ -1,0 +1,2189 @@
+{
+ "design": "v1-50k",
+ "fingerprint": "92f508e0d059b272",
+ "params": {
+  "design": "v1-50k",
+  "n_authors": 30,
+  "n_q1": 20,
+  "n_b1": 10,
+  "k_cand": 8,
+  "word_cap": 600,
+  "word_floor": 100,
+  "min_loc": 50,
+  "max_loc": 2000
+ },
+ "slots": [
+  {
+   "slot": "P:hussein1362:ai",
+   "arm": "P",
+   "author": "hussein1362",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "HKUDS/nanobot",
+     3606,
+     278
+    ]
+   ]
+  },
+  {
+   "slot": "P:hussein1362:nonai",
+   "arm": "P",
+   "author": "hussein1362",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "HKUDS/nanobot",
+     3297,
+     203
+    ],
+    [
+     "HKUDS/nanobot",
+     3391,
+     284
+    ],
+    [
+     "HKUDS/nanobot",
+     3444,
+     170
+    ],
+    [
+     "HKUDS/nanobot",
+     3355,
+     164
+    ],
+    [
+     "HKUDS/nanobot",
+     3389,
+     302
+    ],
+    [
+     "HKUDS/nanobot",
+     3482,
+     205
+    ],
+    [
+     "HKUDS/nanobot",
+     3369,
+     186
+    ],
+    [
+     "HKUDS/nanobot",
+     3491,
+     267
+    ]
+   ]
+  },
+  {
+   "slot": "P:generall:ai",
+   "arm": "P",
+   "author": "generall",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "qdrant/qdrant",
+     8803,
+     104
+    ],
+    [
+     "qdrant/qdrant",
+     8626,
+     107
+    ],
+    [
+     "qdrant/qdrant",
+     8881,
+     585
+    ],
+    [
+     "qdrant/qdrant",
+     8755,
+     462
+    ],
+    [
+     "qdrant/qdrant",
+     8882,
+     363
+    ],
+    [
+     "qdrant/qdrant",
+     8888,
+     1904
+    ],
+    [
+     "qdrant/qdrant",
+     8879,
+     1478
+    ],
+    [
+     "qdrant/qdrant",
+     8715,
+     596
+    ]
+   ]
+  },
+  {
+   "slot": "P:generall:nonai",
+   "arm": "P",
+   "author": "generall",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "qdrant/qdrant",
+     8855,
+     209
+    ],
+    [
+     "qdrant/qdrant",
+     8654,
+     547
+    ],
+    [
+     "qdrant/qdrant",
+     8852,
+     659
+    ],
+    [
+     "qdrant/qdrant",
+     8638,
+     273
+    ],
+    [
+     "qdrant/qdrant",
+     8681,
+     1371
+    ],
+    [
+     "qdrant/qdrant",
+     8636,
+     102
+    ],
+    [
+     "qdrant/qdrant",
+     8714,
+     259
+    ],
+    [
+     "qdrant/qdrant",
+     8887,
+     261
+    ]
+   ]
+  },
+  {
+   "slot": "P:duncankmckinnon:ai",
+   "arm": "P",
+   "author": "duncankmckinnon",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "Arize-ai/coding-harness-tracing",
+     23,
+     1257
+    ],
+    [
+     "Arize-ai/coding-harness-tracing",
+     5,
+     1700
+    ],
+    [
+     "Arize-ai/coding-harness-tracing",
+     7,
+     1112
+    ],
+    [
+     "Arize-ai/coding-harness-tracing",
+     22,
+     840
+    ],
+    [
+     "Arize-ai/coding-harness-tracing",
+     26,
+     843
+    ],
+    [
+     "Arize-ai/coding-harness-tracing",
+     6,
+     1935
+    ],
+    [
+     "Arize-ai/coding-harness-tracing",
+     25,
+     1017
+    ],
+    [
+     "Arize-ai/coding-harness-tracing",
+     27,
+     801
+    ]
+   ]
+  },
+  {
+   "slot": "P:duncankmckinnon:nonai",
+   "arm": "P",
+   "author": "duncankmckinnon",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "Arize-ai/openinference",
+     3003,
+     89
+    ]
+   ]
+  },
+  {
+   "slot": "P:zhagnlu:ai",
+   "arm": "P",
+   "author": "zhagnlu",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "milvus-io/milvus-design-docs",
+     34,
+     510
+    ]
+   ]
+  },
+  {
+   "slot": "P:zhagnlu:nonai",
+   "arm": "P",
+   "author": "zhagnlu",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "milvus-io/milvus",
+     48912,
+     551
+    ],
+    [
+     "milvus-io/milvus-design-docs",
+     40,
+     196
+    ],
+    [
+     "milvus-io/milvus",
+     49321,
+     1044
+    ],
+    [
+     "milvus-io/milvus",
+     49446,
+     189
+    ],
+    [
+     "milvus-io/milvus",
+     49445,
+     103
+    ],
+    [
+     "milvus-io/milvus",
+     49249,
+     493
+    ]
+   ]
+  },
+  {
+   "slot": "P:MrPresent-Han:ai",
+   "arm": "P",
+   "author": "MrPresent-Han",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "milvus-io/milvus-design-docs",
+     38,
+     518
+    ],
+    [
+     "milvus-io/milvus",
+     48819,
+     1319
+    ],
+    [
+     "milvus-io/milvus",
+     48865,
+     1418
+    ],
+    [
+     "milvus-io/milvus",
+     49169,
+     1319
+    ]
+   ]
+  },
+  {
+   "slot": "P:MrPresent-Han:nonai",
+   "arm": "P",
+   "author": "MrPresent-Han",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "milvus-io/milvus-proto",
+     582,
+     238
+    ],
+    [
+     "milvus-io/milvus",
+     49456,
+     1954
+    ],
+    [
+     "milvus-io/milvus",
+     49471,
+     1954
+    ]
+   ]
+  },
+  {
+   "slot": "P:SyedShahmeerAli12:ai",
+   "arm": "P",
+   "author": "SyedShahmeerAli12",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "deepset-ai/haystack-core-integrations",
+     3173,
+     977
+    ]
+   ]
+  },
+  {
+   "slot": "P:SyedShahmeerAli12:nonai",
+   "arm": "P",
+   "author": "SyedShahmeerAli12",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "deepset-ai/haystack-core-integrations",
+     3196,
+     590
+    ],
+    [
+     "deepset-ai/haystack-core-integrations",
+     3114,
+     94
+    ],
+    [
+     "deepset-ai/haystack-core-integrations",
+     3249,
+     241
+    ],
+    [
+     "deepset-ai/haystack-core-integrations",
+     3228,
+     471
+    ],
+    [
+     "deepset-ai/haystack",
+     11165,
+     550
+    ],
+    [
+     "deepset-ai/haystack-core-integrations",
+     3126,
+     361
+    ],
+    [
+     "deepset-ai/haystack-integrations",
+     452,
+     103
+    ],
+    [
+     "deepset-ai/haystack-core-integrations",
+     3103,
+     218
+    ]
+   ]
+  },
+  {
+   "slot": "P:Anerudhan:ai",
+   "arm": "P",
+   "author": "Anerudhan",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA/cudnn-frontend",
+     219,
+     74
+    ],
+    [
+     "NVIDIA/cudnn-frontend",
+     235,
+     69
+    ],
+    [
+     "NVIDIA/cudnn-frontend",
+     226,
+     299
+    ]
+   ]
+  },
+  {
+   "slot": "P:Anerudhan:nonai",
+   "arm": "P",
+   "author": "Anerudhan",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/cudnn-frontend",
+     216,
+     186
+    ],
+    [
+     "NVIDIA/cudnn-frontend",
+     234,
+     90
+    ]
+   ]
+  },
+  {
+   "slot": "P:jasonvigil:ai",
+   "arm": "P",
+   "author": "jasonvigil",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "chroma-core/chroma",
+     6958,
+     223
+    ]
+   ]
+  },
+  {
+   "slot": "P:jasonvigil:nonai",
+   "arm": "P",
+   "author": "jasonvigil",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "chroma-core/chroma",
+     6944,
+     559
+    ],
+    [
+     "chroma-core/chroma",
+     6965,
+     223
+    ]
+   ]
+  },
+  {
+   "slot": "P:wenscarl:ai",
+   "arm": "P",
+   "author": "wenscarl",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "sgl-project/sglang",
+     23273,
+     251
+    ],
+    [
+     "sgl-project/sglang",
+     24435,
+     305
+    ]
+   ]
+  },
+  {
+   "slot": "P:wenscarl:nonai",
+   "arm": "P",
+   "author": "wenscarl",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "sgl-project/sglang",
+     23402,
+     550
+    ]
+   ]
+  },
+  {
+   "slot": "P:khalatepradnya:ai",
+   "arm": "P",
+   "author": "khalatepradnya",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA/cuda-quantum",
+     4439,
+     1363
+    ],
+    [
+     "NVIDIA/cuda-quantum",
+     4405,
+     469
+    ]
+   ]
+  },
+  {
+   "slot": "P:khalatepradnya:nonai",
+   "arm": "P",
+   "author": "khalatepradnya",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/cuda-quantum",
+     4267,
+     76
+    ],
+    [
+     "NVIDIA/cuda-quantum",
+     4346,
+     117
+    ],
+    [
+     "NVIDIA/cudaqx",
+     504,
+     130
+    ],
+    [
+     "NVIDIA/cudaqx",
+     509,
+     130
+    ],
+    [
+     "NVIDIA/cuda-quantum",
+     4403,
+     145
+    ],
+    [
+     "NVIDIA/cuda-quantum",
+     4266,
+     196
+    ],
+    [
+     "NVIDIA/cuda-quantum",
+     4404,
+     251
+    ]
+   ]
+  },
+  {
+   "slot": "P:Torantulino:ai",
+   "arm": "P",
+   "author": "Torantulino",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "Significant-Gravitas/AutoGPT",
+     12969,
+     231
+    ],
+    [
+     "Significant-Gravitas/AutoGPT",
+     12968,
+     123
+    ]
+   ]
+  },
+  {
+   "slot": "P:Torantulino:nonai",
+   "arm": "P",
+   "author": "Torantulino",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "Significant-Gravitas/AutoGPT",
+     12672,
+     77
+    ],
+    [
+     "Significant-Gravitas/AutoGPT",
+     12996,
+     149
+    ]
+   ]
+  },
+  {
+   "slot": "P:chuqCTC:ai",
+   "arm": "P",
+   "author": "chuqCTC",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     21622,
+     144
+    ],
+    [
+     "PrefectHQ/prefect",
+     21792,
+     149
+    ]
+   ]
+  },
+  {
+   "slot": "P:chuqCTC:nonai",
+   "arm": "P",
+   "author": "chuqCTC",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     21458,
+     319
+    ]
+   ]
+  },
+  {
+   "slot": "P:RUCYancy:ai",
+   "arm": "P",
+   "author": "RUCYancy",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "dataelement/bisheng",
+     2004,
+     1259
+    ]
+   ]
+  },
+  {
+   "slot": "P:RUCYancy:nonai",
+   "arm": "P",
+   "author": "RUCYancy",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "dataelement/bisheng",
+     2030,
+     493
+    ],
+    [
+     "dataelement/bisheng",
+     2036,
+     628
+    ],
+    [
+     "dataelement/bisheng",
+     2011,
+     254
+    ]
+   ]
+  },
+  {
+   "slot": "P:stuxf:ai",
+   "arm": "P",
+   "author": "stuxf",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "BerriAI/litellm",
+     26489,
+     419
+    ],
+    [
+     "BerriAI/litellm",
+     27013,
+     174
+    ],
+    [
+     "BerriAI/litellm",
+     26968,
+     373
+    ],
+    [
+     "BerriAI/litellm",
+     27015,
+     432
+    ],
+    [
+     "BerriAI/litellm",
+     26969,
+     510
+    ],
+    [
+     "BerriAI/litellm",
+     26915,
+     310
+    ],
+    [
+     "BerriAI/litellm",
+     27009,
+     151
+    ],
+    [
+     "BerriAI/litellm",
+     26953,
+     600
+    ]
+   ]
+  },
+  {
+   "slot": "P:stuxf:nonai",
+   "arm": "P",
+   "author": "stuxf",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "BerriAI/litellm",
+     25834,
+     129
+    ],
+    [
+     "BerriAI/litellm",
+     26854,
+     385
+    ],
+    [
+     "BerriAI/litellm",
+     26860,
+     1218
+    ],
+    [
+     "BerriAI/litellm",
+     25904,
+     1403
+    ],
+    [
+     "BerriAI/litellm",
+     26365,
+     1394
+    ],
+    [
+     "BerriAI/litellm",
+     26841,
+     246
+    ],
+    [
+     "BerriAI/litellm",
+     26849,
+     466
+    ],
+    [
+     "BerriAI/litellm",
+     26836,
+     557
+    ]
+   ]
+  },
+  {
+   "slot": "P:wochinge:ai",
+   "arm": "P",
+   "author": "wochinge",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "langfuse/langfuse",
+     12937,
+     634
+    ],
+    [
+     "langfuse/langfuse",
+     13374,
+     591
+    ],
+    [
+     "langfuse/langfuse",
+     13194,
+     130
+    ],
+    [
+     "langfuse/langfuse-js",
+     783,
+     94
+    ],
+    [
+     "langfuse/langfuse",
+     13200,
+     341
+    ],
+    [
+     "langfuse/langfuse",
+     12999,
+     157
+    ],
+    [
+     "langfuse/langfuse",
+     13225,
+     63
+    ],
+    [
+     "langfuse/langfuse",
+     13129,
+     141
+    ]
+   ]
+  },
+  {
+   "slot": "P:wochinge:nonai",
+   "arm": "P",
+   "author": "wochinge",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "langfuse/langfuse",
+     13412,
+     73
+    ],
+    [
+     "langfuse/langfuse-js",
+     795,
+     408
+    ],
+    [
+     "langfuse/langfuse",
+     13048,
+     267
+    ],
+    [
+     "langfuse/langfuse",
+     13456,
+     312
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2888,
+     939
+    ],
+    [
+     "langfuse/langfuse",
+     13155,
+     267
+    ]
+   ]
+  },
+  {
+   "slot": "P:39499740:ai",
+   "arm": "P",
+   "author": "39499740",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "dataelement/Clawith",
+     292,
+     525
+    ],
+    [
+     "dataelement/Clawith",
+     268,
+     519
+    ]
+   ]
+  },
+  {
+   "slot": "P:39499740:nonai",
+   "arm": "P",
+   "author": "39499740",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "dataelement/Clawith",
+     361,
+     1261
+    ]
+   ]
+  },
+  {
+   "slot": "P:tugsbayasgalan:ai",
+   "arm": "P",
+   "author": "tugsbayasgalan",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "pytorch/torchtitan",
+     3046,
+     510
+    ]
+   ]
+  },
+  {
+   "slot": "P:tugsbayasgalan:nonai",
+   "arm": "P",
+   "author": "tugsbayasgalan",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "pytorch/torchtitan",
+     2784,
+     88
+    ],
+    [
+     "pytorch/torchtitan",
+     2882,
+     741
+    ],
+    [
+     "pytorch/torchtitan",
+     2875,
+     202
+    ],
+    [
+     "pytorch/torchtitan",
+     3164,
+     714
+    ],
+    [
+     "pytorch/torchtitan",
+     2945,
+     55
+    ]
+   ]
+  },
+  {
+   "slot": "P:lipikaramaswamy:ai",
+   "arm": "P",
+   "author": "lipikaramaswamy",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA-NeMo/Anonymizer",
+     124,
+     423
+    ]
+   ]
+  },
+  {
+   "slot": "P:lipikaramaswamy:nonai",
+   "arm": "P",
+   "author": "lipikaramaswamy",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA-NeMo/Anonymizer",
+     101,
+     70
+    ],
+    [
+     "NVIDIA-NeMo/Anonymizer",
+     91,
+     56
+    ],
+    [
+     "NVIDIA-NeMo/Anonymizer",
+     96,
+     176
+    ],
+    [
+     "NVIDIA-NeMo/Anonymizer",
+     102,
+     1634
+    ],
+    [
+     "NVIDIA-NeMo/Anonymizer",
+     92,
+     376
+    ],
+    [
+     "NVIDIA-NeMo/Anonymizer",
+     88,
+     183
+    ],
+    [
+     "NVIDIA-NeMo/Anonymizer",
+     103,
+     144
+    ]
+   ]
+  },
+  {
+   "slot": "P:Doondi-Ashlesh:ai",
+   "arm": "P",
+   "author": "Doondi-Ashlesh",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA-NeMo/Nemotron",
+     145,
+     1230
+    ]
+   ]
+  },
+  {
+   "slot": "P:Doondi-Ashlesh:nonai",
+   "arm": "P",
+   "author": "Doondi-Ashlesh",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     3349,
+     86
+    ]
+   ]
+  },
+  {
+   "slot": "P:vincenzopalazzo:ai",
+   "arm": "P",
+   "author": "vincenzopalazzo",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "aaif-goose/goose",
+     8448,
+     440
+    ],
+    [
+     "aaif-goose/goose",
+     8450,
+     260
+    ]
+   ]
+  },
+  {
+   "slot": "P:vincenzopalazzo:nonai",
+   "arm": "P",
+   "author": "vincenzopalazzo",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "aaif-goose/goose",
+     8386,
+     116
+    ]
+   ]
+  },
+  {
+   "slot": "P:yangzheli:ai",
+   "arm": "P",
+   "author": "yangzheli",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "bytedance/deer-flow",
+     1904,
+     85
+    ],
+    [
+     "bytedance/deer-flow",
+     2147,
+     892
+    ],
+    [
+     "bytedance/deer-flow",
+     1896,
+     112
+    ],
+    [
+     "bytedance/deer-flow",
+     2279,
+     685
+    ],
+    [
+     "bytedance/deer-flow",
+     1846,
+     51
+    ],
+    [
+     "bytedance/deer-flow",
+     2713,
+     1017
+    ]
+   ]
+  },
+  {
+   "slot": "P:yangzheli:nonai",
+   "arm": "P",
+   "author": "yangzheli",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "bytedance/deer-flow",
+     1848,
+     74
+    ],
+    [
+     "bytedance/deer-flow",
+     2679,
+     158
+    ]
+   ]
+  },
+  {
+   "slot": "P:vmaksimovicTT:ai",
+   "arm": "P",
+   "author": "vmaksimovicTT",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "tenstorrent/tt-inference-server",
+     2723,
+     518
+    ]
+   ]
+  },
+  {
+   "slot": "P:vmaksimovicTT:nonai",
+   "arm": "P",
+   "author": "vmaksimovicTT",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "tenstorrent/tt-inference-server",
+     2790,
+     53
+    ],
+    [
+     "tenstorrent/tt-inference-server",
+     3157,
+     202
+    ],
+    [
+     "tenstorrent/tt-inference-server",
+     3156,
+     105
+    ],
+    [
+     "tenstorrent/tt-inference-server",
+     3227,
+     857
+    ],
+    [
+     "tenstorrent/tt-inference-server",
+     2795,
+     150
+    ],
+    [
+     "tenstorrent/tt-inference-server",
+     3096,
+     221
+    ]
+   ]
+  },
+  {
+   "slot": "P:Genmin:ai",
+   "arm": "P",
+   "author": "Genmin",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "langchain-ai/langchainjs",
+     10790,
+     59
+    ],
+    [
+     "langchain-ai/langchainjs",
+     10791,
+     115
+    ]
+   ]
+  },
+  {
+   "slot": "P:Genmin:nonai",
+   "arm": "P",
+   "author": "Genmin",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "mlflow/mlflow",
+     23036,
+     107
+    ],
+    [
+     "vllm-project/aibrix",
+     2168,
+     71
+    ],
+    [
+     "run-llama/llama_index",
+     21507,
+     84
+    ],
+    [
+     "langchain-ai/langchainjs",
+     10811,
+     193
+    ]
+   ]
+  },
+  {
+   "slot": "P:samstokes:ai",
+   "arm": "P",
+   "author": "samstokes",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "Eventual-Inc/Daft",
+     6697,
+     946
+    ],
+    [
+     "Eventual-Inc/Daft",
+     6716,
+     660
+    ],
+    [
+     "Eventual-Inc/Daft",
+     6861,
+     586
+    ],
+    [
+     "Eventual-Inc/Daft",
+     6838,
+     523
+    ],
+    [
+     "Eventual-Inc/Daft",
+     6763,
+     368
+    ],
+    [
+     "Eventual-Inc/Daft",
+     6878,
+     406
+    ],
+    [
+     "Eventual-Inc/Daft",
+     6879,
+     281
+    ],
+    [
+     "Eventual-Inc/Daft",
+     6881,
+     396
+    ]
+   ]
+  },
+  {
+   "slot": "P:samstokes:nonai",
+   "arm": "P",
+   "author": "samstokes",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "Eventual-Inc/Daft",
+     6632,
+     109
+    ]
+   ]
+  },
+  {
+   "slot": "P:Prayer3th:ai",
+   "arm": "P",
+   "author": "Prayer3th",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "sgl-project/sglang-jax",
+     969,
+     203
+    ]
+   ]
+  },
+  {
+   "slot": "P:Prayer3th:nonai",
+   "arm": "P",
+   "author": "Prayer3th",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "sgl-project/sglang-jax",
+     1021,
+     314
+    ]
+   ]
+  },
+  {
+   "slot": "P:mdragulaTT:ai",
+   "arm": "P",
+   "author": "mdragulaTT",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "tenstorrent/tt-metal",
+     42968,
+     317
+    ]
+   ]
+  },
+  {
+   "slot": "P:mdragulaTT:nonai",
+   "arm": "P",
+   "author": "mdragulaTT",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "tenstorrent/tt-metal",
+     41617,
+     241
+    ]
+   ]
+  },
+  {
+   "slot": "P:rpavlovicTT:ai",
+   "arm": "P",
+   "author": "rpavlovicTT",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "tenstorrent/tt-metal",
+     41550,
+     56
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     8256,
+     280
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     7903,
+     97
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     8098,
+     270
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     8235,
+     68
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     7974,
+     528
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     7818,
+     86
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     7856,
+     612
+    ]
+   ]
+  },
+  {
+   "slot": "P:rpavlovicTT:nonai",
+   "arm": "P",
+   "author": "rpavlovicTT",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "tenstorrent/tt-mlir",
+     8093,
+     87
+    ],
+    [
+     "tenstorrent/tt-metal",
+     41744,
+     56
+    ]
+   ]
+  },
+  {
+   "slot": "P:ffuugoo:ai",
+   "arm": "P",
+   "author": "ffuugoo",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "qdrant/qdrant",
+     8759,
+     583
+    ]
+   ]
+  },
+  {
+   "slot": "P:ffuugoo:nonai",
+   "arm": "P",
+   "author": "ffuugoo",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "qdrant/qdrant",
+     8702,
+     201
+    ],
+    [
+     "qdrant/qdrant",
+     8850,
+     107
+    ],
+    [
+     "qdrant/qdrant",
+     8685,
+     910
+    ],
+    [
+     "qdrant/qdrant",
+     8791,
+     227
+    ],
+    [
+     "qdrant/qdrant",
+     8894,
+     233
+    ],
+    [
+     "qdrant/qdrant",
+     8586,
+     570
+    ],
+    [
+     "qdrant/qdrant",
+     8592,
+     444
+    ]
+   ]
+  },
+  {
+   "slot": "P:xr843:ai",
+   "arm": "P",
+   "author": "xr843",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "BerriAI/litellm",
+     26868,
+     84
+    ],
+    [
+     "langgenius/dify",
+     35726,
+     52
+    ],
+    [
+     "BerriAI/litellm",
+     25777,
+     490
+    ],
+    [
+     "langgenius/dify",
+     34379,
+     80
+    ]
+   ]
+  },
+  {
+   "slot": "P:xr843:nonai",
+   "arm": "P",
+   "author": "xr843",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "langgenius/dify",
+     35793,
+     89
+    ],
+    [
+     "langgenius/dify",
+     35267,
+     111
+    ],
+    [
+     "langgenius/dify",
+     35796,
+     51
+    ]
+   ]
+  },
+  {
+   "slot": "P:jlost:ai",
+   "arm": "P",
+   "author": "jlost",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "kserve/kserve",
+     5378,
+     208
+    ]
+   ]
+  },
+  {
+   "slot": "P:jlost:nonai",
+   "arm": "P",
+   "author": "jlost",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "kserve/kserve",
+     5396,
+     266
+    ],
+    [
+     "kserve/kserve",
+     5420,
+     168
+    ],
+    [
+     "kserve/kserve",
+     5363,
+     322
+    ],
+    [
+     "kserve/kserve",
+     5427,
+     64
+    ]
+   ]
+  },
+  {
+   "slot": "B1:generall",
+   "arm": "B1",
+   "author": "generall",
+   "period": "Q1-2024",
+   "ai": false,
+   "same_repo": true,
+   "candidates": [
+    [
+     "qdrant/qdrant",
+     3896,
+     285
+    ],
+    [
+     "qdrant/qdrant",
+     3581,
+     64
+    ],
+    [
+     "qdrant/qdrant",
+     3748,
+     51
+    ],
+    [
+     "qdrant/qdrant",
+     3900,
+     752
+    ],
+    [
+     "qdrant/landing_page",
+     503,
+     137
+    ],
+    [
+     "qdrant/landing_page",
+     605,
+     316
+    ],
+    [
+     "qdrant/landing_page",
+     766,
+     1188
+    ],
+    [
+     "qdrant/landing_page",
+     505,
+     57
+    ]
+   ]
+  },
+  {
+   "slot": "B1:zhagnlu",
+   "arm": "B1",
+   "author": "zhagnlu",
+   "period": "Q1-2024",
+   "ai": false,
+   "same_repo": true,
+   "candidates": [
+    [
+     "milvus-io/milvus",
+     30324,
+     1024
+    ],
+    [
+     "milvus-io/milvus",
+     30578,
+     53
+    ],
+    [
+     "milvus-io/milvus",
+     30079,
+     144
+    ],
+    [
+     "milvus-io/milvus",
+     31636,
+     531
+    ],
+    [
+     "milvus-io/milvus",
+     30834,
+     69
+    ],
+    [
+     "milvus-io/milvus",
+     30384,
+     172
+    ],
+    [
+     "milvus-io/milvus",
+     31499,
+     531
+    ]
+   ]
+  },
+  {
+   "slot": "B1:MrPresent-Han",
+   "arm": "B1",
+   "author": "MrPresent-Han",
+   "period": "Q1-2024",
+   "ai": false,
+   "same_repo": true,
+   "candidates": [
+    [
+     "milvus-io/milvus",
+     30882,
+     645
+    ],
+    [
+     "milvus-io/milvus",
+     30947,
+     241
+    ],
+    [
+     "milvus-io/milvus",
+     30017,
+     155
+    ],
+    [
+     "milvus-io/milvus",
+     30644,
+     1407
+    ],
+    [
+     "milvus-io/milvus",
+     30091,
+     112
+    ],
+    [
+     "milvus-io/milvus",
+     31200,
+     120
+    ],
+    [
+     "milvus-io/milvus",
+     29614,
+     72
+    ],
+    [
+     "milvus-io/pymilvus",
+     1854,
+     70
+    ]
+   ]
+  },
+  {
+   "slot": "B1:Anerudhan",
+   "arm": "B1",
+   "author": "Anerudhan",
+   "period": "Q1-2024",
+   "ai": false,
+   "same_repo": true,
+   "candidates": [
+    [
+     "NVIDIA/cudnn-frontend",
+     53,
+     344
+    ],
+    [
+     "NVIDIA/cudnn-frontend",
+     59,
+     125
+    ],
+    [
+     "NVIDIA/cudnn-frontend",
+     69,
+     402
+    ]
+   ]
+  },
+  {
+   "slot": "B1:khalatepradnya",
+   "arm": "B1",
+   "author": "khalatepradnya",
+   "period": "Q1-2024",
+   "ai": false,
+   "same_repo": true,
+   "candidates": [
+    [
+     "NVIDIA/cuda-quantum",
+     1339,
+     592
+    ],
+    [
+     "NVIDIA/cuda-quantum",
+     1317,
+     236
+    ],
+    [
+     "NVIDIA/cuda-quantum",
+     1334,
+     2000
+    ],
+    [
+     "NVIDIA/cuda-quantum",
+     1256,
+     1211
+    ],
+    [
+     "NVIDIA/cuda-quantum",
+     1172,
+     149
+    ],
+    [
+     "NVIDIA/cuda-quantum",
+     1207,
+     1802
+    ],
+    [
+     "NVIDIA/cuda-quantum",
+     1335,
+     459
+    ],
+    [
+     "NVIDIA/cuda-quantum",
+     1197,
+     443
+    ]
+   ]
+  },
+  {
+   "slot": "B1:wochinge",
+   "arm": "B1",
+   "author": "wochinge",
+   "period": "Q1-2024",
+   "ai": false,
+   "same_repo": false,
+   "candidates": [
+    [
+     "deepset-ai/haystack",
+     7206,
+     184
+    ],
+    [
+     "deepset-ai/deepset-cloud-sdk",
+     156,
+     84
+    ],
+    [
+     "deepset-ai/haystack",
+     7207,
+     1269
+    ],
+    [
+     "deepset-ai/haystack",
+     7126,
+     331
+    ],
+    [
+     "deepset-ai/haystack",
+     7052,
+     285
+    ],
+    [
+     "deepset-ai/deepset-cloud-sdk",
+     157,
+     53
+    ],
+    [
+     "deepset-ai/haystack-core-integrations",
+     550,
+     117
+    ],
+    [
+     "deepset-ai/haystack-core-integrations",
+     535,
+     408
+    ]
+   ]
+  },
+  {
+   "slot": "B1:ffuugoo",
+   "arm": "B1",
+   "author": "ffuugoo",
+   "period": "Q1-2024",
+   "ai": false,
+   "same_repo": true,
+   "candidates": [
+    [
+     "qdrant/qdrant",
+     3757,
+     58
+    ],
+    [
+     "qdrant/qdrant",
+     3408,
+     1293
+    ],
+    [
+     "qdrant/qdrant",
+     3645,
+     854
+    ],
+    [
+     "qdrant/qdrant",
+     3776,
+     102
+    ],
+    [
+     "qdrant/qdrant",
+     3506,
+     319
+    ],
+    [
+     "qdrant/qdrant",
+     3929,
+     59
+    ],
+    [
+     "qdrant/qdrant",
+     3931,
+     336
+    ],
+    [
+     "qdrant/qdrant",
+     3784,
+     170
+    ]
+   ]
+  },
+  {
+   "slot": "B2:koaning",
+   "arm": "B2",
+   "author": "koaning",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "lancedb/lancedb",
+     1122,
+     224
+    ]
+   ]
+  },
+  {
+   "slot": "B2:wjhsf",
+   "arm": "B2",
+   "author": "wjhsf",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "salesforce/lwc",
+     4054,
+     600
+    ],
+    [
+     "salesforce/lwc",
+     4028,
+     293
+    ],
+    [
+     "salesforce/lwc",
+     3955,
+     329
+    ],
+    [
+     "salesforce/lwc",
+     4027,
+     107
+    ],
+    [
+     "salesforce/lwc",
+     3992,
+     70
+    ],
+    [
+     "salesforce/lwc",
+     3951,
+     225
+    ],
+    [
+     "salesforce/lwc",
+     3995,
+     354
+    ],
+    [
+     "salesforce/lwc",
+     3967,
+     214
+    ]
+   ]
+  },
+  {
+   "slot": "B2:ayulockin",
+   "arm": "B2",
+   "author": "ayulockin",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "EleutherAI/lm-evaluation-harness",
+     1339,
+     582
+    ]
+   ]
+  },
+  {
+   "slot": "B2:lhoestq",
+   "arm": "B2",
+   "author": "lhoestq",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "huggingface/datasets",
+     6551,
+     53
+    ],
+    [
+     "huggingface/dataset-viewer",
+     2554,
+     121
+    ],
+    [
+     "huggingface/dataset-viewer",
+     2642,
+     304
+    ],
+    [
+     "huggingface/datasets",
+     6705,
+     68
+    ],
+    [
+     "huggingface/dataset-viewer",
+     2454,
+     895
+    ],
+    [
+     "huggingface/huggingface_hub",
+     1967,
+     128
+    ],
+    [
+     "huggingface/dataset-viewer",
+     2635,
+     218
+    ],
+    [
+     "huggingface/huggingface_hub",
+     1996,
+     87
+    ]
+   ]
+  },
+  {
+   "slot": "B2:ImpressionableRaccoon",
+   "arm": "B2",
+   "author": "ImpressionableRaccoon",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "apache/airflow",
+     38589,
+     419
+    ]
+   ]
+  },
+  {
+   "slot": "B2:AlabasterAxe",
+   "arm": "B2",
+   "author": "AlabasterAxe",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "chroma-core/chroma",
+     1817,
+     484
+    ]
+   ]
+  },
+  {
+   "slot": "B2:benkonz",
+   "arm": "B2",
+   "author": "benkonz",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "spotify/ratatool",
+     705,
+     63
+    ]
+   ]
+  },
+  {
+   "slot": "B2:loveyang1990",
+   "arm": "B2",
+   "author": "loveyang1990",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "apache/seatunnel",
+     6471,
+     75
+    ]
+   ]
+  },
+  {
+   "slot": "B2:afranchuk",
+   "arm": "B2",
+   "author": "afranchuk",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "mozilla/sccache",
+     2030,
+     118
+    ]
+   ]
+  },
+  {
+   "slot": "B2:zesongw",
+   "arm": "B2",
+   "author": "zesongw",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "microsoft/onnxruntime",
+     19103,
+     411
+    ],
+    [
+     "microsoft/onnxruntime",
+     19988,
+     106
+    ],
+    [
+     "microsoft/onnxruntime",
+     19713,
+     73
+    ]
+   ]
+  },
+  {
+   "slot": "B2:writinwaters",
+   "arm": "B2",
+   "author": "writinwaters",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "infiniflow/ragflow",
+     175,
+     75
+    ],
+    [
+     "infiniflow/ragflow",
+     183,
+     175
+    ],
+    [
+     "infiniflow/ragflow",
+     168,
+     89
+    ],
+    [
+     "infiniflow/ragflow",
+     177,
+     51
+    ],
+    [
+     "infiniflow/ragflow",
+     165,
+     91
+    ],
+    [
+     "infiniflow/ragflow",
+     176,
+     99
+    ]
+   ]
+  },
+  {
+   "slot": "B2:siddartha-RE",
+   "arm": "B2",
+   "author": "siddartha-RE",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "huggingface/peft",
+     1368,
+     217
+    ]
+   ]
+  },
+  {
+   "slot": "B2:molbap",
+   "arm": "B2",
+   "author": "molbap",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "huggingface/transformers",
+     28843,
+     1190
+    ],
+    [
+     "huggingface/transformers",
+     29063,
+     956
+    ]
+   ]
+  }
+ ]
+}
