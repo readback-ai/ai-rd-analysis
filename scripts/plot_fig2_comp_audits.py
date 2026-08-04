@@ -5,9 +5,10 @@ Balanced cohorts, one per adoption month whose full [-2..+2] window has
 passed w8 finalization at the AS_OF (at AS_OF 2026-08-01: first AI use
 2025-12 .. 2026-03), non-fleet adopters, six series per panel:
 submitted/merged (blue/green) x total/non-AI/AI-involved
-(solid/dashed/dotted), raw mean kLOC per author per month. Every offset
-is a finalized calendar month, so the merged series are final and no
-provisional shading is needed.
+(solid/dashed/dotted), raw mean kLOC per author per month, in a
+two-column panel grid with the legend to the right of the top-right
+panel. Every offset is a finalized calendar month, so the merged series
+are final and no provisional shading is needed.
 
 Output: artifacts/figure_2_comp_audits.png
 Usage:  PYTHONPATH=src python scripts/plot_fig2_comp_audits.py
@@ -21,7 +22,9 @@ from pipeline.studies.productivity import event_by_adoption_month
 
 def main() -> None:
     cohorts = sorted(event_by_adoption_month().items())
-    fig, axes = plt.subplots(2, 3, figsize=(13, 7.5))
+    rows = (len(cohorts) + 1) // 2
+    fig, axes = plt.subplots(rows, 2, figsize=(9, 3.75 * rows),
+                             squeeze=False)
     fig.suptitle("Figure 2: LOC per contributor around first AI adoption, "
                  "by adoption month (balanced cohorts, finalized months "
                  "only)", fontsize=12, y=-0.03)
@@ -36,13 +39,13 @@ def main() -> None:
         ax.set_xlabel("months from first observed AI use")
         ax.set_ylabel("kLOC / contributor / month")
         ax.set_ylim(bottom=0)
-    handles, labels = axes.flat[0].get_legend_handles_labels()
-    spare = list(axes.flat)[len(cohorts):]
-    for ax in spare:
+    for ax in list(axes.flat)[len(cohorts):]:
         ax.axis("off")
-    spare[0].legend(handles, labels, loc="center", fontsize=10,
-                    frameon=False)
+    handles, labels = axes.flat[0].get_legend_handles_labels()
     fig.tight_layout()
+    # legend to the right of the top-right panel, outside the grid
+    fig.legend(handles, labels, loc="upper left",
+               bbox_to_anchor=(1.0, 0.97), fontsize=10, frameon=False)
     save(fig, "artifacts/figure_2_comp_audits.png")
 
 
