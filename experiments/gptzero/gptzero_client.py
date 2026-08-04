@@ -30,7 +30,7 @@ from diffs import count_words
 API_URL = "https://api.gptzero.me/v2/predict/text"
 FILES_URL = "https://api.gptzero.me/v2/predict/files"
 BATCH_FILES = 50          # API limit per request (support, 2026-07-29)
-BUDGET_WORDS = 70_000
+BUDGET_WORDS = 85_000
 PINNED_VERSION: str | None = "2026-07-04-base"   # from the 2026-07-29
                                                  # smoke run's responses
 TRANSIENT_HTTP = (408, 429, 500, 502, 503, 504)
