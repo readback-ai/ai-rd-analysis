@@ -21,6 +21,9 @@ experiment calibrates GPTZero against the study's own labels.
   - **B1** — those authors' own Q1-2024 PRs where they exist
     (same-author-across-eras anchor).
   - **B2** — independent Q1-2024 authors, to 20 baseline docs total.
+  - **Eras** (design eras-v1) — the paired contrast re-drawn at the
+    same depth in Q4-2025 and Q1-2026 (own manifest, quarter-namespaced
+    seeds), so score trends read across eras, not one quarter.
 - **Determinism**: study seed 20260630, namespaced streams; manifest
   fingerprints AS_OF/CUTOFF/params/pool and is rebuilt-not-trusted.
   Candidate lists are seeded whole-pool shuffles, so deepening `k_cand`
@@ -42,6 +45,7 @@ experiment calibrates GPTZero against the study's own labels.
 
 ```
 python experiments/gptzero/gz.py --sample            # manifest + pool sizes
+python experiments/gptzero/gz.py --sample-eras       # Q4-2025/Q1-2026 arms
 python experiments/gptzero/gz.py --fetch             # diffs -> documents
 python experiments/gptzero/gz.py --score --limit 2   # unpinned smoke
 # read the smoke output's model version, then set
