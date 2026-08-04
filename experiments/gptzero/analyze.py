@@ -221,8 +221,8 @@ def report_paragraphs(para_rows: list[dict]) -> None:
     s = paragraph_stats(para_rows)
     if s is None:
         return
-    print(f"\nparagraph-level (from cached responses; the document "
-          f"verdict discards this):")
+    print("\nparagraph-level (from cached responses; the document "
+          "verdict discards this):")
     print(f"docs {s['n']}; any paragraph >0.5: {s['any_hi']} "
           f"({100 * s['any_hi'] / s['n']:.0f}%); some-but-not-all "
           f"paragraphs >0.5: {s['partial']} "
