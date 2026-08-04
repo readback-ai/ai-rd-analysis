@@ -85,20 +85,26 @@ from pipeline.analyze import bootstrap_ci, weighted_mean
 from pipeline.detect import AS_OF, _iso
 from pipeline.frame import ai_contrast_eligible, study_frame
 from pipeline.ghx import graphql_nodes, rest_count
-from pipeline.scan_orgs import QUARTER_RANGES
+from pipeline.scan_orgs import QUARTER_RANGES, resolve_period
 
 PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
 ADOPTION_PERIODS = ["Q4-2025", "Q1-2026", "Q2-2026"]   # Q1-2024 excluded
+ADOPTION_ERA_START = "2025-10"   # first adoption-era month (monthly mode)
 SEED = 20260630
 SAMPLE_RATE = 0.001          # ~0.1% of the eligible merged frame
-MIN_PRS = 5                  # repo floor per (period, arm), house convention
-ORG_MIN_PRS = 20             # org floor per quarter for the adoption contrast
+MIN_PRS = 5                  # repo floor per (quarter, arm); 2/month —
+MIN_PRS_MONTH = 2            #   comparable thresholds per unit time
+ORG_MIN_PRS = 20             # org floor per quarter for the adoption
+ORG_MIN_PRS_MONTH = 7        #   contrast; 7/month is the same per unit time
 FILES_PAGE = 100             # per-PR file-list cap (one page; no pagination)
 CAP = 20_000                 # per-side LOC cap for capped ratios
 SAMPLE = Path("data/derived/churn_sample_v1.jsonl")
 SAMPLE_MANIFEST = Path("data/derived/churn_sample_manifest_v1.json")
 BUGS = Path("data/derived/churn_incidents_v1.jsonl")
 BUGS_MANIFEST = Path("data/derived/churn_incidents_manifest_v1.json")
+BUGS_MONTHLY = Path("data/derived/churn_incidents_monthly_v1.jsonl")
+BUGS_MONTHLY_MANIFEST = \
+    Path("data/derived/churn_incidents_monthly_manifest_v1.json")
 BUG_LABEL = "bug"
 
 # Generated-content path patterns (the METHODS 5b hygiene classes:
@@ -136,25 +142,59 @@ def merge_quarter(merged_at: str | None) -> str | None:
     return None
 
 
-def eligible() -> tuple[dict[str, list], dict[str, list], int]:
+def finalized_months() -> list[str]:
+    """Reportable months under the w8 FINALIZATION rule: censused months
+    (frozen quarters + registered incremental months) whose every PR
+    creation window has closed — month_end + 56d <= AS_OF. On
+    2026-08-01 the series runs through 2026-05; June finalizes at the
+    ~Aug 25 re-pull and July on ~Sep 25 (monthly runbook cadence)."""
+    from pipeline.analyze import censused_months, extended_quarters
+    from pipeline.studies.productivity import month_w8_mature
+    return sorted(m for m in censused_months(extended_quarters())
+                  if month_w8_mature(m))
+
+
+def _period_order(keys) -> list[str]:
+    """Chronological order for quarter or month tokens."""
+    return sorted(keys, key=lambda t: resolve_period(t).split("..")[0])
+
+
+def eligible(granularity: str = "quarter",
+             ) -> tuple[dict[str, list], dict[str, list], int, list[str]]:
     """Two frames over merged PRs (profile 'all' + ai_contrast_eligible:
     non-AI bots dropped, all = AI + nonAI), items
     (repo, num, ai, additions, deletions):
 
-    - trimmed (the CHURN frame): created AND merged in the same quarter,
+    - trimmed (the CHURN frame): created AND merged in the same period,
       regardless of w8 maturity — an observed merge is terminal, so
-      every quarter is identically observable (module docstring);
+      every period is identically observable (module docstring);
     - created (the BUG-PROXY denominator): w8-mature merged (frozen fate
-      convention), bucketed by creation quarter — maturity is what
+      convention), bucketed by creation period — maturity is what
       aligns the denominator's exposure with the frontier-truncated bug
       windows.
 
-    Third value: merged PRs whose merge fell outside their creation
-    quarter (the cross-quarter residual the churn trim drops)."""
-    trimmed: dict[str, list] = {p: [] for p in PERIODS}
-    created: dict[str, list] = {p: [] for p in PERIODS}
+    Monthly granularity uses only FINALIZED months (finalized_months):
+    the w8 finalization rule means a month is reportable once every PR
+    created in it closed its 56-day window — June 2026 has no data until
+    the post-Aug-25 re-pull. Returns (trimmed, created, cross-period
+    merge residual, ordered period list)."""
+    if granularity == "month":
+        periods = finalized_months()
+        frame = study_frame("all", periods=set(periods),
+                            granularity="month")
+
+        def merge_per(merged_at):
+            tok = (merged_at or "")[:7]
+            return tok if tok in pset else None
+        pset = set(periods)
+    else:
+        periods = list(PERIODS)
+        frame = study_frame("all")
+        merge_per = merge_quarter
+    trimmed: dict[str, list] = {p: [] for p in periods}
+    created: dict[str, list] = {p: [] for p in periods}
     cross = 0
-    for f in study_frame("all"):
+    for f in frame:
         if not ai_contrast_eligible(f):
             continue
         c = f.cls
@@ -163,13 +203,13 @@ def eligible() -> tuple[dict[str, list], dict[str, list], int]:
         item = (f.repo, f.pr["number"], bool(c.ai_involved),
                 int(f.pr.get("additions") or 0),
                 int(f.pr.get("deletions") or 0))
-        if merge_quarter(f.pr.get("mergedAt")) == f.period:
+        if merge_per(f.pr.get("mergedAt")) == f.period:
             trimmed[f.period].append(item)
         else:
             cross += 1
         if c.w8_mature and c.merged:
             created[f.period].append(item)
-    return trimmed, created, cross
+    return trimmed, created, cross, periods
 
 
 def _ratio(adds: int, dels: int) -> float:
@@ -178,18 +218,29 @@ def _ratio(adds: int, dels: int) -> float:
 
 # --------------------------------------------- adoption contrast (headline)
 
-def adoption_rows(pool: dict[str, list]) -> dict:
+def adoption_era(periods: list[str]) -> list[str]:
+    """Endpoint-eligible periods: the adoption era only — the 2024
+    baseline's zero is by construction (marker availability)."""
+    if periods and periods[0].startswith("Q"):
+        return [p for p in periods if p in ADOPTION_PERIODS]
+    return [p for p in periods if p >= ADOPTION_ERA_START]
+
+
+def adoption_rows(pool: dict[str, list], era: list[str] | None = None,
+                  org_min: int = ORG_MIN_PRS) -> dict:
     """Within-org contrast on traceable adoption: per org, churn at
-    its highest-adoption era quarter relative to its lowest. Org-quarters
-    qualify at >= ORG_MIN_PRS trimmed merged PRs; only ADOPTION_PERIODS
-    are eligible endpoints (Q1-2024's zero is by construction). Orgs need
-    >= 2 qualifying era quarters, a strictly positive adoption spread,
-    and nonzero additions in both endpoint quarters. Returns {orgs,
-    dropped_flat, multiples: [(org, low_share, high_share, low_ratio,
-    high_ratio, multiple)]}."""
+    its highest-adoption era period relative to its lowest. Org-periods
+    qualify at >= org_min trimmed merged PRs; only adoption-era periods
+    are eligible endpoints (the 2024 baseline's zero is by
+    construction). Orgs need >= 2 qualifying era periods, a strictly
+    positive adoption spread, and nonzero additions in both endpoint
+    periods. Returns {orgs_any, orgs_ge2, dropped_flat, dropped_ratio,
+    multiples: [(org, low_share, high_share, low_ratio, high_ratio,
+    multiple)]}."""
+    era = era if era is not None else ADOPTION_PERIODS
     per_org: dict[tuple[str, str], list[int]] = defaultdict(lambda: [0, 0, 0, 0])
-    for per in ADOPTION_PERIODS:
-        for repo, _num, ai, adds, dels in pool[per]:
+    for per in era:
+        for repo, _num, ai, adds, dels in pool.get(per, []):
             a = per_org[(repo.split("/")[0].lower(), per)]
             a[0] += 1
             a[1] += bool(ai)
@@ -197,11 +248,11 @@ def adoption_rows(pool: dict[str, list]) -> dict:
             a[3] += min(dels, CAP)
     quarters: dict[str, dict[str, tuple]] = defaultdict(dict)
     for (org, per), (n, ai, adds, dels) in per_org.items():
-        if n >= ORG_MIN_PRS:
+        if n >= org_min:
             quarters[org][per] = (ai / n, adds, dels)
     multiples, flat, badratio = [], 0, 0
     orgs_ge2 = 0
-    idx = ADOPTION_PERIODS.index
+    idx = era.index
     for org, qs in sorted(quarters.items()):
         if len(qs) < 2:
             continue
@@ -223,18 +274,22 @@ def adoption_rows(pool: dict[str, list]) -> dict:
             "multiples": multiples}
 
 
-def print_adoption(pool: dict[str, list], cross: int) -> None:
+def print_adoption(pool: dict[str, list], cross: int,
+                   periods: list[str] | None = None,
+                   org_min: int = ORG_MIN_PRS) -> None:
     import math
-    r = adoption_rows(pool)
+    era = adoption_era(periods if periods is not None else PERIODS)
+    r = adoption_rows(pool, era, org_min)
     ms = r["multiples"]
+    unit = "quarter" if era and era[0].startswith("Q") else "month"
     print("code churn, WITHIN-ORG ADOPTION CONTRAST on TRACEABLE "
           "adoption (an evidence floor): per org, deleted:added at its "
-          "highest-adoption quarter vs its lowest, endpoints from "
-          f"{ADOPTION_PERIODS[0]}..{ADOPTION_PERIODS[-1]} only "
-          "(Q1-2024's zero is by construction — a low endpoint there "
-          "would contrast marker availability, not adoption); "
-          "same-quarter-trimmed merge windows (capped sides; "
-          f"org-quarters qualify at >= {ORG_MIN_PRS} PRs)")
+          f"highest-adoption {unit} vs its lowest, endpoints from "
+          f"{era[0]}..{era[-1]} only "
+          "(the 2024 baseline's zero is by construction — a low "
+          "endpoint there would contrast marker availability, not "
+          f"adoption); same-{unit}-trimmed merge windows (capped sides; "
+          f"org-{unit}s qualify at >= {org_min} PRs)")
     print("external reference, NOT a replication target (different "
           "population): Faros's broad-industry report has this multiple "
           "at ~x9.6 (+861%)")
@@ -247,7 +302,7 @@ def print_adoption(pool: dict[str, list], cross: int) -> None:
     med = median(m[5] for m in ms)
     rose = sum(1 for m in ms if m[5] > 1)
     print(f"orgs contrasted: {len(ms)} — attrition: {r['orgs_any']} orgs "
-          f"with >= 1 qualifying era quarter, {r['orgs_ge2']} with >= 2, "
+          f"with >= 1 qualifying era {unit}, {r['orgs_ge2']} with >= 2, "
           f"minus {r['dropped_flat']} with zero adoption spread and "
           f"{r['dropped_ratio']} with an undefined/zero endpoint ratio; "
           f"cross-quarter merges trimmed: {cross}")
@@ -289,10 +344,11 @@ def census_rows(pool: dict[str, list]) -> dict[tuple[str, str], dict]:
     return out
 
 
-def repo_pairs(pool: dict[str, list]) -> dict[tuple[str, str], list]:
-    """(quarter, arm) -> [(repo_ratio, repo)] for the CW series: per
+def repo_pairs(pool: dict[str, list],
+               min_prs: int = MIN_PRS) -> dict[tuple[str, str], list]:
+    """(period, arm) -> [(repo_ratio, repo)] for the CW series: per
     repo, capped-side deletions / capped-side additions over its arm PRs;
-    qualifies at >= MIN_PRS PRs and nonzero additions (a repo whose arm
+    qualifies at >= min_prs PRs and nonzero additions (a repo whose arm
     added nothing has no defined ratio — skipped, never zeroed)."""
     acc: dict[tuple[str, str, str], list[int]] = defaultdict(lambda: [0, 0, 0])
     for per, items in pool.items():
@@ -304,26 +360,49 @@ def repo_pairs(pool: dict[str, list]) -> dict[tuple[str, str], list]:
                 a[2] += 1
     out: dict[tuple[str, str], list] = defaultdict(list)
     for (per, arm, repo), (adds, dels, n) in sorted(acc.items()):
-        if n >= MIN_PRS and adds > 0:
+        if n >= min_prs and adds > 0:
             out[(per, arm)].append((dels / adds, repo))
     return dict(out)
 
 
-def print_census(pool: dict[str, list]) -> None:
+def baseline_rows(rows: dict, periods: list[str]) -> dict[str, dict]:
+    """arm -> pooled 2024-baseline totals for the x-baseline multiple:
+    the Q1-2024 row at quarter granularity, the pooled 2024 months at
+    month granularity."""
+    base_pers = [p for p in periods
+                 if p == "Q1-2024" or p.startswith("2024")]
+    out: dict[str, dict] = {}
+    for arm in ("all", "AI", "nonAI"):
+        adds = sum(rows[(p, arm)]["adds"] for p in base_pers
+                   if (p, arm) in rows)
+        dels = sum(rows[(p, arm)]["dels"] for p in base_pers
+                   if (p, arm) in rows)
+        if adds:
+            out[arm] = {"ratio": dels / adds}
+    return out
+
+
+def print_census(pool: dict[str, list],
+                 periods: list[str] | None = None,
+                 min_prs: int = MIN_PRS) -> None:
     from pipeline.studies.slices import weights
+    periods = periods if periods is not None else list(PERIODS)
+    unit = "quarter" if periods and periods[0].startswith("Q") else "month"
     rows = census_rows(pool)
-    pairs = repo_pairs(pool)
+    pairs = repo_pairs(pool, min_prs)
+    base = baseline_rows(rows, periods)
     w = weights()
-    print("code churn, CALENDAR-TREND SENSITIVITY (fixed quarters and "
+    print(f"code churn, CALENDAR-TREND SENSITIVITY (fixed {unit}s and "
           "PR-level arms — a different cut than the within-org adoption "
           "contrast above, and not comparable to any external figure). "
-          "Same-quarter-trimmed merge windows. CW = contributor-weighted "
-          f"mean of per-repo deleted:added (capped sides, >= {MIN_PRS} "
-          "PRs/repo, 95% CI over repos); pooled = raw ratio of totals")
-    print(f"{'quarter':9}{'arm':7}{'repos':>6}{'CW del:add [95% CI]':>22}"
+          f"Same-{unit}-trimmed merge windows. CW = contributor-weighted "
+          f"mean of per-repo deleted:added (capped sides, >= {min_prs} "
+          "PRs/repo, 95% CI over repos); pooled = raw ratio of totals; "
+          "x2024 = pooled ratio vs the same-arm pooled 2024 baseline")
+    print(f"{'period':9}{'arm':7}{'repos':>6}{'CW del:add [95% CI]':>22}"
           f"{'PRs':>8}{'pooled':>8}{'capped':>8}{'medPR':>7}"
-          f"{'del>add':>9}{'xQ1-24':>8}")
-    for per in PERIODS:
+          f"{'del>add':>9}{'x2024':>8}")
+    for per in periods:
         for arm in ("all", "AI", "nonAI"):
             r = rows.get((per, arm))
             if not r:
@@ -336,17 +415,17 @@ def print_census(pool: dict[str, list]) -> None:
                 cw = f"{m:6.3f} [{lo:5.3f},{hi:5.3f}]"
             else:
                 cw = "n/a"
-            base = rows.get(("Q1-2024", arm))
-            mult = (r["ratio"] / base["ratio"]
-                    if base and base["ratio"] else float("nan"))
+            b = base.get(arm)
+            mult = (r["ratio"] / b["ratio"]
+                    if b and b["ratio"] else float("nan"))
             print(f"{per:9}{arm:7}{len(ps):>6}{cw:>22}{r['n']:>8}"
                   f"{r['ratio']:>8.3f}{r['ratio_capped']:>8.3f}"
                   f"{r['median_pr']:>7.3f}{100 * r['del_dominant']:>8.1f}%"
                   f"{mult:>8.2f}")
-    print("Q1-2024 caption: detector-validity baseline and review-practice "
+    print("2024 caption: detector-validity baseline and review-practice "
           "control, not an AI-usage estimate; AI arm has no 2024 baseline "
-          "by construction (and Q1-2024 is excluded from the adoption "
-          "contrast above)")
+          "by construction (and the 2024 baseline is excluded from the "
+          "adoption contrast above)")
 
 
 # ------------------------------------------------------------------ sample
@@ -590,39 +669,59 @@ def migrate_bug_rows(rows: list[dict]) -> list[dict]:
     return out
 
 
-def bug_cells(pool: dict[str, list]) -> list[dict]:
+def bug_cells(pool: dict[str, list], periods: list[str] | None = None,
+              repos: list[str] | None = None) -> list[dict]:
     """The current selection of (repo, per, rng) bug-count cells: the
-    sample's distinct repos x quarters with a defined window."""
-    repos = sorted({d["repo"] for d in draw(pool)})
+    pilot repos x periods with a defined window. Quarterly mode draws
+    the repo universe live; monthly mode passes the FROZEN quarterly
+    sample's repos (one pilot repo set across granularities)."""
+    if repos is None:
+        repos = sorted({d["repo"] for d in draw(pool)})
     return [{"repo": r, "per": per, "rng": bug_window(per)}
-            for r in repos for per in PERIODS
+            for r in repos for per in (periods or PERIODS)
             if bug_window(per) is not None]
 
 
-def _stamp_denominators(records: dict, created: dict[str, list]) -> None:
+def group_periods(periods: list[str]) -> list[str]:
+    """The grouping window for low/high-AI membership: the latest
+    adoption-era quarter (Q2-2026), or its monthly analog — the last
+    three finalized era months."""
+    era = adoption_era(periods)
+    if era and era[0].startswith("Q"):
+        return [era[-1]]
+    return era[-3:]
+
+
+def _stamp_denominators(records: dict, created: dict[str, list],
+                        group_pers: tuple[str, ...] = ("Q2-2026",)) -> None:
     """Freeze the table's OTHER inputs into the records: each cell gets
     its creation-bucketed mature-merged denominator, and EVERY row gets
-    the repo's Q2 group inputs `q2: [ai_numerator, merged_denominator]`
-    (on every row, not just Q2 rows — a repo whose Q2 cell is missing
-    from an honest partial freeze must still carry its group membership).
+    the repo's grouping-window inputs `q2: [ai_numerator,
+    merged_denominator]`, summed over group_pers (the latest era
+    quarter, or the last three finalized era months) and stamped on
+    EVERY row — a repo whose grouping-window cell is missing from an
+    honest partial freeze must still carry its group membership.
     Stamped on every freeze — reused bug counts stay valid (they depend
     only on repo+window) while denominators/groups always reflect the
     frozen frame."""
     merged: dict[tuple[str, str], int] = defaultdict(int)
     ai_num: dict[str, int] = defaultdict(int)
+    gset = set(group_pers)
     for per, items in created.items():
         for repo, _num, ai, _a, _d in items:
             merged[(repo, per)] += 1
-            if per == "Q2-2026" and ai:
+            if per in gset and ai:
                 ai_num[repo] += 1
     for rec in records.values():
         rec["merged"] = merged.get((rec["repo"], rec["per"]), 0)
         rec["q2"] = [ai_num.get(rec["repo"], 0),
-                     merged.get((rec["repo"], "Q2-2026"), 0)]
+                     sum(merged.get((rec["repo"], g), 0)
+                         for g in group_pers)]
         rec.pop("ai_num", None)         # superseded Q2-only stamp
 
 
 def pull_bugs(trimmed: dict[str, list], created: dict[str, list],
+              periods: list[str] | None = None,
               pace: float = 2.0) -> None:
     """Count bug-labeled issues per cell (label:bug only — a documented
     proxy limitation). The file is atomically rewritten to exactly the
@@ -633,16 +732,26 @@ def pull_bugs(trimmed: dict[str, list], created: dict[str, list],
     frozen into the records (_stamp_denominators) so the table needs no
     live frame. Checkpoints every 25 cells, each writing data + manifest
     crash-consistently (_freeze)."""
-    cells = bug_cells(trimmed)
-    kept, todo, stale = reconcile(cells, migrate_bug_rows(_load_jsonl(BUGS)),
+    monthly = periods is not None and bool(periods) \
+        and not periods[0].startswith("Q")
+    if monthly:
+        data, mani = BUGS_MONTHLY, BUGS_MONTHLY_MANIFEST
+        sample_rows, _m = _verify(SAMPLE, SAMPLE_MANIFEST)
+        repos = sorted({d["repo"] for d in sample_rows})
+        cells = bug_cells(trimmed, periods, repos)
+    else:
+        data, mani = BUGS, BUGS_MANIFEST
+        cells = bug_cells(trimmed, periods)
+    gp = tuple(group_periods(periods or list(PERIODS)))
+    kept, todo, stale = reconcile(cells, migrate_bug_rows(_load_jsonl(data)),
                                   ("repo", "per", "rng"), "bugs")
     print(f"pulling {len(todo)} of {len(cells)} bug cells "
           f"({len(kept)} reused, {stale} stale dropped)")
     fp = frame_fingerprint(trimmed, created)
 
     def flush() -> None:
-        _stamp_denominators(kept, created)
-        _freeze(BUGS, BUGS_MANIFEST,
+        _stamp_denominators(kept, created, gp)
+        _freeze(data, mani,
                 sorted(kept.values(), key=lambda d: (d["repo"], d["per"])),
                 fp, len(cells))
 
@@ -687,33 +796,40 @@ def rank_groups(with_bugs: set, ai_share: dict,
     return lo, set(ranked) - lo, with_bugs - set(ranked)
 
 
-def print_bugs(trimmed: dict[str, list], created: dict[str, list]) -> None:
-    rows, manifest = _verify(BUGS, BUGS_MANIFEST)
+def print_bugs(trimmed: dict[str, list], created: dict[str, list],
+               periods: list[str] | None = None) -> None:
+    periods = periods if periods is not None else list(PERIODS)
+    monthly = bool(periods) and not periods[0].startswith("Q")
+    rows, manifest = _verify(*((BUGS_MONTHLY, BUGS_MONTHLY_MANIFEST)
+                               if monthly else (BUGS, BUGS_MANIFEST)))
     bugs, merged, ai_share = bug_stats(rows)
     repos = sorted({r for (r, _p) in bugs})
     with_bugs = {r for r in repos
-                 if any(bugs.get((r, p)) for p in PERIODS)}
+                 if any(bugs.get((r, p)) for p in periods)}
     lo, hi, unranked = rank_groups(with_bugs, ai_share)
     short = manifest["selected"] - manifest["held"]
     frontier = maturity_frontier(manifest.get("as_of", AS_OF))
+    unit = "month" if monthly else "quarter"
+    gp = group_periods(periods)
+    gp_label = f"{gp[0]}..{gp[-1]}" if len(gp) > 1 else gp[0]
     print("BUG-REPORT PROXY pilot (bug-labeled GH issues — NOT production "
           "incidents): issues labeled bug created per 100 mature merged "
           "PRs. Exposure is creation-bucketed on BOTH sides: denominator "
-          "= mature merged PRs by creation quarter, numerator window = "
-          f"the quarter truncated at the FROZEN maturity frontier "
+          f"= mature merged PRs by creation {unit}, numerator window = "
+          f"the {unit} truncated at the FROZEN maturity frontier "
           f"({frontier}). Fully FROZEN table — counts, denominators and "
-          "Q2 group inputs all from the frozen records "
+          "grouping inputs all from the frozen records "
           f"({len(repos)} repos"
           + (f", {short} cells unpulled at freeze" if short else "")
           + f"; {len(repos) - len(with_bugs)} with zero bug-labeled "
-            "issues in every quarter EXCLUDED as probable non-users of "
+            f"issues in every {unit} EXCLUDED as probable non-users of "
             f"the label — label:bug only; {len(unranked)} with an "
-            "UNDEFINED Q2 adoption share (zero Q2 merged) in 'all' but "
-            "neither AI half)")
+            "UNDEFINED adoption share (zero merged in the grouping "
+            "window) in 'all' but neither AI half)")
     print(_drift_line(manifest, frame_fingerprint(trimmed, created)))
-    print(f"{'quarter':9}{'group':9}{'repos':>6}{'bugs':>7}{'merged':>8}"
+    print(f"{'period':9}{'group':9}{'repos':>6}{'bugs':>7}{'merged':>8}"
           f"{'per100':>8}")
-    for per in PERIODS:
+    for per in periods:
         for label, grp in (("low-AI", lo), ("high-AI", hi),
                            ("all", with_bugs)):
             rs = [r for r in grp
@@ -724,9 +840,9 @@ def print_bugs(trimmed: dict[str, list], created: dict[str, list]) -> None:
                 continue
             print(f"{per:9}{label:9}{len(rs):>6}{b:>7}{m:>8}"
                   f"{100 * b / m:>8.2f}")
-    print("groups = halves of the sample repos by Q2-2026 AI-involvement "
-          "share among their created-bucketed merged PRs; pooled group "
-          "rates can be dominated by single large repos")
+    print(f"groups = halves of the pilot repos by {gp_label} "
+          "AI-involvement share among their created-bucketed merged PRs; "
+          "pooled group rates can be dominated by single large repos")
 
 
 # ------------------------------------------------------------------- main
@@ -741,11 +857,20 @@ def main() -> None:
     ap.add_argument("--pull", action="store_true",
                     help="hydrate per-file splits for the current draw")
     ap.add_argument("--pull-bugs", action="store_true",
-                    help="pull bug-label counts for the sample's repos")
+                    help="pull bug-label counts for the pilot's repos")
+    ap.add_argument("--granularity", choices=["quarter", "month"],
+                    default="quarter",
+                    help="month = w8-FINALIZED months only (a month "
+                         "reports once month_end + 56d <= AS_OF)")
     a = ap.parse_args()
     if not (a.table or a.draw or a.pull or a.pull_bugs):
         ap.error("pick --table/--draw/--pull/--pull-bugs")
-    trimmed, created, cross = eligible()
+    if a.granularity == "month" and (a.pull or a.table == "sample"
+                                     or a.draw):
+        ap.error("the 0.1% file-level sample is quarterly-only "
+                 "(--draw/--pull/--table sample)")
+    trimmed, created, cross, periods = eligible(a.granularity)
+    month = a.granularity == "month"
     if a.draw:
         sel = draw(trimmed)
         by = defaultdict(int)
@@ -753,21 +878,23 @@ def main() -> None:
             by[(s["per"], s["ai"])] += 1
         print(f"{len(sel)} PRs selected: " + ", ".join(
             f"{p} AI={by[(p, True)]}/nonAI={by[(p, False)]}"
-            for p in PERIODS))
+            for p in periods))
     if a.pull:
         pull(trimmed)
     if a.pull_bugs:
-        pull_bugs(trimmed, created)
+        pull_bugs(trimmed, created, periods)
+    org_min = ORG_MIN_PRS_MONTH if month else ORG_MIN_PRS
+    min_prs = MIN_PRS_MONTH if month else MIN_PRS
     if a.table in ("report", "adoption"):
-        print_adoption(trimmed, cross)
+        print_adoption(trimmed, cross, periods, org_min)
     if a.table in ("report", "census"):
         if a.table == "report":
             print()
-        print_census(trimmed)
+        print_census(trimmed, periods, min_prs)
     if a.table == "sample":
         print_sample(trimmed)
     elif a.table == "bugs":
-        print_bugs(trimmed, created)
+        print_bugs(trimmed, created, periods)
 
 
 if __name__ == "__main__":

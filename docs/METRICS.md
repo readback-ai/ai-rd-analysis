@@ -214,9 +214,16 @@ argument — one section = one module invocation):
     population, not a replication target. Companion: calendar-trend
     sensitivity (CW mean of per-repo ratios, capped sides, ≥5 PRs/repo,
     per-cell CIs; pooled ratio; per-PR medians over nonzero-addition
-    PRs). The 0.1% balanced file-level sample and the bug-report proxy
+    PRs). **Monthly granularity** (`--granularity month`, added
+    2026-08-03) uses w8-FINALIZED months only — a month reports once
+    month_end + 56d ≤ AS_OF (June 2026 has no data until the ~Aug 25
+    re-pull) — with per-unit-time floors (≥2 PRs/repo, ≥7 PRs/org-month)
+    and the last three finalized era months as the grouping window;
+    quarters remain the precision unit, months the trend unit. The 0.1%
+    balanced file-level sample (quarterly-only) and the bug-report proxy
     (creation-bucketed mature-merged denominator, bug windows truncated
-    at the maturity frontier) stay auxiliary
+    at the maturity frontier; monthly twin in
+    `churn_incidents_monthly_v1.jsonl`) stay auxiliary
     (`churn --pull/--table sample/--pull-bugs/--table bugs`; §6).
 
 Alongside the report, `data/derived/census_manifest.json` records SHA-256

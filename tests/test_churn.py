@@ -31,7 +31,8 @@ def test_eligible_splits_trimmed_churn_frame_from_created_denominator(
         _fact("2026-01-10T00:00:00Z", "2026-01-20T00:00:00Z", num=3),
     ]
     monkeypatch.setattr(churn, "study_frame", lambda level: iter(facts))
-    trimmed, created, cross = churn.eligible()
+    trimmed, created, cross, periods = churn.eligible()
+    assert periods == churn.PERIODS
     assert [x[1] for x in trimmed["Q2-2026"]] == [1]   # (a) immature kept
     assert created["Q2-2026"] == []                    # (a) not mature
     assert [x[1] for x in created["Q1-2026"]] == [2, 3]  # (b)+(c)
@@ -317,6 +318,45 @@ def test_fingerprint_covers_ai_flags_and_both_pools():
     b["Q2-2026"] = [("o/r", 1, True, 10, 5)]
     assert churn.frame_fingerprint(a) != churn.frame_fingerprint(b)
     assert churn.frame_fingerprint(a) != churn.frame_fingerprint(a, b)
+
+
+def test_finalized_months_apply_w8_finalization(monkeypatch):
+    """Monthly mode: a month reports only once month_end + 56d <= AS_OF —
+    at AS_OF 2026-08-01, May 2026 is the last reportable month (June
+    finalizes ~Aug 25, July ~Sep 25)."""
+    from pipeline.studies import productivity
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-01T00:00:00Z")
+    assert productivity.month_w8_mature("2026-05")
+    assert not productivity.month_w8_mature("2026-06")
+    assert not productivity.month_w8_mature("2026-07")
+
+
+def test_adoption_era_and_group_periods_by_granularity():
+    """Monthly endpoints start at the adoption era (2024 baseline months
+    never rank); the grouping window is the latest era quarter or the
+    last three finalized era months."""
+    months = ["2024-01", "2024-02", "2025-10", "2025-11", "2025-12",
+              "2026-01", "2026-02", "2026-03", "2026-04", "2026-05"]
+    assert churn.adoption_era(months) == months[2:]
+    assert churn.group_periods(months) == ["2026-03", "2026-04", "2026-05"]
+    assert churn.adoption_era(churn.PERIODS) == churn.ADOPTION_PERIODS
+    assert churn.group_periods(churn.PERIODS) == ["Q2-2026"]
+
+
+def test_stamp_denominators_monthly_grouping_window():
+    """Monthly grouping inputs sum over the passed window (last three
+    finalized months), stamped on every row."""
+    created = {"2026-04": [("o/a", 1, True, 1, 1), ("o/a", 2, False, 1, 1)],
+               "2026-05": [("o/a", 3, True, 1, 1)],
+               "2026-03": [("o/a", 4, False, 1, 1)],
+               "2024-01": [("o/a", 5, False, 1, 1)]}
+    records = {("o/a", "2024-01", "r"): {"repo": "o/a", "per": "2024-01",
+                                         "rng": "r", "bugs": 0}}
+    churn._stamp_denominators(records, created,
+                              ("2026-03", "2026-04", "2026-05"))
+    rec = records[("o/a", "2024-01", "r")]
+    assert rec["merged"] == 1
+    assert rec["q2"] == [2, 4]      # 2 AI of 4 merged in the window
 
 
 def test_generated_path_classifier():
