@@ -397,23 +397,36 @@ def test_eligible_monthly_passes_extended_ranges(monkeypatch):
     assert seen["ranges"] == extended_quarters()
 
 
-def test_monthly_bugs_fingerprint_covers_sample_universe(
-        tmp_path, monkeypatch):
+def test_monthly_bugs_fingerprint_covers_sample_universe():
     """Review round (monthly), P2: the monthly bug selection comes from
     the frozen quarterly sample, so its fingerprint must cover that
     sample's digest — a sample refresh must never leave MATCHES standing
     on a different pilot universe. Quarterly stamps are unchanged."""
-    import json
     pool = {"2026-05": [("o/r", 1, True, 10, 5)]}
-    m = tmp_path / "sample_manifest.json"
-    monkeypatch.setattr(churn, "SAMPLE_MANIFEST", m)
-    m.write_text(json.dumps({"digest": "aaaa"}))
-    fp_a = churn.bugs_fingerprint(pool, pool, monthly=True)
-    m.write_text(json.dumps({"digest": "bbbb"}))
-    fp_b = churn.bugs_fingerprint(pool, pool, monthly=True)
+    fp_a = churn.bugs_fingerprint(pool, pool, sample_digest="aaaa")
+    fp_b = churn.bugs_fingerprint(pool, pool, sample_digest="bbbb")
     assert fp_a != fp_b
-    assert churn.bugs_fingerprint(pool, pool, monthly=False) \
+    assert churn.bugs_fingerprint(pool, pool) \
         == churn.frame_fingerprint(pool, pool)
+
+
+def test_bugs_fingerprint_uses_caller_verified_digest(
+        tmp_path, monkeypatch):
+    """Review round (monthly), follow-up P2 — TOCTOU: the monthly stamp
+    must derive from the digest returned by the SAME _verify() call that
+    produced the sample rows, never a re-read of SAMPLE_MANIFEST (which
+    a concurrent re-freeze can change between the two operations,
+    stamping old rows with a new digest and faking MATCHES)."""
+    import json
+    poisoned = tmp_path / "m.json"
+    poisoned.write_text(json.dumps({"digest": "NEWER"}))
+    monkeypatch.setattr(churn, "SAMPLE_MANIFEST", poisoned)
+    pool = {"2026-05": [("o/r", 1, True, 10, 5)]}
+    fp = churn.bugs_fingerprint(pool, pool, sample_digest="OLDROWS")
+    assert fp == churn.frame_fingerprint(pool, pool,
+                                         extra="sample:OLDROWS")
+    assert fp != churn.frame_fingerprint(pool, pool,
+                                         extra="sample:NEWER")
 
 
 def test_adoption_attrition_line_uses_the_periods_unit(capsys):

@@ -502,16 +502,20 @@ def frame_fingerprint(*pools: dict[str, list], extra: str = "") -> str:
 
 
 def bugs_fingerprint(trimmed: dict[str, list], created: dict[str, list],
-                     monthly: bool) -> str:
+                     sample_digest: str | None = None) -> str:
     """The bug artifact's frame stamp. The monthly selection's repo
     universe comes from the FROZEN quarterly sample, so the monthly
     stamp also covers that sample's digest — a quarterly sample refresh
-    changes the monthly pilot universe and must change the stamp.
-    Quarterly stamps are the plain two-pool fingerprint (unchanged)."""
-    if not monthly:
+    changes the monthly pilot universe and must change the stamp. The
+    digest MUST come from the same _verify() call that produced the
+    sample rows the caller is using (a manifest re-read here could see a
+    concurrent re-freeze and stamp old rows with a new digest).
+    Quarterly stamps (sample_digest None) are the plain two-pool
+    fingerprint, unchanged."""
+    if sample_digest is None:
         return frame_fingerprint(trimmed, created)
-    digest = _read_manifest(SAMPLE_MANIFEST).get("digest", "")
-    return frame_fingerprint(trimmed, created, extra=f"sample:{digest}")
+    return frame_fingerprint(trimmed, created,
+                             extra=f"sample:{sample_digest}")
 
 
 def _freeze(path: Path, mpath: Path, records: list[dict], fp: str,
@@ -751,9 +755,11 @@ def pull_bugs(trimmed: dict[str, list], created: dict[str, list],
     crash-consistently (_freeze)."""
     monthly = periods is not None and bool(periods) \
         and not periods[0].startswith("Q")
+    sample_digest = None
     if monthly:
         data, mani = BUGS_MONTHLY, BUGS_MONTHLY_MANIFEST
-        sample_rows, _m = _verify(SAMPLE, SAMPLE_MANIFEST)
+        sample_rows, sm = _verify(SAMPLE, SAMPLE_MANIFEST)
+        sample_digest = sm["digest"]    # same snapshot as sample_rows
         repos = sorted({d["repo"] for d in sample_rows})
         cells = bug_cells(trimmed, periods, repos)
     else:
@@ -764,7 +770,7 @@ def pull_bugs(trimmed: dict[str, list], created: dict[str, list],
                                   ("repo", "per", "rng"), "bugs")
     print(f"pulling {len(todo)} of {len(cells)} bug cells "
           f"({len(kept)} reused, {stale} stale dropped)")
-    fp = bugs_fingerprint(trimmed, created, monthly)
+    fp = bugs_fingerprint(trimmed, created, sample_digest)
 
     def flush() -> None:
         _stamp_denominators(kept, created, gp)
@@ -843,8 +849,12 @@ def print_bugs(trimmed: dict[str, list], created: dict[str, list],
             f"the label — label:bug only; {len(unranked)} with an "
             "UNDEFINED adoption share (zero merged in the grouping "
             "window) in 'all' but neither AI half)")
+    sample_digest = None
+    if monthly:
+        _srows, sm = _verify(SAMPLE, SAMPLE_MANIFEST)
+        sample_digest = sm["digest"]    # verified at THIS read
     print(_drift_line(manifest, bugs_fingerprint(trimmed, created,
-                                                 monthly)))
+                                                 sample_digest)))
     print(f"{'period':9}{'group':9}{'repos':>6}{'bugs':>7}{'merged':>8}"
           f"{'per100':>8}")
     for per in periods:
