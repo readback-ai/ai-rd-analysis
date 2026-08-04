@@ -374,11 +374,87 @@ def cmd_retest() -> None:
 
 
 FROZEN = BASE / "frozen"
+PARAGRAPHS = LOCAL / "paragraph_summary.jsonl"
+
+
+def _load_rows(path: Path) -> list[dict]:
+    if not path.is_file():
+        return []
+    return [json.loads(ln) for ln in path.read_text().splitlines()
+            if ln.strip()]
+
+
+def _validate_freeze(docs_rows: list[dict], score_rows: list[dict],
+                     retest_rows: list[dict]) -> None:
+    """The frozen set must be internally coherent: refuse stale source
+    hashes, duplicate slots, filled-but-unscored documents, and retest
+    rows not bound to a current score."""
+    errors = []
+    filled = {}
+    for r in docs_rows:
+        if not r.get("unfilled"):
+            filled[r["slot"]] = r
+    seen: set[str] = set()
+    scored: dict[str, dict] = {}
+    for r in score_rows:
+        if r["slot"] in seen:
+            errors.append(f"duplicate slot in scores: {r['slot']}")
+        seen.add(r["slot"])
+        scored[r["slot"]] = r
+        d = filled.get(r["slot"])
+        if d is None or d["doc_sha"] != r["doc_sha"]:
+            errors.append(f"score row doc_sha not the slot's current "
+                          f"document: {r['slot']}")
+    unscored = sorted(set(filled) - set(scored))
+    if unscored:
+        errors.append(f"{len(unscored)} filled documents unscored: "
+                      f"{unscored[:5]}")
+    seen_rt: set[str] = set()
+    for rt in retest_rows:
+        if rt["slot"] in seen_rt:
+            errors.append(f"duplicate slot in retest: {rt['slot']}")
+        seen_rt.add(rt["slot"])
+        v = scored.get(rt["slot"])
+        if v is None or v["doc_sha"] != rt.get("sha600"):
+            errors.append(f"retest row detached from current score: "
+                          f"{rt['slot']}")
+    if errors:
+        raise SystemExit("freeze refused:\n  " + "\n  ".join(errors))
+
+
+def _paragraph_summaries(score_rows: list[dict]) -> list[dict]:
+    """Privacy-safe per-document paragraph metrics from the cached
+    responses, so the heterogeneity claims are auditable from the
+    frozen set. A scored document without its cached response is a
+    validation error."""
+    import gptzero_client as gzc
+    out = []
+    for r in score_rows:
+        cached = gzc._cache_path(RESP_CACHE, r["doc_sha"])
+        if not cached.is_file():
+            raise SystemExit(f"freeze refused: scored document missing "
+                             f"cached response: {r['slot']}")
+        d = (json.loads(cached.read_text()).get("documents") or [{}])[0]
+        paras = [p.get("completely_generated_prob", 0.0)
+                 for p in (d.get("paragraphs") or [])]
+        probs = r.get("class_probabilities") or {}
+        out.append({
+            "slot": r["slot"], "arm": r["arm"], "period": r["period"],
+            "ai": r["ai"], "doc_sha": r["doc_sha"],
+            "predicted_class": r.get("predicted_class"),
+            "n_paragraphs": len(paras),
+            "max_paragraph_prob": max(paras, default=None),
+            "share_paragraphs_gt50":
+                (sum(1 for p in paras if p > 0.5) / len(paras))
+                if paras else None,
+            "mixed_prob": probs.get("mixed")})
+    return out
 
 
 def cmd_freeze() -> None:
-    """Copy the audit set — manifests, document metadata rows, score
-    rows, and the generated report — into the committed frozen/
+    """Validate then snapshot the audit set — manifests, document
+    metadata rows, score rows, per-document paragraph summaries, the
+    generated report, and provenance — into the committed frozen/
     directory, so the reported numbers can be reviewed and reproduced
     from a fresh checkout without a paid rerun. Raw diffs, document
     texts, and API response caches stay local-only. Repos, PR numbers,
@@ -390,16 +466,26 @@ def cmd_freeze() -> None:
 
     import analyze
     import gptzero_client as gzc
-    FROZEN.mkdir(exist_ok=True)
+    required = (MANIFEST, MANIFEST_B3, MANIFEST_ERAS, DOCS, RESULTS)
+    missing = [p.name for p in required if not p.is_file()]
+    if missing:
+        raise SystemExit(f"freeze refused: missing {missing}")
+    score_rows = _load_rows(RESULTS)
+    _validate_freeze(_load_rows(DOCS), score_rows,
+                     _load_rows(RESULTS_RETEST))
+    PARAGRAPHS.write_text("".join(
+        json.dumps(r) + "\n" for r in _paragraph_summaries(score_rows)))
+    if FROZEN.is_dir():
+        shutil.rmtree(FROZEN)
+    FROZEN.mkdir()
     kept = []
-    for p in (MANIFEST, MANIFEST_B3, MANIFEST_ERAS, DOCS, DOCS_RETEST,
-              RESULTS, RESULTS_RETEST):
+    for p in (*required, DOCS_RETEST, RESULTS_RETEST, PARAGRAPHS):
         if p.is_file():
             shutil.copy(p, FROZEN / p.name)
             kept.append(p.name)
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
-        analyze.report(RESULTS, RESULTS_RETEST)
+        analyze.report(RESULTS, RESULTS_RETEST, PARAGRAPHS)
     (FROZEN / "report.txt").write_text(buf.getvalue())
     (FROZEN / "PROVENANCE.md").write_text(
         f"# Frozen audit set ({date.today().isoformat()})\n\n"
@@ -407,10 +493,14 @@ def cmd_freeze() -> None:
         f"- reservation ledger: {ledger_total()} words reserved, "
         f"ceiling {gzc.BUDGET_WORDS}\n"
         f"- files: {', '.join(kept)} + report.txt\n\n"
-        f"The ledger deliberately over-counts on transport failures "
-        f"(every HTTP attempt reserves before it runs); reconcile "
-        f"against the GPTZero dashboard by archiving the ledger and "
-        f"seeding it with one dashboard-confirmed row (see README).\n")
+        f"The retest rows are the stage-1 sensitivity subset: every "
+        f"document truncated at the design cap when the retest ran; "
+        f"the report's coverage line states the bound share of the "
+        f"current corpus. The ledger deliberately over-counts on "
+        f"transport failures (every HTTP attempt reserves before it "
+        f"runs); reconcile against the GPTZero dashboard by archiving "
+        f"the ledger and seeding it with one dashboard-confirmed row "
+        f"(see README).\n")
     print(f"frozen: {len(kept) + 2} files -> {FROZEN}")
 
 

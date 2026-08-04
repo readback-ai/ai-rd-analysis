@@ -173,8 +173,16 @@ def retest_stats(rows: list[dict], retest_rows: list[dict],
 
 def report_retest(rows: list[dict], retest_rows: list[dict]) -> None:
     cap = max((r.get("word_cap", 0) for r in retest_rows), default=0)
+    v1 = {r["slot"]: r for r in rows}
+    bound = [rt for rt in retest_rows
+             if v1.get(rt["slot"], {}).get("doc_sha") == rt.get("sha600")]
+    truncated_now = sum(1 for r in rows if r.get("truncated"))
     print(f"\nretest @{cap} (documents truncated at the design cap; "
           f"delta = score@{cap} - score@design-cap):")
+    print(f"coverage: {len(bound)}/{truncated_now} currently-truncated "
+          f"scored documents — the stage-1 sensitivity subset (every "
+          f"document truncated when the retest ran; rows detached by "
+          f"later redraws are excluded)")
     print(f"{'group':14}{'n':>4}{'mean@600':>10}{'mean@'+str(cap):>11}"
           f"{'Δmean':>8}{'higher':>9}{'sign_p':>8}  flips")
     for name, pred in RETEST_GROUPS:
@@ -188,12 +196,52 @@ def report_retest(rows: list[dict], retest_rows: list[dict]) -> None:
               f"{s['mean_delta']:>+8.2f}"
               f"{s['wins']:>6}/{s['wins'] + s['losses']:<2}"
               f"{s['sign_p']:>8.3f}  {flips}")
-    still = sum(1 for r in retest_rows if r.get("truncated"))
-    print(f"still truncated at {cap}: {still}/{len(retest_rows)}")
+    still = sum(1 for r in bound if r.get("truncated"))
+    print(f"still truncated at {cap}: {still}/{len(bound)}")
+
+
+def paragraph_stats(para_rows: list[dict]) -> dict | None:
+    """Aggregates over per-document paragraph summaries (frozen beside
+    the scores): the document verdict discards within-document
+    heterogeneity, so 'some but not all paragraphs above 0.5' is the
+    auditable footprint of possible mixed authorship."""
+    rows = [r for r in para_rows
+            if r.get("n_paragraphs") and r.get("mixed_prob") is not None]
+    if not rows:
+        return None
+    any_hi = sum(1 for r in rows if r["share_paragraphs_gt50"] > 0)
+    partial = sum(1 for r in rows
+                  if 0 < r["share_paragraphs_gt50"] < 1)
+    return {"n": len(rows), "any_hi": any_hi, "partial": partial,
+            "mean_mixed_prob":
+                statistics.fmean(r["mixed_prob"] for r in rows)}
+
+
+def report_paragraphs(para_rows: list[dict]) -> None:
+    s = paragraph_stats(para_rows)
+    if s is None:
+        return
+    print(f"\nparagraph-level (from cached responses; the document "
+          f"verdict discards this):")
+    print(f"docs {s['n']}; any paragraph >0.5: {s['any_hi']} "
+          f"({100 * s['any_hi'] / s['n']:.0f}%); some-but-not-all "
+          f"paragraphs >0.5: {s['partial']} "
+          f"({100 * s['partial'] / s['n']:.0f}%); mean mixed-class "
+          f"prob {s['mean_mixed_prob']:.3f}")
+    print(f"{'group':14}{'n':>4}{'mean max-para':>15}"
+          f"{'mean share>0.5':>16}")
+    for name, pred in RETEST_GROUPS:
+        rs = [r for r in para_rows if r.get("n_paragraphs") and pred(r)]
+        if not rs:
+            continue
+        print(f"{name:14}{len(rs):>4}"
+              f"{statistics.fmean(r['max_paragraph_prob'] for r in rs):>15.2f}"
+              f"{statistics.fmean(r['share_paragraphs_gt50'] for r in rs):>16.2f}")
 
 
 def report(results_path: Path,
-           retest_path: Path | None = None) -> None:
+           retest_path: Path | None = None,
+           paragraphs_path: Path | None = None) -> None:
     rows = load_rows(results_path)
     if not rows:
         print(f"no results at {results_path} — run --score first")
@@ -235,6 +283,8 @@ def report(results_path: Path,
                   f"mean gap {lm['mean_gap']:+.2f}, p={lm['sign_p']:.3f}")
     if retest_rows:
         report_retest(rows, retest_rows)
+    if paragraphs_path is not None:
+        report_paragraphs(load_rows(paragraphs_path))
     print(f"\nGPTZero model version(s): {versions or 'unknown'}")
     print()
     print(CAVEATS)

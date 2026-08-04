@@ -1110,29 +1110,98 @@ def test_retest_command_targets_truncated_scored_docs_only(
     assert sent == []
 
 
-def test_freeze_writes_the_audit_set(tmp_path, monkeypatch):
-    """--freeze snapshots manifests, row files, the generated report,
-    and provenance into the committed frozen/ dir — the review artifact
-    for the reported numbers (PR #28 review P2)."""
+def _freeze_env(tmp_path, monkeypatch):
+    """Minimal coherent corpus for cmd_freeze: one filled+scored doc
+    with its cached response, all manifests present."""
     import gz
-    for name in ("MANIFEST", "MANIFEST_B3", "MANIFEST_ERAS", "DOCS",
-                 "DOCS_RETEST", "RESULTS", "RESULTS_RETEST",
-                 "RESERVATIONS"):
+    for name in ("LOCAL", "MANIFEST", "MANIFEST_B3", "MANIFEST_ERAS",
+                 "DOCS", "DOCS_RETEST", "RESULTS", "RESULTS_RETEST",
+                 "RESERVATIONS", "RESP_CACHE"):
         monkeypatch.setattr(gz, name, tmp_path / getattr(gz, name).name)
     monkeypatch.setattr(gz, "FROZEN", tmp_path / "frozen")
     monkeypatch.setattr(gptzero_client, "PINNED_VERSION", "pinver")
-    gz.MANIFEST.write_text(json.dumps({"slots": []}))
+    for m in (gz.MANIFEST, gz.MANIFEST_B3, gz.MANIFEST_ERAS):
+        m.write_text(json.dumps({"slots": []}))
+    gz.DOCS.write_text(json.dumps(
+        {"slot": "B3:o/r", "arm": "B3", "ai": False, "period": "Q3-2022",
+         "doc_sha": "s", "words": 200, "truncated": True}) + "\n")
     gz.RESULTS.write_text(json.dumps(
         {"slot": "B3:o/r", "arm": "B3", "ai": False, "period": "Q3-2022",
-         "doc_sha": "s", "class_probabilities": {"ai": 0.1},
-         "predicted_class": "human", "truncated": False,
+         "doc_sha": "s", "words": 200, "truncated": True,
+         "class_probabilities": {"ai": 0.1, "mixed": 0.02},
+         "predicted_class": "human",
          "model_version": "pinver"}) + "\n")
+    resp = tmp_path / gz.RESP_CACHE.name / "pinver" / "s.json"
+    resp.parent.mkdir(parents=True)
+    resp.write_text(json.dumps({"version": "pinver", "documents": [
+        {"predicted_class": "human",
+         "class_probabilities": {"ai": 0.1, "mixed": 0.02},
+         "paragraphs": [{"completely_generated_prob": 0.8},
+                        {"completely_generated_prob": 0.1}]}]}))
+    return gz
+
+
+def test_freeze_writes_the_audit_set(tmp_path, monkeypatch):
+    """--freeze snapshots manifests, row files, paragraph summaries,
+    the generated report, and provenance into the committed frozen/
+    dir — the review artifact for the reported numbers (PR #28 review
+    P2), including the paragraph-level heterogeneity claim."""
+    gz = _freeze_env(tmp_path, monkeypatch)
     gz.cmd_freeze()
     names = {f.name for f in gz.FROZEN.iterdir()}
     assert {"manifest_v1_50k.json", "scores_v1.jsonl", "report.txt",
-            "PROVENANCE.md"} <= names
-    assert "Q3-22-era" in (gz.FROZEN / "report.txt").read_text()
+            "paragraph_summary.jsonl", "PROVENANCE.md"} <= names
+    report = (gz.FROZEN / "report.txt").read_text()
+    assert "Q3-22-era" in report
+    assert "paragraph-level" in report
+    para = [json.loads(ln) for ln in
+            (gz.FROZEN / "paragraph_summary.jsonl").read_text()
+            .splitlines()]
+    assert para[0]["slot"] == "B3:o/r"
+    assert para[0]["share_paragraphs_gt50"] == pytest.approx(0.5)
     assert "pinver" in (gz.FROZEN / "PROVENANCE.md").read_text()
+
+
+def test_freeze_refuses_incoherent_inputs(tmp_path, monkeypatch):
+    """PR #28 review P1: --freeze copied files without validating their
+    relationships, committing retest rows detached from current source
+    hashes and a report whose denominators disagreed. Freeze must
+    refuse: a score row whose doc_sha is not the slot's current
+    document, duplicate slots, a filled document with no score, a
+    retest row not bound to a current score, and a scored document
+    missing its cached response."""
+    gz = _freeze_env(tmp_path, monkeypatch)
+
+    def rows(path):
+        return [json.loads(ln) for ln in
+                path.read_text().splitlines() if ln.strip()]
+
+    def write(path, rs):
+        path.write_text("".join(json.dumps(r) + "\n" for r in rs))
+
+    good_results = rows(gz.RESULTS)
+    stale = [{**good_results[0], "doc_sha": "OTHER"}]
+    write(gz.RESULTS, stale)
+    with pytest.raises(SystemExit, match="doc_sha"):
+        gz.cmd_freeze()
+    write(gz.RESULTS, good_results * 2)          # duplicate slot
+    with pytest.raises(SystemExit, match="duplicate"):
+        gz.cmd_freeze()
+    write(gz.RESULTS, good_results)
+    docs = rows(gz.DOCS)
+    write(gz.DOCS, docs + [{**docs[0], "slot": "B3:o/x",
+                            "doc_sha": "x"}])    # filled, unscored
+    with pytest.raises(SystemExit, match="unscored"):
+        gz.cmd_freeze()
+    write(gz.DOCS, docs)
+    write(gz.RESULTS_RETEST, [{**good_results[0], "sha600": "GONE",
+                               "doc_sha": "s:long", "word_cap": 1200}])
+    with pytest.raises(SystemExit, match="retest"):
+        gz.cmd_freeze()
+    gz.RESULTS_RETEST.unlink()
+    (tmp_path / gz.RESP_CACHE.name / "pinver" / "s.json").unlink()
+    with pytest.raises(SystemExit, match="response"):
+        gz.cmd_freeze()
 
 
 def _eras_pools(q4=("alice", "bob"), q1_26=("alice",),

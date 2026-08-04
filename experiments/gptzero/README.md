@@ -78,9 +78,11 @@ python experiments/gptzero/gz.py --freeze            # commit-ready audit set
 regenerate it with `--freeze` after any scoring change.
 
 API key: `GPTZERO_API_KEY` env var, or paste into `local/api_key`.
-Everything data-shaped (manifest, documents, diffs, responses,
-reservations, scores) lives under `local/` — gitignored; only code and
-this README are committed.
+Raw data (documents, diffs, API responses, reservations) lives under
+`local/` — gitignored. Committed alongside the code: this README and
+the `frozen/` audit set (validated manifests, row metadata, scores,
+paragraph summaries, generated report, provenance) that backs any
+reported numbers.
 
 ## What the numbers do and don't license
 

@@ -19,11 +19,19 @@ paired Q2-2026 (n=70): AI PR scores higher in 31/66 decided pairs (4 ties); mean
 length-matched sensitivity (|Δwords| <= 150): n=40, 16/37 decided, mean gap -0.05, p=0.838
 
 retest @1200 (documents truncated at the design cap; delta = score@1200 - score@design-cap):
+coverage: 92/221 currently-truncated scored documents — the stage-1 sensitivity subset (every document truncated when the retest ran; rows detached by later redraws are excluded)
 group            n  mean@600  mean@1200   Δmean   higher  sign_p  flips
 paired-AI       43      0.36       0.29   -0.06    19/34   0.304  ai->human 5, human->ai 3
 paired-nonAI    35      0.23       0.23   +0.00    12/27   0.779  none
 baselines       14      0.04       0.03   -0.01    11/14   0.029  none
-still truncated at 1200: 55/95
+still truncated at 1200: 54/92
+
+paragraph-level (from cached responses; the document verdict discards this):
+docs 500; any paragraph >0.5: 249 (50%); some-but-not-all paragraphs >0.5: 158 (32%); mean mixed-class prob 0.013
+group            n  mean max-para  mean share>0.5
+paired-AI      234           0.50            0.37
+paired-nonAI   236           0.46            0.32
+baselines       30           0.21            0.05
 
 GPTZero model version(s): ['2026-07-04-base']
 
