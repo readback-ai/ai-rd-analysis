@@ -85,15 +85,25 @@ def cmd_sample_b3() -> None:
 
 def cmd_sample_eras() -> None:
     import eras
+    if not MANIFEST.is_file():
+        raise SystemExit("v1 manifest required first (--sample): the "
+                         "Q2-2026 expansion excludes its authors")
+    v1_authors = {s["author"]
+                  for s in json.loads(MANIFEST.read_text())["slots"]
+                  if s["arm"] == "P"}
+    exclude = {"Q2-2026": v1_authors}
     pools_ = eras.pools()
-    manifest, rewrote = eras.ensure_manifest(pools_, MANIFEST_ERAS)
+    manifest, rewrote = eras.ensure_manifest(pools_, MANIFEST_ERAS,
+                                             exclude)
     slots = manifest["slots"]
     for q in eras.QUARTERS:
         mixed = sum(1 for a, v in pools_[q].items()
                     if v["ai"] and v["nonai"])
         n = sum(1 for s in slots if s["period"] == q)
         print(f"{q}: {len(pools_[q])} eligible authors, {mixed} mixed "
-              f"(both arms) -> {n} slots")
+              f"(both arms) -> {n} slots"
+              + (f" (+{len(v1_authors)} v1 authors)"
+                 if q == "Q2-2026" else ""))
         if mixed < eras.PARAMS["n_authors"]:
             print(f"NOTE: only {mixed} mixed authors < "
                   f"{eras.PARAMS['n_authors']} target — using all")

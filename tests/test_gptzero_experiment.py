@@ -998,12 +998,14 @@ def test_retest_command_targets_truncated_scored_docs_only(
     assert sent == []
 
 
-def _eras_pools(q4=("alice", "bob"), q1_26=("alice",)):
+def _eras_pools(q4=("alice", "bob"), q1_26=("alice",),
+                q2_26=("carol", "dana")):
     def entry():
         return {"ai": [("o/r", 1, 100), ("o/r", 3, 200)],
                 "nonai": [("o/r", 2, 100)]}
     return {"Q4-2025": {a: entry() for a in q4},
-            "Q1-2026": {a: entry() for a in q1_26}}
+            "Q1-2026": {a: entry() for a in q1_26},
+            "Q2-2026": {a: entry() for a in q2_26}}
 
 
 def test_eras_draw_quarter_slots_deterministic_and_independent():
@@ -1016,13 +1018,37 @@ def test_eras_draw_quarter_slots_deterministic_and_independent():
     assert {s["slot"] for s in slots} == {
         "P:Q4-2025:alice:ai", "P:Q4-2025:alice:nonai",
         "P:Q4-2025:bob:ai", "P:Q4-2025:bob:nonai",
-        "P:Q1-2026:alice:ai", "P:Q1-2026:alice:nonai"}
+        "P:Q1-2026:alice:ai", "P:Q1-2026:alice:nonai",
+        "P:Q2-2026:carol:ai", "P:Q2-2026:carol:nonai",
+        "P:Q2-2026:dana:ai", "P:Q2-2026:dana:nonai"}
     assert all(s["arm"] == "P" and s["period"] in eras.QUARTERS
                for s in slots)
     q1_before = [s for s in slots if s["period"] == "Q1-2026"]
     p2 = _eras_pools(q4=("alice", "bob", "carol"))
     q1_after = [s for s in eras.draw(p2) if s["period"] == "Q1-2026"]
     assert q1_after == q1_before
+
+
+def test_eras_deepening_keeps_existing_slots_and_exclusions_hold(
+        monkeypatch):
+    """Raising n_authors deepens a quarter without redrawing its
+    existing slots (whole-pool shuffle, then a prefix); excluded
+    authors (the v1 Q2-2026 draw) never appear and reduce the quarter's
+    target so the pooled quarter still totals n_authors pairs."""
+    pool = _eras_pools(q2_26=("carol", "dana", "erin", "fred"))
+    monkeypatch.setitem(eras.PARAMS, "n_authors", 2)
+    shallow = [s for s in eras.draw(pool) if s["period"] == "Q4-2025"]
+    monkeypatch.setitem(eras.PARAMS, "n_authors", 3)
+    deep = [s for s in eras.draw(pool) if s["period"] == "Q4-2025"]
+    assert deep[:len(shallow)] == shallow      # prefix-stable deepening
+    excl = {"Q2-2026": {"carol", "erin"}}
+    q2 = [s for s in eras.draw(pool, excl) if s["period"] == "Q2-2026"]
+    assert {s["author"] for s in q2}.isdisjoint(excl["Q2-2026"])
+    # 2 excluded authors in-pool -> target 3 - 2 = 1 author (2 slots)
+    assert len(q2) == 2
+    fp = eras.fingerprint(pool, excl)
+    assert fp != eras.fingerprint(pool)
+    assert fp != eras.fingerprint(pool, {"Q2-2026": {"carol"}})
 
 
 def test_eras_draw_skips_unmixed_authors_and_caps_depth(monkeypatch):
@@ -1084,3 +1110,4 @@ def test_eras_pools_use_paired_eligibility(monkeypatch):
     assert p["Q4-2025"]["alice"]["nonai"] == [("o/r", 2, 100)]
     assert p["Q1-2026"] == {"alice": {"ai": [],
                                       "nonai": [("o/r", 5, 100)]}}
+    assert p["Q2-2026"] == {}

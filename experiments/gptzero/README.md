@@ -21,9 +21,15 @@ experiment calibrates GPTZero against the study's own labels.
   - **B1** — those authors' own Q1-2024 PRs where they exist
     (same-author-across-eras anchor).
   - **B2** — independent Q1-2024 authors, to 20 baseline docs total.
-  - **Eras** (design eras-v1) — the paired contrast re-drawn at the
-    same depth in Q4-2025 and Q1-2026 (own manifest, quarter-namespaced
-    seeds), so score trends read across eras, not one quarter.
+  - **Eras** (design eras-v1) — the paired contrast at 90 authors per
+    quarter across Q4-2025, Q1-2026 and Q2-2026 (own manifest,
+    quarter-namespaced seeds, prefix-stable deepening). Q2-2026 is an
+    expansion: v1's authors are excluded and keep their v1 slots, so
+    the pooled quarter is 90 distinct authors.
+  - **Length sensitivity** — every document truncated at the 600-word
+    cap is also scored at a 1200-word assembly (`--retest`, separate
+    results file): the dose-response section bounds what document
+    length does to the detector.
 - **Determinism**: study seed 20260630, namespaced streams; manifest
   fingerprints AS_OF/CUTOFF/params/pool and is rebuilt-not-trusted.
   Candidate lists are seeded whole-pool shuffles, so deepening `k_cand`
