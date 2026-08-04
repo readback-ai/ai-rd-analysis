@@ -90,7 +90,13 @@ daytonaio, streamlit, datahub-project, ...) and 3 included topic-sparse AI
 developers (flashinfer-ai, embeddings-benchmark, AnswerDotAI). Exclusion
 beats every rule; inclusion asserts R3 only (quality/evidence still apply).
 
-Result (2026-07-10 run): **229 orgs = 182 full-org + 47 repo-scoped** (`population.tsv` is authoritative; docs quote it).
+Result (2026-07-30 regeneration): **224 orgs = 179 full-org + 45
+repo-scoped** (`population.tsv` is authoritative; docs quote it). Down
+from the 2026-07-10 run's 229 under the corrected distinct-evidence R4
+arithmetic applied uniformly: sony (probe-sum double-counting) and,
+via the census-evidence recompute under current detection (CI-canary
+branch exclusion), physical-intelligence, salesforceairesearch,
+stability-ai, and thu-pacman.
 Consequence for inference: the population is prominence-selected; findings
 describe practices at leading AI organizations, with the Q1-2024 census as
 the temporal control.
@@ -105,7 +111,10 @@ AI-topic repos. Appendix cuts (org-type public/private/community via
 `scripts/monthly_update.py YYYY-MM` adds a month of activity data:
 1. RE-COLLECTS the previous TWO months first (wipes their census cells;
    cells are immutable snapshots, so refresh is always wipe + full
-   re-query, reconciled against fresh precounts) — N-1 for creation
+   re-query, reconciled against fresh precounts). The wipe happens ONCE
+   per target month (logged in raw/monthly_wipes.json), so rerunning the
+   update after a mid-collection failure RESUMES the checkpointed
+   census instead of discarding it — N-1 for creation
    recency, and N-2 because under the w8 rule its last 8-week windows
    only just closed: a month's fate metrics are FINAL once it has been
    revised as N-2, i.e. two updates after first collection. Until then
@@ -218,20 +227,19 @@ check) vs 3.8% of population PRs by Q2-2026. Layer C is reported as
 PR-level attribution, never commit-level proof.
 
 **Measured layer-C precision** (org-stratified samples, C-only PRs — no
-marker, no agent author, repo-scoped orgs' cells filtered to their
-in-scope repos; `studies.layer_c_precision`. Repo-scoped orgs' current
-cells were drawn org-wide and are filtered at read time — an interim
-measure until they are re-sampled from the scoped universe, since the
-org-wide 50-newest page is a biased selection of it): the share carrying
+marker, no agent author; `studies.layer_c_precision`. Repo-scoped orgs'
+cells are drawn from their in-scope repos — the scoped universe is
+queried directly, before the per-cell page cap — and filtered again at
+read time as belt-and-braces): the share carrying
 positive provenance signals (GitHub web-flow committer, or the product's
 machine-generated slug pattern) is codex/ 95%, copilot/ 98%, cursor/ 49%,
-claude/ 43%. The web-flow identity (`noreply@github.com` committer) is any
+claude/ 42%. The web-flow identity (`noreply@github.com` committer) is any
 web-UI/API commit and is NOT standalone agent evidence — it confirms only
 CONDITIONED on the agent-named branch; these precision figures measure
 exactly that combination. One false-positive class was MEASURED and is
 EXCLUDED from detection: branches named after the product but committed
-entirely by github-actions[bot] (CI canaries; 19.6% of C-only claude/
-samples). The remainder (cursor/ 51%, claude/ 38%) is INDETERMINATE:
+entirely by github-actions[bot] (CI canaries; 18.4% of C-only claude/
+samples). The remainder (cursor/ 51%, claude/ 39%) is INDETERMINATE:
 user-pushed commits on a prefix branch are consistent both with an agent
 branch continued locally (true positive) and a human-named branch (false
 positive); the Q1-2024 zero shows no pre-product baseline of such naming,
@@ -368,7 +376,19 @@ sub-window count adapts to PR volume (integer-boundary date splits — float
 rounding once produced inverted windows), each window paginates by cursor up
 to the API's 1,000-node cap (= up to 1,000 PRs per day-window), cells are
 written atomically (tmp+rename: torn writes cannot exist), and a repo-quarter
-that still cannot be completed FAILS the run. A zero denominator never
+that still cannot be completed FAILS the run.
+**Unsearchable repos** (`census_direct.py`): GitHub's search index refuses
+some public repos outright (`repo:X` answers HTTP 422 "cannot be searched"),
+so no precount and no search-collected cell can ever exist for them. Such a
+repo is collected through `repository.pullRequests`, which does not use the
+search index; its own `totalCount` is the completeness denominator (the full
+history must arrive, verified page by page, or nothing is written), and
+quarters with no PRs get a VERIFIED empty cell. Only the definitive 422
+triggers this route — a transient failure still fails the repo-quarter.
+Measured 2026-07-29: 8 population repos in this state, 364 in-window PRs
+recovered rather than waived as inaccessible (they skew new and
+AI-tooling-heavy, e.g. `ComposioHQ/awesome-claude-plugins` at 265, so
+waiving them would bias AI rates DOWN). A zero denominator never
 stands on one observation: search brownouts return 200 with a zero count,
 so a 0 precount is re-queried and only a confirmed 0 (cache-marked) can
 census as a complete empty repo-quarter — an unconfirmable zero FAILS

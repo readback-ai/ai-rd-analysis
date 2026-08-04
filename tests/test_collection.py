@@ -97,26 +97,33 @@ def test_census_query_has_layer_c_and_accountability_fields():
 def test_branch_scan_scoped_org_counts_only_in_scope_repos(
         tmp_path, monkeypatch):
     """Issue #8: for a repo-scoped org, branch_scan must count
-    per in-scope repo (summed), never org-wide — org-wide counts include
-    out-of-scope, non-AI repos and feed R4 admission evidence."""
+    per in-scope repo (summed, batched via aliased search), never
+    org-wide — org-wide counts include out-of-scope, non-AI repos and
+    feed R4 admission evidence."""
     queries = []
-    monkeypatch.setattr(branch_scan, "rest_count",
-                        lambda q, endpoint: queries.append(q) or 1)
+
+    def fake(query, variables, jq, expect):
+        queries.append(query)
+        return {"a0": {"issueCount": 1}, "a1": {"issueCount": 1}}
+    monkeypatch.setattr(branch_scan, "graphql_nodes", fake)
     out = tmp_path / "scan.tsv"
     branch_scan.scan(["bigco"], out, {"Q2-2026": "2026-04-01..2026-06-30"},
                      {"codex": "codex/"},
                      scoped={"bigco": ["bigco/ai-a", "bigco/ai-b"]})
     assert not any("org:" in q for q in queries)
+    assert all(r in queries[0] for r in ("repo:bigco/ai-a",
+                                         "repo:bigco/ai-b"))
     assert branch_scan.load(out) == {("bigco", "Q2-2026", "codex/"): 2}
 
 
 def test_branch_scan_scoped_org_fails_cell_on_any_repo_failure(
         tmp_path, monkeypatch):
     """Issue #8: a partial per-repo sum understates silently — if any
-    in-scope repo's count fails, the whole cell is skipped, not written."""
+    in-scope repo's count is missing from the batch, the whole cell is
+    skipped, not written."""
     monkeypatch.setattr(
-        branch_scan, "rest_count",
-        lambda q, endpoint: None if "ai-b" in q else 3)
+        branch_scan, "graphql_nodes",
+        lambda *a, **k: {"a0": {"issueCount": 3}, "a1": None})
     out = tmp_path / "scan.tsv"
     branch_scan.scan(["bigco"], out, {"Q2-2026": "2026-04-01..2026-06-30"},
                      {"codex": "codex/"},
@@ -145,6 +152,77 @@ def test_sample_branch_prs_filters_out_of_scope_repos(
              for c in cells for p in c["prs"]]
     assert repos == ["bigco/ai-a"]
     assert cells[0]["pop_count"] == 5
+
+
+def test_sample_run_removes_unjustified_orgwide_cells(
+        tmp_path, monkeypatch):
+    """PR #18 review, P1: a repo-scoped org's sample cell without the
+    scoped marker is an org-wide draw — when its cell has NO positive
+    scoped count it can never be re-drawn, so it must be deleted, not
+    left to feed the precision estimates. Full-org cells stay."""
+    scan = tmp_path / "scan.tsv"
+    scan.write_text("bigco\tQ2-2026\tcodex/\t0\n")   # scoped count zero
+    out = tmp_path / "cells"
+    out.mkdir()
+    (out / "bigco__Q2-2026.json").write_text(json.dumps(
+        {"org": "bigco", "period": "Q2-2026", "pop_count": 44,
+         "prs": [{"number": 1}]}))                    # legacy org-wide
+    (out / "acme__Q2-2026.json").write_text(json.dumps(
+        {"org": "acme", "period": "Q2-2026", "pop_count": 9,
+         "prs": [{"number": 2}]}))                    # full-org: keep
+    monkeypatch.setattr(pull_prs, "graphql_nodes",
+                        lambda *a, **k: [])
+    pull_prs.sample_branch_prs("codex/", scan, out, ["Q2-2026"],
+                               in_scope={"bigco": {"bigco/ai-a"}})
+    assert not (out / "bigco__Q2-2026.json").exists()
+    assert (out / "acme__Q2-2026.json").exists()
+
+
+def test_verify_zeros_fails_loudly_on_unverified_zeros(
+        tmp_path, monkeypatch):
+    """PR #18 re-review, P2: load() cannot tell an unverified zero from a
+    confirmed one, so an incomplete verification must not exit 0 — a
+    scripted check would accept it. Corrections found before the failure
+    are still written."""
+    out = tmp_path / "scan.tsv"
+    out.write_text("bigco\tQ1-2024\tcodex/\t0\n"
+                   "bigco\tQ1-2024\tclaude/\t0\n")
+    results = {"codex/": 4, "claude/": None}     # one correction, one fail
+    monkeypatch.setattr(branch_scan, "_scoped_cell_count",
+                        lambda repos, prefix, rng: results[prefix])
+    with pytest.raises(SystemExit) as exc:
+        branch_scan.verify_zeros(
+            out, {"Q1-2024": "2024-01-01..2024-03-31"},
+            scoped={"bigco": ["bigco/a"]}, pace=0)
+    assert exc.value.code == 1
+    assert branch_scan.load(out) == {
+        ("bigco", "Q1-2024", "codex/"): 4,       # correction persisted
+        ("bigco", "Q1-2024", "claude/"): 0}
+
+
+def test_verify_zeros_corrects_poisoned_scoped_zero(
+        tmp_path, monkeypatch):
+    """PR #18 review, P2: a zero scoped cell is only a fact once
+    independently re-observed — a search brownout can return a
+    structurally valid zero. verify_zeros recounts scoped zero cells,
+    corrects rows whose recount is nonzero, leaves twice-observed
+    zeros, and never touches full-org or nonzero rows."""
+    out = tmp_path / "scan.tsv"
+    out.write_text("bigco\tQ1-2024\tcodex/\t0\n"
+                   "bigco\tQ1-2024\tclaude/\t0\n"
+                   "bigco\tQ2-2026\tcodex/\t7\n"
+                   "fullorg\tQ1-2024\tcodex/\t0\n")
+    recounts = {"codex/": 4, "claude/": 0}
+    monkeypatch.setattr(branch_scan, "_scoped_cell_count",
+                        lambda repos, prefix, rng: recounts[prefix])
+    branch_scan.verify_zeros(
+        out, {"Q1-2024": "2024-01-01..2024-03-31"},
+        scoped={"bigco": ["bigco/a"]}, pace=0)
+    assert branch_scan.load(out) == {
+        ("bigco", "Q1-2024", "codex/"): 4,
+        ("bigco", "Q1-2024", "claude/"): 0,
+        ("bigco", "Q2-2026", "codex/"): 7,
+        ("fullorg", "Q1-2024", "codex/"): 0}
 
 
 def test_layer_c_precision_filters_scoped_org_samples(

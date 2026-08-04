@@ -42,7 +42,7 @@ CUTOFF = "2026-06-30T23:59:59Z"
 # at each re-pull (monthly updates, the 2026-09-01 Q2 finalization) to
 # the run's start date — mature PRs are immutable, so bumping only ever
 # ADDS newly-mature PRs (METHODS §1c).
-AS_OF = CUTOFF
+AS_OF = "2026-08-01T00:00:00Z"
 
 # FROZEN CENSORING RULE (METHODS conventions): all per-PR outcomes are
 # measured at 8 WEEKS after PR creation. The maturity curves show merges

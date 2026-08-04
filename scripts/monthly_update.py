@@ -17,6 +17,7 @@ Usage:
   PYTHONPATH=src python scripts/monthly_update.py 2026-07
   (collects 2026-07 fresh, re-collects 2026-06, prints monthly tables)
 """
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -64,6 +65,28 @@ def wipe_month(tok: str) -> int:
     return wiped
 
 
+def ensure_wiped(new: str, revise: list[str]) -> None:
+    """Wipe the revision months exactly ONCE per target-month cycle. The
+    wipe log lives beside the store it clears (raw/monthly_wipes.json),
+    so rerunning the update after a mid-census failure resumes the
+    checkpointed collection instead of discarding it. A different target
+    month is a new cycle and wipes its own revision window. To force a
+    re-wipe of the same cycle deliberately, delete the log entry."""
+    from pipeline.ghx import data_dir
+    log = data_dir() / "raw" / "monthly_wipes.json"
+    done = json.loads(log.read_text()) if log.is_file() else {}
+    if done.get(new) == revise:
+        print(f"revision months already wiped this cycle ({new}); "
+              f"resuming collection", flush=True)
+        return
+    for tok in revise:
+        print(f"revising provisional month {tok}: "
+              f"wiped {wipe_month(tok)} cells", flush=True)
+    done[new] = revise
+    log.parent.mkdir(parents=True, exist_ok=True)
+    log.write_text(json.dumps(done))
+
+
 def run(mod: str, *args: str) -> None:
     r = subprocess.run([sys.executable, "-m", mod, *args])
     if r.returncode != 0:
@@ -92,8 +115,7 @@ if __name__ == "__main__":
     revise = months_to_revise(new)
     repos = DRV / "population_repos.txt"
     coll = collectable(repos)
-    for tok in revise:
-        print(f"revising provisional month {tok}: wiped {wipe_month(tok)} cells")
+    ensure_wiped(new, revise)
     run("pipeline.precount", "--repos", str(coll), "--periods", *revise, new)
     run("pipeline.census", "--repos", str(coll), "--periods", *revise, new)
     # register the months PERSISTENTLY: later analyses (and later monthly

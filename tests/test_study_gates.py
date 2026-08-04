@@ -60,6 +60,10 @@ def test_attention_counts_w8_windowed_comments_past_cutoff(monkeypatch):
 
 def test_event_study_mature_max_follows_as_of(monkeypatch):
     from pipeline.studies import event_study
+    # Pin BOTH observation points: the contract is that maturity follows
+    # AS_OF, so neither assertion may depend on the module constant's
+    # current value (it advances with every re-pull, METHODS §1c).
+    monkeypatch.setattr(detect, "AS_OF", "2026-06-30T23:59:59Z")
     assert event_study.mature_max() == event_study.WINDOW.index("2026-04")
     monkeypatch.setattr(detect, "AS_OF", "2026-09-05T00:00:00Z")
     assert event_study.mature_max() == event_study.WINDOW.index("2026-06")
@@ -1184,3 +1188,63 @@ def test_fleet_cohort_is_membership_in_fleet_all(monkeypatch):
     assert cohorts["below"] != "fleet"
     assert {a for a, c in cohorts.items() if c == "fleet"} == fleet_all
     assert productivity.fleet_logins() == fleet_all
+
+
+# --- monthly-finalized figures: Figure 2 / Figure 3 companions use only
+# w8-final months (no provisional data on either figure) ---
+
+
+def test_event_cohorts_require_w8_final_window(monkeypatch):
+    """Figure 2 (monthly finalized update): an adoption-month cohort
+    enters only when its full [-2..+2] window has passed w8 finalization
+    at the AS_OF — a cohort whose t+2 month is still open is excluded,
+    so no plotted offset is ever provisional."""
+    from pipeline.studies import productivity
+
+    def row(ai_prs):
+        return [0.0, 0.0, ai_prs, 1, 0, 1.0, 0.0]
+
+    acc = {"a": {"2026-04": row(1)}, "b": {"2026-03": row(1)}}
+    cohorts = {"a": "medium", "b": "medium"}
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: (acc, cohorts, {}, set()))
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-01T00:00:00Z")
+    out = productivity.event_by_adoption_month()
+    assert "2026-03" in out        # t+2 = 2026-05, w8-final by the AS_OF
+    assert "2026-04" not in out    # t+2 = 2026-06, window still open
+
+
+def test_review_mix_monthly_granularity(monkeypatch):
+    """Figure 3 companion (monthly finalized update): review_mix groups
+    by calendar month when granularity='month', keying rows by month."""
+    from pipeline import frame
+    from pipeline.studies import productivity
+    monkeypatch.setattr(detect, "AS_OF", "2026-09-01T00:00:00Z")
+    apr = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z",
+              num=2, reviews=[dict(_REV)])
+    may = _pr("2026-05-02T00:00:00Z", merged="2026-05-06T00:00:00Z", num=3)
+    cells = {("o/r", "2026-04-01..2026-06-30"): [apr, may]}
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(productivity, "fleet_logins", lambda: set())
+    rows = productivity.review_mix(by="ai", granularity="month")
+    assert rows[("2026-04", "nonai")]["n"] == 1
+    assert rows[("2026-05", "nonai")]["n"] == 1
+    assert ("Q2-2026", "nonai") not in rows
+
+
+def test_attention_by_ai_monthly_granularity(monkeypatch):
+    """Figure 3 companion (monthly finalized update): attention_by_ai
+    keys rows by calendar month when granularity='month'."""
+    from pipeline import frame
+    from pipeline.studies import attention, productivity
+    monkeypatch.setattr(detect, "AS_OF", "2026-09-01T00:00:00Z")
+    apr = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z",
+              num=2, reviews=[dict(_REV)])
+    cells = {("o/r", "2026-04-01..2026-06-30"): [apr]}
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(productivity, "fleet_logins", lambda: set())
+    rows = attention.attention_by_ai(granularity="month")
+    assert ("2026-04", "nonai") in rows
+    assert ("Q2-2026", "nonai") not in rows
