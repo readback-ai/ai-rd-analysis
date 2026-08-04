@@ -199,6 +199,26 @@ def cmd_fetch() -> None:
           f"{sum(r['words'] for r in filled_rows)} words assembled")
 
 
+def _batches(rows: list[dict]) -> list[list[dict]]:
+    """Split scoring work into batches under BOTH request limits: file
+    count (API cap) and total words (bigger uploads time out inside the
+    API). An overweight single document still ships alone."""
+    import gptzero_client as gzc
+    out: list[list[dict]] = []
+    cur: list[dict] = []
+    words = 0
+    for r in rows:
+        if cur and (len(cur) >= gzc.BATCH_FILES
+                    or words + r["words"] > gzc.BATCH_WORDS):
+            out.append(cur)
+            cur, words = [], 0
+        cur.append(r)
+        words += r["words"]
+    if cur:
+        out.append(cur)
+    return out
+
+
 def cmd_score(limit: int | None) -> None:
     import gptzero_client as gzc
     _, meta_of = _slot_index(_manifests())
@@ -237,8 +257,8 @@ def cmd_score(limit: int | None) -> None:
         todo = [r for s, r in docs.items() if s not in done]
         if limit is not None:
             todo = todo[:limit]
-        for i in range(0, len(todo), gzc.BATCH_FILES):
-            chunk = todo[i:i + gzc.BATCH_FILES]
+        batches = _batches(todo)
+        for i, chunk in enumerate(batches):
             items = [(r["doc_sha"], DOC_CACHE / f"{r['doc_sha']}.txt")
                      for r in chunk]
             try:
@@ -258,7 +278,7 @@ def cmd_score(limit: int | None) -> None:
                 out.flush()
                 print(f"scored {r['slot']}: {fields['predicted_class']} "
                       f"({billed} words billed)", flush=True)
-            if i + gzc.BATCH_FILES < len(todo):
+            if i + 1 < len(batches):
                 time.sleep(SCORE_PACE)
     print(f"reserved: {gzc.ledger(RESERVATIONS)}/{gzc.BUDGET_WORDS} "
           f"words")
@@ -315,8 +335,8 @@ def cmd_retest() -> None:
             out.write(json.dumps(r) + "\n")
         done = {r["slot"] for r in valid}
         todo = [r for r in rows if r["slot"] not in done]
-        for i in range(0, len(todo), gzc.BATCH_FILES):
-            chunk = todo[i:i + gzc.BATCH_FILES]
+        batches = _batches(todo)
+        for i, chunk in enumerate(batches):
             items = [(r["doc_sha"], DOC_CACHE / f"{r['doc_sha']}.txt")
                      for r in chunk]
             try:
@@ -337,7 +357,7 @@ def cmd_retest() -> None:
                 print(f"retested {r['slot']}: "
                       f"{fields['predicted_class']} "
                       f"({billed} words billed)", flush=True)
-            if i + gzc.BATCH_FILES < len(todo):
+            if i + 1 < len(batches):
                 time.sleep(SCORE_PACE)
     print(f"reserved: {gzc.ledger(RESERVATIONS)}/{gzc.BUDGET_WORDS} "
           f"words")

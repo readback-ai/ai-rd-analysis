@@ -30,7 +30,10 @@ from diffs import count_words
 API_URL = "https://api.gptzero.me/v2/predict/text"
 FILES_URL = "https://api.gptzero.me/v2/predict/files"
 BATCH_FILES = 50          # API limit per request (support, 2026-07-29)
-BUDGET_WORDS = 150_000
+BATCH_WORDS = 20_000      # server-side processing budget per request:
+                          # bigger uploads time out inside the API
+                          # (200 + {"error": ..., "status": 408})
+BUDGET_WORDS = 190_000
 PINNED_VERSION: str | None = "2026-07-04-base"   # from the 2026-07-29
                                                  # smoke run's responses
 TRANSIENT_HTTP = (408, 429, 500, 502, 503, 504)
@@ -258,8 +261,7 @@ def score_batch(items: list[tuple[str, Path]], cache_dir: Path,
             for sha, _p, w in misses:
                 _reserve(reservations_path, sha, w)
             try:
-                resp = transport([p for _s, p, _w in misses])
-                break
+                got = transport([p for _s, p, _w in misses])
             except urllib.error.HTTPError as e:
                 if e.code not in TRANSIENT_HTTP:
                     raise
@@ -267,6 +269,27 @@ def score_batch(items: list[tuple[str, Path]], cache_dir: Path,
             except (urllib.error.URLError, TimeoutError,
                     json.JSONDecodeError) as e:
                 last = e
+            else:
+                # The endpoint can wrap failures in an HTTP 200 whose
+                # body is {"error": ..., "status": ...} with no
+                # documents — classify by the embedded status exactly
+                # like a real HTTP error.
+                if "documents" not in got and (
+                        got.get("error") or got.get("status")):
+                    status = got.get("status")
+                    if status not in TRANSIENT_HTTP:
+                        dump = _dump_mismatch(reservations_path.parent,
+                                              got)
+                        raise SystemExit(
+                            f"batch error response (status {status!r}): "
+                            f"{got.get('error')!r} — nothing cached; "
+                            f"dumped to {dump}")
+                    last = RuntimeError(
+                        f"error envelope status {status}: "
+                        f"{got.get('error')!r}")
+                else:
+                    resp = got
+                    break
             time.sleep(5 * 3 ** attempt)
         if resp is None:
             raise RuntimeError(f"GPTZero batch failed after {retries} "

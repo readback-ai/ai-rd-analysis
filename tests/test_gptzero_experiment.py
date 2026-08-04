@@ -835,6 +835,60 @@ def test_analysis_pairs_within_one_quarter_only():
     assert (pr["pairs"], pr["wins"]) == (1, 1)
 
 
+def test_score_batch_retries_transient_error_envelopes(
+        tmp_path, monkeypatch):
+    """Live-run finding 2026-08-04: the files endpoint can return HTTP
+    200 whose body is an error envelope ({'error': 'Request timeout or
+    aborted', 'status': 408}, no documents); it was treated as a version
+    mismatch and aborted the run. A transient-status envelope must
+    retry with a fresh reservation like any transient failure; a
+    non-transient envelope must still abort with the payload dumped."""
+    import gptzero_client as gzc
+    monkeypatch.setattr(gzc, "PINNED_VERSION", "pinver")
+    monkeypatch.setattr(gzc.time, "sleep", lambda s: None)
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
+    p = docs_dir / "shaA.txt"
+    p.write_text("one two three")
+    attempts = []
+
+    def flaky(paths):
+        attempts.append(1)
+        if len(attempts) < 2:
+            return {"error": "Request timeout or aborted", "status": 408}
+        return _batch_resp([q.stem for q in paths])
+
+    resv = tmp_path / "resv.jsonl"
+    out = gzc.score_batch([("shaA", p)], tmp_path / "cache", resv,
+                          transport=flaky)
+    assert [b for _r, b in out] == [3]
+    assert gzc.ledger(resv) == 6            # 2 attempts x 3 words
+
+    q = docs_dir / "shaB.txt"
+    q.write_text("four five")
+    with pytest.raises(SystemExit):
+        gzc.score_batch([("shaB", q)], tmp_path / "cache",
+                        tmp_path / "resv2.jsonl",
+                        transport=lambda paths:
+                            {"error": "Payment required", "status": 402})
+    assert list(tmp_path.glob("batch_mismatch_*.json"))
+
+
+def test_batches_respect_file_and_word_caps(monkeypatch):
+    """Scoring batches stay under BOTH request limits — file count and
+    total words (oversized uploads time out inside the API); a single
+    overweight document still ships alone."""
+    import gz
+    import gptzero_client as gzc
+    monkeypatch.setattr(gzc, "BATCH_FILES", 3)
+    monkeypatch.setattr(gzc, "BATCH_WORDS", 1000)
+    rows = [{"words": w} for w in (400, 400, 400, 900, 1500, 100)]
+    got = gz._batches(rows)
+    assert [[r["words"] for r in b] for b in got] == \
+        [[400, 400], [400], [900], [1500], [100]]
+    assert all(len(b) <= 3 for b in got)
+
+
 def test_default_transports_resolve_at_call_time(tmp_path, monkeypatch):
     """No-network-guard bypass: score()/score_batch() bound their live
     transports as import-time default arguments, so calls that omit the
