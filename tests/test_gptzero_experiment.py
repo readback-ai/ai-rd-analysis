@@ -1120,7 +1120,8 @@ def _freeze_env(tmp_path, monkeypatch):
         monkeypatch.setattr(gz, name, tmp_path / getattr(gz, name).name)
     monkeypatch.setattr(gz, "FROZEN", tmp_path / "frozen")
     monkeypatch.setattr(gptzero_client, "PINNED_VERSION", "pinver")
-    for m in (gz.MANIFEST, gz.MANIFEST_B3, gz.MANIFEST_ERAS):
+    gz.MANIFEST_B3.write_text(json.dumps({"slots": [{"slot": "B3:o/r"}]}))
+    for m in (gz.MANIFEST, gz.MANIFEST_ERAS):
         m.write_text(json.dumps({"slots": []}))
     gz.DOCS.write_text(json.dumps(
         {"slot": "B3:o/r", "arm": "B3", "ai": False, "period": "Q3-2022",
@@ -1201,6 +1202,50 @@ def test_freeze_refuses_incoherent_inputs(tmp_path, monkeypatch):
     gz.RESULTS_RETEST.unlink()
     (tmp_path / gz.RESP_CACHE.name / "pinver" / "s.json").unlink()
     with pytest.raises(SystemExit, match="response"):
+        gz.cmd_freeze()
+
+
+def test_freeze_refuses_retest_and_manifest_incoherence(
+        tmp_path, monkeypatch):
+    """PR #28 review round 3: freeze validated retest SCORES but never
+    retest DOCUMENT rows (the detached B3 rows shipped in the frozen
+    set), and required manifests without inspecting them. Retest doc
+    and score rows must bind one-to-one on (slot, sha600, doc_sha) to a
+    current score; document slots must be unique and cover the
+    manifests' slots exactly."""
+    gz = _freeze_env(tmp_path, monkeypatch)
+
+    def rows(path):
+        return [json.loads(ln) for ln in
+                path.read_text().splitlines() if ln.strip()]
+
+    def write(path, rs):
+        path.write_text("".join(json.dumps(r) + "\n" for r in rs))
+
+    rt_doc = {"slot": "B3:o/r", "arm": "B3", "ai": False,
+              "period": "Q3-2022", "sha600": "s", "doc_sha": "s:long",
+              "word_cap": 1200, "words": 300, "truncated": False}
+    rt_score = {**rt_doc, "class_probabilities": {"ai": 0.2},
+                "predicted_class": "human", "model_version": "pinver"}
+    write(gz.DOCS_RETEST, [rt_doc])
+    write(gz.RESULTS_RETEST, [rt_score])
+    gz.cmd_freeze()                                   # coherent: passes
+
+    detached = {**rt_doc, "slot": "B3:o/GONE", "sha600": "nope"}
+    write(gz.DOCS_RETEST, [rt_doc, detached])         # doc row extra
+    with pytest.raises(SystemExit, match="retest"):
+        gz.cmd_freeze()
+    write(gz.DOCS_RETEST, [rt_doc])
+
+    docs = rows(gz.DOCS)
+    write(gz.DOCS, docs * 2)                          # duplicate doc slot
+    with pytest.raises(SystemExit, match="duplicate"):
+        gz.cmd_freeze()
+    write(gz.DOCS, docs)
+
+    gz.MANIFEST.write_text(json.dumps(
+        {"slots": [{"slot": "P:ghost:ai"}]}))         # uncovered manifest
+    with pytest.raises(SystemExit, match="manifest"):
         gz.cmd_freeze()
 
 

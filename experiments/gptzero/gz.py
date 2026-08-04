@@ -384,16 +384,29 @@ def _load_rows(path: Path) -> list[dict]:
             if ln.strip()]
 
 
-def _validate_freeze(docs_rows: list[dict], score_rows: list[dict],
+def _validate_freeze(manifest_slots: set[str], docs_rows: list[dict],
+                     score_rows: list[dict], retest_docs: list[dict],
                      retest_rows: list[dict]) -> None:
-    """The frozen set must be internally coherent: refuse stale source
-    hashes, duplicate slots, filled-but-unscored documents, and retest
-    rows not bound to a current score."""
+    """The frozen set must be internally coherent: document slots are
+    unique and cover the manifests' slots exactly; every score row is
+    the slot's current document; every filled document is scored; and
+    retest document and score rows bind ONE-TO-ONE on (slot, sha600,
+    doc_sha) to a current score."""
+    from collections import Counter
     errors = []
-    filled = {}
-    for r in docs_rows:
-        if not r.get("unfilled"):
-            filled[r["slot"]] = r
+    doc_slot_counts = Counter(r["slot"] for r in docs_rows)
+    for slot, n in sorted(doc_slot_counts.items()):
+        if n > 1:
+            errors.append(f"duplicate document row: {slot}")
+    only_manifest = sorted(manifest_slots - set(doc_slot_counts))
+    only_docs = sorted(set(doc_slot_counts) - manifest_slots)
+    if only_manifest:
+        errors.append(f"{len(only_manifest)} manifest slots without "
+                      f"document rows: {only_manifest[:5]}")
+    if only_docs:
+        errors.append(f"{len(only_docs)} document rows not in any "
+                      f"manifest: {only_docs[:5]}")
+    filled = {r["slot"]: r for r in docs_rows if not r.get("unfilled")}
     seen: set[str] = set()
     scored: dict[str, dict] = {}
     for r in score_rows:
@@ -409,15 +422,26 @@ def _validate_freeze(docs_rows: list[dict], score_rows: list[dict],
     if unscored:
         errors.append(f"{len(unscored)} filled documents unscored: "
                       f"{unscored[:5]}")
-    seen_rt: set[str] = set()
-    for rt in retest_rows:
-        if rt["slot"] in seen_rt:
-            errors.append(f"duplicate slot in retest: {rt['slot']}")
-        seen_rt.add(rt["slot"])
-        v = scored.get(rt["slot"])
-        if v is None or v["doc_sha"] != rt.get("sha600"):
-            errors.append(f"retest row detached from current score: "
-                          f"{rt['slot']}")
+
+    def binding(rows: list[dict], kind: str) -> set[tuple]:
+        keys = set()
+        for rt in rows:
+            key = (rt["slot"], rt.get("sha600"), rt["doc_sha"])
+            if key in keys:
+                errors.append(f"duplicate slot in retest {kind}: "
+                              f"{rt['slot']}")
+            keys.add(key)
+            v = scored.get(rt["slot"])
+            if v is None or v["doc_sha"] != rt.get("sha600"):
+                errors.append(f"retest {kind} row detached from "
+                              f"current score: {rt['slot']}")
+        return keys
+    doc_keys = binding(retest_docs, "documents")
+    score_keys = binding(retest_rows, "scores")
+    if doc_keys != score_keys:
+        odd = sorted(s for s, _h, _d in doc_keys ^ score_keys)
+        errors.append(f"retest documents and scores not one-to-one: "
+                      f"{odd[:5]}")
     if errors:
         raise SystemExit("freeze refused:\n  " + "\n  ".join(errors))
 
@@ -470,9 +494,12 @@ def cmd_freeze() -> None:
     missing = [p.name for p in required if not p.is_file()]
     if missing:
         raise SystemExit(f"freeze refused: missing {missing}")
+    manifest_slots = {s["slot"]
+                      for p in (MANIFEST, MANIFEST_B3, MANIFEST_ERAS)
+                      for s in json.loads(p.read_text())["slots"]}
     score_rows = _load_rows(RESULTS)
-    _validate_freeze(_load_rows(DOCS), score_rows,
-                     _load_rows(RESULTS_RETEST))
+    _validate_freeze(manifest_slots, _load_rows(DOCS), score_rows,
+                     _load_rows(DOCS_RETEST), _load_rows(RESULTS_RETEST))
     PARAGRAPHS.write_text("".join(
         json.dumps(r) + "\n" for r in _paragraph_summaries(score_rows)))
     if FROZEN.is_dir():
