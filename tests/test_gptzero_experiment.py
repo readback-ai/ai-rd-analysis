@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]
                        / "experiments" / "gptzero"))
 import analyze          # noqa: E402
 import diffs            # noqa: E402
+import eras             # noqa: E402
 import gptzero_client   # noqa: E402
 import sampling         # noqa: E402
 
@@ -290,6 +291,7 @@ def test_attempted_words_count_against_ceiling(tmp_path, monkeypatch):
     document whose words would exceed the ceiling counting those
     attempts must be refused with no HTTP call."""
     import gptzero_client as gzc
+    monkeypatch.setattr(gzc, "BUDGET_WORDS", 50_000)
     monkeypatch.setattr(gzc.time, "sleep", lambda s: None)
     resv = tmp_path / "reservations.jsonl"
 
@@ -792,16 +794,127 @@ def test_score_batch_retries_transient_failures(tmp_path, monkeypatch):
     assert gzc.ledger(resv2) == 6           # 3 attempts x 2 words
 
 
+def _row(author, ai, p, cls="human", arm="P", period="Q2-2026"):
+    return {"arm": arm, "author": author, "ai": ai, "period": period,
+            "class_probabilities": {"ai": p},
+            "predicted_class": cls, "truncated": False}
+
+
 def test_analysis_paired_sign_and_arm_rates():
-    def row(author, ai, p, cls="human", arm="P"):
-        return {"arm": arm, "author": author, "ai": ai,
-                "class_probabilities": {"ai": p},
-                "predicted_class": cls, "truncated": False}
-    rows = [row("a", True, 0.9, "ai"), row("a", False, 0.1),
-            row("b", True, 0.8, "ai"), row("b", False, 0.2),
-            row("c", True, 0.3), row("c", False, 0.6)]
+    rows = [_row("a", True, 0.9, "ai"), _row("a", False, 0.1),
+            _row("b", True, 0.8, "ai"), _row("b", False, 0.2),
+            _row("c", True, 0.3), _row("c", False, 0.6)]
     pr = analyze.paired(rows)
     assert (pr["pairs"], pr["wins"], pr["losses"]) == (3, 2, 1)
     assert pr["sign_p"] == pytest.approx(0.5)      # C(3,2)+C(3,3) / 8
     s = analyze.arm_stats([r for r in rows if r["ai"]])
     assert s["n"] == 3 and s["flag_ai"] == pytest.approx(2 / 3)
+
+
+def test_analysis_breaks_out_all_predicted_classes():
+    rows = [_row("a", True, 0.9, "ai"), _row("b", True, 0.5, "mixed"),
+            _row("c", True, 0.2, "human"), _row("d", True, 0.1, "human")]
+    s = analyze.arm_stats(rows)
+    assert s["flag_ai"] == pytest.approx(1 / 4)
+    assert s["flag_human"] == pytest.approx(2 / 4)
+    assert s["flag_mixed"] == pytest.approx(1 / 4)
+
+
+def test_analysis_pairs_within_one_quarter_only():
+    """A same-named author scored in two quarters must never be paired
+    across them: paired() contrasts within one quarter's arm P."""
+    rows = [_row("a", True, 0.9, period="Q4-2025"),
+            _row("a", False, 0.1, period="Q2-2026"),
+            _row("b", True, 0.8, period="Q4-2025"),
+            _row("b", False, 0.2, period="Q4-2025")]
+    assert analyze.paired(rows, period="Q2-2026") is None
+    pr = analyze.paired(rows, period="Q4-2025")
+    assert (pr["pairs"], pr["wins"]) == (1, 1)
+
+
+def _eras_pools(q4=("alice", "bob"), q1_26=("alice",)):
+    def entry():
+        return {"ai": [("o/r", 1, 100), ("o/r", 3, 200)],
+                "nonai": [("o/r", 2, 100)]}
+    return {"Q4-2025": {a: entry() for a in q4},
+            "Q1-2026": {a: entry() for a in q1_26}}
+
+
+def test_eras_draw_quarter_slots_deterministic_and_independent():
+    """Each quarter draws its own paired slots (quarter-qualified ids,
+    one slot per arm per author); the draw is deterministic and one
+    quarter's pool never influences another quarter's slots."""
+    p = _eras_pools()
+    slots = eras.draw(p)
+    assert slots == eras.draw(p)
+    assert {s["slot"] for s in slots} == {
+        "P:Q4-2025:alice:ai", "P:Q4-2025:alice:nonai",
+        "P:Q4-2025:bob:ai", "P:Q4-2025:bob:nonai",
+        "P:Q1-2026:alice:ai", "P:Q1-2026:alice:nonai"}
+    assert all(s["arm"] == "P" and s["period"] in eras.QUARTERS
+               for s in slots)
+    q1_before = [s for s in slots if s["period"] == "Q1-2026"]
+    p2 = _eras_pools(q4=("alice", "bob", "carol"))
+    q1_after = [s for s in eras.draw(p2) if s["period"] == "Q1-2026"]
+    assert q1_after == q1_before
+
+
+def test_eras_draw_skips_unmixed_authors_and_caps_depth(monkeypatch):
+    p = _eras_pools()
+    p["Q4-2025"]["aionly"] = {"ai": [("o/r", 9, 100)], "nonai": []}
+    assert not [s for s in eras.draw(p) if s["author"] == "aionly"]
+    monkeypatch.setitem(eras.PARAMS, "n_authors", 1)
+    q4 = [s for s in eras.draw(p) if s["period"] == "Q4-2025"]
+    assert len(q4) == 2 and len({s["author"] for s in q4}) == 1
+
+
+def test_eras_manifest_fingerprint_tracks_pools(tmp_path):
+    p = _eras_pools()
+    fp = eras.fingerprint(p)
+    p2 = _eras_pools(q1_26=("alice", "newcomer"))
+    assert eras.fingerprint(p2) != fp
+    path = tmp_path / "m.json"
+    _, rewrote = eras.ensure_manifest(p, path)
+    assert rewrote
+    _, rewrote = eras.ensure_manifest(p, path)
+    assert not rewrote
+    tampered = json.loads(path.read_text())
+    tampered["slots"] = tampered["slots"][:-1]
+    path.write_text(json.dumps(tampered))
+    _, rewrote = eras.ensure_manifest(p, path)
+    assert rewrote
+
+
+def test_eras_pools_use_paired_eligibility(monkeypatch):
+    """The eras pools apply exactly the v1 paired-arm eligibility
+    (sampling.eligible_item) per quarter: fleet, bot-login, unmerged,
+    and out-of-window PRs never enter; AI/unmarked split by marker."""
+    from pipeline import frame
+    from pipeline.studies import productivity
+
+    def pr(created, merged, num, login="alice", additions=100, msg="x"):
+        return _pr(created, merged, num, login=login,
+                   additions=additions, msg=msg)
+
+    cells = {
+        ("o/r", "2025-10-01..2025-12-31"): [
+            pr("2025-11-01T00:00:00Z", "2025-11-05T00:00:00Z", 1,
+               msg=CLAUDE_MARK),
+            pr("2025-11-02T00:00:00Z", "2025-11-06T00:00:00Z", 2),
+            pr("2025-11-03T00:00:00Z", "2025-11-07T00:00:00Z", 3,
+               login="fleeter"),
+            pr("2025-11-04T00:00:00Z", "2025-11-08T00:00:00Z", 4,
+               login="tiny", additions=10)],
+        ("o/r", "2026-01-01..2026-03-31"): [
+            pr("2026-02-01T00:00:00Z", "2026-02-05T00:00:00Z", 5)],
+    }
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(productivity, "fleet_logins",
+                        lambda: {"fleeter"})
+    p = eras.pools()
+    assert set(p["Q4-2025"]) == {"alice"}
+    assert p["Q4-2025"]["alice"]["ai"] == [("o/r", 1, 100)]
+    assert p["Q4-2025"]["alice"]["nonai"] == [("o/r", 2, 100)]
+    assert p["Q1-2026"] == {"alice": {"ai": [],
+                                      "nonai": [("o/r", 5, 100)]}}

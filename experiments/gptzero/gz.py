@@ -29,6 +29,7 @@ sys.path.insert(0, str(BASE.parents[1] / "src"))
 LOCAL = BASE / "local"
 MANIFEST = LOCAL / "manifest_v1_50k.json"
 MANIFEST_B3 = LOCAL / "manifest_b3.json"
+MANIFEST_ERAS = LOCAL / "manifest_eras.json"
 B3_PAGES = LOCAL / "cache" / "q3_2022_pages"
 DOCS = LOCAL / "docs_v1.jsonl"
 RESULTS = LOCAL / "results" / "scores_v1.jsonl"
@@ -78,9 +79,28 @@ def cmd_sample_b3() -> None:
           f"fingerprint {manifest['fingerprint']}")
 
 
+def cmd_sample_eras() -> None:
+    import eras
+    pools_ = eras.pools()
+    manifest, rewrote = eras.ensure_manifest(pools_, MANIFEST_ERAS)
+    slots = manifest["slots"]
+    for q in eras.QUARTERS:
+        mixed = sum(1 for a, v in pools_[q].items()
+                    if v["ai"] and v["nonai"])
+        n = sum(1 for s in slots if s["period"] == q)
+        print(f"{q}: {len(pools_[q])} eligible authors, {mixed} mixed "
+              f"(both arms) -> {n} slots")
+        if mixed < eras.PARAMS["n_authors"]:
+            print(f"NOTE: only {mixed} mixed authors < "
+                  f"{eras.PARAMS['n_authors']} target — using all")
+    print(f"eras manifest {'rewritten' if rewrote else 'unchanged'}: "
+          f"{len(slots)} slots, fingerprint {manifest['fingerprint']}")
+
+
 def _manifests() -> list[dict]:
     return [json.loads(p.read_text())
-            for p in (MANIFEST, MANIFEST_B3) if p.is_file()]
+            for p in (MANIFEST, MANIFEST_B3, MANIFEST_ERAS)
+            if p.is_file()]
 
 
 def _slot_index(manifests: list[dict]) -> tuple[list[dict], dict]:
@@ -244,6 +264,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--sample", action="store_true")
     ap.add_argument("--sample-b3", action="store_true")
+    ap.add_argument("--sample-eras", action="store_true")
     ap.add_argument("--fetch", action="store_true")
     ap.add_argument("--score", action="store_true")
     ap.add_argument("--limit", type=int, default=None)
@@ -252,6 +273,8 @@ def main() -> None:
         cmd_sample()
     elif a.sample_b3:
         cmd_sample_b3()
+    elif a.sample_eras:
+        cmd_sample_eras()
     elif a.fetch:
         cmd_fetch()
     elif a.score:

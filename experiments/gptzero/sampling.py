@@ -36,30 +36,39 @@ def _raw_loc(pr: dict) -> int:
     return (pr.get("additions") or 0) + (pr.get("deletions") or 0)
 
 
+def eligible_item(f, fleet: set) -> tuple | None:
+    """(repo, num, raw_loc) when the PR clears the paired-design
+    eligibility — human author (no bot login), non-fleet, merged +
+    w8-mature, raw additions+deletions inside the [min_loc, max_loc]
+    window — else None. Every paired arm (any quarter) uses exactly
+    this filter."""
+    if not ai_contrast_eligible(f):
+        return None
+    if f.bot_author or not f.author or is_bot_login(f.author):
+        return None
+    if f.author in fleet:
+        return None
+    if not (f.cls.merged and f.cls.w8_mature):
+        return None
+    loc = _raw_loc(f.pr)
+    if not (PARAMS["min_loc"] <= loc <= PARAMS["max_loc"]):
+        return None
+    return (f.repo, f.pr["number"], loc)
+
+
 def pools() -> dict:
     """One frame pass over Q1-2024 + Q2-2026, profile 'all'.
     q2: author -> {"ai": [(repo, num, loc)...], "nonai": [...]};
     q1: author -> [(repo, num, loc)...] (unmarked only — the baseline arm
-    is unmarked by definition). Eligibility: human author (no bot login),
-    non-fleet, merged + w8-mature, raw additions+deletions inside the
-    [min_loc, max_loc] window."""
+    is unmarked by definition)."""
     from pipeline.studies.productivity import fleet_logins
     fleet = fleet_logins()
     q2: dict = {}
     q1: dict = {}
     for f in study_frame("all", periods=("Q1-2024", "Q2-2026")):
-        if not ai_contrast_eligible(f):
+        item = eligible_item(f, fleet)
+        if item is None:
             continue
-        if f.bot_author or not f.author or is_bot_login(f.author):
-            continue
-        if f.author in fleet:
-            continue
-        if not (f.cls.merged and f.cls.w8_mature):
-            continue
-        loc = _raw_loc(f.pr)
-        if not (PARAMS["min_loc"] <= loc <= PARAMS["max_loc"]):
-            continue
-        item = (f.repo, f.pr["number"], loc)
         if f.period == "Q1-2024":
             if not f.cls.ai_involved:
                 q1.setdefault(f.author, []).append(item)
