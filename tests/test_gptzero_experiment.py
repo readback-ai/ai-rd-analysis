@@ -751,6 +751,9 @@ def test_score_batch_version_or_shape_mismatch_caches_nothing(
                         transport=lambda paths:
                             {"version": "pinver", "documents": []})
     assert not list((tmp_path / "cache").rglob("*.json"))
+    dumps = list(tmp_path.glob("batch_mismatch_*.json"))
+    assert len(dumps) == 2
+    assert json.loads(dumps[0].read_text())
 
 
 def test_score_batch_retries_transient_failures(tmp_path, monkeypatch):

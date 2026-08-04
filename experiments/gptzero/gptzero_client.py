@@ -207,6 +207,15 @@ def _post_files_once(paths: list[Path]) -> dict:
     return json.loads(payload)
 
 
+def _dump_mismatch(dir_: Path, resp: dict) -> Path:
+    """A refused batch response is evidence: keep the full payload so
+    the abort can be diagnosed without re-billing an attempt."""
+    dir_.mkdir(parents=True, exist_ok=True)
+    p = dir_ / f"batch_mismatch_{time.time_ns()}.json"
+    p.write_text(json.dumps(resp))
+    return p
+
+
 def score_batch(items: list[tuple[str, Path]], cache_dir: Path,
                 reservations_path: Path,
                 transport=_post_files_once,
@@ -260,13 +269,17 @@ def score_batch(items: list[tuple[str, Path]], cache_dir: Path,
         version = resp.get("version")
         docs = resp.get("documents") or []
         if PINNED_VERSION is not None and version != PINNED_VERSION:
+            dump = _dump_mismatch(reservations_path.parent, resp)
             raise SystemExit(
                 f"version mismatch: batch reports {version!r}, pin is "
-                f"{PINNED_VERSION!r} — nothing cached")
+                f"{PINNED_VERSION!r} — nothing cached; response keys "
+                f"{sorted(resp)} dumped to {dump}")
         if len(docs) != len(misses):
+            dump = _dump_mismatch(reservations_path.parent, resp)
             raise SystemExit(
                 f"batch shape mismatch: {len(misses)} files uploaded, "
-                f"{len(docs)} documents returned — nothing cached")
+                f"{len(docs)} documents returned — nothing cached; "
+                f"response dumped to {dump}")
         by_name = {d.get("filename"): d for d in docs
                    if isinstance(d, dict) and d.get("filename")}
         for i, (sha, path, w) in enumerate(misses):
