@@ -751,6 +751,47 @@ def test_score_batch_version_or_shape_mismatch_caches_nothing(
     assert not list((tmp_path / "cache").rglob("*.json"))
 
 
+def test_score_batch_retries_transient_failures(tmp_path, monkeypatch):
+    """Live-run finding 2026-08-04: HTTP 408 on the first files-endpoint
+    batch aborted the whole run. A transient batch failure (408/429/5xx/
+    network) must back off and retry like the single-doc path, with every
+    attempt reserving the batch's words, and exhausted retries must raise
+    RuntimeError so the caller defers the batch."""
+    import gptzero_client as gzc
+    monkeypatch.setattr(gzc, "PINNED_VERSION", "pinver")
+    monkeypatch.setattr(gzc.time, "sleep", lambda s: None)
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
+    p = docs_dir / "shaA.txt"
+    p.write_text("one two three")
+    attempts = []
+
+    def flaky(paths):
+        attempts.append(1)
+        if len(attempts) < 3:
+            raise gzc.urllib.error.HTTPError("u", 408, "timeout",
+                                             None, None)
+        return _batch_resp([q.stem for q in paths])
+
+    resv = tmp_path / "resv.jsonl"
+    out = gzc.score_batch([("shaA", p)], tmp_path / "cache", resv,
+                          transport=flaky)
+    assert [b for _r, b in out] == [3]
+    assert gzc.ledger(resv) == 9            # 3 attempts x 3 words
+
+    def down(paths):
+        raise gzc.urllib.error.HTTPError("u", 503, "unavailable",
+                                         None, None)
+
+    q = docs_dir / "shaB.txt"
+    q.write_text("four five")
+    resv2 = tmp_path / "resv2.jsonl"
+    with pytest.raises(RuntimeError):
+        gzc.score_batch([("shaB", q)], tmp_path / "cache", resv2,
+                        transport=down)
+    assert gzc.ledger(resv2) == 6           # 3 attempts x 2 words
+
+
 def test_analysis_paired_sign_and_arm_rates():
     def row(author, ai, p, cls="human", arm="P"):
         return {"arm": arm, "author": author, "ai": ai,

@@ -33,7 +33,7 @@ BATCH_FILES = 50          # API limit per request (support, 2026-07-29)
 BUDGET_WORDS = 50_000
 PINNED_VERSION: str | None = "2026-07-04-base"   # from the 2026-07-29
                                                  # smoke run's responses
-TRANSIENT_HTTP = (429, 500, 502, 503, 504)
+TRANSIENT_HTTP = (408, 429, 500, 502, 503, 504)
 
 
 def ledger(reservations_path: Path) -> int:
@@ -209,16 +209,20 @@ def _post_files_once(paths: list[Path]) -> dict:
 
 def score_batch(items: list[tuple[str, Path]], cache_dir: Path,
                 reservations_path: Path,
-                transport=_post_files_once) -> list[tuple[dict, int]]:
+                transport=_post_files_once,
+                retries: int = 3) -> list[tuple[dict, int]]:
     """Score up to BATCH_FILES documents in ONE request. items are
     (doc_sha, text_path) with filenames '{sha}.txt', so results map back
     by filename (falling back to upload order when the response carries
     none). Cache hits are excluded from the upload and billed 0; every
-    uploaded document reserves its words before the request; the whole
-    batch aborts UNCACHED on a version or shape mismatch — a
-    misattributed batch would poison every document in it. Returns
-    (per-doc response in the single-doc cache format, billed words) in
-    items order."""
+    HTTP attempt first checks the ceiling and reserves the batch's words
+    (an attempt can be billed even when its response is lost). Transient
+    failures (408/429/5xx/network) back off and retry; anything else
+    raises immediately; exhausted retries raise RuntimeError so the
+    caller defers the batch. The whole batch aborts UNCACHED on a
+    version or shape mismatch — a misattributed batch would poison
+    every document in it. Returns (per-doc response in the single-doc
+    cache format, billed words) in items order."""
     results: dict[str, tuple[dict, int]] = {}
     misses: list[tuple[str, Path, int]] = []
     for sha, path in items:
@@ -228,15 +232,31 @@ def score_batch(items: list[tuple[str, Path]], cache_dir: Path,
         else:
             misses.append((sha, path, count_words(path.read_text())))
     if misses:
-        spent = ledger(reservations_path)
         total = sum(w for _s, _p, w in misses)
-        if spent + total > BUDGET_WORDS:
-            raise SystemExit(
-                f"budget ceiling: {spent} reserved + {total} for this "
-                f"batch > {BUDGET_WORDS}")
-        for sha, _p, w in misses:
-            _reserve(reservations_path, sha, w)
-        resp = transport([p for _s, p, _w in misses])
+        resp = None
+        last: Exception | None = None
+        for attempt in range(retries):
+            spent = ledger(reservations_path)
+            if spent + total > BUDGET_WORDS:
+                raise SystemExit(
+                    f"budget ceiling: {spent} reserved + {total} for "
+                    f"this batch > {BUDGET_WORDS}")
+            for sha, _p, w in misses:
+                _reserve(reservations_path, sha, w)
+            try:
+                resp = transport([p for _s, p, _w in misses])
+                break
+            except urllib.error.HTTPError as e:
+                if e.code not in TRANSIENT_HTTP:
+                    raise
+                last = e
+            except (urllib.error.URLError, TimeoutError,
+                    json.JSONDecodeError) as e:
+                last = e
+            time.sleep(5 * 3 ** attempt)
+        if resp is None:
+            raise RuntimeError(f"GPTZero batch failed after {retries} "
+                               f"attempts: {last}")
         version = resp.get("version")
         docs = resp.get("documents") or []
         if PINNED_VERSION is not None and version != PINNED_VERSION:
