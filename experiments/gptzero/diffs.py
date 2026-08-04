@@ -58,18 +58,21 @@ def fetch_diff(repo: str, num: int, cache_dir: Path,
     p = cache_dir / f"{repo.replace('/', '~')}@{num}.diff"
     if p.is_file():
         return p.read_text(errors="replace")
+    # bytes + replacement decoding: real diffs can carry non-UTF-8
+    # bytes, and text=True would raise inside subprocess
     out = subprocess.run(
         ["gh", "api", f"repos/{repo}/pulls/{num}",
          "-H", "Accept: application/vnd.github.diff"],
-        capture_output=True, text=True)
+        capture_output=True)
     time.sleep(pace)
     if out.returncode != 0:
         return None
+    text = out.stdout.decode("utf-8", errors="replace")
     cache_dir.mkdir(parents=True, exist_ok=True)
     tmp = p.with_suffix(".tmp")
-    tmp.write_text(out.stdout)
+    tmp.write_text(text)
     tmp.replace(p)
-    return out.stdout
+    return text
 
 
 def parse_diff(text: str) -> list[tuple[str, list[list[str]]]]:

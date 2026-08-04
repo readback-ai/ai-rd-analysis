@@ -925,6 +925,23 @@ def _v1(slot, sha, p, cls, arm="P", ai=True):
             "model_version": "pinver"}
 
 
+def test_fetch_diff_survives_non_utf8_diffs(tmp_path, monkeypatch):
+    """Stage-2 fetch crash 2026-08-04: a PR diff containing non-UTF-8
+    bytes (0xb3) aborted the whole fetch run inside subprocess text
+    decoding. fetch_diff must capture bytes, decode with replacement,
+    and serve the same text from the cache on the next call."""
+    raw = (b"diff --git a/f.c b/f.c\n+++ b/f.c\n"
+           b"@@ -0,0 +1 @@\n+x \xb3 y\n")
+    monkeypatch.setattr(
+        diffs.subprocess, "run",
+        lambda *a, **k: diffs.subprocess.CompletedProcess(
+            a, 0, stdout=raw, stderr=b""))
+    monkeypatch.setattr(diffs.time, "sleep", lambda s: None)
+    got = diffs.fetch_diff("o/r", 1, tmp_path)
+    assert "�" in got and "+x" in got
+    assert diffs.fetch_diff("o/r", 1, tmp_path) == got  # cache round-trip
+
+
 def test_retest_stats_pair_by_slot_and_source_sha():
     """Dose-response pairs bind by slot AND the design-cap doc_sha the
     retest row was built from: a redrawn document never pairs across
