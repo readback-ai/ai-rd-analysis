@@ -489,7 +489,7 @@ def frame_fingerprint(*pools: dict[str, list]) -> str:
     import hashlib
     h = hashlib.sha256(f"{AS_OF}|{SEED}|{SAMPLE_RATE}".encode())
     for pool in pools:
-        for per in PERIODS:
+        for per in _period_order(pool.keys()):
             for repo, num, ai, *_ in sorted(pool[per],
                                             key=lambda x: (x[0], x[1])):
                 h.update(f"{per}|{repo}|{num}|{int(ai)}\n".encode())

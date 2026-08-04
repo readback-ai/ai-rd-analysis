@@ -330,6 +330,16 @@ def test_fingerprint_covers_ai_flags_and_both_pools():
     assert churn.frame_fingerprint(a) != churn.frame_fingerprint(a, b)
 
 
+def test_fingerprint_accepts_monthly_pools():
+    """Monthly pull crashed with KeyError('Q1-2024'): frame_fingerprint
+    iterated the quarterly PERIODS constant instead of the pool's own
+    keys. Monthly pools must fingerprint, and distinct months must yield
+    distinct stamps."""
+    a = {"2024-01": [("o/r", 1, False, 10, 5)], "2026-05": []}
+    b = {"2024-01": [], "2026-05": [("o/r", 1, False, 10, 5)]}
+    assert churn.frame_fingerprint(a) != churn.frame_fingerprint(b)
+
+
 def test_finalized_months_apply_w8_finalization(monkeypatch):
     """Monthly mode: a month reports only once month_end + 56d <= AS_OF —
     at AS_OF 2026-08-01, May 2026 is the last reportable month (June
