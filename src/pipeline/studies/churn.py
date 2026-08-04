@@ -179,8 +179,10 @@ def eligible(granularity: str = "quarter",
     the post-Aug-25 re-pull. Returns (trimmed, created, cross-period
     merge residual, ordered period list)."""
     if granularity == "month":
+        from pipeline.analyze import extended_quarters
         periods = finalized_months()
         frame = study_frame("all", periods=set(periods),
+                            ranges=extended_quarters(),
                             granularity="month")
 
         def merge_per(merged_at):
@@ -305,7 +307,7 @@ def print_adoption(pool: dict[str, list], cross: int,
           f"with >= 1 qualifying era {unit}, {r['orgs_ge2']} with >= 2, "
           f"minus {r['dropped_flat']} with zero adoption spread and "
           f"{r['dropped_ratio']} with an undefined/zero endpoint ratio; "
-          f"cross-quarter merges trimmed: {cross}")
+          f"cross-{unit} merges trimmed: {cross}")
     print(f"geomean churn multiple (high/low adoption): {gm:.2f} "
           f"[{math.exp(lo):.2f},{math.exp(hi):.2f}]  median {med:.2f}  "
           f"churn rose in {rose}/{len(ms)} orgs "
@@ -477,7 +479,7 @@ def reconcile(selected: list[dict], existing: list[dict],
     return kept, todo, stale
 
 
-def frame_fingerprint(*pools: dict[str, list]) -> str:
+def frame_fingerprint(*pools: dict[str, list], extra: str = "") -> str:
     """Identity of the frame(s) a frozen artifact depends on: hash of the
     draw-determining config plus every (period, repo, num, ai) of each
     pool, in order. The AI flag is included because it drives arm
@@ -494,7 +496,22 @@ def frame_fingerprint(*pools: dict[str, list]) -> str:
                                             key=lambda x: (x[0], x[1])):
                 h.update(f"{per}|{repo}|{num}|{int(ai)}\n".encode())
         h.update(b"--\n")
+    if extra:
+        h.update(f"extra|{extra}\n".encode())
     return h.hexdigest()[:16]
+
+
+def bugs_fingerprint(trimmed: dict[str, list], created: dict[str, list],
+                     monthly: bool) -> str:
+    """The bug artifact's frame stamp. The monthly selection's repo
+    universe comes from the FROZEN quarterly sample, so the monthly
+    stamp also covers that sample's digest — a quarterly sample refresh
+    changes the monthly pilot universe and must change the stamp.
+    Quarterly stamps are the plain two-pool fingerprint (unchanged)."""
+    if not monthly:
+        return frame_fingerprint(trimmed, created)
+    digest = _read_manifest(SAMPLE_MANIFEST).get("digest", "")
+    return frame_fingerprint(trimmed, created, extra=f"sample:{digest}")
 
 
 def _freeze(path: Path, mpath: Path, records: list[dict], fp: str,
@@ -747,7 +764,7 @@ def pull_bugs(trimmed: dict[str, list], created: dict[str, list],
                                   ("repo", "per", "rng"), "bugs")
     print(f"pulling {len(todo)} of {len(cells)} bug cells "
           f"({len(kept)} reused, {stale} stale dropped)")
-    fp = frame_fingerprint(trimmed, created)
+    fp = bugs_fingerprint(trimmed, created, monthly)
 
     def flush() -> None:
         _stamp_denominators(kept, created, gp)
@@ -826,7 +843,8 @@ def print_bugs(trimmed: dict[str, list], created: dict[str, list],
             f"the label — label:bug only; {len(unranked)} with an "
             "UNDEFINED adoption share (zero merged in the grouping "
             "window) in 'all' but neither AI half)")
-    print(_drift_line(manifest, frame_fingerprint(trimmed, created)))
+    print(_drift_line(manifest, bugs_fingerprint(trimmed, created,
+                                                 monthly)))
     print(f"{'period':9}{'group':9}{'repos':>6}{'bugs':>7}{'merged':>8}"
           f"{'per100':>8}")
     for per in periods:

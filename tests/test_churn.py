@@ -379,6 +379,55 @@ def test_stamp_denominators_monthly_grouping_window():
     assert rec["q2"] == [2, 4]      # 2 AI of 4 merged in the window
 
 
+def test_eligible_monthly_passes_extended_ranges(monkeypatch):
+    """Review round (monthly), P1: monthly eligible() must group cells
+    under extended_quarters() — the default QUARTER_RANGES silently
+    discards finalized INCREMENTAL months' cells (July's month-shaped
+    cells map to no frozen quarter), breaking the September rollover."""
+    seen = {}
+
+    def fake_frame(level, periods=None, ranges=None, granularity="quarter"):
+        seen["ranges"] = ranges
+        return iter([])
+
+    monkeypatch.setattr(churn, "study_frame", fake_frame)
+    monkeypatch.setattr(churn, "finalized_months", lambda: ["2024-01"])
+    churn.eligible("month")
+    from pipeline.analyze import extended_quarters
+    assert seen["ranges"] == extended_quarters()
+
+
+def test_monthly_bugs_fingerprint_covers_sample_universe(
+        tmp_path, monkeypatch):
+    """Review round (monthly), P2: the monthly bug selection comes from
+    the frozen quarterly sample, so its fingerprint must cover that
+    sample's digest — a sample refresh must never leave MATCHES standing
+    on a different pilot universe. Quarterly stamps are unchanged."""
+    import json
+    pool = {"2026-05": [("o/r", 1, True, 10, 5)]}
+    m = tmp_path / "sample_manifest.json"
+    monkeypatch.setattr(churn, "SAMPLE_MANIFEST", m)
+    m.write_text(json.dumps({"digest": "aaaa"}))
+    fp_a = churn.bugs_fingerprint(pool, pool, monthly=True)
+    m.write_text(json.dumps({"digest": "bbbb"}))
+    fp_b = churn.bugs_fingerprint(pool, pool, monthly=True)
+    assert fp_a != fp_b
+    assert churn.bugs_fingerprint(pool, pool, monthly=False) \
+        == churn.frame_fingerprint(pool, pool)
+
+
+def test_adoption_attrition_line_uses_the_periods_unit(capsys):
+    """Review round (monthly), P3: monthly output must say cross-month,
+    not cross-quarter."""
+    pool = {"2025-10": [("a/r", i, False, 100, 20) for i in range(7)],
+            "2026-05": [("a/r", i, True, 100, 60) for i in range(7)]}
+    churn.print_adoption(pool, cross=3, periods=["2025-10", "2026-05"],
+                         org_min=7)
+    out = capsys.readouterr().out
+    assert "cross-month merges trimmed: 3" in out
+    assert "cross-quarter" not in out
+
+
 def test_generated_path_classifier():
     for p in ("package-lock.json", "a/b/yarn.lock", "vendor/x.go",
               "web/dist/app.min.js", "proto/x_pb2.py", "img/logo.svg",
