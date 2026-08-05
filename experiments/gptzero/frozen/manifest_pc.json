@@ -1,6 +1,6 @@
 {
  "design": "pc-v1",
- "fingerprint": "a78a1ea4160c5df1",
+ "fingerprint": "1b72e257df3f67a4",
  "params": {
   "design": "pc-v1",
   "quarters": [
@@ -17,262 +17,77 @@
  },
  "slots": [
   {
-   "slot": "PC:Q1-2026:cursor:Giskard-AI/giskard-hub-python",
-   "arm": "PC",
-   "author": "cursor",
-   "period": "Q1-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "Giskard-AI/giskard-hub-python",
-     20,
-     619
-    ],
-    [
-     "Giskard-AI/giskard-hub-python",
-     27,
-     306
-    ],
-    [
-     "Giskard-AI/giskard-hub-python",
-     23,
-     1531
-    ],
-    [
-     "Giskard-AI/giskard-hub-python",
-     65,
-     164
-    ],
-    [
-     "Giskard-AI/giskard-hub-python",
-     63,
-     365
-    ],
-    [
-     "Giskard-AI/giskard-hub-python",
-     58,
-     255
-    ],
-    [
-     "Giskard-AI/giskard-hub-python",
-     29,
-     1989
-    ]
-   ]
-  },
-  {
-   "slot": "PC:Q1-2026:copilot-swe-agent:mlflow/mlflow",
+   "slot": "PC:Q1-2026:copilot-swe-agent:langchain-ai/langchain-litellm",
    "arm": "PC",
    "author": "copilot-swe-agent",
    "period": "Q1-2026",
    "ai": true,
    "candidates": [
     [
-     "mlflow/mlflow",
-     21088,
-     58
+     "langchain-ai/langchain-litellm",
+     70,
+     54
     ],
     [
-     "mlflow/mlflow",
-     19899,
-     348
-    ],
-    [
-     "mlflow/mlflow",
-     21414,
-     246
-    ],
-    [
-     "mlflow/mlflow",
-     21196,
-     1108
-    ],
-    [
-     "mlflow/mlflow",
-     20967,
-     171
-    ],
-    [
-     "mlflow/mlflow",
-     21130,
-     61
-    ],
-    [
-     "mlflow/mlflow",
-     20735,
-     58
-    ],
-    [
-     "mlflow/mlflow",
-     20640,
-     70
+     "langchain-ai/langchain-litellm",
+     69,
+     209
     ]
    ]
   },
   {
-   "slot": "PC:Q1-2026:dependabot:langchain-ai/langchain-pinecone",
-   "arm": "PC",
-   "author": "dependabot",
-   "period": "Q1-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "langchain-ai/langchain-pinecone",
-     97,
-     1270
-    ]
-   ]
-  },
-  {
-   "slot": "PC:Q1-2026:github-actions:apache/doris",
-   "arm": "PC",
-   "author": "github-actions",
-   "period": "Q1-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "apache/doris",
-     60441,
-     853
-    ],
-    [
-     "apache/doris",
-     61809,
-     420
-    ],
-    [
-     "apache/doris",
-     61899,
-     72
-    ],
-    [
-     "apache/doris",
-     59595,
-     711
-    ]
-   ]
-  },
-  {
-   "slot": "PC:Q1-2026:copilot-swe-agent:vllm-project/vllm",
+   "slot": "PC:Q1-2026:copilot-swe-agent:microsoft/simplechat",
    "arm": "PC",
    "author": "copilot-swe-agent",
    "period": "Q1-2026",
    "ai": true,
    "candidates": [
     [
-     "vllm-project/vllm",
-     35538,
-     467
-    ],
-    [
-     "vllm-project/vllm",
-     36027,
-     61
+     "microsoft/simplechat",
+     786,
+     309
     ]
    ]
   },
   {
-   "slot": "PC:Q1-2026:copilot-swe-agent:promptfoo/promptfoo",
+   "slot": "PC:Q1-2026:copilot-swe-agent:lemonade-sdk/lemonade",
    "arm": "PC",
    "author": "copilot-swe-agent",
    "period": "Q1-2026",
    "ai": true,
    "candidates": [
     [
-     "promptfoo/promptfoo",
-     6948,
-     242
+     "lemonade-sdk/lemonade",
+     934,
+     60
     ]
    ]
   },
   {
-   "slot": "PC:Q1-2026:copilot-swe-agent:microsoft/AI-For-Beginners",
+   "slot": "PC:Q1-2026:copilot-swe-agent:dotnet/maui-labs",
    "arm": "PC",
    "author": "copilot-swe-agent",
    "period": "Q1-2026",
    "ai": true,
    "candidates": [
     [
-     "microsoft/AI-For-Beginners",
-     610,
-     230
+     "dotnet/maui-labs",
+     48,
+     402
     ]
    ]
   },
   {
-   "slot": "PC:Q1-2026:copilot-swe-agent:microsoft/onnxruntime",
+   "slot": "PC:Q1-2026:copilot-swe-agent:microsoft/vscode-jupyter",
    "arm": "PC",
    "author": "copilot-swe-agent",
    "period": "Q1-2026",
    "ai": true,
    "candidates": [
     [
-     "microsoft/onnxruntime",
-     27738,
-     102
-    ],
-    [
-     "microsoft/onnxruntime",
-     27270,
-     404
-    ],
-    [
-     "microsoft/onnxruntime",
-     27687,
-     201
-    ],
-    [
-     "microsoft/onnxruntime",
-     27833,
-     105
-    ],
-    [
-     "microsoft/onnxruntime",
-     27755,
-     356
-    ],
-    [
-     "microsoft/onnxruntime",
-     27759,
-     126
-    ],
-    [
-     "microsoft/onnxruntime",
-     27651,
-     1992
-    ],
-    [
-     "microsoft/onnxruntime",
-     27744,
-     336
-    ]
-   ]
-  },
-  {
-   "slot": "PC:Q1-2026:dependabot:aaif-goose/goose",
-   "arm": "PC",
-   "author": "dependabot",
-   "period": "Q1-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "aaif-goose/goose",
-     6924,
-     223
-    ]
-   ]
-  },
-  {
-   "slot": "PC:Q1-2026:dependabot:mozilla/pilo",
-   "arm": "PC",
-   "author": "dependabot",
-   "period": "Q1-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "mozilla/pilo",
-     248,
-     385
+     "microsoft/vscode-jupyter",
+     17274,
+     103
     ]
    ]
   },
@@ -326,39 +141,6 @@
    ]
   },
   {
-   "slot": "PC:Q1-2026:github-actions:onyx-dot-app/onyx",
-   "arm": "PC",
-   "author": "github-actions",
-   "period": "Q1-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "onyx-dot-app/onyx",
-     9472,
-     373
-    ],
-    [
-     "onyx-dot-app/onyx",
-     9470,
-     65
-    ]
-   ]
-  },
-  {
-   "slot": "PC:Q1-2026:kagura-agent:NVIDIA/NemoClaw",
-   "arm": "PC",
-   "author": "kagura-agent",
-   "period": "Q1-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "NVIDIA/NemoClaw",
-     1089,
-     248
-    ]
-   ]
-  },
-  {
    "slot": "PC:Q1-2026:claude:EleutherAI/bergson",
    "arm": "PC",
    "author": "claude",
@@ -378,21 +160,117 @@
    ]
   },
   {
-   "slot": "PC:Q1-2026:dependabot:langchain-ai/langchainjs",
+   "slot": "PC:Q1-2026:cursor:Giskard-AI/giskard-hub-python",
    "arm": "PC",
-   "author": "dependabot",
+   "author": "cursor",
    "period": "Q1-2026",
    "ai": true,
    "candidates": [
     [
-     "langchain-ai/langchainjs",
-     10029,
-     96
+     "Giskard-AI/giskard-hub-python",
+     20,
+     619
     ],
     [
-     "langchain-ai/langchainjs",
-     10070,
-     268
+     "Giskard-AI/giskard-hub-python",
+     27,
+     306
+    ],
+    [
+     "Giskard-AI/giskard-hub-python",
+     23,
+     1531
+    ],
+    [
+     "Giskard-AI/giskard-hub-python",
+     65,
+     164
+    ],
+    [
+     "Giskard-AI/giskard-hub-python",
+     63,
+     365
+    ],
+    [
+     "Giskard-AI/giskard-hub-python",
+     58,
+     255
+    ],
+    [
+     "Giskard-AI/giskard-hub-python",
+     29,
+     1989
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:devin-ai-integration:ComposioHQ/composio",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "ComposioHQ/composio",
+     2903,
+     193
+    ],
+    [
+     "ComposioHQ/composio",
+     2358,
+     204
+    ],
+    [
+     "ComposioHQ/composio",
+     2796,
+     68
+    ],
+    [
+     "ComposioHQ/composio",
+     2623,
+     57
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:devin-ai-integration:firecrawl/firecrawl",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "firecrawl/firecrawl",
+     2635,
+     58
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:copilot-swe-agent:microsoft/ai-agents-for-beginners",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/ai-agents-for-beginners",
+     510,
+     160
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:copilot-swe-agent:microsoft/mattersim",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/mattersim",
+     148,
+     77
     ]
    ]
   },
@@ -411,60 +289,283 @@
    ]
   },
   {
-   "slot": "PC:Q2-2026:copilot-swe-agent:microsoft/TypeChat",
+   "slot": "PC:Q2-2026:devin-ai-integration:firecrawl/firecrawl",
    "arm": "PC",
-   "author": "copilot-swe-agent",
+   "author": "devin-ai-integration",
    "period": "Q2-2026",
    "ai": true,
    "candidates": [
     [
-     "microsoft/TypeChat",
-     325,
-     255
+     "firecrawl/firecrawl",
+     3463,
+     125
     ],
     [
-     "microsoft/TypeChat",
-     336,
-     298
+     "firecrawl/firecrawl",
+     3481,
+     148
     ],
     [
-     "microsoft/TypeChat",
-     327,
-     615
+     "firecrawl/firecrawl",
+     3482,
+     106
+    ],
+    [
+     "firecrawl/firecrawl",
+     3462,
+     70
+    ],
+    [
+     "firecrawl/firecrawl",
+     3364,
+     784
+    ],
+    [
+     "firecrawl/firecrawl",
+     3280,
+     925
     ]
    ]
   },
   {
-   "slot": "PC:Q2-2026:copilot-swe-agent:dotnet/maui-labs",
+   "slot": "PC:Q2-2026:copilot-swe-agent:microsoft/agent-framework",
    "arm": "PC",
    "author": "copilot-swe-agent",
    "period": "Q2-2026",
    "ai": true,
    "candidates": [
     [
-     "dotnet/maui-labs",
-     193,
-     200
+     "microsoft/agent-framework",
+     5824,
+     546
     ],
     [
-     "dotnet/maui-labs",
-     71,
-     309
+     "microsoft/agent-framework",
+     6096,
+     64
     ],
     [
-     "dotnet/maui-labs",
-     308,
-     1794
+     "microsoft/agent-framework",
+     5823,
+     258
     ],
     [
-     "dotnet/maui-labs",
-     139,
-     419
+     "microsoft/agent-framework",
+     5833,
+     1453
     ],
     [
-     "dotnet/maui-labs",
-     63,
-     62
+     "microsoft/agent-framework",
+     5851,
+     287
+    ],
+    [
+     "microsoft/agent-framework",
+     5981,
+     155
+    ],
+    [
+     "microsoft/agent-framework",
+     5175,
+     367
+    ],
+    [
+     "microsoft/agent-framework",
+     5750,
+     584
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:copilot-swe-agent:lemonade-sdk/lemonade",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "lemonade-sdk/lemonade",
+     1685,
+     85
+    ],
+    [
+     "lemonade-sdk/lemonade",
+     1815,
+     75
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:devin-ai-integration:PrefectHQ/prefect",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     21763,
+     959
+    ],
+    [
+     "PrefectHQ/prefect",
+     21700,
+     452
+    ],
+    [
+     "PrefectHQ/prefect",
+     22000,
+     88
+    ],
+    [
+     "PrefectHQ/prefect",
+     21468,
+     115
+    ],
+    [
+     "PrefectHQ/prefect",
+     21931,
+     165
+    ],
+    [
+     "PrefectHQ/prefect",
+     21626,
+     71
+    ],
+    [
+     "PrefectHQ/prefect",
+     21651,
+     221
+    ],
+    [
+     "PrefectHQ/prefect",
+     21951,
+     371
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:devin-ai-integration:crewAIInc/crewAI",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "crewAIInc/crewAI",
+     6003,
+     145
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:claude:firecrawl/firecrawl",
+   "arm": "PC",
+   "author": "claude",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "firecrawl/firecrawl",
+     3509,
+     71
+    ],
+    [
+     "firecrawl/firecrawl",
+     3589,
+     64
+    ],
+    [
+     "firecrawl/firecrawl",
+     3556,
+     174
+    ],
+    [
+     "firecrawl/firecrawl",
+     3522,
+     190
+    ],
+    [
+     "firecrawl/firecrawl",
+     3515,
+     63
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:cursor:togethercomputer/together-py",
+   "arm": "PC",
+   "author": "cursor",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "togethercomputer/together-py",
+     371,
+     126
+    ],
+    [
+     "togethercomputer/together-py",
+     378,
+     203
+    ],
+    [
+     "togethercomputer/together-py",
+     372,
+     84
+    ],
+    [
+     "togethercomputer/together-py",
+     374,
+     56
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:cursor:Giskard-AI/giskard-hub-python",
+   "arm": "PC",
+   "author": "cursor",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "Giskard-AI/giskard-hub-python",
+     86,
+     1094
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:cursor:elevenlabs/skills",
+   "arm": "PC",
+   "author": "cursor",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "elevenlabs/skills",
+     38,
+     215
+    ],
+    [
+     "elevenlabs/skills",
+     49,
+     64
+    ],
+    [
+     "elevenlabs/skills",
+     82,
+     61
+    ],
+    [
+     "elevenlabs/skills",
+     61,
+     53
+    ],
+    [
+     "elevenlabs/skills",
+     56,
+     79
     ]
    ]
   },
@@ -488,211 +589,40 @@
    ]
   },
   {
-   "slot": "PC:Q2-2026:cursor:togethercomputer/detect_agent",
+   "slot": "PC:Q2-2026:devin-ai-integration:ComposioHQ/composio",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "ComposioHQ/composio",
+     3261,
+     350
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:cursor:firecrawl/firecrawl",
    "arm": "PC",
    "author": "cursor",
    "period": "Q2-2026",
    "ai": true,
    "candidates": [
     [
-     "togethercomputer/detect_agent",
-     9,
-     391
-    ]
-   ]
-  },
-  {
-   "slot": "PC:Q2-2026:sglang-bot:sgl-project/sglang",
-   "arm": "PC",
-   "author": "sglang-bot",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "sgl-project/sglang",
-     25182,
-     255
-    ]
-   ]
-  },
-  {
-   "slot": "PC:Q2-2026:copilot-swe-agent:promptfoo/modelaudit",
-   "arm": "PC",
-   "author": "copilot-swe-agent",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "promptfoo/modelaudit",
-     1002,
-     67
+     "firecrawl/firecrawl",
+     3689,
+     54
     ],
     [
-     "promptfoo/modelaudit",
-     1078,
-     271
-    ]
-   ]
-  },
-  {
-   "slot": "PC:Q2-2026:dependabot:langchain-ai/langgraphjs",
-   "arm": "PC",
-   "author": "dependabot",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "langchain-ai/langgraphjs",
-     2487,
-     1075
-    ]
-   ]
-  },
-  {
-   "slot": "PC:Q2-2026:dependabot:lancedb/lancedb",
-   "arm": "PC",
-   "author": "dependabot",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "lancedb/lancedb",
-     3382,
-     1125
-    ]
-   ]
-  },
-  {
-   "slot": "PC:Q2-2026:stainless-app:anthropics/anthropic-sdk-typescript",
-   "arm": "PC",
-   "author": "stainless-app",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "anthropics/anthropic-sdk-typescript",
-     1075,
-     116
+     "firecrawl/firecrawl",
+     3542,
+     62
     ],
     [
-     "anthropics/anthropic-sdk-typescript",
-     1070,
-     127
-    ],
-    [
-     "anthropics/anthropic-sdk-typescript",
-     1061,
-     111
-    ]
-   ]
-  },
-  {
-   "slot": "PC:Q2-2026:stainless-app:anthropics/anthropic-sdk-python",
-   "arm": "PC",
-   "author": "stainless-app",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "anthropics/anthropic-sdk-python",
-     1585,
-     121
-    ]
-   ]
-  },
-  {
-   "slot": "PC:Q2-2026:copilot-swe-agent:microsoft/agent-governance-toolkit",
-   "arm": "PC",
-   "author": "copilot-swe-agent",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "microsoft/agent-governance-toolkit",
-     1980,
-     720
-    ],
-    [
-     "microsoft/agent-governance-toolkit",
-     1193,
-     204
-    ],
-    [
-     "microsoft/agent-governance-toolkit",
-     1195,
-     1841
-    ],
-    [
-     "microsoft/agent-governance-toolkit",
-     1984,
-     98
-    ],
-    [
-     "microsoft/agent-governance-toolkit",
-     1983,
-     536
-    ],
-    [
-     "microsoft/agent-governance-toolkit",
-     1981,
-     108
-    ]
-   ]
-  },
-  {
-   "slot": "PC:Q2-2026:dependabot:langchain-ai/social-media-agent",
-   "arm": "PC",
-   "author": "dependabot",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "langchain-ai/social-media-agent",
-     288,
-     141
-    ],
-    [
-     "langchain-ai/social-media-agent",
-     315,
-     662
-    ],
-    [
-     "langchain-ai/social-media-agent",
-     257,
-     362
-    ]
-   ]
-  },
-  {
-   "slot": "PC:Q2-2026:rapids-bot:NVIDIA/cuopt",
-   "arm": "PC",
-   "author": "rapids-bot",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "NVIDIA/cuopt",
-     1359,
-     83
-    ],
-    [
-     "NVIDIA/cuopt",
-     1383,
-     57
-    ]
-   ]
-  },
-  {
-   "slot": "PC:Q2-2026:ollieagent:comet-ml/opik",
-   "arm": "PC",
-   "author": "ollieagent",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "comet-ml/opik",
-     6425,
-     84
+     "firecrawl/firecrawl",
+     3545,
+     715
     ]
    ]
   }
