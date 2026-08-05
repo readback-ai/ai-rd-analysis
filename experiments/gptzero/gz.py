@@ -36,6 +36,7 @@ DOCS = LOCAL / "docs_v1.jsonl"
 DOCS_RETEST = LOCAL / "docs_retest.jsonl"
 RESULTS = LOCAL / "results" / "scores_v1.jsonl"
 RESULTS_RETEST = LOCAL / "results" / "scores_retest.jsonl"
+RESULTS_SEM = LOCAL / "results" / "scores_sem13c.jsonl"
 RETEST_CAP = 1200   # dose-response stage: docs truncated at the design
                     # cap are re-assembled and re-scored at this cap
 RESERVATIONS = LOCAL / "results" / "reservations_v1.jsonl"
@@ -392,6 +393,17 @@ FROZEN = BASE / "frozen"
 PARAGRAPHS = LOCAL / "paragraph_summary.jsonl"
 
 
+def cmd_score_sem() -> None:
+    """Score every filled document with the SemEval-13c MIL-UniXcoder
+    detector (local, free, pinned revision); append-only results,
+    resumable. The report and freeze bind rows to the CURRENT document
+    per slot, so redraws age out old rows harmlessly."""
+    import sem13c
+    filled = [r for r in _doc_rows().values() if not r.get("unfilled")]
+    n = sem13c.score_rows(filled, DOC_CACHE, RESULTS_SEM)
+    print(f"sem13c: {n} newly scored, corpus {len(filled)} docs")
+
+
 def _load_rows(path: Path) -> list[dict]:
     if not path.is_file():
         return []
@@ -554,9 +566,18 @@ def cmd_freeze() -> None:
         if p.is_file():
             shutil.copy(p, FROZEN / p.name)
             kept.append(p.name)
+    if RESULTS_SEM.is_file():
+        # append-only log: freeze only the rows bound to the current
+        # corpus (one per slot, pinned revision)
+        bound = analyze.sem_bound(score_rows,
+                                  _load_rows(RESULTS_SEM))
+        (FROZEN / RESULTS_SEM.name).write_text(
+            "".join(json.dumps(r) + "\n" for r in bound))
+        kept.append(RESULTS_SEM.name)
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
-        analyze.report(RESULTS, RESULTS_RETEST, PARAGRAPHS)
+        analyze.report(RESULTS, RESULTS_RETEST, PARAGRAPHS,
+                       RESULTS_SEM)
     (FROZEN / "report.txt").write_text(buf.getvalue())
     (FROZEN / "PROVENANCE.md").write_text(
         f"# Frozen audit set ({date.today().isoformat()})\n\n"
@@ -589,6 +610,7 @@ def main() -> None:
     ap.add_argument("--fetch", action="store_true")
     ap.add_argument("--score", action="store_true")
     ap.add_argument("--retest", action="store_true")
+    ap.add_argument("--score-sem", action="store_true")
     ap.add_argument("--freeze", action="store_true")
     ap.add_argument("--limit", type=int, default=None)
     a = ap.parse_args()
@@ -606,11 +628,14 @@ def main() -> None:
         cmd_score(a.limit)
     elif a.retest:
         cmd_retest()
+    elif a.score_sem:
+        cmd_score_sem()
     elif a.freeze:
         cmd_freeze()
     else:
         import analyze
-        analyze.report(RESULTS, RESULTS_RETEST)
+        analyze.report(RESULTS, RESULTS_RETEST, PARAGRAPHS,
+                       RESULTS_SEM)
 
 
 if __name__ == "__main__":

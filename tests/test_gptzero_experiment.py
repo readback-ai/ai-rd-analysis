@@ -15,6 +15,7 @@ import eras             # noqa: E402
 import gptzero_client   # noqa: E402
 import pc               # noqa: E402
 import sampling         # noqa: E402
+import sem13c           # noqa: E402
 
 CLAUDE_MARK = "x\n\nCo-Authored-By: Claude <noreply@anthropic.com>"
 
@@ -1189,6 +1190,39 @@ def _freeze_env(tmp_path, monkeypatch):
          "paragraphs": [{"completely_generated_prob": 0.8},
                         {"completely_generated_prob": 0.1}]}]}))
     return gz
+
+
+def test_sem13c_scores_resume_and_bind(tmp_path):
+    """The sem13c scorer appends one row per (slot, doc_sha) under the
+    pinned revision, skips already-scored docs on re-run, and
+    sem_bound keeps only rows matching each slot's CURRENT document —
+    redrawn docs age out instead of double-counting."""
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
+    rows = []
+    for sha, slot in (("s1", "P:a:ai"), ("s2", "P:a:nonai")):
+        (docs_dir / f"{sha}.txt").write_text("code()")
+        rows.append({"slot": slot, "arm": "P", "author": "a",
+                     "period": "Q2-2026", "ai": slot.endswith(":ai"),
+                     "doc_sha": sha, "words": 100, "truncated": False})
+    calls = []
+
+    def stub(text):
+        calls.append(text)
+        return {"human": 0.1, "ai": 0.6, "hybrid": 0.2,
+                "adversarial": 0.1}
+
+    out = tmp_path / "sem.jsonl"
+    assert sem13c.score_rows(rows, docs_dir, out, predictor=stub) == 2
+    assert sem13c.score_rows(rows, docs_dir, out, predictor=stub) == 0
+    assert len(calls) == 2                      # resume: no rescoring
+    scored = [json.loads(ln) for ln in out.read_text().splitlines()]
+    assert scored[0]["sem_pred"] == "ai"
+    assert scored[0]["model_revision"] == sem13c.HF_REVISION
+    current = [{"slot": "P:a:ai", "doc_sha": "s1"},
+               {"slot": "P:a:nonai", "doc_sha": "REDRAWN"}]
+    bound = analyze.sem_bound(current, scored)
+    assert [r["slot"] for r in bound] == ["P:a:ai"]
 
 
 def test_freeze_writes_the_audit_set(tmp_path, monkeypatch):

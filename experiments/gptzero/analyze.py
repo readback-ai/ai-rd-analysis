@@ -322,6 +322,63 @@ def report_languages(para_rows: list[dict], top: int = 6) -> None:
               f"{statistics.fmean(no_ps) if no_ps else float('nan'):>10.2f}")
 
 
+def sem_bound(rows: list[dict], sem_rows: list[dict]) -> list[dict]:
+    """sem13c rows bound to the CURRENT document per slot (append-only
+    scoring log ages out redrawn docs here), one row per slot."""
+    current = {r["slot"]: r["doc_sha"] for r in rows}
+    out, seen = [], set()
+    for r in sem_rows:
+        if r["slot"] in seen:
+            continue
+        if current.get(r["slot"]) == r["doc_sha"]:
+            out.append(r)
+            seen.add(r["slot"])
+    return out
+
+
+def report_sem(rows: list[dict], sem_rows: list[dict]) -> None:
+    bound = sem_bound(rows, sem_rows)
+    if not bound:
+        return
+    for r in bound:
+        r["aihyb"] = r["sem_probs"]["ai"] + r["sem_probs"]["hybrid"]
+    print(f"\nsem13c (SemEval-2026 T13c winner, MIL-UniXcoder stream; "
+          f"4-way code classifier; {len(bound)}/{len(rows)} docs "
+          f"bound):")
+    print(f"{'arm':14}{'n':>4}{'p_ai':>7}{'p_hyb':>7}{'p_adv':>7}"
+          f"{'ai%':>6}{'hyb%':>6}{'adv%':>6}{'hum%':>6}")
+    for name, pred in ARMS:
+        rs = [r for r in bound if pred(r)]
+        if not rs:
+            continue
+        n = len(rs)
+        share = {c: sum(1 for r in rs if r["sem_pred"] == c) / n
+                 for c in ("ai", "hybrid", "adversarial", "human")}
+        print(f"{name:14}{n:>4}"
+              f"{statistics.fmean(r['sem_probs']['ai'] for r in rs):>7.2f}"
+              f"{statistics.fmean(r['sem_probs']['hybrid'] for r in rs):>7.2f}"
+              f"{statistics.fmean(r['sem_probs']['adversarial'] for r in rs):>7.2f}"
+              f"{100 * share['ai']:>5.0f}%{100 * share['hybrid']:>5.0f}%"
+              f"{100 * share['adversarial']:>5.0f}%"
+              f"{100 * share['human']:>5.0f}%")
+    for q in PAIRED_QUARTERS:
+        pr = paired_metric(bound, q, "aihyb")
+        if pr:
+            print(f"  paired {q} on p(ai)+p(hybrid): n={pr['pairs']}, "
+                  f"{pr['wins']}/{pr['wins'] + pr['losses']} higher, "
+                  f"mean gap {pr['mean_gap']:+.2f}, "
+                  f"p={pr['sign_p']:.3f}")
+    gz_by_slot = {r["slot"]: ai_prob(r) for r in rows
+                  if ai_prob(r) is not None}
+    pairs = [(gz_by_slot[r["slot"]], r["aihyb"]) for r in bound
+             if r["slot"] in gz_by_slot]
+    if len(pairs) >= 10:
+        xs, ys = zip(*pairs)
+        print(f"  agreement with GPTZero: corr(p_gz, p_ai+hyb) = "
+              f"{statistics.correlation(xs, ys):+.2f} over "
+              f"{len(pairs)} docs")
+
+
 def paragraph_stats(para_rows: list[dict]) -> dict | None:
     """Aggregates over per-document paragraph summaries (frozen beside
     the scores): the document verdict discards within-document
@@ -363,7 +420,8 @@ def report_paragraphs(para_rows: list[dict]) -> None:
 
 def report(results_path: Path,
            retest_path: Path | None = None,
-           paragraphs_path: Path | None = None) -> None:
+           paragraphs_path: Path | None = None,
+           sem_path: Path | None = None) -> None:
     rows = load_rows(results_path)
     if not rows:
         print(f"no results at {results_path} — run --score first")
@@ -411,6 +469,8 @@ def report(results_path: Path,
         report_paragraphs(para_rows)
         report_paragraph_paired(para_rows)
         report_languages(para_rows)
+    if sem_path is not None:
+        report_sem(rows, load_rows(sem_path))
     print(f"\nGPTZero model version(s): {versions or 'unknown'}")
     print()
     print(CAVEATS)
