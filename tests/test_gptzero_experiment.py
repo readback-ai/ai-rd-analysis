@@ -918,6 +918,47 @@ def test_analysis_breaks_out_all_predicted_classes():
     assert s["flag_mixed"] == pytest.approx(1 / 4)
 
 
+def test_paired_metric_secondary_outcomes():
+    """The pre-specified secondary outcomes run the same within-author
+    contrast on paragraph metrics; rows without the metric or an
+    author never pair."""
+    def prow(author, ai, share):
+        return {"arm": "P", "period": "Q2-2026", "author": author,
+                "ai": ai, "share_paragraphs_gt50": share}
+    rows = [prow("a", True, 0.6), prow("a", False, 0.2),
+            prow("b", True, 0.1), prow("b", False, 0.5),
+            prow("c", True, 0.9), prow("c", False, 0.3),
+            {"arm": "P", "period": "Q2-2026", "author": "d", "ai": True,
+             "share_paragraphs_gt50": None}]
+    pr = analyze.paired_metric(rows, "Q2-2026", "share_paragraphs_gt50")
+    assert (pr["pairs"], pr["wins"], pr["losses"]) == (3, 2, 1)
+    assert analyze.paired_metric(rows, "Q4-2025",
+                                 "share_paragraphs_gt50") is None
+
+
+def test_mixture_prevalence_anchors_and_clamp():
+    """Method-of-moments prevalence: pi = (mean - human)/(anchor -
+    human) per paired arm, clamped to [0, 1]; None when anchors are
+    missing or inverted."""
+    def row(arm, period, ai, p):
+        return {"arm": arm, "period": period, "ai": ai,
+                "class_probabilities": {"ai": p}}
+    rows = ([row("P", "Q4-2025", True, 0.5)] * 4
+            + [row("B3", "Q3-2022", False, 0.1)] * 4
+            + [row("P", "Q2-2026", False, 0.3)] * 4
+            + [row("P", "Q2-2026", True, 0.9)] * 4)
+    s = analyze.mixture_stats(rows)
+    assert s["anchor"] == pytest.approx(0.5)
+    assert s["human"] == pytest.approx(0.1)
+    by = {a["arm"]: a["pi"] for a in s["arms"]}
+    assert by["Q4-2025 AI"] == pytest.approx(1.0)
+    assert by["Q2-2026 nonAI"] == pytest.approx(0.5)
+    assert by["Q2-2026 AI"] == pytest.approx(1.0)   # clamped
+    assert analyze.mixture_stats(
+        [row("P", "Q4-2025", True, 0.1),
+         row("B3", "Q3-2022", False, 0.5)]) is None  # inverted anchors
+
+
 def test_analysis_pairs_within_one_quarter_only():
     """A same-named author scored in two quarters must never be paired
     across them: paired() contrasts within one quarter's arm P."""
@@ -1112,11 +1153,12 @@ def test_retest_command_targets_truncated_scored_docs_only(
 
 def _freeze_env(tmp_path, monkeypatch):
     """Minimal coherent corpus for cmd_freeze: one filled+scored doc
-    with its cached response, all manifests present."""
+    with its cached response and document text, all manifests
+    present."""
     import gz
     for name in ("LOCAL", "MANIFEST", "MANIFEST_B3", "MANIFEST_ERAS",
                  "DOCS", "DOCS_RETEST", "RESULTS", "RESULTS_RETEST",
-                 "RESERVATIONS", "RESP_CACHE"):
+                 "RESERVATIONS", "RESP_CACHE", "DOC_CACHE"):
         monkeypatch.setattr(gz, name, tmp_path / getattr(gz, name).name)
     monkeypatch.setattr(gz, "FROZEN", tmp_path / "frozen")
     monkeypatch.setattr(gptzero_client, "PINNED_VERSION", "pinver")
@@ -1128,10 +1170,15 @@ def _freeze_env(tmp_path, monkeypatch):
          "doc_sha": "s", "words": 200, "truncated": True}) + "\n")
     gz.RESULTS.write_text(json.dumps(
         {"slot": "B3:o/r", "arm": "B3", "ai": False, "period": "Q3-2022",
-         "doc_sha": "s", "words": 200, "truncated": True,
+         "author": "dev", "doc_sha": "s", "words": 200,
+         "truncated": True,
          "class_probabilities": {"ai": 0.1, "mixed": 0.02},
          "predicted_class": "human",
          "model_version": "pinver"}) + "\n")
+    gz.DOC_CACHE.mkdir(parents=True)
+    (gz.DOC_CACHE / "s.txt").write_text(
+        "// file: src/a.py\ncode\n// file: b.rs\ncode\n"
+        "// file: c.py\ncode\n")
     resp = tmp_path / gz.RESP_CACHE.name / "pinver" / "s.json"
     resp.parent.mkdir(parents=True)
     resp.write_text(json.dumps({"version": "pinver", "documents": [
@@ -1160,6 +1207,9 @@ def test_freeze_writes_the_audit_set(tmp_path, monkeypatch):
             .splitlines()]
     assert para[0]["slot"] == "B3:o/r"
     assert para[0]["share_paragraphs_gt50"] == pytest.approx(0.5)
+    assert para[0]["author"] == "dev"
+    assert para[0]["ai_prob"] == pytest.approx(0.1)
+    assert para[0]["dominant_ext"] == ".py"      # 2 .py vs 1 .rs
     assert "pinver" in (gz.FROZEN / "PROVENANCE.md").read_text()
 
 

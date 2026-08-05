@@ -451,11 +451,25 @@ def _validate_freeze(manifest_slots: list[str], docs_rows: list[dict],
         raise SystemExit("freeze refused:\n  " + "\n  ".join(errors))
 
 
+def _dominant_ext(text: str) -> str | None:
+    """Most common file extension among the document's `// file:`
+    headers — the language-stratification key."""
+    from collections import Counter
+    exts: Counter = Counter()
+    for line in text.splitlines():
+        if line.startswith("// file: "):
+            name = line[len("// file: "):].strip().rsplit("/", 1)[-1]
+            dot = name.rfind(".")
+            exts[name[dot:] if dot > 0 else "(none)"] += 1
+    return exts.most_common(1)[0][0] if exts else None
+
+
 def _paragraph_summaries(score_rows: list[dict]) -> list[dict]:
-    """Privacy-safe per-document paragraph metrics from the cached
-    responses, so the heterogeneity claims are auditable from the
-    frozen set. A scored document without its cached response is a
-    validation error."""
+    """Privacy-safe per-document metrics from the cached responses and
+    document texts, so the heterogeneity, paired-secondary-outcome, and
+    language-stratification claims are auditable from the frozen set.
+    A scored document missing its cached response or its document text
+    is a validation error."""
     import gptzero_client as gzc
     out = []
     for r in score_rows:
@@ -463,14 +477,21 @@ def _paragraph_summaries(score_rows: list[dict]) -> list[dict]:
         if not cached.is_file():
             raise SystemExit(f"freeze refused: scored document missing "
                              f"cached response: {r['slot']}")
+        doc_txt = DOC_CACHE / f"{r['doc_sha']}.txt"
+        if not doc_txt.is_file():
+            raise SystemExit(f"freeze refused: scored document missing "
+                             f"document text: {r['slot']}")
         d = (json.loads(cached.read_text()).get("documents") or [{}])[0]
         paras = [p.get("completely_generated_prob", 0.0)
                  for p in (d.get("paragraphs") or [])]
         probs = r.get("class_probabilities") or {}
         out.append({
             "slot": r["slot"], "arm": r["arm"], "period": r["period"],
-            "ai": r["ai"], "doc_sha": r["doc_sha"],
+            "ai": r["ai"], "author": r.get("author"),
+            "doc_sha": r["doc_sha"],
             "predicted_class": r.get("predicted_class"),
+            "ai_prob": probs.get("ai"),
+            "dominant_ext": _dominant_ext(doc_txt.read_text()),
             "n_paragraphs": len(paras),
             "max_paragraph_prob": max(paras, default=None),
             "share_paragraphs_gt50":

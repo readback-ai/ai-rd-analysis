@@ -200,6 +200,113 @@ def report_retest(rows: list[dict], retest_rows: list[dict]) -> None:
     print(f"still truncated at {cap}: {still}/{len(bound)}")
 
 
+def paired_metric(rows: list[dict], period: str, key: str) \
+        -> dict | None:
+    """Within-author paired contrast on an arbitrary per-document
+    metric (the pre-specified secondary outcomes: max_paragraph_prob,
+    share_paragraphs_gt50). Same wins/sign-test convention as
+    paired()."""
+    by_author: dict = {}
+    for r in rows:
+        if r.get("arm") == "P" and r.get("period") == period \
+                and r.get("author") and r.get(key) is not None:
+            by_author.setdefault(r["author"], {})[
+                "ai" if r["ai"] else "nonai"] = r[key]
+    gaps = [v["ai"] - v["nonai"] for v in by_author.values()
+            if "ai" in v and "nonai" in v]
+    if not gaps:
+        return None
+    wins = sum(1 for g in gaps if g > 0)
+    losses = sum(1 for g in gaps if g < 0)
+    return {"pairs": len(gaps), "wins": wins, "losses": losses,
+            "mean_gap": statistics.fmean(gaps),
+            "sign_p": _sign_p(wins, wins + losses)}
+
+
+def mixture_stats(rows: list[dict]) -> dict | None:
+    """Method-of-moments prevalence: anchor the AI score level on the
+    Q4-2025 MARKED arm (the quarter where disclosure labels still
+    separated) and the human level on the pre-/early-AI baselines,
+    then read each paired arm's mean as a two-component mixture.
+    pi_hat is prevalence in units of 'the Q4-2025 marked mix' — if
+    that anchor itself contains non-AI work, true prevalence is
+    higher, so estimates are conservative for the marked arms and
+    stated in anchor units throughout."""
+    def mean_of(pred):
+        ps = [ai_prob(r) for r in rows
+              if pred(r) and ai_prob(r) is not None]
+        return statistics.fmean(ps) if ps else None
+    anchor = mean_of(lambda r: r["arm"] == "P"
+                     and r["period"] == "Q4-2025" and r["ai"])
+    human = mean_of(lambda r: r["arm"] in ("B1", "B2", "B3"))
+    if anchor is None or human is None or anchor <= human:
+        return None
+    arms = []
+    for q in PAIRED_QUARTERS:
+        for ai in (True, False):
+            m = mean_of(lambda r, q=q, ai=ai: r["arm"] == "P"
+                        and r["period"] == q and r["ai"] == ai)
+            if m is None:
+                continue
+            pi = min(max((m - human) / (anchor - human), 0.0), 1.0)
+            arms.append({"arm": f"{q} {'AI' if ai else 'nonAI'}",
+                         "mean": m, "pi": pi})
+    return {"anchor": anchor, "human": human, "arms": arms}
+
+
+def report_mixture(rows: list[dict]) -> None:
+    s = mixture_stats(rows)
+    if s is None:
+        return
+    print(f"\nprevalence, method of moments (anchors: AI = Q4-2025 "
+          f"marked mean {s['anchor']:.2f}, human = baselines mean "
+          f"{s['human']:.2f}; pi in Q4-25-marked-mix units):")
+    for a in s["arms"]:
+        print(f"  {a['arm']:14} mean {a['mean']:.2f}  "
+              f"pi_hat {a['pi']:.2f}")
+
+
+def report_paragraph_paired(para_rows: list[dict]) -> None:
+    lines = []
+    for q in PAIRED_QUARTERS:
+        for key, label in (("max_paragraph_prob", "max-para"),
+                           ("share_paragraphs_gt50", "share>0.5")):
+            pr = paired_metric(para_rows, q, key)
+            if pr:
+                lines.append(
+                    f"  {q} {label:10} n={pr['pairs']:<3} "
+                    f"{pr['wins']}/{pr['wins'] + pr['losses']} higher, "
+                    f"mean gap {pr['mean_gap']:+.2f}, "
+                    f"p={pr['sign_p']:.3f}")
+    if lines:
+        print("\nparagraph-metric paired contrasts (pre-specified "
+              "secondary outcomes):")
+        print("\n".join(lines))
+
+
+def report_languages(para_rows: list[dict], top: int = 6) -> None:
+    from collections import Counter
+    p_rows = [r for r in para_rows
+              if r["arm"] == "P" and r.get("dominant_ext")
+              and r.get("ai_prob") is not None]
+    if not p_rows:
+        return
+    exts = [e for e, _n in Counter(
+        r["dominant_ext"] for r in p_rows).most_common(top)]
+    print("\nby dominant extension (paired arms pooled over quarters):")
+    print(f"{'ext':10}{'n-AI':>6}{'mean-AI':>9}{'n-non':>7}"
+          f"{'mean-non':>10}")
+    for ext in exts:
+        ai_ps = [r["ai_prob"] for r in p_rows
+                 if r["dominant_ext"] == ext and r["ai"]]
+        no_ps = [r["ai_prob"] for r in p_rows
+                 if r["dominant_ext"] == ext and not r["ai"]]
+        print(f"{ext:10}{len(ai_ps):>6}"
+              f"{statistics.fmean(ai_ps) if ai_ps else float('nan'):>9.2f}"
+              f"{len(no_ps):>7}"
+              f"{statistics.fmean(no_ps) if no_ps else float('nan'):>10.2f}")
+
+
 def paragraph_stats(para_rows: list[dict]) -> dict | None:
     """Aggregates over per-document paragraph summaries (frozen beside
     the scores): the document verdict discards within-document
@@ -281,10 +388,14 @@ def report(results_path: Path,
                   f"{LENGTH_MATCH_WORDS}): n={lm['pairs']}, "
                   f"{lm['wins']}/{lm['wins'] + lm['losses']} decided, "
                   f"mean gap {lm['mean_gap']:+.2f}, p={lm['sign_p']:.3f}")
+    report_mixture(rows)
     if retest_rows:
         report_retest(rows, retest_rows)
     if paragraphs_path is not None:
-        report_paragraphs(load_rows(paragraphs_path))
+        para_rows = load_rows(paragraphs_path)
+        report_paragraphs(para_rows)
+        report_paragraph_paired(para_rows)
+        report_languages(para_rows)
     print(f"\nGPTZero model version(s): {versions or 'unknown'}")
     print()
     print(CAVEATS)
