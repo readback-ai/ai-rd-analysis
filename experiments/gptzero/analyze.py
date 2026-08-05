@@ -41,6 +41,11 @@ Caveats (they bound every number above):
   capture a thinner (possibly different) slice of AI use, and their
   author sets overlap each other's and Q2-2026's, so quarters are not
   independent samples.
+- Q2-2026 is NOT a full quarter: w8 maturity at AS_OF 2026-08-01
+  admits only PRs created through 2026-06-06, so the arm measures
+  April-May (+ the first June days). June stays unmeasured until a
+  later AS_OF matures it; do not read Q2-2026 numbers as
+  quarter-complete.
 - The paired arm is A-and-C-heavy: layer-B (bot-login agent) PRs cannot
   anchor a human-paired design and are absent.
 - Truncated documents measure a diff's head only (share reported above).
