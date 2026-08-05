@@ -59,6 +59,23 @@ ext         n-AI  mean-AI  n-non  mean-non
 .cpp          10     0.29     10      0.16
 .go            9     0.53     10      0.56
 
+sem13c (SemEval-2026 T13c winner, MIL-UniXcoder stream; 4-way code classifier; 530/530 docs bound):
+arm              n   p_ai  p_hyb  p_adv   ai%  hyb%  adv%  hum%
+Q3-22-era       20   0.27   0.08   0.12   30%    0%   10%   60%
+Q1-24-persist    3   0.34   0.26   0.03   33%   33%    0%   33%
+Q1-24-indep     14   0.22   0.06   0.08   21%    0%    0%   79%
+Q4-25-AI        80   0.48   0.10   0.11   50%    6%    8%   36%
+Q4-25-nonAI     78   0.45   0.12   0.13   47%    8%   12%   33%
+Q1-26-AI        75   0.32   0.08   0.10   33%    1%    8%   57%
+Q1-26-nonAI     81   0.36   0.07   0.11   38%    1%    7%   53%
+Q2-26-AI        75   0.24   0.07   0.13   17%    1%   13%   68%
+Q2-26-nonAI     78   0.27   0.06   0.12   27%    4%   10%   59%
+known-AI        26   0.34   0.13   0.14   31%    8%   12%   50%
+  paired Q4-2025 on p(ai)+p(hybrid): n=72, 39/72 higher, mean gap +0.02, p=0.278
+  paired Q1-2026 on p(ai)+p(hybrid): n=70, 33/70 higher, mean gap -0.04, p=0.725
+  paired Q2-2026 on p(ai)+p(hybrid): n=66, 36/66 higher, mean gap +0.00, p=0.269
+  agreement with GPTZero: corr(p_gz, p_ai+hyb) = -0.01 over 530 docs
+
 GPTZero model version(s): ['2026-07-04-base']
 
 Caveats (they bound every number above):
@@ -101,3 +118,9 @@ Caveats (they bound every number above):
   verdicts largely miss agent code.
 - Near-uniform scores in ALL arms would itself be the answer: no signal
   on bare added-lines code.
+- sem13c does NOT transfer to diff-assembled documents: 30% of the
+  pre-ChatGPT Q3-2022 baseline is classified "ai" (GPTZero: 0%), the
+  era trend runs backwards, paired contrasts are null, and its scores
+  are uncorrelated with GPTZero's (r=-0.01). Its in-domain macro-F1
+  (0.7855 on whole source files) does not survive the domain shift;
+  treat its verdicts on this corpus as uninformative.

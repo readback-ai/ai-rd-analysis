@@ -66,7 +66,13 @@ Caveats (they bound every number above):
   arms' elevation is NOT agent-style detection — document-level
   verdicts largely miss agent code.
 - Near-uniform scores in ALL arms would itself be the answer: no signal
-  on bare added-lines code."""
+  on bare added-lines code.
+- sem13c does NOT transfer to diff-assembled documents: 30% of the
+  pre-ChatGPT Q3-2022 baseline is classified "ai" (GPTZero: 0%), the
+  era trend runs backwards, paired contrasts are null, and its scores
+  are uncorrelated with GPTZero's (r=-0.01). Its in-domain macro-F1
+  (0.7855 on whole source files) does not survive the domain shift;
+  treat its verdicts on this corpus as uninformative."""
 
 
 def load_rows(path: Path) -> list[dict]:
