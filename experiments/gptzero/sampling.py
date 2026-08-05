@@ -28,7 +28,7 @@ from pipeline.detect import AS_OF, CUTOFF, is_bot_login
 from pipeline.frame import ai_contrast_eligible, study_frame
 
 SEED = 20260630
-PARAMS = dict(design="v1-50k", n_authors=30, n_q1=20, n_b1=10, k_cand=8,
+PARAMS = dict(design="v1-50k", n_authors=30, n_q1=20, n_b1=10, k_cand=16,
               word_cap=600, word_floor=100, min_loc=50, max_loc=2000)
 
 

@@ -34,7 +34,7 @@ from sampling import SEED
 
 QUARTERS = ("Q4-2025", "Q1-2026", "Q2-2026")
 PARAMS = dict(design="eras-v1", quarters=list(QUARTERS), n_authors=90,
-              k_cand=8, word_cap=600, word_floor=100, min_loc=50,
+              k_cand=16, word_cap=600, word_floor=100, min_loc=50,
               max_loc=2000)
 
 
