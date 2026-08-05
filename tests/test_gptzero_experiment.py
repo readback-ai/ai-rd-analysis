@@ -13,6 +13,7 @@ import analyze          # noqa: E402
 import diffs            # noqa: E402
 import eras             # noqa: E402
 import gptzero_client   # noqa: E402
+import pc               # noqa: E402
 import sampling         # noqa: E402
 
 CLAUDE_MARK = "x\n\nCo-Authored-By: Claude <noreply@anthropic.com>"
@@ -1396,6 +1397,49 @@ def test_eras_manifest_fingerprint_tracks_pools(tmp_path):
     path.write_text(json.dumps(tampered))
     _, rewrote = eras.ensure_manifest(p, path)
     assert rewrote
+
+
+def test_pc_pools_admit_only_ai_involved_agents(monkeypatch):
+    """The positive control samples layer-B PRs only: AI-involved AND
+    agent-authored (App author or bot login). Human-authored AI PRs,
+    non-AI bots (dependabot), and unmerged agent PRs never enter."""
+    from pipeline import frame
+    unmerged = _pr("2026-04-01T00:00:00Z", None, 9,
+                   login="devin-ai-integration[bot]", msg=CLAUDE_MARK)
+    unmerged["mergedBy"] = None
+    cells = {("o/r", "2026-04-01..2026-06-30"): [
+        _q2(1, login="devin-ai-integration[bot]", msg=CLAUDE_MARK),
+        _q2(2, login="alice", msg=CLAUDE_MARK),      # human AI: excluded
+        _q2(3, login="dependabot[bot]"),             # bot, not AI
+        unmerged]}
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    p = pc.pools()
+    assert set(p["Q2-2026"]) == {("devin-ai-integration[bot]", "o/r")}
+    assert p["Q2-2026"][("devin-ai-integration[bot]", "o/r")] == \
+        [("o/r", 1, 100)]
+    assert p["Q1-2026"] == {}
+
+
+def test_pc_draw_caps_per_login_and_is_deterministic():
+    """One slot per (agent, repo) group, per-quarter target, and no
+    login exceeds max_per_login groups — one prolific agent must not
+    dominate the control arm."""
+    prs = [("o/r", 1, 100)]
+    pools_ = {"Q1-2026": {},
+              "Q2-2026": {("botA", f"o/r{i}"): prs for i in range(10)}}
+    pools_["Q2-2026"][("botB", "o/z")] = prs
+    slots = pc.draw(pools_)
+    assert slots == pc.draw(pools_)
+    q2 = [s for s in slots if s["period"] == "Q2-2026"]
+    from collections import Counter
+    per = Counter(s["author"] for s in q2)
+    assert per["botA"] == pc.PARAMS["max_per_login"]
+    assert per["botB"] == 1
+    assert all(s["arm"] == "PC" and s["ai"] for s in q2)
+    fp = pc.fingerprint(pools_)
+    pools_["Q2-2026"][("botC", "o/y")] = prs
+    assert pc.fingerprint(pools_) != fp
 
 
 def test_eras_pools_use_paired_eligibility(monkeypatch):

@@ -30,6 +30,7 @@ LOCAL = BASE / "local"
 MANIFEST = LOCAL / "manifest_v1_50k.json"
 MANIFEST_B3 = LOCAL / "manifest_b3.json"
 MANIFEST_ERAS = LOCAL / "manifest_eras.json"
+MANIFEST_PC = LOCAL / "manifest_pc.json"
 B3_PAGES = LOCAL / "cache" / "q3_2022_pages"
 DOCS = LOCAL / "docs_v1.jsonl"
 DOCS_RETEST = LOCAL / "docs_retest.jsonl"
@@ -111,9 +112,23 @@ def cmd_sample_eras() -> None:
           f"{len(slots)} slots, fingerprint {manifest['fingerprint']}")
 
 
+def cmd_sample_pc() -> None:
+    import pc
+    pools_ = pc.pools()
+    manifest, rewrote = pc.ensure_manifest(pools_, MANIFEST_PC)
+    slots = manifest["slots"]
+    for q in pc.QUARTERS:
+        n = sum(1 for s in slots if s["period"] == q)
+        logins = {s["author"] for s in slots if s["period"] == q}
+        print(f"{q}: {len(pools_[q])} (agent, repo) groups -> {n} "
+              f"slots across {len(logins)} agent logins")
+    print(f"pc manifest {'rewritten' if rewrote else 'unchanged'}: "
+          f"{len(slots)} slots, fingerprint {manifest['fingerprint']}")
+
+
 def _manifests() -> list[dict]:
     return [json.loads(p.read_text())
-            for p in (MANIFEST, MANIFEST_B3, MANIFEST_ERAS)
+            for p in (MANIFEST, MANIFEST_B3, MANIFEST_ERAS, MANIFEST_PC)
             if p.is_file()]
 
 
@@ -521,7 +536,9 @@ def cmd_freeze() -> None:
     if missing:
         raise SystemExit(f"freeze refused: missing {missing}")
     manifest_slots = [s["slot"]
-                      for p in (MANIFEST, MANIFEST_B3, MANIFEST_ERAS)
+                      for p in (MANIFEST, MANIFEST_B3, MANIFEST_ERAS,
+                                MANIFEST_PC)
+                      if p.is_file()
                       for s in json.loads(p.read_text())["slots"]]
     score_rows = _load_rows(RESULTS)
     _validate_freeze(manifest_slots, _load_rows(DOCS), score_rows,
@@ -532,7 +549,8 @@ def cmd_freeze() -> None:
         shutil.rmtree(FROZEN)
     FROZEN.mkdir()
     kept = []
-    for p in (*required, DOCS_RETEST, RESULTS_RETEST, PARAGRAPHS):
+    for p in (*required, MANIFEST_PC, DOCS_RETEST, RESULTS_RETEST,
+              PARAGRAPHS):
         if p.is_file():
             shutil.copy(p, FROZEN / p.name)
             kept.append(p.name)
@@ -567,6 +585,7 @@ def main() -> None:
     ap.add_argument("--sample", action="store_true")
     ap.add_argument("--sample-b3", action="store_true")
     ap.add_argument("--sample-eras", action="store_true")
+    ap.add_argument("--sample-pc", action="store_true")
     ap.add_argument("--fetch", action="store_true")
     ap.add_argument("--score", action="store_true")
     ap.add_argument("--retest", action="store_true")
@@ -579,6 +598,8 @@ def main() -> None:
         cmd_sample_b3()
     elif a.sample_eras:
         cmd_sample_eras()
+    elif a.sample_pc:
+        cmd_sample_pc()
     elif a.fetch:
         cmd_fetch()
     elif a.score:

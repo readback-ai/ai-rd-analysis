@@ -30,6 +30,10 @@ experiment calibrates GPTZero against the study's own labels.
     cap is also scored at a 1200-word assembly (`--retest`, separate
     results file): the dose-response section bounds what document
     length does to the detector.
+  - **Known-AI positive control** (design pc-v1) — agent-authored
+    (layer-B) PRs from Q1/Q2-2026 through the same pipeline: validates
+    the instrument and sets the score ceiling for reading the paired
+    arms' mixtures. One slot per (agent, repo), per-login cap.
 - **Determinism**: study seed 20260630, namespaced streams; manifest
   fingerprints AS_OF/CUTOFF/params/pool and is rebuilt-not-trusted.
   Candidate lists are seeded whole-pool shuffles, so deepening `k_cand`
@@ -64,6 +68,7 @@ python experiments/gptzero/gz.py --sample            # manifest + pool sizes
 python experiments/gptzero/gz.py --sample-eras       # Q4-2025/Q1-2026 arms
 python experiments/gptzero/gz.py --fetch             # diffs -> documents
 python experiments/gptzero/gz.py --sample-b3         # Q3-2022 arm
+python experiments/gptzero/gz.py --sample-pc         # known-AI agents arm
 python experiments/gptzero/gz.py --score --limit 2   # unpinned smoke
 # read the smoke output's model version, then set
 #   gptzero_client.PINNED_VERSION = "<that version>"

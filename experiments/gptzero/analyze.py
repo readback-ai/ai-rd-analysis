@@ -23,7 +23,8 @@ ARMS = (("Q3-22-era", lambda r: r["arm"] == "B3"),
         ("Q1-26-AI", _p("Q1-2026", True)),
         ("Q1-26-nonAI", _p("Q1-2026", False)),
         ("Q2-26-AI", _p("Q2-2026", True)),
-        ("Q2-26-nonAI", _p("Q2-2026", False)))
+        ("Q2-26-nonAI", _p("Q2-2026", False)),
+        ("known-AI", lambda r: r["arm"] == "PC"))
 
 CAVEATS = """\
 Caveats (they bound every number above):
@@ -49,6 +50,10 @@ Caveats (they bound every number above):
 - Q3-2022-era predates ChatGPT: its positives are near-pure FALSE
   positives (early-Codex/Copilot-autocomplete volume was tiny) — the
   cleanest false-positive calibration in the design.
+- The known-AI arm is agent-authored (layer-B) PRs, 2026 quarters: as
+  close to pure machine-written code as the study can sample. It
+  validates the instrument and sets the score ceiling against which
+  the paired arms' mixtures are read.
 - Near-uniform scores in ALL arms would itself be the answer: no signal
   on bare added-lines code."""
 
