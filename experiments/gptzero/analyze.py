@@ -42,10 +42,14 @@ Caveats (they bound every number above):
   author sets overlap each other's and Q2-2026's, so quarters are not
   independent samples.
 - Q2-2026 is NOT a full quarter: w8 maturity at AS_OF 2026-08-01
-  admits only PRs created through 2026-06-06, so the arm measures
-  April-May (+ the first June days). June stays unmeasured until a
-  later AS_OF matures it; do not read Q2-2026 numbers as
-  quarter-complete.
+  admits PRs created 2026-04-01..2026-06-06; June 7-30 stays
+  unmeasured until a later AS_OF matures it. Do not read Q2-2026
+  numbers as quarter-complete.
+- Draws are whole-pool shuffles, so an AS_OF advance redraws cohorts
+  almost completely (the August Q2-2026 draw shares 3/90 authors with
+  July's): July-vs-August contrasts are two nearly-independent
+  samples, consistent with frame bias but NOT a within-cohort
+  correction. Stable per-author ranks are a v3 design item.
 - The paired arm is A-and-C-heavy: layer-B (bot-login agent) PRs cannot
   anchor a human-paired design and are absent.
 - Truncated documents measure a diff's head only (share reported above).
@@ -234,14 +238,13 @@ def paired_metric(rows: list[dict], period: str, key: str) \
 
 
 def mixture_stats(rows: list[dict]) -> dict | None:
-    """Method-of-moments prevalence: anchor the AI score level on the
-    Q4-2025 MARKED arm (the quarter where disclosure labels still
-    separated) and the human level on the pre-/early-AI baselines,
-    then read each paired arm's mean as a two-component mixture.
-    pi_hat is prevalence in units of 'the Q4-2025 marked mix' — if
-    that anchor itself contains non-AI work, true prevalence is
-    higher, so estimates are conservative for the marked arms and
-    stated in anchor units throughout."""
+    """RELATIVE score level per paired arm: where each arm's mean sits
+    between the baseline mean (0) and the Q4-2025 marked-arm mean (1),
+    clamped. These are anchor-relative units, NOT identifiable
+    prevalence — the anchor is itself a mixture of unknown purity, and
+    an impure anchor shrinks the denominator, INFLATING the ratio
+    relative to a pure-AI endpoint. Read as 'how saturated is this arm
+    against the Q4-2025 marked level', nothing more."""
     def mean_of(pred):
         ps = [ai_prob(r) for r in rows
               if pred(r) and ai_prob(r) is not None]
@@ -268,12 +271,12 @@ def report_mixture(rows: list[dict]) -> None:
     s = mixture_stats(rows)
     if s is None:
         return
-    print(f"\nprevalence, method of moments (anchors: AI = Q4-2025 "
-          f"marked mean {s['anchor']:.2f}, human = baselines mean "
-          f"{s['human']:.2f}; pi in Q4-25-marked-mix units):")
+    print(f"\nrelative score level (0 = baselines mean {s['human']:.2f},"
+          f" 1 = Q4-2025 marked mean {s['anchor']:.2f}; anchor-relative"
+          f" units, NOT identifiable prevalence):")
     for a in s["arms"]:
         print(f"  {a['arm']:14} mean {a['mean']:.2f}  "
-              f"pi_hat {a['pi']:.2f}")
+              f"level {a['pi']:.2f}")
 
 
 def report_paragraph_paired(para_rows: list[dict]) -> None:

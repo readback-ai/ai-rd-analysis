@@ -1158,13 +1158,14 @@ def _freeze_env(tmp_path, monkeypatch):
     present."""
     import gz
     for name in ("LOCAL", "MANIFEST", "MANIFEST_B3", "MANIFEST_ERAS",
-                 "DOCS", "DOCS_RETEST", "RESULTS", "RESULTS_RETEST",
-                 "RESERVATIONS", "RESP_CACHE", "DOC_CACHE"):
+                 "MANIFEST_PC", "DOCS", "DOCS_RETEST", "RESULTS",
+                 "RESULTS_RETEST", "RESERVATIONS", "RESP_CACHE",
+                 "DOC_CACHE"):
         monkeypatch.setattr(gz, name, tmp_path / getattr(gz, name).name)
     monkeypatch.setattr(gz, "FROZEN", tmp_path / "frozen")
     monkeypatch.setattr(gptzero_client, "PINNED_VERSION", "pinver")
     gz.MANIFEST_B3.write_text(json.dumps({"slots": [{"slot": "B3:o/r"}]}))
-    for m in (gz.MANIFEST, gz.MANIFEST_ERAS):
+    for m in (gz.MANIFEST, gz.MANIFEST_ERAS, gz.MANIFEST_PC):
         m.write_text(json.dumps({"slots": []}))
     gz.DOCS.write_text(json.dumps(
         {"slot": "B3:o/r", "arm": "B3", "ai": False, "period": "Q3-2022",
@@ -1399,24 +1400,36 @@ def test_eras_manifest_fingerprint_tracks_pools(tmp_path):
     assert rewrote
 
 
-def test_pc_pools_admit_only_ai_involved_agents(monkeypatch):
-    """The positive control samples layer-B PRs only: AI-involved AND
-    agent-authored (App author or bot login). Human-authored AI PRs,
-    non-AI bots (dependabot), and unmerged agent PRs never enter."""
+def test_pc_pools_admit_only_canonical_agents(monkeypatch):
+    """PR #29 review P1: the control admitted ANY bot-like author with
+    AI evidence — 9/22 scored rows were Dependabot/Actions/Stainless
+    automation, not coding agents, so the known-AI claim wasn't
+    licensed. Eligibility is the canonical layer-B classification
+    (cls.agent_author / AGENT_PR_AUTHORS): a Dependabot PR carrying an
+    AI marker, human-authored AI PRs, and unmerged agent PRs never
+    enter."""
     from pipeline import frame
-    unmerged = _pr("2026-04-01T00:00:00Z", None, 9,
-                   login="devin-ai-integration[bot]", msg=CLAUDE_MARK)
-    unmerged["mergedBy"] = None
+
+    def agent_pr(num, merged="2026-04-05T00:00:00Z"):
+        p = _pr("2026-04-01T00:00:00Z", merged, num,
+                login="devin-ai-integration[bot]", msg=CLAUDE_MARK)
+        p["author"]["__typename"] = "Bot"
+        if merged is None:
+            p["mergedBy"] = None
+        return p
+
     cells = {("o/r", "2026-04-01..2026-06-30"): [
-        _q2(1, login="devin-ai-integration[bot]", msg=CLAUDE_MARK),
+        agent_pr(1),
         _q2(2, login="alice", msg=CLAUDE_MARK),      # human AI: excluded
         _q2(3, login="dependabot[bot]"),             # bot, not AI
-        unmerged]}
+        _q2(4, login="dependabot[bot]", msg=CLAUDE_MARK),  # bot + marker:
+        # still NOT a coding agent — the review's misclassification
+        agent_pr(9, merged=None)]}
     monkeypatch.setattr(frame, "load_cells", lambda: cells)
     monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
     p = pc.pools()
-    assert set(p["Q2-2026"]) == {("devin-ai-integration[bot]", "o/r")}
-    assert p["Q2-2026"][("devin-ai-integration[bot]", "o/r")] == \
+    assert set(p["Q2-2026"]) == {("devin-ai-integration", "o/r")}
+    assert p["Q2-2026"][("devin-ai-integration", "o/r")] == \
         [("o/r", 1, 100)]
     assert p["Q1-2026"] == {}
 

@@ -1,7 +1,8 @@
 """Positive-control arm (design pc-v1): agent-authored PRs.
 
-Layer-B PRs — authored by coding-agent accounts (GitHub App authors or
-user-typed bot logins) with AI involvement — are as close to known
+Layer-B PRs — authored by a CANONICAL coding agent
+(detect.AGENT_PR_AUTHORS via cls.agent_author; Dependabot/CI/release
+automation never qualifies, marker or not) — are as close to known
 machine-written code as the study can sample. Scoring them through the
 SAME document pipeline validates the instrument: if the detector cannot
 flag these, "GPTZero misses AI code" explains the paired-arm results;
@@ -27,7 +28,7 @@ import random
 from collections import Counter
 from pathlib import Path
 
-from pipeline.detect import AS_OF, CUTOFF, is_bot_login
+from pipeline.detect import AS_OF, CUTOFF
 from pipeline.frame import study_frame
 
 import sampling
@@ -44,23 +45,20 @@ def _raw_loc(pr: dict) -> int:
 
 
 def pools() -> dict:
-    """quarter -> (login, repo) -> [(repo, num, loc)...] over
-    AI-involved agent-authored PRs (App author or bot login), merged +
-    w8-mature, raw LOC inside the window."""
+    """quarter -> (agent, repo) -> [(repo, num, loc)...] over PRs whose
+    author is a canonical coding agent (cls.agent_author — the study's
+    layer-B allowlist), merged + w8-mature, raw LOC inside the
+    window."""
     out: dict = {q: {} for q in QUARTERS}
     for f in study_frame("all", periods=QUARTERS):
-        if not f.cls.ai_involved:
-            continue
-        if not (f.bot_author
-                or (f.author and is_bot_login(f.author))):
+        if f.cls.agent_author is None:
             continue
         if not (f.cls.merged and f.cls.w8_mature):
             continue
         loc = _raw_loc(f.pr)
         if not (PARAMS["min_loc"] <= loc <= PARAMS["max_loc"]):
             continue
-        login = f.author or "(app)"
-        out[f.period].setdefault((login, f.repo), []).append(
+        out[f.period].setdefault((f.cls.agent_author, f.repo), []).append(
             (f.repo, f.pr["number"], loc))
     return out
 

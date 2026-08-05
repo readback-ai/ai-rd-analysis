@@ -531,7 +531,8 @@ def cmd_freeze() -> None:
 
     import analyze
     import gptzero_client as gzc
-    required = (MANIFEST, MANIFEST_B3, MANIFEST_ERAS, DOCS, RESULTS)
+    required = (MANIFEST, MANIFEST_B3, MANIFEST_ERAS, MANIFEST_PC,
+                DOCS, RESULTS)
     missing = [p.name for p in required if not p.is_file()]
     if missing:
         raise SystemExit(f"freeze refused: missing {missing}")
@@ -549,8 +550,7 @@ def cmd_freeze() -> None:
         shutil.rmtree(FROZEN)
     FROZEN.mkdir()
     kept = []
-    for p in (*required, MANIFEST_PC, DOCS_RETEST, RESULTS_RETEST,
-              PARAGRAPHS):
+    for p in (*required, DOCS_RETEST, RESULTS_RETEST, PARAGRAPHS):
         if p.is_file():
             shutil.copy(p, FROZEN / p.name)
             kept.append(p.name)

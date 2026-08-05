@@ -103,9 +103,9 @@ reported numbers.
 - Known selection effect from the fetch stage: AI-marked PRs fail the
   100-word code floor more often than unmarked ones (docs/config-heavy
   agent PRs) — `--fetch` prints the per-arm unfilled counts.
-- **Q2-2026 is April–May only**: w8 maturity at AS_OF 2026-08-01
-  admits PRs created through 2026-06-06. June is unmeasured until a
-  later AS_OF; never present Q2-2026 as a complete quarter.
+- **Q2-2026 covers April 1 – June 6 creations** (w8 maturity at AS_OF
+  2026-08-01); June 7–30 is unmeasured until a later AS_OF. Never
+  present Q2-2026 as a complete quarter.
 - The sampling frame tracks the study's canonical census: when AS_OF
   advances (monthly update), manifests redraw and fingerprints change
   by design — the 2026-08-04 frozen set under the July frame remains
