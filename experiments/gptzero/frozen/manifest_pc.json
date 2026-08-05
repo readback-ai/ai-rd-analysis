@@ -1,21 +1,288 @@
 {
- "design": "pc-v1",
- "fingerprint": "1b72e257df3f67a4",
+ "design": "pc-v2",
+ "fingerprint": "a503115d3bcedcb6",
  "params": {
-  "design": "pc-v1",
+  "design": "pc-v2",
   "quarters": [
+   "Q4-2025",
    "Q1-2026",
    "Q2-2026"
   ],
-  "n_per_quarter": 15,
-  "max_per_login": 5,
+  "n_per_agent_quarter": 5,
+  "per_group": 3,
   "k_cand": 8,
+  "extra_cand": 4,
   "word_cap": 600,
   "word_floor": 100,
   "min_loc": 50,
   "max_loc": 2000
  },
  "slots": [
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:NVIDIA/apex",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA/apex",
+     1943,
+     114
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:apache/casbin-gateway",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "apache/casbin-gateway",
+     96,
+     107
+    ],
+    [
+     "apache/casbin-gateway",
+     126,
+     797
+    ],
+    [
+     "apache/casbin-gateway",
+     132,
+     123
+    ],
+    [
+     "apache/casbin-gateway",
+     136,
+     900
+    ],
+    [
+     "apache/casbin-gateway",
+     108,
+     143
+    ],
+    [
+     "apache/casbin-gateway",
+     88,
+     346
+    ],
+    [
+     "apache/casbin-gateway",
+     130,
+     89
+    ],
+    [
+     "apache/casbin-gateway",
+     106,
+     60
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:vespa-engine/pyvespa",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "vespa-engine/pyvespa",
+     1138,
+     228
+    ],
+    [
+     "vespa-engine/pyvespa",
+     1161,
+     78
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:microsoft/generative-ai-for-beginners",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/generative-ai-for-beginners",
+     980,
+     312
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:intel/ScalableVectorSearch",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "intel/ScalableVectorSearch",
+     196,
+     468
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:devin-ai-integration:onyx-dot-app/onyx",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "onyx-dot-app/onyx",
+     7123,
+     297
+    ],
+    [
+     "onyx-dot-app/onyx",
+     7151,
+     94
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:devin-ai-integration:firecrawl/firecrawl",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "firecrawl/firecrawl",
+     2283,
+     53
+    ],
+    [
+     "firecrawl/firecrawl",
+     2357,
+     94
+    ],
+    [
+     "firecrawl/firecrawl",
+     2371,
+     346
+    ],
+    [
+     "firecrawl/firecrawl",
+     2360,
+     571
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:devin-ai-integration:ComposioHQ/composio",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "ComposioHQ/composio",
+     2275,
+     59
+    ],
+    [
+     "ComposioHQ/composio",
+     2206,
+     77
+    ],
+    [
+     "ComposioHQ/composio",
+     2318,
+     88
+    ],
+    [
+     "ComposioHQ/composio",
+     2261,
+     72
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:devin-ai-integration:PrefectHQ/prefect",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     19764,
+     101
+    ],
+    [
+     "PrefectHQ/prefect",
+     19877,
+     199
+    ],
+    [
+     "PrefectHQ/prefect",
+     19849,
+     706
+    ],
+    [
+     "PrefectHQ/prefect",
+     19967,
+     370
+    ],
+    [
+     "PrefectHQ/prefect",
+     20019,
+     1152
+    ],
+    [
+     "PrefectHQ/prefect",
+     20062,
+     51
+    ],
+    [
+     "PrefectHQ/prefect",
+     19751,
+     604
+    ],
+    [
+     "PrefectHQ/prefect",
+     19363,
+     115
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:devin-ai-integration:PrefectHQ/prefect:1",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     20069,
+     112
+    ],
+    [
+     "PrefectHQ/prefect",
+     19681,
+     734
+    ],
+    [
+     "PrefectHQ/prefect",
+     19712,
+     155
+    ],
+    [
+     "PrefectHQ/prefect",
+     19838,
+     581
+    ]
+   ]
+  },
   {
    "slot": "PC:Q1-2026:copilot-swe-agent:langchain-ai/langchain-litellm",
    "arm": "PC",
@@ -243,6 +510,64 @@
      "firecrawl/firecrawl",
      2635,
      58
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:devin-ai-integration:PrefectHQ/prefect:1",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     20155,
+     168
+    ],
+    [
+     "PrefectHQ/prefect",
+     20631,
+     360
+    ],
+    [
+     "PrefectHQ/prefect",
+     20988,
+     118
+    ],
+    [
+     "PrefectHQ/prefect",
+     20322,
+     208
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:devin-ai-integration:PrefectHQ/prefect:2",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     20773,
+     80
+    ],
+    [
+     "PrefectHQ/prefect",
+     20572,
+     51
+    ],
+    [
+     "PrefectHQ/prefect",
+     20692,
+     298
+    ],
+    [
+     "PrefectHQ/prefect",
+     20444,
+     456
     ]
    ]
   },
@@ -623,6 +948,34 @@
      "firecrawl/firecrawl",
      3545,
      715
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:devin-ai-integration:modal-labs/multinode-training-guide",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "modal-labs/multinode-training-guide",
+     84,
+     1698
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:cursor:togethercomputer/detect_agent",
+   "arm": "PC",
+   "author": "cursor",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "togethercomputer/detect_agent",
+     9,
+     391
     ]
    ]
   }

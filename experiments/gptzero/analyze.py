@@ -59,10 +59,12 @@ Caveats (they bound every number above):
 - Q3-2022-era predates ChatGPT: its positives are near-pure FALSE
   positives (early-Codex/Copilot-autocomplete volume was tiny) — the
   cleanest false-positive calibration in the design.
-- The known-AI arm is agent-authored (layer-B) PRs, 2026 quarters: as
-  close to pure machine-written code as the study can sample. It
-  validates the instrument and sets the score ceiling against which
-  the paired arms' mixtures are read.
+- The known-AI arm is canonical agent-authored (layer-B) PRs,
+  Q4-2025..Q2-2026: as close to pure machine-written code as the study
+  can sample. cursor/claude are pool-limited (21 and 9 eligible PRs
+  exist); copilot/devin carry the arm. Its LOW scores mean the paired
+  arms' elevation is NOT agent-style detection — document-level
+  verdicts largely miss agent code.
 - Near-uniform scores in ALL arms would itself be the answer: no signal
   on bare added-lines code."""
 
