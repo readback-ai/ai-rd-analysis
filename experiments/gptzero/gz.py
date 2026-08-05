@@ -384,22 +384,27 @@ def _load_rows(path: Path) -> list[dict]:
             if ln.strip()]
 
 
-def _validate_freeze(manifest_slots: set[str], docs_rows: list[dict],
+def _validate_freeze(manifest_slots: list[str], docs_rows: list[dict],
                      score_rows: list[dict], retest_docs: list[dict],
                      retest_rows: list[dict]) -> None:
-    """The frozen set must be internally coherent: document slots are
-    unique and cover the manifests' slots exactly; every score row is
-    the slot's current document; every filled document is scored; and
-    retest document and score rows bind ONE-TO-ONE on (slot, sha600,
+    """The frozen set must be internally coherent: manifest slot
+    definitions and document slots are unique, and cover each other
+    exactly; every score row is the slot's current document; every
+    filled document is scored; and retest document and score rows are
+    unique PER SLOT in each file and bind one-to-one on (slot, sha600,
     doc_sha) to a current score."""
     from collections import Counter
     errors = []
+    manifest_counts = Counter(manifest_slots)
+    for slot, n in sorted(manifest_counts.items()):
+        if n > 1:
+            errors.append(f"duplicate manifest slot definition: {slot}")
     doc_slot_counts = Counter(r["slot"] for r in docs_rows)
     for slot, n in sorted(doc_slot_counts.items()):
         if n > 1:
             errors.append(f"duplicate document row: {slot}")
-    only_manifest = sorted(manifest_slots - set(doc_slot_counts))
-    only_docs = sorted(set(doc_slot_counts) - manifest_slots)
+    only_manifest = sorted(set(manifest_counts) - set(doc_slot_counts))
+    only_docs = sorted(set(doc_slot_counts) - set(manifest_counts))
     if only_manifest:
         errors.append(f"{len(only_manifest)} manifest slots without "
                       f"document rows: {only_manifest[:5]}")
@@ -423,25 +428,25 @@ def _validate_freeze(manifest_slots: set[str], docs_rows: list[dict],
         errors.append(f"{len(unscored)} filled documents unscored: "
                       f"{unscored[:5]}")
 
-    def binding(rows: list[dict], kind: str) -> set[tuple]:
-        keys = set()
-        for rt in rows:
-            key = (rt["slot"], rt.get("sha600"), rt["doc_sha"])
-            if key in keys:
-                errors.append(f"duplicate slot in retest {kind}: "
-                              f"{rt['slot']}")
-            keys.add(key)
-            v = scored.get(rt["slot"])
-            if v is None or v["doc_sha"] != rt.get("sha600"):
+    def binding(rows: list[dict], kind: str) -> dict[str, tuple]:
+        counts = Counter(rt["slot"] for rt in rows)
+        for slot, n in sorted(counts.items()):
+            if n > 1:
+                errors.append(f"duplicate slot in retest {kind}: {slot}")
+        mapping = {rt["slot"]: (rt.get("sha600"), rt["doc_sha"])
+                   for rt in rows}
+        for slot, (sha600, _long) in sorted(mapping.items()):
+            v = scored.get(slot)
+            if v is None or v["doc_sha"] != sha600:
                 errors.append(f"retest {kind} row detached from "
-                              f"current score: {rt['slot']}")
-        return keys
-    doc_keys = binding(retest_docs, "documents")
-    score_keys = binding(retest_rows, "scores")
-    if doc_keys != score_keys:
-        odd = sorted(s for s, _h, _d in doc_keys ^ score_keys)
+                              f"current score: {slot}")
+        return mapping
+    doc_map = binding(retest_docs, "documents")
+    score_map = binding(retest_rows, "scores")
+    if doc_map != score_map:
+        odd = sorted(set(doc_map.items()) ^ set(score_map.items()))
         errors.append(f"retest documents and scores not one-to-one: "
-                      f"{odd[:5]}")
+                      f"{[slot for slot, _m in odd][:5]}")
     if errors:
         raise SystemExit("freeze refused:\n  " + "\n  ".join(errors))
 
@@ -494,9 +499,9 @@ def cmd_freeze() -> None:
     missing = [p.name for p in required if not p.is_file()]
     if missing:
         raise SystemExit(f"freeze refused: missing {missing}")
-    manifest_slots = {s["slot"]
+    manifest_slots = [s["slot"]
                       for p in (MANIFEST, MANIFEST_B3, MANIFEST_ERAS)
-                      for s in json.loads(p.read_text())["slots"]}
+                      for s in json.loads(p.read_text())["slots"]]
     score_rows = _load_rows(RESULTS)
     _validate_freeze(manifest_slots, _load_rows(DOCS), score_rows,
                      _load_rows(DOCS_RETEST), _load_rows(RESULTS_RETEST))

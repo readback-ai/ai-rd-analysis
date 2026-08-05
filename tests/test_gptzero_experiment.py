@@ -1247,6 +1247,26 @@ def test_freeze_refuses_retest_and_manifest_incoherence(
         {"slots": [{"slot": "P:ghost:ai"}]}))         # uncovered manifest
     with pytest.raises(SystemExit, match="manifest"):
         gz.cmd_freeze()
+    gz.MANIFEST.write_text(json.dumps({"slots": []}))
+
+    # PR #28 review round 4: same slot twice with DIFFERENT long-doc
+    # hashes, mirrored in both retest files — full-tuple uniqueness and
+    # the set comparison both accepted it, double-counting the source
+    # document. Uniqueness must hold per slot in each file.
+    twin = {**rt_doc, "doc_sha": "s:long2"}
+    twin_score = {**rt_score, "doc_sha": "s:long2"}
+    write(gz.DOCS_RETEST, [rt_doc, twin])
+    write(gz.RESULTS_RETEST, [rt_score, twin_score])
+    with pytest.raises(SystemExit, match="duplicate"):
+        gz.cmd_freeze()
+    write(gz.DOCS_RETEST, [rt_doc])
+    write(gz.RESULTS_RETEST, [rt_score])
+
+    # duplicate slot definitions across manifests must refuse, not
+    # silently collapse into the coverage set
+    gz.MANIFEST.write_text(json.dumps({"slots": [{"slot": "B3:o/r"}]}))
+    with pytest.raises(SystemExit, match="duplicate"):
+        gz.cmd_freeze()
 
 
 def _eras_pools(q4=("alice", "bob"), q1_26=("alice",),
