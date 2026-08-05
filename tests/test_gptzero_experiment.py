@@ -1434,24 +1434,40 @@ def test_pc_pools_admit_only_canonical_agents(monkeypatch):
     assert p["Q1-2026"] == {}
 
 
-def test_pc_draw_caps_per_login_and_is_deterministic():
-    """One slot per (agent, repo) group, per-quarter target, and no
-    login exceeds max_per_login groups — one prolific agent must not
-    dominate the control arm."""
-    prs = [("o/r", 1, 100)]
-    pools_ = {"Q1-2026": {},
-              "Q2-2026": {("botA", f"o/r{i}"): prs for i in range(10)}}
-    pools_["Q2-2026"][("botB", "o/z")] = prs
+def test_pc_draw_targets_per_agent_with_group_deepening():
+    """pc-v2: each agent aims for n_per_agent_quarter documents per
+    quarter — repo-diverse agents get one slot per group; concentrated
+    agents deepen already-selected groups (up to per_group, disjoint
+    candidate chunks). Slot 0 keeps the pc-v1 id and candidate list so
+    scored documents survive the deepening."""
+    from collections import Counter
+    diverse = {("botA", f"o/r{i}"): [(f"o/r{i}", 1, 100)]
+               for i in range(10)}
+    rich = [("o/z", n, 100) for n in range(1, 21)]     # 20 PRs, 1 repo
+    pools_ = {"Q4-2025": {}, "Q1-2026": {},
+              "Q2-2026": {**diverse, ("botB", "o/z"): rich}}
     slots = pc.draw(pools_)
     assert slots == pc.draw(pools_)
-    q2 = [s for s in slots if s["period"] == "Q2-2026"]
-    from collections import Counter
-    per = Counter(s["author"] for s in q2)
-    assert per["botA"] == pc.PARAMS["max_per_login"]
-    assert per["botB"] == 1
-    assert all(s["arm"] == "PC" and s["ai"] for s in q2)
+    per = Counter(s["author"] for s in slots)
+    assert per["botA"] == pc.PARAMS["n_per_agent_quarter"]
+    # botB: 1 group -> slot 0 plus per_group-1 deepened slots
+    b = [s for s in slots if s["author"] == "botB"]
+    assert len(b) == pc.PARAMS["per_group"]
+    assert b[0]["slot"] == "PC:Q2-2026:botB:o/z"
+    assert {s["slot"] for s in b[1:]} == {
+        "PC:Q2-2026:botB:o/z:1", "PC:Q2-2026:botB:o/z:2"}
+    chunks = [{tuple(c) for c in s["candidates"]} for s in b]
+    assert len(b[0]["candidates"]) == pc.PARAMS["k_cand"]
+    assert all(len(c) == pc.PARAMS["extra_cand"] for c in chunks[1:])
+    assert not (chunks[0] | chunks[1]) & chunks[2] \
+        and not chunks[0] & chunks[1]                # disjoint
+    # a thin group (few PRs) never yields empty extra slots
+    pools_["Q2-2026"][("botC", "o/t")] = [("o/t", 1, 100),
+                                          ("o/t", 2, 90)]
+    thin = [s for s in pc.draw(pools_) if s["author"] == "botC"]
+    assert len(thin) == 1                            # 2 PRs < k_cand+1
     fp = pc.fingerprint(pools_)
-    pools_["Q2-2026"][("botC", "o/y")] = prs
+    pools_["Q2-2026"][("botD", "o/y")] = [("o/y", 9, 100)]
     assert pc.fingerprint(pools_) != fp
 
 

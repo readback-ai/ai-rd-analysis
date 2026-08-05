@@ -31,13 +31,13 @@ from pathlib import Path
 from pipeline.detect import AS_OF, CUTOFF
 from pipeline.frame import study_frame
 
-import sampling
 from sampling import SEED
 
-QUARTERS = ("Q1-2026", "Q2-2026")
-PARAMS = dict(design="pc-v1", quarters=list(QUARTERS), n_per_quarter=15,
-              max_per_login=5, k_cand=8, word_cap=600, word_floor=100,
-              min_loc=50, max_loc=2000)
+QUARTERS = ("Q4-2025", "Q1-2026", "Q2-2026")
+PARAMS = dict(design="pc-v2", quarters=list(QUARTERS),
+              n_per_agent_quarter=5, per_group=3, k_cand=8,
+              extra_cand=4, word_cap=600, word_floor=100, min_loc=50,
+              max_loc=2000)
 
 
 def _raw_loc(pr: dict) -> int:
@@ -63,31 +63,66 @@ def pools() -> dict:
     return out
 
 
+def _group_shuffle(q: str, login: str, repo: str,
+                   prs: list) -> list[list]:
+    """The group's full seeded PR shuffle — one stream per group, so
+    every slot of the group draws disjoint candidate chunks from the
+    same ordering (slot 0's chunk is identical to the pc-v1 list)."""
+    crng = random.Random(f"{SEED}:gptzero:pc:cand:{q}:{login}:{repo}")
+    order = sorted(prs)
+    crng.shuffle(order)
+    return [list(p) for p in order]
+
+
+def _chunk(order: list[list], k: int) -> list[list]:
+    """Slot k's candidate chunk: the first k_cand PRs for slot 0
+    (pc-v1 compatible), then disjoint extra_cand-sized chunks."""
+    kc, ec = PARAMS["k_cand"], PARAMS["extra_cand"]
+    if k == 0:
+        return order[:kc]
+    start = kc + (k - 1) * ec
+    return order[start:start + ec]
+
+
 def draw(pools_: dict) -> list[dict]:
-    """Deterministic slot list: per quarter, up to n_per_quarter
-    (login, repo) groups from a seeded whole-pool shuffle, at most
-    max_per_login groups per agent login."""
+    """Deterministic slot list: per quarter, walk the seeded group
+    shuffle giving each agent one slot per group up to
+    n_per_agent_quarter documents; agents short on repos (devin's
+    concentration, cursor/claude scarcity) then take extra slots on
+    already-selected groups — up to per_group per repo, each with a
+    disjoint candidate chunk — until the target or the pool runs out.
+    Slot 0 of a group keeps the pc-v1 id and candidate list, so
+    already-scored documents survive the deepening."""
     slots = []
     for q in QUARTERS:
         rng = random.Random(f"{SEED}:gptzero:pc:{q}")
         keys = sorted(pools_[q])
         rng.shuffle(keys)
-        per_login: Counter = Counter()
-        taken = 0
+        docs: Counter = Counter()
+        chosen: list[tuple[str, str, list]] = []
         for login, repo in keys:
-            if taken >= PARAMS["n_per_quarter"]:
-                break
-            if per_login[login] >= PARAMS["max_per_login"]:
+            if docs[login] >= PARAMS["n_per_agent_quarter"]:
                 continue
-            crng = random.Random(
-                f"{SEED}:gptzero:pc:cand:{q}:{login}:{repo}")
+            order = _group_shuffle(q, login, repo,
+                                   pools_[q][(login, repo)])
             slots.append({
                 "slot": f"PC:{q}:{login}:{repo}", "arm": "PC",
                 "author": login, "period": q, "ai": True,
-                "candidates": sampling._candidates(
-                    crng, pools_[q][(login, repo)], PARAMS["k_cand"])})
-            per_login[login] += 1
-            taken += 1
+                "candidates": _chunk(order, 0)})
+            chosen.append((login, repo, order))
+            docs[login] += 1
+        for k in range(1, PARAMS["per_group"]):
+            for login, repo, order in chosen:
+                if docs[login] >= PARAMS["n_per_agent_quarter"]:
+                    continue
+                cands = _chunk(order, k)
+                if not cands:
+                    continue
+                slots.append({
+                    "slot": f"PC:{q}:{login}:{repo}:{k}", "arm": "PC",
+                    "author": login, "period": q, "ai": True,
+                    "candidates": cands})
+                docs[login] += 1
     return slots
 
 
