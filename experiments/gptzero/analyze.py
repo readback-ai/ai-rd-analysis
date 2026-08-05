@@ -385,6 +385,65 @@ def report_sem(rows: list[dict], sem_rows: list[dict]) -> None:
               f"{len(pairs)} docs")
 
 
+def report_newfile(nf_rows: list[dict], sem_cap: list[dict],
+                   sem_full: list[dict],
+                   gz_rows: list[dict]) -> None:
+    """Created-file arm: whole-file documents under sem13c (capped and
+    full variants — the domain-repair probe) and, when scored, GPTZero
+    on the capped variant."""
+    if not nf_rows:
+        print("no newfile rows — run --newfile first")
+        return
+    by_cap = {r["slot"]: r for r in sem_cap}
+    by_full = {r["slot"]: r for r in sem_full}
+    by_gz = {r["slot"]: r for r in gz_rows}
+    valid = {r["slot"]: r for r in nf_rows}
+    print(f"created-file arm ({len(nf_rows)} whole-file documents, "
+          f"largest created file per scored slot):")
+    print(f"{'arm':14}{'n':>4}"
+          f"{'sem-ai%':>9}{'semF-ai%':>10}{'semF-hyb%':>10}"
+          f"{'gz-ai%':>8}{'gz-mean':>9}")
+    for name, pred in ARMS:
+        rs = [r for r in nf_rows if pred(r)]
+        if not rs:
+            continue
+        n = len(rs)
+
+        def share(scored, cls_key, pred_key):
+            hits = [scored[r["slot"]] for r in rs
+                    if r["slot"] in scored]
+            if not hits:
+                return None
+            return (sum(1 for h in hits
+                        if h[pred_key] == cls_key) / len(hits))
+
+        sa = share(by_cap, "ai", "sem_pred")
+        fa = share(by_full, "ai", "sem_pred")
+        fh = share(by_full, "hybrid", "sem_pred")
+        ga = share(by_gz, "ai", "predicted_class")
+        gz_ps = [ai_prob(by_gz[r["slot"]]) for r in rs
+                 if r["slot"] in by_gz
+                 and ai_prob(by_gz[r["slot"]]) is not None]
+        gm = statistics.fmean(gz_ps) if gz_ps else None
+
+        def pct(v):
+            return f"{100 * v:>.0f}%" if v is not None else "—"
+        print(f"{name:14}{n:>4}{pct(sa):>9}{pct(fa):>10}{pct(fh):>10}"
+              f"{pct(ga):>8}"
+              f"{gm if gm is None else format(gm, '.2f'):>9}")
+    for label, sem in (("capped", sem_cap), ("full", sem_full)):
+        rows = [{**valid[r["slot"]],
+                 "aihyb": r["sem_probs"]["ai"] + r["sem_probs"]["hybrid"]}
+                for r in sem if r["slot"] in valid]
+        for q in PAIRED_QUARTERS:
+            pr = paired_metric(rows, q, "aihyb")
+            if pr:
+                print(f"  sem13c-{label} paired {q}: n={pr['pairs']}, "
+                      f"{pr['wins']}/{pr['wins'] + pr['losses']} "
+                      f"higher, gap {pr['mean_gap']:+.2f}, "
+                      f"p={pr['sign_p']:.3f}")
+
+
 def paragraph_stats(para_rows: list[dict]) -> dict | None:
     """Aggregates over per-document paragraph summaries (frozen beside
     the scores): the document verdict discards within-document

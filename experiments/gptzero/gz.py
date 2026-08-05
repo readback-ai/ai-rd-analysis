@@ -37,6 +37,11 @@ DOCS_RETEST = LOCAL / "docs_retest.jsonl"
 RESULTS = LOCAL / "results" / "scores_v1.jsonl"
 RESULTS_RETEST = LOCAL / "results" / "scores_retest.jsonl"
 RESULTS_SEM = LOCAL / "results" / "scores_sem13c.jsonl"
+DOCS_NEWFILE = LOCAL / "docs_newfile.jsonl"
+RESULTS_SEM_NF = LOCAL / "results" / "scores_sem13c_newfile.jsonl"
+RESULTS_SEM_NF_FULL = (LOCAL / "results"
+                       / "scores_sem13c_newfile_full.jsonl")
+RESULTS_NF = LOCAL / "results" / "scores_newfile.jsonl"
 RETEST_CAP = 1200   # dose-response stage: docs truncated at the design
                     # cap are re-assembled and re-scored at this cap
 RESERVATIONS = LOCAL / "results" / "reservations_v1.jsonl"
@@ -393,6 +398,71 @@ FROZEN = BASE / "frozen"
 PARAGRAPHS = LOCAL / "paragraph_summary.jsonl"
 
 
+def cmd_newfile() -> None:
+    """Assemble the created-file arm (whole-file documents, capped +
+    full variants) from the cached diffs of every SCORED slot, then
+    score both variants with sem13c (local, free). GPTZero scoring of
+    the capped variant is the separate, billed --score-newfile."""
+    import newfile
+    import sem13c
+    scored = {r["slot"] for r in _load_rows(RESULTS)}
+    docs = [r for r in _doc_rows().values()
+            if not r.get("unfilled") and r["slot"] in scored]
+    rows = newfile.build_rows(docs, DIFF_CACHE, DOC_CACHE)
+    newfile.write_rows(rows, DOCS_NEWFILE)
+    print(f"newfile arm: {len(rows)} documents "
+          f"({sum(r['words'] for r in rows)} words capped, "
+          f"{sum(r['words_full'] for r in rows)} full)")
+    n = sem13c.score_rows(rows, DOC_CACHE, RESULTS_SEM_NF)
+    full_rows = [{**r, "doc_sha": r["doc_sha_full"],
+                  "words": r["words_full"], "truncated": False}
+                 for r in rows]
+    nf = sem13c.score_rows(full_rows, DOC_CACHE, RESULTS_SEM_NF_FULL)
+    print(f"sem13c newfile: {n} capped + {nf} full newly scored")
+
+
+def cmd_score_newfile() -> None:
+    """GPTZero over the capped created-file documents (billed; same
+    ledger, cache, and version discipline as every other arm)."""
+    import gptzero_client as gzc
+    rows = _load_rows(DOCS_NEWFILE)
+    old = [r for r in _load_rows(RESULTS_NF)
+           if any(r["slot"] == d["slot"] and r["doc_sha"] == d["doc_sha"]
+                  for d in rows)
+           and r.get("model_version") == gzc.PINNED_VERSION]
+    RESULTS_NF.parent.mkdir(parents=True, exist_ok=True)
+    with RESULTS_NF.open("w") as out:
+        for r in old:
+            out.write(json.dumps(r) + "\n")
+        done = {r["slot"] for r in old}
+        todo = [r for r in rows if r["slot"] not in done]
+        batches = _batches(todo)
+        for i, chunk in enumerate(batches):
+            items = [(r["doc_sha"], DOC_CACHE / f"{r['doc_sha']}.txt")
+                     for r in chunk]
+            try:
+                scored = gzc.score_batch(items, RESP_CACHE, RESERVATIONS)
+            except RuntimeError as e:
+                print(f"BATCH FAIL: {e}", flush=True)
+                continue
+            except urllib.error.HTTPError as e:
+                raise SystemExit(
+                    f"HTTP {e.code} on a batch — results so far are "
+                    f"recorded; re-run --score-newfile to resume.") from e
+            for r, (resp, billed) in zip(chunk, scored):
+                fields = gzc.doc_fields(resp)
+                out.write(json.dumps(
+                    {**r, **fields, "billed_words": billed}) + "\n")
+                out.flush()
+                print(f"newfile {r['slot']}: "
+                      f"{fields['predicted_class']} "
+                      f"({billed} words billed)", flush=True)
+            if i + 1 < len(batches):
+                time.sleep(SCORE_PACE)
+    print(f"reserved: {ledger_total()}/"
+          f"{gzc.BUDGET_WORDS} words")
+
+
 def cmd_score_sem() -> None:
     """Score every filled document with the SemEval-13c MIL-UniXcoder
     detector (local, free, pinned revision); append-only results,
@@ -611,6 +681,9 @@ def main() -> None:
     ap.add_argument("--score", action="store_true")
     ap.add_argument("--retest", action="store_true")
     ap.add_argument("--score-sem", action="store_true")
+    ap.add_argument("--newfile", action="store_true")
+    ap.add_argument("--score-newfile", action="store_true")
+    ap.add_argument("--report-newfile", action="store_true")
     ap.add_argument("--freeze", action="store_true")
     ap.add_argument("--limit", type=int, default=None)
     a = ap.parse_args()
@@ -630,6 +703,15 @@ def main() -> None:
         cmd_retest()
     elif a.score_sem:
         cmd_score_sem()
+    elif a.newfile:
+        cmd_newfile()
+    elif a.score_newfile:
+        cmd_score_newfile()
+    elif a.report_newfile:
+        import analyze
+        analyze.report_newfile(
+            _load_rows(DOCS_NEWFILE), _load_rows(RESULTS_SEM_NF),
+            _load_rows(RESULTS_SEM_NF_FULL), _load_rows(RESULTS_NF))
     elif a.freeze:
         cmd_freeze()
     else:

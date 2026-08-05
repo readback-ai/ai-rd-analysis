@@ -13,6 +13,7 @@ import analyze          # noqa: E402
 import diffs            # noqa: E402
 import eras             # noqa: E402
 import gptzero_client   # noqa: E402
+import newfile          # noqa: E402
 import pc               # noqa: E402
 import sampling         # noqa: E402
 import sem13c           # noqa: E402
@@ -1190,6 +1191,67 @@ def _freeze_env(tmp_path, monkeypatch):
          "paragraphs": [{"completely_generated_prob": 0.8},
                         {"completely_generated_prob": 0.1}]}]}))
     return gz
+
+
+NEWFILE_DIFF = """\
+diff --git a/src/old.py b/src/old.py
++++ b/src/old.py
+@@ -1,2 +1,3 @@
++modified_existing_file = True
+diff --git a/src/created.py b/src/created.py
+new file mode 100644
++++ b/src/created.py
+@@ -0,0 +1,3 @@
++def whole():
++    return "file"
++CREATED = True
+diff --git a/vendor/lib.js b/vendor/lib.js
+new file mode 100644
++++ b/vendor/lib.js
+@@ -0,0 +1 @@
++vendored = 1
+diff --git a/docs/readme.md b/docs/readme.md
+new file mode 100644
++++ b/docs/readme.md
+@@ -0,0 +1 @@
++prose, not code
+"""
+
+
+def test_created_files_are_new_code_files_only():
+    """Only `new file mode` blocks count (edits to existing files are
+    not whole files), and the allowlist/vendored filters apply."""
+    got = newfile.created_files(NEWFILE_DIFF)
+    assert [p for p, _t in got] == ["src/created.py"]
+    assert got[0][1] == 'def whole():\n    return "file"\nCREATED = True\n'
+
+
+def test_newfile_rows_pick_largest_eligible_and_cap(tmp_path,
+                                                    monkeypatch):
+    """One row per slot: the LARGEST created code file above the
+    floor, with capped and full variants cached; slots whose PRs
+    created no eligible file yield nothing."""
+    monkeypatch.setattr(newfile, "WORD_FLOOR", 3)
+    monkeypatch.setattr(newfile, "WORD_CAP", 5)
+    diff_cache = tmp_path / "diffs"
+    diff_cache.mkdir()
+    (diff_cache / "o~r@1.diff").write_text(NEWFILE_DIFF)
+    (diff_cache / "o~r@2.diff").write_text(
+        "diff --git a/a.py b/a.py\n+++ b/a.py\n+edit_only = 1\n")
+    docs = [{"slot": "P:a:ai", "arm": "P", "author": "a",
+             "period": "Q2-2026", "ai": True, "repo": "o/r", "num": 1},
+            {"slot": "P:b:ai", "arm": "P", "author": "b",
+             "period": "Q2-2026", "ai": True, "repo": "o/r", "num": 2}]
+    rows = newfile.build_rows(docs, diff_cache, tmp_path / "cache")
+    assert [r["slot"] for r in rows] == ["P:a:ai"]
+    r = rows[0]
+    assert r["path"] == "src/created.py"
+    assert r["truncated"] and r["words"] == 5
+    assert r["words_full"] == 10   # 3-word header + 7-word file
+    capped = (tmp_path / "cache" / f"{r['doc_sha']}.txt").read_text()
+    full = (tmp_path / "cache" / f"{r['doc_sha_full']}.txt").read_text()
+    assert full.startswith("// file: src/created.py\n")
+    assert capped == " ".join(full.split()[:5])
 
 
 def test_sem13c_scores_resume_and_bind(tmp_path):
