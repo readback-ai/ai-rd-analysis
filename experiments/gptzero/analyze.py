@@ -430,7 +430,7 @@ def report_newfile(nf_rows: list[dict], sem_cap: list[dict],
             return f"{100 * v:>.0f}%" if v is not None else "—"
         print(f"{name:14}{n:>4}{pct(sa):>9}{pct(fa):>10}{pct(fh):>10}"
               f"{pct(ga):>8}"
-              f"{gm if gm is None else format(gm, '.2f'):>9}")
+              f"{'—' if gm is None else format(gm, '.2f'):>9}")
     for label, sem in (("capped", sem_cap), ("full", sem_full)):
         rows = [{**valid[r["slot"]],
                  "aihyb": r["sem_probs"]["ai"] + r["sem_probs"]["hybrid"]}

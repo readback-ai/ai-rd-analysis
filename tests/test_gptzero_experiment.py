@@ -1254,6 +1254,22 @@ def test_newfile_rows_pick_largest_eligible_and_cap(tmp_path,
     assert capped == " ".join(full.split()[:5])
 
 
+def test_report_newfile_renders_without_gptzero_rows(capsys):
+    """Live finding 2026-08-05: --report-newfile crashed formatting the
+    absent GPTZero mean (None) before the billed pass ran. Unscored
+    detector columns render as dashes, never TypeError."""
+    nf = [{"slot": "P:a:ai", "arm": "P", "period": "Q2-2026",
+           "author": "a", "ai": True, "doc_sha": "s", "words": 100,
+           "truncated": False}]
+    sem = [{"slot": "P:a:ai", "sem_pred": "ai",
+            "sem_probs": {"human": 0.1, "ai": 0.7, "hybrid": 0.1,
+                          "adversarial": 0.1}}]
+    analyze.report_newfile(nf, sem, sem, [])
+    out = capsys.readouterr().out
+    assert "Q2-26-AI" in out and "TypeError" not in out
+    assert "—" in out
+
+
 def test_sem13c_scores_resume_and_bind(tmp_path):
     """The sem13c scorer appends one row per (slot, doc_sha) under the
     pinned revision, skips already-scored docs on re-run, and
