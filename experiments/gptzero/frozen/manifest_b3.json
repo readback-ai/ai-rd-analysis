@@ -1,9 +1,9 @@
 {
  "design": "v1-50k-b3",
- "fingerprint": "3abeaf744298f243",
+ "fingerprint": "dc128f151b1e7cb3",
  "params": {
   "design": "v1-50k-b3",
-  "n_docs": 20,
+  "n_docs": 26,
   "k_cand": 8,
   "spare": 15,
   "min_repo_prs": 20,
@@ -525,6 +525,200 @@
      "PaddlePaddle/PaddleOCR",
      7621,
      181
+    ]
+   ]
+  },
+  {
+   "slot": "B3:apache/seatunnel",
+   "arm": "B3",
+   "author": "TyrantLucifer",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "apache/seatunnel",
+     2884,
+     554
+    ],
+    [
+     "apache/seatunnel",
+     2943,
+     588
+    ],
+    [
+     "apache/seatunnel",
+     2944,
+     699
+    ]
+   ]
+  },
+  {
+   "slot": "B3:PaddlePaddle/FastDeploy",
+   "arm": "B3",
+   "author": "DefTruth",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "PaddlePaddle/FastDeploy",
+     268,
+     254
+    ],
+    [
+     "PaddlePaddle/FastDeploy",
+     275,
+     617
+    ],
+    [
+     "PaddlePaddle/FastDeploy",
+     304,
+     530
+    ],
+    [
+     "PaddlePaddle/FastDeploy",
+     298,
+     82
+    ],
+    [
+     "PaddlePaddle/FastDeploy",
+     313,
+     220
+    ],
+    [
+     "PaddlePaddle/FastDeploy",
+     306,
+     56
+    ],
+    [
+     "PaddlePaddle/FastDeploy",
+     288,
+     164
+    ],
+    [
+     "PaddlePaddle/FastDeploy",
+     280,
+     564
+    ]
+   ]
+  },
+  {
+   "slot": "B3:huggingface/pytorch-image-models",
+   "arm": "B3",
+   "author": "rwightman",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "huggingface/pytorch-image-models",
+     1467,
+     266
+    ],
+    [
+     "huggingface/pytorch-image-models",
+     1354,
+     271
+    ]
+   ]
+  },
+  {
+   "slot": "B3:milvus-io/milvus-docs",
+   "arm": "B3",
+   "author": "RosieZhang12",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "milvus-io/milvus-docs",
+     1770,
+     66
+    ],
+    [
+     "milvus-io/milvus-docs",
+     1791,
+     145
+    ],
+    [
+     "milvus-io/milvus-docs",
+     1760,
+     66
+    ]
+   ]
+  },
+  {
+   "slot": "B3:milvus-io/pymilvus",
+   "arm": "B3",
+   "author": "XuanYang-cn",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "milvus-io/pymilvus",
+     1158,
+     712
+    ],
+    [
+     "milvus-io/pymilvus",
+     1108,
+     369
+    ],
+    [
+     "milvus-io/pymilvus",
+     1126,
+     66
+    ],
+    [
+     "milvus-io/pymilvus",
+     1139,
+     143
+    ],
+    [
+     "milvus-io/pymilvus",
+     1133,
+     547
+    ],
+    [
+     "milvus-io/pymilvus",
+     1109,
+     369
+    ],
+    [
+     "milvus-io/pymilvus",
+     1138,
+     291
+    ],
+    [
+     "milvus-io/pymilvus",
+     1148,
+     58
+    ]
+   ]
+  },
+  {
+   "slot": "B3:Giskard-AI/giskard-oss",
+   "arm": "B3",
+   "author": "princyiakov",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "Giskard-AI/giskard-oss",
+     230,
+     326
+    ],
+    [
+     "Giskard-AI/giskard-oss",
+     240,
+     429
+    ],
+    [
+     "Giskard-AI/giskard-oss",
+     241,
+     238
+    ],
+    [
+     "Giskard-AI/giskard-oss",
+     242,
+     576
     ]
    ]
   }

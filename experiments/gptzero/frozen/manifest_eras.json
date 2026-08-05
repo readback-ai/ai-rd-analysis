@@ -1,6 +1,6 @@
 {
  "design": "eras-v1",
- "fingerprint": "1d8de0c42e074096",
+ "fingerprint": "950d5fa78fb20871",
  "params": {
   "design": "eras-v1",
   "quarters": [
@@ -9,7 +9,7 @@
    "Q2-2026"
   ],
   "n_authors": 90,
-  "k_cand": 8,
+  "k_cand": 16,
   "word_cap": 600,
   "word_floor": 100,
   "min_loc": 50,
@@ -119,6 +119,26 @@
      "promptfoo/promptfoo",
      5915,
      206
+    ],
+    [
+     "promptfoo/promptfoo",
+     6818,
+     357
+    ],
+    [
+     "promptfoo/promptfoo",
+     6568,
+     72
+    ],
+    [
+     "promptfoo/promptfoo",
+     5937,
+     100
+    ],
+    [
+     "promptfoo/promptfoo",
+     6212,
+     834
     ]
    ]
   },
@@ -182,6 +202,46 @@
      "comet-ml/opik",
      4058,
      1368
+    ],
+    [
+     "comet-ml/opik",
+     4074,
+     713
+    ],
+    [
+     "comet-ml/opik",
+     3991,
+     424
+    ],
+    [
+     "comet-ml/opik",
+     3909,
+     178
+    ],
+    [
+     "comet-ml/opik",
+     4203,
+     1393
+    ],
+    [
+     "comet-ml/opik",
+     4034,
+     106
+    ],
+    [
+     "comet-ml/opik",
+     3702,
+     1967
+    ],
+    [
+     "comet-ml/opik",
+     3921,
+     683
+    ],
+    [
+     "comet-ml/opik",
+     3969,
+     647
     ]
    ]
   },
@@ -265,6 +325,46 @@
      "promptfoo/promptfoo",
      6526,
      509
+    ],
+    [
+     "promptfoo/promptfoo",
+     5943,
+     409
+    ],
+    [
+     "promptfoo/promptfoo",
+     6363,
+     170
+    ],
+    [
+     "promptfoo/promptfoo",
+     6858,
+     243
+    ],
+    [
+     "promptfoo/promptfoo",
+     6485,
+     127
+    ],
+    [
+     "promptfoo/promptfoo",
+     5962,
+     386
+    ],
+    [
+     "promptfoo/promptfoo",
+     5793,
+     311
+    ],
+    [
+     "promptfoo/promptfoo",
+     6709,
+     1984
+    ],
+    [
+     "promptfoo/promptfoo",
+     6290,
+     585
     ]
    ]
   },
@@ -328,6 +428,46 @@
      "zenml-io/zenml",
      4252,
      100
+    ],
+    [
+     "zenml-io/zenml",
+     4298,
+     78
+    ],
+    [
+     "zenml-io/zenml-dashboard",
+     940,
+     162
+    ],
+    [
+     "zenml-io/zenml",
+     4259,
+     918
+    ],
+    [
+     "zenml-io/zenml",
+     4130,
+     83
+    ],
+    [
+     "zenml-io/zenml-dashboard",
+     932,
+     135
+    ],
+    [
+     "zenml-io/zenml",
+     4186,
+     136
+    ],
+    [
+     "zenml-io/zenml-dashboard",
+     961,
+     89
+    ],
+    [
+     "zenml-io/zenml",
+     4169,
+     164
     ]
    ]
   },
@@ -377,6 +517,46 @@
      "groq/openbench",
      219,
      968
+    ],
+    [
+     "groq/openbench",
+     203,
+     1337
+    ],
+    [
+     "groq/openbench",
+     198,
+     572
+    ],
+    [
+     "groq/openbench",
+     209,
+     652
+    ],
+    [
+     "groq/openbench",
+     206,
+     604
+    ],
+    [
+     "groq/openbench",
+     261,
+     119
+    ],
+    [
+     "groq/openbench",
+     201,
+     1327
+    ],
+    [
+     "groq/openbench",
+     199,
+     1034
+    ],
+    [
+     "groq/openbench",
+     262,
+     1342
     ]
    ]
   },
@@ -426,6 +606,41 @@
      "groq/openbench",
      301,
      94
+    ],
+    [
+     "groq/openbench",
+     295,
+     1559
+    ],
+    [
+     "groq/openbench",
+     226,
+     266
+    ],
+    [
+     "groq/openbench",
+     263,
+     157
+    ],
+    [
+     "groq/openbench",
+     255,
+     589
+    ],
+    [
+     "groq/openbench",
+     287,
+     66
+    ],
+    [
+     "groq/openbench",
+     305,
+     420
+    ],
+    [
+     "groq/openbench",
+     194,
+     50
     ]
    ]
   },
@@ -499,6 +714,46 @@
      "chroma-core/chroma",
      6043,
      610
+    ],
+    [
+     "chroma-core/chroma",
+     5649,
+     256
+    ],
+    [
+     "chroma-core/chroma",
+     5912,
+     73
+    ],
+    [
+     "chroma-core/chroma",
+     5735,
+     754
+    ],
+    [
+     "chroma-core/chroma",
+     5712,
+     113
+    ],
+    [
+     "chroma-core/chroma",
+     5658,
+     1115
+    ],
+    [
+     "chroma-core/chroma",
+     5584,
+     871
+    ],
+    [
+     "chroma-core/chroma",
+     6095,
+     328
+    ],
+    [
+     "chroma-core/chroma",
+     5767,
+     712
     ]
    ]
   },
@@ -771,6 +1026,46 @@
      "weaviate/csharp-client",
      175,
      892
+    ],
+    [
+     "weaviate/csharp-client",
+     130,
+     931
+    ],
+    [
+     "weaviate/csharp-client",
+     254,
+     1101
+    ],
+    [
+     "weaviate/csharp-client",
+     129,
+     453
+    ],
+    [
+     "weaviate/csharp-client",
+     177,
+     974
+    ],
+    [
+     "weaviate/csharp-client",
+     171,
+     75
+    ],
+    [
+     "weaviate/csharp-client",
+     149,
+     1980
+    ],
+    [
+     "weaviate/csharp-client",
+     146,
+     1126
+    ],
+    [
+     "weaviate/csharp-client",
+     229,
+     701
     ]
    ]
   },
@@ -854,6 +1149,46 @@
      "tenstorrent/tt-metal",
      32865,
      632
+    ],
+    [
+     "tenstorrent/tt-metal",
+     31545,
+     838
+    ],
+    [
+     "tenstorrent/tt-metal",
+     33375,
+     286
+    ],
+    [
+     "tenstorrent/tt-metal",
+     32881,
+     517
+    ],
+    [
+     "tenstorrent/tt-metal",
+     35189,
+     443
+    ],
+    [
+     "tenstorrent/tt-metal",
+     32854,
+     1091
+    ],
+    [
+     "tenstorrent/tt-metal",
+     32794,
+     511
+    ],
+    [
+     "tenstorrent/tt-metal",
+     32882,
+     347
+    ],
+    [
+     "tenstorrent/tt-metal",
+     33114,
+     1395
     ]
    ]
   },
@@ -1003,6 +1338,21 @@
      "zai-org/Open-AutoGLM",
      179,
      90
+    ],
+    [
+     "zai-org/Open-AutoGLM",
+     249,
+     376
+    ],
+    [
+     "zai-org/Open-AutoGLM",
+     192,
+     254
+    ],
+    [
+     "zai-org/Open-AutoGLM",
+     50,
+     64
     ]
    ]
   },
@@ -1052,6 +1402,11 @@
      "vllm-project/semantic-router",
      469,
      389
+    ],
+    [
+     "vllm-project/semantic-router",
+     812,
+     281
     ]
    ]
   },
@@ -1101,6 +1456,26 @@
      "vllm-project/semantic-router",
      334,
      624
+    ],
+    [
+     "vllm-project/semantic-router",
+     356,
+     483
+    ],
+    [
+     "vllm-project/semantic-router",
+     709,
+     72
+    ],
+    [
+     "vllm-project/semantic-router",
+     585,
+     75
+    ],
+    [
+     "vllm-project/semantic-router",
+     639,
+     420
     ]
    ]
   },
@@ -1169,6 +1544,46 @@
      "OpenHands/OpenHands",
      11900,
      850
+    ],
+    [
+     "OpenHands/OpenHands",
+     11646,
+     124
+    ],
+    [
+     "OpenHands/OpenHands",
+     12179,
+     1102
+    ],
+    [
+     "OpenHands/OpenHands",
+     11906,
+     257
+    ],
+    [
+     "OpenHands/OpenHands",
+     11988,
+     81
+    ],
+    [
+     "OpenHands/OpenHands",
+     11733,
+     674
+    ],
+    [
+     "OpenHands/OpenHands",
+     11795,
+     1061
+    ],
+    [
+     "OpenHands/OpenHands",
+     11218,
+     187
+    ],
+    [
+     "OpenHands/OpenHands",
+     11786,
+     601
     ]
    ]
   },
@@ -1218,6 +1633,41 @@
      "microsoft/agent-lightning",
      190,
      148
+    ],
+    [
+     "microsoft/agent-lightning",
+     198,
+     63
+    ],
+    [
+     "microsoft/agent-lightning",
+     146,
+     69
+    ],
+    [
+     "microsoft/agent-lightning",
+     175,
+     200
+    ],
+    [
+     "microsoft/agent-lightning",
+     174,
+     68
+    ],
+    [
+     "microsoft/agent-lightning",
+     159,
+     314
+    ],
+    [
+     "microsoft/agent-lightning",
+     124,
+     163
+    ],
+    [
+     "microsoft/agent-lightning",
+     135,
+     94
     ]
    ]
   },
@@ -1267,6 +1717,46 @@
      "microsoft/agent-lightning",
      368,
      1332
+    ],
+    [
+     "microsoft/agent-lightning",
+     327,
+     774
+    ],
+    [
+     "microsoft/agent-lightning",
+     331,
+     329
+    ],
+    [
+     "microsoft/agent-lightning",
+     393,
+     207
+    ],
+    [
+     "microsoft/agent-lightning",
+     292,
+     723
+    ],
+    [
+     "microsoft/agent-lightning",
+     167,
+     1494
+    ],
+    [
+     "microsoft/agent-lightning",
+     225,
+     107
+    ],
+    [
+     "microsoft/agent-lightning",
+     357,
+     524
+    ],
+    [
+     "microsoft/agent-lightning",
+     421,
+     935
     ]
    ]
   },
@@ -1391,6 +1881,46 @@
      "agno-agi/agno",
      5407,
      155
+    ],
+    [
+     "agno-agi/agno",
+     5366,
+     114
+    ],
+    [
+     "agno-agi/agno",
+     5178,
+     200
+    ],
+    [
+     "agno-agi/agno",
+     4863,
+     148
+    ],
+    [
+     "agno-agi/docs",
+     293,
+     244
+    ],
+    [
+     "agno-agi/agno",
+     5542,
+     422
+    ],
+    [
+     "agno-agi/docs",
+     292,
+     293
+    ],
+    [
+     "agno-agi/agno",
+     5073,
+     535
+    ],
+    [
+     "agno-agi/agno",
+     5413,
+     382
     ]
    ]
   },
@@ -1459,6 +1989,46 @@
      "Helicone/helicone",
      5104,
      212
+    ],
+    [
+     "Helicone/helicone",
+     5041,
+     57
+    ],
+    [
+     "Helicone/helicone",
+     5274,
+     1659
+    ],
+    [
+     "Helicone/helicone",
+     5233,
+     272
+    ],
+    [
+     "Helicone/helicone",
+     5077,
+     195
+    ],
+    [
+     "Helicone/helicone",
+     5322,
+     89
+    ],
+    [
+     "Helicone/helicone",
+     5303,
+     191
+    ],
+    [
+     "Helicone/helicone",
+     4955,
+     50
+    ],
+    [
+     "Helicone/helicone",
+     5065,
+     796
     ]
    ]
   },
@@ -1527,6 +2097,46 @@
      "mlflow/mlflow",
      18411,
      67
+    ],
+    [
+     "mlflow/mlflow",
+     18487,
+     104
+    ],
+    [
+     "mlflow/mlflow",
+     19477,
+     1569
+    ],
+    [
+     "mlflow/mlflow",
+     19228,
+     115
+    ],
+    [
+     "mlflow/mlflow",
+     18486,
+     196
+    ],
+    [
+     "mlflow/mlflow",
+     19005,
+     374
+    ],
+    [
+     "mlflow/mlflow",
+     18816,
+     534
+    ],
+    [
+     "mlflow/mlflow",
+     19678,
+     168
+    ],
+    [
+     "mlflow/mlflow",
+     18490,
+     495
     ]
    ]
   },
@@ -1666,6 +2276,11 @@
      "langchain-ai/docs",
      1050,
      453
+    ],
+    [
+     "langchain-ai/langchainjs",
+     9235,
+     382
     ]
    ]
   },
@@ -1739,6 +2354,16 @@
      "PrimeIntellect-ai/prime-rl",
      1257,
      497
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     1227,
+     83
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     1476,
+     59
     ]
    ]
   },
@@ -1850,6 +2475,46 @@
      "apache/tvm",
      18470,
      88
+    ],
+    [
+     "apache/tvm",
+     18516,
+     375
+    ],
+    [
+     "apache/tvm",
+     18449,
+     251
+    ],
+    [
+     "apache/tvm",
+     18517,
+     70
+    ],
+    [
+     "apache/tvm",
+     18429,
+     58
+    ],
+    [
+     "apache/tvm",
+     18459,
+     52
+    ],
+    [
+     "apache/tvm",
+     18465,
+     55
+    ],
+    [
+     "apache/tvm",
+     18579,
+     145
+    ],
+    [
+     "apache/tvm",
+     18532,
+     572
     ]
    ]
   },
@@ -1913,6 +2578,16 @@
      "elevenlabs/elevenlabs-python",
      641,
      123
+    ],
+    [
+     "elevenlabs/elevenlabs-swift-sdk",
+     108,
+     377
+    ],
+    [
+     "elevenlabs/packages",
+     412,
+     110
     ]
    ]
   },
@@ -1976,6 +2651,46 @@
      "mlflow/mlflow",
      18070,
      381
+    ],
+    [
+     "mlflow/mlflow",
+     19430,
+     431
+    ],
+    [
+     "mlflow/mlflow",
+     19704,
+     139
+    ],
+    [
+     "mlflow/mlflow",
+     19565,
+     172
+    ],
+    [
+     "mlflow/mlflow",
+     18233,
+     64
+    ],
+    [
+     "mlflow/mlflow",
+     18111,
+     485
+    ],
+    [
+     "mlflow/mlflow",
+     19692,
+     305
+    ],
+    [
+     "mlflow/mlflow",
+     18220,
+     279
+    ],
+    [
+     "mlflow/mlflow",
+     18510,
+     189
     ]
    ]
   },
@@ -2125,6 +2840,26 @@
      "camel-ai/camel",
      3326,
      722
+    ],
+    [
+     "camel-ai/camel",
+     3446,
+     60
+    ],
+    [
+     "camel-ai/camel",
+     3234,
+     287
+    ],
+    [
+     "camel-ai/camel",
+     3321,
+     184
+    ],
+    [
+     "camel-ai/camel",
+     3486,
+     121
     ]
    ]
   },
@@ -2236,6 +2971,46 @@
      "browser-use/browser-use",
      3431,
      58
+    ],
+    [
+     "browser-use/browser-use",
+     3424,
+     1679
+    ],
+    [
+     "browser-use/browser-use",
+     3412,
+     87
+    ],
+    [
+     "browser-use/browser-use",
+     3406,
+     169
+    ],
+    [
+     "browser-use/browser-use",
+     3295,
+     155
+    ],
+    [
+     "browser-use/browser-use",
+     3402,
+     92
+    ],
+    [
+     "browser-use/browser-use",
+     3304,
+     96
+    ],
+    [
+     "browser-use/browser-use",
+     3240,
+     84
+    ],
+    [
+     "browser-use/browser-use",
+     3248,
+     1072
     ]
    ]
   },
@@ -2314,6 +3089,41 @@
      "BerriAI/litellm",
      18463,
      110
+    ],
+    [
+     "BerriAI/litellm",
+     18465,
+     188
+    ],
+    [
+     "BerriAI/litellm",
+     18467,
+     73
+    ],
+    [
+     "google/adk-go",
+     449,
+     196
+    ],
+    [
+     "langchain-ai/langchain-google",
+     1478,
+     148
+    ],
+    [
+     "langgenius/dify",
+     30442,
+     254
+    ],
+    [
+     "apache/burr",
+     613,
+     124
+    ],
+    [
+     "deepset-ai/haystack",
+     10265,
+     79
     ]
    ]
   },
@@ -2496,6 +3306,46 @@
      "langflow-ai/langflow",
      10785,
      938
+    ],
+    [
+     "langflow-ai/langflow",
+     10776,
+     484
+    ],
+    [
+     "langflow-ai/langflow",
+     10342,
+     344
+    ],
+    [
+     "langflow-ai/langflow",
+     11107,
+     136
+    ],
+    [
+     "langflow-ai/langflow",
+     10163,
+     160
+    ],
+    [
+     "langflow-ai/langflow",
+     10739,
+     819
+    ],
+    [
+     "langflow-ai/langflow",
+     10251,
+     215
+    ],
+    [
+     "langflow-ai/langflow",
+     10284,
+     70
+    ],
+    [
+     "langflow-ai/langflow",
+     10768,
+     53
     ]
    ]
   },
@@ -2569,6 +3419,11 @@
      "IBM/mcp-context-forge",
      1268,
      165
+    ],
+    [
+     "IBM/mcp-context-forge",
+     1257,
+     134
     ]
    ]
   },
@@ -2652,6 +3507,46 @@
      "oumi-ai/oumi",
      1985,
      125
+    ],
+    [
+     "oumi-ai/oumi",
+     2075,
+     63
+    ],
+    [
+     "oumi-ai/oumi",
+     2016,
+     88
+    ],
+    [
+     "oumi-ai/oumi",
+     2072,
+     124
+    ],
+    [
+     "oumi-ai/oumi",
+     2100,
+     1124
+    ],
+    [
+     "oumi-ai/oumi",
+     2108,
+     1062
+    ],
+    [
+     "oumi-ai/oumi",
+     2091,
+     94
+    ],
+    [
+     "oumi-ai/oumi",
+     2140,
+     317
+    ],
+    [
+     "oumi-ai/oumi",
+     2132,
+     60
     ]
    ]
   },
@@ -2715,6 +3610,31 @@
      "flashinfer-ai/flashinfer",
      2254,
      138
+    ],
+    [
+     "flashinfer-ai/flashinfer",
+     2075,
+     445
+    ],
+    [
+     "flashinfer-ai/flashinfer",
+     1950,
+     92
+    ],
+    [
+     "flashinfer-ai/flashinfer",
+     2044,
+     555
+    ],
+    [
+     "flashinfer-ai/flashinfer",
+     2275,
+     65
+    ],
+    [
+     "apache/tvm-ffi",
+     189,
+     204
     ]
    ]
   },
@@ -2792,6 +3712,16 @@
      "spotify/confidence-resolver",
      109,
      280
+    ],
+    [
+     "spotify/confidence-resolver",
+     134,
+     353
+    ],
+    [
+     "spotify/confidence-sdk-java",
+     295,
+     200
     ]
    ]
   },
@@ -2841,6 +3771,46 @@
      "spotify/confidence-resolver",
      121,
      116
+    ],
+    [
+     "spotify/confidence-resolver",
+     147,
+     311
+    ],
+    [
+     "spotify/confidence-resolver",
+     167,
+     908
+    ],
+    [
+     "spotify/confidence-resolver",
+     141,
+     142
+    ],
+    [
+     "spotify/confidence-resolver",
+     200,
+     1217
+    ],
+    [
+     "spotify/confidence-resolver",
+     108,
+     61
+    ],
+    [
+     "spotify/confidence-resolver",
+     122,
+     66
+    ],
+    [
+     "spotify/confidence-resolver",
+     208,
+     1324
+    ],
+    [
+     "spotify/confidence-resolver",
+     69,
+     1822
     ]
    ]
   },
@@ -3144,6 +4114,46 @@
      "langgenius/dify",
      28463,
      109
+    ],
+    [
+     "langgenius/dify",
+     29713,
+     287
+    ],
+    [
+     "langgenius/dify",
+     28823,
+     144
+    ],
+    [
+     "langgenius/dify",
+     30232,
+     1089
+    ],
+    [
+     "langgenius/dify",
+     29417,
+     85
+    ],
+    [
+     "langgenius/dify",
+     29803,
+     345
+    ],
+    [
+     "langgenius/dify",
+     29791,
+     166
+    ],
+    [
+     "langgenius/dify",
+     27319,
+     427
+    ],
+    [
+     "langgenius/dify",
+     29172,
+     340
     ]
    ]
   },
@@ -3193,6 +4203,11 @@
      "promptfoo/promptfoo",
      6509,
      70
+    ],
+    [
+     "promptfoo/promptfoo",
+     5912,
+     429
     ]
    ]
   },
@@ -3304,6 +4319,31 @@
      "lance-format/lance",
      4873,
      89
+    ],
+    [
+     "lance-format/lance",
+     5606,
+     449
+    ],
+    [
+     "lancedb/lancedb",
+     2694,
+     102
+    ],
+    [
+     "lance-format/lance",
+     5228,
+     627
+    ],
+    [
+     "lance-format/lance",
+     5609,
+     341
+    ],
+    [
+     "lance-format/lance",
+     5428,
+     173
     ]
    ]
   },
@@ -3353,6 +4393,46 @@
      "lance-format/lance",
      5236,
      130
+    ],
+    [
+     "lance-format/lance",
+     5483,
+     274
+    ],
+    [
+     "lancedb/lancedb",
+     2710,
+     58
+    ],
+    [
+     "lancedb/lancedb",
+     2881,
+     123
+    ],
+    [
+     "lancedb/lancedb",
+     2765,
+     61
+    ],
+    [
+     "lance-format/lance",
+     5173,
+     345
+    ],
+    [
+     "lancedb/lancedb",
+     2754,
+     248
+    ],
+    [
+     "lance-format/lance",
+     5597,
+     218
+    ],
+    [
+     "lance-format/lance",
+     5543,
+     265
     ]
    ]
   },
@@ -3464,6 +4544,46 @@
      "onyx-dot-app/documentation",
      250,
      89
+    ],
+    [
+     "onyx-dot-app/documentation",
+     263,
+     97
+    ],
+    [
+     "onyx-dot-app/onyx",
+     6022,
+     75
+    ],
+    [
+     "onyx-dot-app/onyx",
+     5908,
+     194
+    ],
+    [
+     "onyx-dot-app/onyx",
+     6047,
+     802
+    ],
+    [
+     "onyx-dot-app/onyx",
+     6285,
+     462
+    ],
+    [
+     "onyx-dot-app/onyx",
+     6611,
+     169
+    ],
+    [
+     "onyx-dot-app/documentation",
+     268,
+     100
+    ],
+    [
+     "onyx-dot-app/onyx",
+     7084,
+     432
     ]
    ]
   },
@@ -3527,6 +4647,46 @@
      "milvus-io/milvus",
      45524,
      1759
+    ],
+    [
+     "milvus-io/milvus",
+     45146,
+     754
+    ],
+    [
+     "milvus-io/milvus",
+     45948,
+     421
+    ],
+    [
+     "milvus-io/milvus",
+     44794,
+     176
+    ],
+    [
+     "zilliztech/milvus-backup",
+     819,
+     396
+    ],
+    [
+     "milvus-io/milvus",
+     46232,
+     276
+    ],
+    [
+     "milvus-io/milvus",
+     46237,
+     1232
+    ],
+    [
+     "zilliztech/milvus-backup",
+     822,
+     86
+    ],
+    [
+     "milvus-io/milvus",
+     46671,
+     123
     ]
    ]
   },
@@ -3590,6 +4750,11 @@
      "ray-project/ray",
      58493,
      158
+    ],
+    [
+     "ray-project/ray",
+     59430,
+     525
     ]
    ]
   },
@@ -3731,6 +4896,46 @@
      "langfuse/langfuse",
      10401,
      70
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2359,
+     177
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2158,
+     720
+    ],
+    [
+     "langfuse/langfuse",
+     10191,
+     64
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2256,
+     269
+    ],
+    [
+     "langfuse/langfuse",
+     10169,
+     52
+    ],
+    [
+     "langfuse/langfuse",
+     10356,
+     120
+    ],
+    [
+     "langfuse/langfuse",
+     10346,
+     138
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2183,
+     381
     ]
    ]
   },
@@ -3822,6 +5027,46 @@
      "HelixDB/helix-db",
      771,
      172
+    ],
+    [
+     "HelixDB/helix-db",
+     765,
+     497
+    ],
+    [
+     "HelixDB/helix-db",
+     722,
+     1255
+    ],
+    [
+     "HelixDB/helix-db",
+     750,
+     108
+    ],
+    [
+     "HelixDB/helix-db",
+     736,
+     537
+    ],
+    [
+     "HelixDB/helix-db",
+     674,
+     656
+    ],
+    [
+     "HelixDB/helix-db",
+     702,
+     171
+    ],
+    [
+     "HelixDB/helix-db",
+     647,
+     112
+    ],
+    [
+     "HelixDB/helix-db",
+     691,
+     672
     ]
    ]
   },
@@ -3905,6 +5150,46 @@
      "promptfoo/promptfoo",
      6095,
      800
+    ],
+    [
+     "promptfoo/promptfoo",
+     5813,
+     151
+    ],
+    [
+     "promptfoo/promptfoo",
+     6189,
+     177
+    ],
+    [
+     "promptfoo/promptfoo",
+     6461,
+     181
+    ],
+    [
+     "promptfoo/promptfoo",
+     6522,
+     197
+    ],
+    [
+     "promptfoo/promptfoo",
+     6101,
+     294
+    ],
+    [
+     "promptfoo/promptfoo",
+     6595,
+     172
+    ],
+    [
+     "promptfoo/promptfoo",
+     6123,
+     401
+    ],
+    [
+     "promptfoo/promptfoo",
+     5979,
+     1271
     ]
    ]
   },
@@ -4001,6 +5286,41 @@
      "sgl-project/sglang",
      13462,
      856
+    ],
+    [
+     "sgl-project/sglang",
+     13104,
+     1107
+    ],
+    [
+     "sgl-project/sglang",
+     15055,
+     1852
+    ],
+    [
+     "sgl-project/sglang",
+     14845,
+     100
+    ],
+    [
+     "sgl-project/sglang",
+     14778,
+     65
+    ],
+    [
+     "sgl-project/sglang",
+     15185,
+     116
+    ],
+    [
+     "sgl-project/sglang",
+     13558,
+     1204
+    ],
+    [
+     "sgl-project/sglang",
+     13890,
+     357
     ]
    ]
   },
@@ -4099,6 +5419,46 @@
      "openai/codex",
      6606,
      692
+    ],
+    [
+     "openai/codex",
+     5287,
+     364
+    ],
+    [
+     "openai/codex",
+     4700,
+     57
+    ],
+    [
+     "openai/codex",
+     8349,
+     567
+    ],
+    [
+     "openai/codex",
+     7561,
+     190
+    ],
+    [
+     "openai/codex",
+     5899,
+     823
+    ],
+    [
+     "openai/codex",
+     7835,
+     179
+    ],
+    [
+     "openai/codex",
+     4845,
+     679
+    ],
+    [
+     "openai/codex",
+     5257,
+     764
     ]
    ]
   },
@@ -4339,6 +5699,46 @@
      "mlflow/mlflow",
      19634,
      740
+    ],
+    [
+     "mlflow/mlflow",
+     18640,
+     1822
+    ],
+    [
+     "mlflow/mlflow",
+     18280,
+     100
+    ],
+    [
+     "mlflow/mlflow",
+     19448,
+     421
+    ],
+    [
+     "mlflow/mlflow",
+     19270,
+     135
+    ],
+    [
+     "mlflow/mlflow",
+     19191,
+     1057
+    ],
+    [
+     "mlflow/mlflow",
+     19315,
+     641
+    ],
+    [
+     "mlflow/mlflow",
+     19578,
+     1471
+    ],
+    [
+     "mlflow/mlflow",
+     19330,
+     810
     ]
    ]
   },
@@ -4465,6 +5865,46 @@
      "OpenHands/OpenHands",
      12197,
      113
+    ],
+    [
+     "OpenHands/OpenHands",
+     12090,
+     812
+    ],
+    [
+     "OpenHands/OpenHands",
+     12224,
+     300
+    ],
+    [
+     "OpenHands/OpenHands",
+     11994,
+     51
+    ],
+    [
+     "OpenHands/OpenHands",
+     11703,
+     225
+    ],
+    [
+     "OpenHands/OpenHands",
+     11990,
+     418
+    ],
+    [
+     "OpenHands/OpenHands",
+     11748,
+     307
+    ],
+    [
+     "OpenHands/OpenHands",
+     11457,
+     187
+    ],
+    [
+     "OpenHands/OpenHands",
+     11879,
+     872
     ]
    ]
   },
@@ -4528,6 +5968,11 @@
      "Significant-Gravitas/AutoGPT",
      11306,
      612
+    ],
+    [
+     "Significant-Gravitas/AutoGPT",
+     11634,
+     59
     ]
    ]
   },
@@ -4577,6 +6022,36 @@
      "PrefectHQ/terraform-provider-prefect",
      591,
      80
+    ],
+    [
+     "PrefectHQ/terraform-provider-prefect",
+     620,
+     105
+    ],
+    [
+     "PrefectHQ/prefect-helm",
+     560,
+     133
+    ],
+    [
+     "PrefectHQ/terraform-provider-prefect",
+     616,
+     373
+    ],
+    [
+     "PrefectHQ/terraform-provider-prefect",
+     614,
+     143
+    ],
+    [
+     "PrefectHQ/terraform-provider-prefect",
+     594,
+     58
+    ],
+    [
+     "PrefectHQ/prefect-operator",
+     232,
+     139
     ]
    ]
   },
@@ -4682,6 +6157,46 @@
      "NVIDIA/Fuser",
      5328,
      1392
+    ],
+    [
+     "NVIDIA/Fuser",
+     5645,
+     106
+    ],
+    [
+     "NVIDIA/Fuser",
+     5317,
+     118
+    ],
+    [
+     "NVIDIA/Fuser",
+     5716,
+     733
+    ],
+    [
+     "NVIDIA/Fuser",
+     5674,
+     374
+    ],
+    [
+     "NVIDIA/Fuser",
+     5414,
+     87
+    ],
+    [
+     "NVIDIA/Fuser",
+     5704,
+     278
+    ],
+    [
+     "NVIDIA/Fuser",
+     5671,
+     432
+    ],
+    [
+     "NVIDIA/Fuser",
+     5478,
+     83
     ]
    ]
   },
@@ -4774,6 +6289,46 @@
      "langfuse/langfuse",
      10154,
      1337
+    ],
+    [
+     "langfuse/langfuse",
+     10640,
+     305
+    ],
+    [
+     "langfuse/langfuse",
+     10622,
+     1799
+    ],
+    [
+     "langfuse/langfuse",
+     10046,
+     60
+    ],
+    [
+     "langfuse/langfuse",
+     10120,
+     829
+    ],
+    [
+     "langfuse/langfuse",
+     10620,
+     54
+    ],
+    [
+     "langfuse/langfuse",
+     10581,
+     1399
+    ],
+    [
+     "langfuse/langfuse",
+     11119,
+     84
+    ],
+    [
+     "langfuse/langfuse",
+     10651,
+     365
     ]
    ]
   },
@@ -4823,6 +6378,46 @@
      "langfuse/langfuse",
      10847,
      76
+    ],
+    [
+     "langfuse/langfuse",
+     9641,
+     115
+    ],
+    [
+     "langfuse/langfuse",
+     10755,
+     593
+    ],
+    [
+     "langfuse/langfuse",
+     9500,
+     95
+    ],
+    [
+     "langfuse/langfuse",
+     10753,
+     63
+    ],
+    [
+     "langfuse/langfuse",
+     9467,
+     226
+    ],
+    [
+     "langfuse/langfuse",
+     9623,
+     225
+    ],
+    [
+     "langfuse/langfuse",
+     10104,
+     70
+    ],
+    [
+     "langfuse/langfuse",
+     9685,
+     402
     ]
    ]
   },
@@ -4959,6 +6554,46 @@
      "tenstorrent/tt-metal",
      34957,
      177
+    ],
+    [
+     "tenstorrent/tt-metal",
+     33889,
+     187
+    ],
+    [
+     "tenstorrent/tt-metal",
+     33999,
+     869
+    ],
+    [
+     "tenstorrent/tt-metal",
+     33389,
+     190
+    ],
+    [
+     "tenstorrent/tt-metal",
+     33331,
+     348
+    ],
+    [
+     "tenstorrent/tt-metal",
+     31649,
+     89
+    ],
+    [
+     "tenstorrent/tt-metal",
+     35203,
+     641
+    ],
+    [
+     "tenstorrent/tt-metal",
+     31912,
+     64
+    ],
+    [
+     "tenstorrent/tt-metal",
+     34589,
+     1242
     ]
    ]
   },
@@ -5022,6 +6657,46 @@
      "comet-ml/opik",
      4129,
      59
+    ],
+    [
+     "comet-ml/opik",
+     4418,
+     1099
+    ],
+    [
+     "comet-ml/opik",
+     4347,
+     361
+    ],
+    [
+     "comet-ml/opik",
+     4088,
+     96
+    ],
+    [
+     "comet-ml/opik",
+     4495,
+     504
+    ],
+    [
+     "comet-ml/opik",
+     4235,
+     795
+    ],
+    [
+     "comet-ml/opik",
+     3637,
+     127
+    ],
+    [
+     "comet-ml/opik",
+     3871,
+     233
+    ],
+    [
+     "comet-ml/opik",
+     3746,
+     1365
     ]
    ]
   },
@@ -5085,6 +6760,46 @@
      "onyx-dot-app/onyx",
      6788,
      62
+    ],
+    [
+     "onyx-dot-app/onyx",
+     6846,
+     193
+    ],
+    [
+     "onyx-dot-app/onyx",
+     7041,
+     923
+    ],
+    [
+     "onyx-dot-app/onyx",
+     7144,
+     497
+    ],
+    [
+     "onyx-dot-app/onyx",
+     6968,
+     161
+    ],
+    [
+     "onyx-dot-app/onyx",
+     7044,
+     190
+    ],
+    [
+     "onyx-dot-app/onyx",
+     6971,
+     684
+    ],
+    [
+     "onyx-dot-app/onyx",
+     6544,
+     265
+    ],
+    [
+     "onyx-dot-app/onyx",
+     7145,
+     360
     ]
    ]
   },
@@ -5168,6 +6883,46 @@
      "langfuse/langfuse",
      10310,
      305
+    ],
+    [
+     "langfuse/langfuse",
+     10463,
+     135
+    ],
+    [
+     "langfuse/langfuse",
+     11102,
+     61
+    ],
+    [
+     "langfuse/langfuse",
+     10884,
+     181
+    ],
+    [
+     "langfuse/langfuse",
+     9816,
+     229
+    ],
+    [
+     "langfuse/langfuse",
+     10382,
+     54
+    ],
+    [
+     "langfuse/langfuse",
+     11130,
+     96
+    ],
+    [
+     "langfuse/langfuse",
+     9686,
+     292
+    ],
+    [
+     "langfuse/langfuse",
+     9756,
+     89
     ]
    ]
   },
@@ -5261,6 +7016,46 @@
      "openai/codex",
      6692,
      794
+    ],
+    [
+     "openai/codex",
+     6683,
+     614
+    ],
+    [
+     "openai/codex",
+     8232,
+     306
+    ],
+    [
+     "openai/codex",
+     4626,
+     1832
+    ],
+    [
+     "openai/codex",
+     4740,
+     114
+    ],
+    [
+     "openai/codex",
+     8488,
+     441
+    ],
+    [
+     "openai/codex",
+     6842,
+     1035
+    ],
+    [
+     "openai/codex",
+     7303,
+     428
+    ],
+    [
+     "openai/codex",
+     8346,
+     88
     ]
    ]
   },
@@ -5324,6 +7119,26 @@
      "PrimeIntellect-ai/research-environments",
      34,
      273
+    ],
+    [
+     "PrimeIntellect-ai/community-environments",
+     431,
+     1487
+    ],
+    [
+     "PrimeIntellect-ai/community-environments",
+     446,
+     62
+    ],
+    [
+     "PrimeIntellect-ai/community-environments",
+     433,
+     564
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     1374,
+     620
     ]
    ]
   },
@@ -5604,6 +7419,16 @@
      "huggingface/OpenEnv",
      354,
      77
+    ],
+    [
+     "huggingface/OpenEnv",
+     314,
+     76
+    ],
+    [
+     "huggingface/trl",
+     5123,
+     1466
     ]
    ]
   },
@@ -5744,6 +7569,26 @@
      "milvus-io/milvus",
      47633,
      1041
+    ],
+    [
+     "milvus-io/milvus",
+     48343,
+     1748
+    ],
+    [
+     "milvus-io/milvus",
+     47588,
+     173
+    ],
+    [
+     "milvus-io/milvus",
+     47615,
+     95
+    ],
+    [
+     "milvus-io/milvus",
+     47609,
+     683
     ]
    ]
   },
@@ -6189,6 +8034,46 @@
      "BerriAI/litellm",
      20725,
      90
+    ],
+    [
+     "BerriAI/litellm",
+     19102,
+     518
+    ],
+    [
+     "BerriAI/litellm",
+     18782,
+     66
+    ],
+    [
+     "BerriAI/litellm",
+     21136,
+     64
+    ],
+    [
+     "BerriAI/litellm",
+     23493,
+     119
+    ],
+    [
+     "BerriAI/litellm",
+     21043,
+     329
+    ],
+    [
+     "BerriAI/litellm",
+     20705,
+     150
+    ],
+    [
+     "BerriAI/litellm",
+     20986,
+     124
+    ],
+    [
+     "BerriAI/litellm",
+     19527,
+     90
     ]
    ]
   },
@@ -6381,6 +8266,46 @@
      "aaif-goose/goose",
      7843,
      635
+    ],
+    [
+     "aaif-goose/goose",
+     7122,
+     93
+    ],
+    [
+     "aaif-goose/goose",
+     7576,
+     486
+    ],
+    [
+     "aaif-goose/goose",
+     6356,
+     118
+    ],
+    [
+     "aaif-goose/goose",
+     7994,
+     730
+    ],
+    [
+     "aaif-goose/goose",
+     6666,
+     327
+    ],
+    [
+     "aaif-goose/goose",
+     6665,
+     182
+    ],
+    [
+     "aaif-goose/goose",
+     7653,
+     65
+    ],
+    [
+     "aaif-goose/goose",
+     8076,
+     281
     ]
    ]
   },
@@ -6506,6 +8431,46 @@
      "OpenHands/OpenHands",
      12264,
      882
+    ],
+    [
+     "OpenHands/OpenHands",
+     13019,
+     364
+    ],
+    [
+     "OpenHands/OpenHands",
+     13064,
+     75
+    ],
+    [
+     "OpenHands/OpenHands",
+     12820,
+     215
+    ],
+    [
+     "OpenHands/OpenHands",
+     12280,
+     231
+    ],
+    [
+     "OpenHands/OpenHands",
+     12711,
+     242
+    ],
+    [
+     "OpenHands/OpenHands",
+     13610,
+     288
+    ],
+    [
+     "OpenHands/OpenHands",
+     13160,
+     86
+    ],
+    [
+     "OpenHands/OpenHands",
+     12739,
+     388
     ]
    ]
   },
@@ -6555,6 +8520,41 @@
      "OpenHands/OpenHands",
      12956,
      620
+    ],
+    [
+     "OpenHands/OpenHands",
+     12562,
+     102
+    ],
+    [
+     "OpenHands/OpenHands",
+     13279,
+     455
+    ],
+    [
+     "OpenHands/OpenHands",
+     12460,
+     113
+    ],
+    [
+     "OpenHands/OpenHands",
+     13248,
+     1207
+    ],
+    [
+     "OpenHands/OpenHands",
+     13365,
+     84
+    ],
+    [
+     "OpenHands/OpenHands",
+     12269,
+     583
+    ],
+    [
+     "OpenHands/OpenHands",
+     12438,
+     173
     ]
    ]
   },
@@ -6628,6 +8628,46 @@
      "langfuse/langfuse-docs",
      2584,
      54
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2476,
+     52
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2659,
+     97
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2680,
+     72
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2674,
+     55
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2483,
+     57
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2449,
+     885
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2700,
+     173
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2602,
+     125
     ]
    ]
   },
@@ -6691,6 +8731,11 @@
      "NVIDIA/NemoClaw",
      1037,
      92
+    ],
+    [
+     "NVIDIA/NemoClaw",
+     1187,
+     1123
     ]
    ]
   },
@@ -6740,6 +8785,46 @@
      "PrefectHQ/prefect",
      21010,
      132
+    ],
+    [
+     "PrefectHQ/prefect",
+     20789,
+     119
+    ],
+    [
+     "PrefectHQ/prefect",
+     21134,
+     1128
+    ],
+    [
+     "PrefectHQ/prefect",
+     20606,
+     528
+    ],
+    [
+     "PrefectHQ/prefect",
+     20829,
+     562
+    ],
+    [
+     "PrefectHQ/prefect",
+     21051,
+     769
+    ],
+    [
+     "PrefectHQ/prefect",
+     20667,
+     77
+    ],
+    [
+     "PrefectHQ/canary-flows",
+     9,
+     362
+    ],
+    [
+     "PrefectHQ/prefect",
+     20589,
+     735
     ]
    ]
   },
@@ -6818,6 +8903,46 @@
      "mlflow/mlflow",
      20443,
      1090
+    ],
+    [
+     "mlflow/mlflow",
+     22212,
+     56
+    ],
+    [
+     "mlflow/mlflow",
+     20285,
+     178
+    ],
+    [
+     "mlflow/mlflow",
+     21336,
+     99
+    ],
+    [
+     "mlflow/mlflow",
+     21846,
+     57
+    ],
+    [
+     "mlflow/mlflow",
+     21115,
+     374
+    ],
+    [
+     "mlflow/mlflow",
+     20708,
+     112
+    ],
+    [
+     "mlflow/mlflow",
+     20526,
+     247
+    ],
+    [
+     "mlflow/mlflow",
+     20998,
+     68
     ]
    ]
   },
@@ -6867,6 +8992,46 @@
      "mlflow/mlflow",
      20438,
      66
+    ],
+    [
+     "mlflow/mlflow",
+     20478,
+     269
+    ],
+    [
+     "mlflow/mlflow",
+     20289,
+     772
+    ],
+    [
+     "mlflow/mlflow",
+     20444,
+     94
+    ],
+    [
+     "mlflow/mlflow",
+     20213,
+     72
+    ],
+    [
+     "mlflow/mlflow",
+     20418,
+     92
+    ],
+    [
+     "mlflow/mlflow",
+     20453,
+     179
+    ],
+    [
+     "mlflow/mlflow",
+     21764,
+     360
+    ],
+    [
+     "mlflow/mlflow",
+     19729,
+     224
     ]
    ]
   },
@@ -7001,6 +9166,41 @@
      "0xPlaygrounds/rig",
      1510,
      76
+    ],
+    [
+     "coze-dev/coze-loop",
+     462,
+     68
+    ],
+    [
+     "vllm-project/vllm",
+     36216,
+     98
+    ],
+    [
+     "langgenius/dify",
+     34285,
+     78
+    ],
+    [
+     "langgenius/dify",
+     34226,
+     89
+    ],
+    [
+     "0xPlaygrounds/rig",
+     1511,
+     77
+    ],
+    [
+     "run-llama/llama_index",
+     20451,
+     59
+    ],
+    [
+     "langgenius/dify",
+     31770,
+     285
     ]
    ]
   },
@@ -7064,6 +9264,46 @@
      "huggingface/lerobot",
      2964,
      1022
+    ],
+    [
+     "huggingface/lerobot",
+     2766,
+     80
+    ],
+    [
+     "huggingface/lerobot",
+     2763,
+     883
+    ],
+    [
+     "huggingface/lerobot",
+     2820,
+     124
+    ],
+    [
+     "huggingface/lerobot",
+     2767,
+     80
+    ],
+    [
+     "huggingface/lerobot",
+     2783,
+     419
+    ],
+    [
+     "huggingface/lerobot",
+     3170,
+     194
+    ],
+    [
+     "huggingface/lerobot",
+     2835,
+     471
+    ],
+    [
+     "huggingface/lerobot",
+     2795,
+     1151
     ]
    ]
   },
@@ -7142,6 +9382,21 @@
      "NVIDIA/NeMo-Retriever",
      1307,
      696
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     1544,
+     458
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     1504,
+     316
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     1489,
+     478
     ]
    ]
   },
@@ -7263,6 +9518,46 @@
      "langchain-ai/open-swe",
      1057,
      91
+    ],
+    [
+     "langchain-ai/open-swe",
+     1048,
+     96
+    ],
+    [
+     "langchain-ai/open-swe",
+     955,
+     89
+    ],
+    [
+     "langchain-ai/open-swe",
+     994,
+     328
+    ],
+    [
+     "langchain-ai/open-swe",
+     902,
+     247
+    ],
+    [
+     "langchain-ai/open-swe",
+     952,
+     90
+    ],
+    [
+     "langchain-ai/deepagents",
+     1020,
+     695
+    ],
+    [
+     "langchain-ai/open-swe",
+     1028,
+     132
+    ],
+    [
+     "langchain-ai/open-swe",
+     956,
+     179
     ]
    ]
   },
@@ -7341,6 +9636,46 @@
      "mlflow/mlflow",
      19759,
      237
+    ],
+    [
+     "mlflow/mlflow",
+     19716,
+     1067
+    ],
+    [
+     "mlflow/mlflow",
+     20097,
+     80
+    ],
+    [
+     "mlflow/mlflow",
+     20100,
+     95
+    ],
+    [
+     "mlflow/mlflow",
+     19717,
+     469
+    ],
+    [
+     "mlflow/mlflow",
+     19719,
+     98
+    ],
+    [
+     "mlflow/mlflow",
+     19710,
+     447
+    ],
+    [
+     "mlflow/mlflow",
+     19711,
+     364
+    ],
+    [
+     "mlflow/mlflow",
+     20132,
+     118
     ]
    ]
   },
@@ -7414,6 +9749,36 @@
      "huggingface/speech-to-speech",
      176,
      84
+    ],
+    [
+     "huggingface/speech-to-speech",
+     201,
+     135
+    ],
+    [
+     "huggingface/speech-to-speech",
+     200,
+     136
+    ],
+    [
+     "huggingface/speech-to-speech",
+     179,
+     551
+    ],
+    [
+     "huggingface/speech-to-speech",
+     194,
+     107
+    ],
+    [
+     "huggingface/speech-to-speech",
+     207,
+     164
+    ],
+    [
+     "huggingface/speech-to-speech",
+     209,
+     95
     ]
    ]
   },
@@ -7482,6 +9847,16 @@
      "NVIDIA-NeMo/Export-Deploy",
      555,
      602
+    ],
+    [
+     "NVIDIA-NeMo/Export-Deploy",
+     608,
+     334
+    ],
+    [
+     "NVIDIA-NeMo/Export-Deploy",
+     584,
+     308
     ]
    ]
   },
@@ -7545,6 +9920,16 @@
      "langchain-ai/docs",
      2874,
      118
+    ],
+    [
+     "langchain-ai/helm",
+     596,
+     186
+    ],
+    [
+     "langchain-ai/helm",
+     604,
+     50
     ]
    ]
   },
@@ -7613,6 +9998,46 @@
      "mem0ai/mem0",
      4564,
      481
+    ],
+    [
+     "mem0ai/mem0",
+     4405,
+     400
+    ],
+    [
+     "mem0ai/mem0",
+     4500,
+     401
+    ],
+    [
+     "mem0ai/mem0",
+     4566,
+     170
+    ],
+    [
+     "mem0ai/mem0",
+     4570,
+     50
+    ],
+    [
+     "mem0ai/mem0",
+     4455,
+     134
+    ],
+    [
+     "mem0ai/mem0",
+     4572,
+     227
+    ],
+    [
+     "mem0ai/mem0",
+     4320,
+     83
+    ],
+    [
+     "mem0ai/mem0",
+     4400,
+     238
     ]
    ]
   },
@@ -7686,6 +10111,46 @@
      "NVIDIA/OSMO",
      631,
      111
+    ],
+    [
+     "NVIDIA/OSMO",
+     312,
+     115
+    ],
+    [
+     "NVIDIA/OSMO",
+     251,
+     446
+    ],
+    [
+     "NVIDIA/OSMO",
+     655,
+     120
+    ],
+    [
+     "NVIDIA/OSMO",
+     284,
+     443
+    ],
+    [
+     "NVIDIA/OSMO",
+     576,
+     237
+    ],
+    [
+     "NVIDIA/OSMO",
+     701,
+     120
+    ],
+    [
+     "NVIDIA/OSMO",
+     419,
+     156
+    ],
+    [
+     "NVIDIA/OSMO",
+     516,
+     77
     ]
    ]
   },
@@ -7749,6 +10214,46 @@
      "apache/airflow",
      62584,
      52
+    ],
+    [
+     "apache/airflow",
+     63769,
+     256
+    ],
+    [
+     "apache/airflow",
+     62824,
+     60
+    ],
+    [
+     "apache/airflow",
+     62746,
+     183
+    ],
+    [
+     "apache/airflow",
+     63322,
+     1316
+    ],
+    [
+     "apache/airflow",
+     62901,
+     825
+    ],
+    [
+     "apache/airflow",
+     64234,
+     62
+    ],
+    [
+     "apache/airflow",
+     64199,
+     1163
+    ],
+    [
+     "apache/airflow",
+     62089,
+     54
     ]
    ]
   },
@@ -7995,6 +10500,46 @@
      "onyx-dot-app/onyx",
      8097,
      222
+    ],
+    [
+     "onyx-dot-app/onyx",
+     8284,
+     367
+    ],
+    [
+     "onyx-dot-app/onyx",
+     8008,
+     722
+    ],
+    [
+     "onyx-dot-app/onyx",
+     8291,
+     78
+    ],
+    [
+     "onyx-dot-app/onyx",
+     8173,
+     913
+    ],
+    [
+     "onyx-dot-app/onyx",
+     8009,
+     615
+    ],
+    [
+     "onyx-dot-app/onyx",
+     9137,
+     408
+    ],
+    [
+     "onyx-dot-app/onyx",
+     7575,
+     292
+    ],
+    [
+     "onyx-dot-app/onyx",
+     8348,
+     626
     ]
    ]
   },
@@ -8044,6 +10589,46 @@
      "onyx-dot-app/onyx",
      9376,
      1212
+    ],
+    [
+     "onyx-dot-app/onyx",
+     9011,
+     193
+    ],
+    [
+     "onyx-dot-app/onyx",
+     7511,
+     457
+    ],
+    [
+     "onyx-dot-app/onyx",
+     9528,
+     423
+    ],
+    [
+     "onyx-dot-app/onyx",
+     9334,
+     269
+    ],
+    [
+     "onyx-dot-app/onyx",
+     8779,
+     246
+    ],
+    [
+     "onyx-dot-app/onyx",
+     7971,
+     754
+    ],
+    [
+     "onyx-dot-app/onyx",
+     7730,
+     272
+    ],
+    [
+     "onyx-dot-app/onyx",
+     8983,
+     163
     ]
    ]
   },
@@ -8093,6 +10678,41 @@
      "huggingface/huggingface_hub",
      3952,
      441
+    ],
+    [
+     "huggingface/lerobot-dataset-visualizer",
+     23,
+     1399
+    ],
+    [
+     "huggingface/lerobot-dataset-visualizer",
+     18,
+     951
+    ],
+    [
+     "huggingface/lerobot-dataset-visualizer",
+     39,
+     118
+    ],
+    [
+     "huggingface/lerobot-dataset-visualizer",
+     24,
+     1135
+    ],
+    [
+     "huggingface/lerobot-dataset-visualizer",
+     19,
+     59
+    ],
+    [
+     "huggingface/doc-builder",
+     754,
+     1793
+    ],
+    [
+     "huggingface/lerobot-dataset-visualizer",
+     43,
+     111
     ]
    ]
   },
@@ -8142,6 +10762,46 @@
      "huggingface/doc-builder",
      717,
      65
+    ],
+    [
+     "huggingface/doc-builder",
+     747,
+     89
+    ],
+    [
+     "huggingface/hub-docs",
+     2157,
+     108
+    ],
+    [
+     "huggingface/doc-builder",
+     711,
+     56
+    ],
+    [
+     "huggingface/doc-builder",
+     715,
+     66
+    ],
+    [
+     "huggingface/hub-docs",
+     2308,
+     131
+    ],
+    [
+     "huggingface/doc-builder",
+     748,
+     92
+    ],
+    [
+     "huggingface/lerobot-dataset-visualizer",
+     30,
+     187
+    ],
+    [
+     "huggingface/doc-builder",
+     718,
+     73
     ]
    ]
   },
@@ -8219,6 +10879,16 @@
      "Helicone/helicone",
      5595,
      290
+    ],
+    [
+     "Helicone/helicone",
+     5584,
+     70
+    ],
+    [
+     "Helicone/helicone",
+     5571,
+     126
     ]
    ]
   },
@@ -8268,6 +10938,16 @@
      "Helicone/helicone",
      5548,
      698
+    ],
+    [
+     "Helicone/helicone",
+     5546,
+     174
+    ],
+    [
+     "Helicone/helicone",
+     5484,
+     163
     ]
    ]
   },
@@ -8364,6 +11044,46 @@
      "allenai/rslearn",
      456,
      814
+    ],
+    [
+     "allenai/rslearn",
+     518,
+     689
+    ],
+    [
+     "allenai/rslearn",
+     538,
+     576
+    ],
+    [
+     "allenai/olmoearth_pretrain",
+     507,
+     129
+    ],
+    [
+     "allenai/rslearn",
+     462,
+     89
+    ],
+    [
+     "allenai/rslearn",
+     546,
+     926
+    ],
+    [
+     "allenai/rslearn_projects",
+     277,
+     1629
+    ],
+    [
+     "allenai/rslearn",
+     506,
+     1013
+    ],
+    [
+     "allenai/olmoearth_pretrain",
+     498,
+     254
     ]
    ]
   },
@@ -8462,6 +11182,46 @@
      "onyx-dot-app/onyx",
      8264,
      342
+    ],
+    [
+     "onyx-dot-app/onyx",
+     9548,
+     356
+    ],
+    [
+     "onyx-dot-app/onyx",
+     8425,
+     194
+    ],
+    [
+     "onyx-dot-app/onyx",
+     8580,
+     290
+    ],
+    [
+     "onyx-dot-app/onyx",
+     8294,
+     1223
+    ],
+    [
+     "onyx-dot-app/onyx",
+     8133,
+     208
+    ],
+    [
+     "onyx-dot-app/onyx",
+     9020,
+     962
+    ],
+    [
+     "onyx-dot-app/onyx",
+     8623,
+     193
+    ],
+    [
+     "onyx-dot-app/onyx",
+     7568,
+     1603
     ]
    ]
   },
@@ -8511,6 +11271,46 @@
      "milvus-io/milvus",
      47853,
      174
+    ],
+    [
+     "zilliztech/VectorDBBench",
+     731,
+     130
+    ],
+    [
+     "milvus-io/milvus",
+     47862,
+     64
+    ],
+    [
+     "milvus-io/milvus",
+     47943,
+     170
+    ],
+    [
+     "milvus-io/milvus",
+     48286,
+     1493
+    ],
+    [
+     "milvus-io/milvus",
+     47852,
+     184
+    ],
+    [
+     "milvus-io/milvus",
+     48480,
+     126
+    ],
+    [
+     "milvus-io/milvus",
+     48353,
+     67
+    ],
+    [
+     "milvus-io/milvus",
+     47561,
+     52
     ]
    ]
   },
@@ -8694,6 +11494,26 @@
      "huggingface/transformers",
      43893,
      102
+    ],
+    [
+     "huggingface/transformers",
+     43261,
+     1060
+    ],
+    [
+     "huggingface/tokenizers",
+     2002,
+     85
+    ],
+    [
+     "huggingface/transformers",
+     43730,
+     207
+    ],
+    [
+     "huggingface/tokenizers",
+     1995,
+     880
     ]
    ]
   },
@@ -8776,6 +11596,21 @@
      "apache/doris",
      59990,
      480
+    ],
+    [
+     "apache/doris",
+     60513,
+     1053
+    ],
+    [
+     "apache/doris",
+     61233,
+     558
+    ],
+    [
+     "apache/doris",
+     61332,
+     1921
     ]
    ]
   },
@@ -8969,6 +11804,31 @@
      "Eventual-Inc/Daft",
      6046,
      71
+    ],
+    [
+     "Eventual-Inc/Daft",
+     5989,
+     419
+    ],
+    [
+     "Eventual-Inc/Daft",
+     5971,
+     951
+    ],
+    [
+     "Eventual-Inc/Daft",
+     6010,
+     198
+    ],
+    [
+     "Eventual-Inc/Daft",
+     5999,
+     931
+    ],
+    [
+     "Eventual-Inc/Daft",
+     6043,
+     143
     ]
    ]
   },
@@ -9018,6 +11878,26 @@
      "NVIDIA-NeMo/Safe-Synthesizer",
      107,
      108
+    ],
+    [
+     "NVIDIA-NeMo/Safe-Synthesizer",
+     84,
+     428
+    ],
+    [
+     "NVIDIA-NeMo/Safe-Synthesizer",
+     87,
+     72
+    ],
+    [
+     "NVIDIA-NeMo/Safe-Synthesizer",
+     116,
+     169
+    ],
+    [
+     "NVIDIA-NeMo/Safe-Synthesizer",
+     27,
+     118
     ]
    ]
   },
@@ -9067,6 +11947,46 @@
      "NVIDIA-NeMo/Safe-Synthesizer",
      163,
      511
+    ],
+    [
+     "NVIDIA-NeMo/Safe-Synthesizer",
+     152,
+     292
+    ],
+    [
+     "NVIDIA-NeMo/Safe-Synthesizer",
+     144,
+     182
+    ],
+    [
+     "NVIDIA-NeMo/Safe-Synthesizer",
+     53,
+     212
+    ],
+    [
+     "NVIDIA-NeMo/Safe-Synthesizer",
+     44,
+     120
+    ],
+    [
+     "NVIDIA-NeMo/Safe-Synthesizer",
+     7,
+     1100
+    ],
+    [
+     "NVIDIA-NeMo/Safe-Synthesizer",
+     3,
+     972
+    ],
+    [
+     "NVIDIA-NeMo/Safe-Synthesizer",
+     1,
+     173
+    ],
+    [
+     "NVIDIA-NeMo/Anonymizer",
+     51,
+     1677
     ]
    ]
   },
@@ -9178,6 +12098,46 @@
      "mozilla/experimenter",
      14853,
      311
+    ],
+    [
+     "mozilla/experimenter",
+     14822,
+     405
+    ],
+    [
+     "mozilla/application-services",
+     7160,
+     262
+    ],
+    [
+     "mozilla/experimenter",
+     14651,
+     450
+    ],
+    [
+     "mozilla/experimenter",
+     14454,
+     124
+    ],
+    [
+     "mozilla/experimenter-docs",
+     783,
+     80
+    ],
+    [
+     "mozilla/experimenter",
+     14954,
+     370
+    ],
+    [
+     "mozilla/experimenter",
+     15000,
+     118
+    ],
+    [
+     "mozilla/experimenter",
+     15035,
+     278
     ]
    ]
   },
@@ -9241,6 +12201,46 @@
      "NVIDIA/OSMO",
      417,
      61
+    ],
+    [
+     "NVIDIA/OSMO",
+     667,
+     883
+    ],
+    [
+     "NVIDIA/OSMO",
+     385,
+     200
+    ],
+    [
+     "NVIDIA/OSMO",
+     500,
+     203
+    ],
+    [
+     "NVIDIA/OSMO",
+     693,
+     1119
+    ],
+    [
+     "NVIDIA/OSMO",
+     704,
+     265
+    ],
+    [
+     "NVIDIA/OSMO",
+     632,
+     1129
+    ],
+    [
+     "NVIDIA/OSMO",
+     539,
+     145
+    ],
+    [
+     "NVIDIA/OSMO",
+     624,
+     719
     ]
    ]
   },
@@ -9290,6 +12290,46 @@
      "zilliztech/memsearch",
      16,
      1035
+    ],
+    [
+     "zilliztech/memsearch",
+     206,
+     98
+    ],
+    [
+     "zilliztech/milvus-marketplace",
+     4,
+     180
+    ],
+    [
+     "zilliztech/milvus-marketplace",
+     2,
+     331
+    ],
+    [
+     "zilliztech/memsearch",
+     1,
+     79
+    ],
+    [
+     "zilliztech/memsearch",
+     42,
+     87
+    ],
+    [
+     "zilliztech/memsearch",
+     12,
+     90
+    ],
+    [
+     "zilliztech/memsearch",
+     63,
+     83
+    ],
+    [
+     "zilliztech/memsearch",
+     21,
+     370
     ]
    ]
   },
@@ -9339,6 +12379,46 @@
      "zilliztech/memsearch",
      106,
      52
+    ],
+    [
+     "zilliztech/memsearch",
+     246,
+     98
+    ],
+    [
+     "zilliztech/vector-graph-rag",
+     17,
+     92
+    ],
+    [
+     "zilliztech/memsearch",
+     172,
+     55
+    ],
+    [
+     "zilliztech/memsearch",
+     98,
+     231
+    ],
+    [
+     "zilliztech/memsearch",
+     215,
+     56
+    ],
+    [
+     "zilliztech/vector-graph-rag",
+     19,
+     272
+    ],
+    [
+     "zilliztech/memsearch",
+     240,
+     217
+    ],
+    [
+     "zilliztech/memsearch",
+     257,
+     50
     ]
    ]
   },
@@ -9422,6 +12502,11 @@
      "comet-ml/opik",
      5330,
      60
+    ],
+    [
+     "BerriAI/litellm",
+     21653,
+     455
     ]
    ]
   },
@@ -9495,6 +12580,41 @@
      "spotify/sourcekit-bazel-bsp",
      167,
      208
+    ],
+    [
+     "spotify/sourcekit-bazel-bsp",
+     145,
+     701
+    ],
+    [
+     "spotify/sourcekit-bazel-bsp",
+     166,
+     203
+    ],
+    [
+     "spotify/sourcekit-bazel-bsp",
+     164,
+     83
+    ],
+    [
+     "spotify/sourcekit-bazel-bsp",
+     171,
+     120
+    ],
+    [
+     "spotify/sourcekit-bazel-bsp",
+     175,
+     55
+    ],
+    [
+     "spotify/sourcekit-bazel-bsp",
+     147,
+     490
+    ],
+    [
+     "spotify/sourcekit-bazel-bsp",
+     186,
+     1450
     ]
    ]
   },
@@ -9568,6 +12688,16 @@
      "tenstorrent/tt-metal",
      38606,
      83
+    ],
+    [
+     "tenstorrent/tt-metal",
+     38164,
+     248
+    ],
+    [
+     "tenstorrent/tt-metal",
+     38469,
+     116
     ]
    ]
   },
@@ -9739,6 +12869,21 @@
      "huggingface/optimum-neuron",
      1062,
      95
+    ],
+    [
+     "huggingface/optimum-neuron",
+     1056,
+     144
+    ],
+    [
+     "huggingface/optimum-neuron",
+     1052,
+     886
+    ],
+    [
+     "huggingface/optimum-neuron",
+     1070,
+     683
     ]
    ]
   },
@@ -9874,6 +13019,16 @@
      "langchain-ai/docs",
      3116,
      289
+    ],
+    [
+     "langchain-ai/langgraph",
+     6784,
+     87
+    ],
+    [
+     "langchain-ai/langsmith-sdk",
+     2599,
+     60
     ]
    ]
   },
@@ -9923,6 +13078,46 @@
      "langchain-ai/docs",
      2210,
      216
+    ],
+    [
+     "langchain-ai/langsmith-sdk",
+     2275,
+     349
+    ],
+    [
+     "langchain-ai/langgraph",
+     6774,
+     981
+    ],
+    [
+     "langchain-ai/docs",
+     2308,
+     83
+    ],
+    [
+     "langchain-ai/langgraphjs",
+     2173,
+     127
+    ],
+    [
+     "langchain-ai/langgraph",
+     7003,
+     853
+    ],
+    [
+     "langchain-ai/langgraph",
+     7224,
+     555
+    ],
+    [
+     "langchain-ai/langgraph",
+     7108,
+     78
+    ],
+    [
+     "langchain-ai/docs",
+     3106,
+     88
     ]
    ]
   },
@@ -10029,6 +13224,31 @@
      "ray-project/ray",
      60839,
      501
+    ],
+    [
+     "ray-project/ray",
+     62051,
+     72
+    ],
+    [
+     "ray-project/ray",
+     61258,
+     370
+    ],
+    [
+     "ray-project/ray",
+     62179,
+     244
+    ],
+    [
+     "ray-project/rayci",
+     453,
+     356
+    ],
+    [
+     "ray-project/ray",
+     61919,
+     92
     ]
    ]
   },
@@ -10092,6 +13312,46 @@
      "kserve/kserve",
      5105,
      79
+    ],
+    [
+     "kserve/kserve",
+     5079,
+     174
+    ],
+    [
+     "kserve/kserve",
+     5308,
+     214
+    ],
+    [
+     "kserve/kserve",
+     5071,
+     95
+    ],
+    [
+     "kserve/kserve",
+     5104,
+     1887
+    ],
+    [
+     "kserve/kserve",
+     5201,
+     194
+    ],
+    [
+     "kserve/kserve",
+     5217,
+     136
+    ],
+    [
+     "kserve/kserve",
+     5179,
+     62
+    ],
+    [
+     "kserve/kserve",
+     5055,
+     975
     ]
    ]
   },
@@ -10256,6 +13516,46 @@
      "huggingface/huggingface_hub",
      3884,
      80
+    ],
+    [
+     "huggingface/huggingface_hub",
+     3991,
+     88
+    ],
+    [
+     "huggingface/hub-docs",
+     2166,
+     91
+    ],
+    [
+     "huggingface/huggingface_hub",
+     3760,
+     121
+    ],
+    [
+     "huggingface/huggingface.js",
+     1919,
+     194
+    ],
+    [
+     "huggingface/skills",
+     37,
+     233
+    ],
+    [
+     "huggingface/huggingface_hub",
+     3815,
+     50
+    ],
+    [
+     "huggingface/huggingface_hub",
+     4005,
+     272
+    ],
+    [
+     "huggingface/huggingface_hub",
+     3669,
+     941
     ]
    ]
   },
@@ -10334,6 +13634,36 @@
      "NVIDIA/numbast",
      308,
      299
+    ],
+    [
+     "NVIDIA/cuda-python",
+     1511,
+     1636
+    ],
+    [
+     "NVIDIA/numbast",
+     283,
+     709
+    ],
+    [
+     "NVIDIA/numba-cuda",
+     717,
+     708
+    ],
+    [
+     "NVIDIA/numbast",
+     290,
+     797
+    ],
+    [
+     "NVIDIA/numba-cuda",
+     790,
+     109
+    ],
+    [
+     "NVIDIA/numbast",
+     276,
+     57
     ]
    ]
   },
@@ -10425,6 +13755,41 @@
      "camel-ai/camel",
      3925,
      87
+    ],
+    [
+     "camel-ai/camel",
+     3883,
+     758
+    ],
+    [
+     "camel-ai/camel",
+     3836,
+     199
+    ],
+    [
+     "camel-ai/camel",
+     3872,
+     691
+    ],
+    [
+     "camel-ai/camel",
+     3722,
+     52
+    ],
+    [
+     "camel-ai/camel",
+     3923,
+     400
+    ],
+    [
+     "camel-ai/camel",
+     3662,
+     232
+    ],
+    [
+     "camel-ai/camel",
+     3824,
+     259
     ]
    ]
   },
@@ -10474,6 +13839,46 @@
      "agentscope-ai/AgentTeams",
      324,
      125
+    ],
+    [
+     "agentscope-ai/AgentTeams",
+     483,
+     172
+    ],
+    [
+     "agentscope-ai/AgentTeams",
+     94,
+     1854
+    ],
+    [
+     "agentscope-ai/AgentTeams",
+     448,
+     199
+    ],
+    [
+     "agentscope-ai/AgentTeams",
+     330,
+     110
+    ],
+    [
+     "agentscope-ai/AgentTeams",
+     459,
+     98
+    ],
+    [
+     "agentscope-ai/AgentTeams",
+     318,
+     212
+    ],
+    [
+     "agentscope-ai/AgentTeams",
+     455,
+     577
+    ],
+    [
+     "agentscope-ai/AgentTeams",
+     466,
+     773
     ]
    ]
   },
@@ -10523,6 +13928,46 @@
      "agentscope-ai/AgentTeams",
      12,
      384
+    ],
+    [
+     "agentscope-ai/AgentTeams",
+     13,
+     232
+    ],
+    [
+     "agentscope-ai/AgentTeams",
+     227,
+     133
+    ],
+    [
+     "agentscope-ai/AgentTeams",
+     205,
+     74
+    ],
+    [
+     "agentscope-ai/AgentTeams",
+     3,
+     261
+    ],
+    [
+     "agentscope-ai/AgentTeams",
+     38,
+     70
+    ],
+    [
+     "agentscope-ai/AgentTeams",
+     282,
+     820
+    ],
+    [
+     "agentscope-ai/AgentTeams",
+     212,
+     66
+    ],
+    [
+     "agentscope-ai/AgentTeams",
+     278,
+     81
     ]
    ]
   },
@@ -10586,6 +14031,11 @@
      "spiceai/spiceai",
      8793,
      124
+    ],
+    [
+     "spiceai/spiceai",
+     9734,
+     147
     ]
    ]
   },
@@ -10635,6 +14085,46 @@
      "PrimeIntellect-ai/prime-rl",
      1818,
      55
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2080,
+     260
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2145,
+     69
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     1783,
+     82
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     1832,
+     249
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     1585,
+     57
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     1915,
+     586
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     1771,
+     77
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     1589,
+     162
     ]
    ]
   },
@@ -10785,6 +14275,31 @@
      "langgenius/dify",
      33901,
      64
+    ],
+    [
+     "langgenius/dify",
+     33728,
+     72
+    ],
+    [
+     "langgenius/dify",
+     33738,
+     172
+    ],
+    [
+     "langgenius/dify",
+     34029,
+     428
+    ],
+    [
+     "langgenius/dify",
+     33954,
+     51
+    ],
+    [
+     "langgenius/dify",
+     34042,
+     234
     ]
    ]
   },
@@ -10848,6 +14363,46 @@
      "lance-format/lance",
      6148,
      246
+    ],
+    [
+     "lance-format/lance",
+     6034,
+     380
+    ],
+    [
+     "lance-format/lance",
+     6036,
+     109
+    ],
+    [
+     "lance-format/lance",
+     5982,
+     70
+    ],
+    [
+     "lance-format/lance",
+     5894,
+     392
+    ],
+    [
+     "lance-format/lance",
+     6066,
+     613
+    ],
+    [
+     "lance-format/lance",
+     6023,
+     89
+    ],
+    [
+     "lance-format/lance",
+     6335,
+     56
+    ],
+    [
+     "lance-format/lance",
+     6341,
+     258
     ]
    ]
   },
@@ -10897,6 +14452,46 @@
      "comet-ml/opik",
      5368,
      54
+    ],
+    [
+     "comet-ml/opik",
+     5025,
+     101
+    ],
+    [
+     "comet-ml/opik",
+     5241,
+     158
+    ],
+    [
+     "comet-ml/opik",
+     5097,
+     426
+    ],
+    [
+     "comet-ml/opik",
+     5564,
+     469
+    ],
+    [
+     "comet-ml/opik",
+     5675,
+     56
+    ],
+    [
+     "comet-ml/opik",
+     5268,
+     191
+    ],
+    [
+     "comet-ml/opik",
+     5921,
+     99
+    ],
+    [
+     "comet-ml/opik",
+     5082,
+     110
     ]
    ]
   },
@@ -10946,6 +14541,21 @@
      "comet-ml/opik",
      4844,
      50
+    ],
+    [
+     "comet-ml/opik",
+     5060,
+     537
+    ],
+    [
+     "comet-ml/opik",
+     4929,
+     97
+    ],
+    [
+     "comet-ml/opik",
+     4786,
+     1657
     ]
    ]
   },
@@ -11070,6 +14680,31 @@
      "PaddlePaddle/Paddle",
      77388,
      318
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     77544,
+     500
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     77303,
+     131
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     77713,
+     915
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     77581,
+     876
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     77498,
+     506
     ]
    ]
   },
@@ -11127,3142 +14762,4397 @@
    ]
   },
   {
-   "slot": "P:Q2-2026:christian-bromann:ai",
+   "slot": "P:Q2-2026:Cheggin:ai",
    "arm": "P",
-   "author": "christian-bromann",
+   "author": "Cheggin",
    "period": "Q2-2026",
    "ai": true,
    "candidates": [
     [
-     "langchain-ai/agent-protocol",
-     78,
-     250
+     "browser-use/desktop",
+     431,
+     811
     ],
     [
-     "langchain-ai/langgraphjs",
-     2274,
-     218
+     "browser-use/terminal",
+     41,
+     756
     ]
    ]
   },
   {
-   "slot": "P:Q2-2026:christian-bromann:nonai",
+   "slot": "P:Q2-2026:Cheggin:nonai",
    "arm": "P",
-   "author": "christian-bromann",
+   "author": "Cheggin",
    "period": "Q2-2026",
    "ai": false,
    "candidates": [
     [
-     "langchain-ai/langgraphjs",
-     2278,
-     107
+     "browser-use/desktop",
+     437,
+     544
     ],
     [
-     "langchain-ai/langgraphjs",
-     2287,
-     717
+     "browser-use/desktop",
+     415,
+     1657
     ],
     [
-     "langchain-ai/docs",
-     3828,
-     761
+     "browser-use/terminal",
+     44,
+     865
     ],
     [
-     "langchain-ai/langchainjs-community",
-     30,
-     448
+     "browser-use/desktop",
+     420,
+     615
     ],
     [
-     "langchain-ai/langgraphjs",
-     2290,
-     221
+     "browser-use/desktop",
+     152,
+     287
     ],
     [
-     "langchain-ai/langgraphjs",
-     2292,
-     98
+     "browser-use/desktop",
+     154,
+     376
     ],
     [
-     "langchain-ai/langchainjs",
-     10822,
-     68
+     "browser-use/desktop",
+     135,
+     882
     ],
     [
-     "langchain-ai/langgraphjs",
-     2285,
-     215
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:justin-tahara:ai",
-   "arm": "P",
-   "author": "justin-tahara",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "onyx-dot-app/onyx",
-     10602,
-     304
-    ],
-    [
-     "onyx-dot-app/onyx",
-     10601,
-     219
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:justin-tahara:nonai",
-   "arm": "P",
-   "author": "justin-tahara",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "onyx-dot-app/onyx",
-     10261,
-     83
-    ],
-    [
-     "onyx-dot-app/onyx",
-     10148,
-     89
-    ],
-    [
-     "onyx-dot-app/onyx",
-     10675,
-     106
-    ],
-    [
-     "onyx-dot-app/onyx",
-     10307,
-     325
-    ],
-    [
-     "onyx-dot-app/onyx",
-     10209,
-     378
-    ],
-    [
-     "onyx-dot-app/onyx",
-     10395,
-     242
-    ],
-    [
-     "onyx-dot-app/onyx",
-     9974,
-     222
-    ],
-    [
-     "onyx-dot-app/onyx",
-     10157,
-     329
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:celia-oai:ai",
-   "arm": "P",
-   "author": "celia-oai",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "openai/codex",
-     19048,
-     363
-    ],
-    [
-     "openai/codex",
-     19461,
-     86
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:celia-oai:nonai",
-   "arm": "P",
-   "author": "celia-oai",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "openai/codex",
-     17820,
-     1770
-    ],
-    [
-     "openai/codex",
-     20049,
-     318
-    ],
-    [
-     "openai/codex",
-     17713,
-     946
-    ],
-    [
-     "openai/codex",
-     19442,
-     398
-    ],
-    [
-     "openai/codex",
-     20275,
-     166
-    ],
-    [
-     "openai/codex",
-     18744,
-     472
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:langchain-infra:ai",
-   "arm": "P",
-   "author": "langchain-infra",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "langchain-ai/docs",
-     3712,
-     111
-    ],
-    [
-     "langchain-ai/langsmith-go",
-     65,
-     1155
-    ],
-    [
-     "langchain-ai/docs",
-     3755,
-     94
-    ],
-    [
-     "langchain-ai/docs",
-     3748,
-     130
-    ],
-    [
-     "langchain-ai/helm",
-     686,
-     462
-    ],
-    [
-     "langchain-ai/docs",
-     3622,
-     142
-    ],
-    [
-     "langchain-ai/langsmith-go",
-     64,
-     1199
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:langchain-infra:nonai",
-   "arm": "P",
-   "author": "langchain-infra",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "langchain-ai/langsmith-sdk",
-     2835,
-     1026
-    ],
-    [
-     "langchain-ai/helm",
-     691,
-     50
-    ],
-    [
-     "langchain-ai/langsmith-sdk",
-     2846,
-     860
-    ],
-    [
-     "langchain-ai/helm",
-     682,
-     380
-    ],
-    [
-     "langchain-ai/langsmith-go",
-     70,
-     322
-    ],
-    [
-     "langchain-ai/langsmith-cli",
-     87,
-     1020
-    ],
-    [
-     "langchain-ai/langsmith-cli",
-     92,
-     347
-    ],
-    [
-     "langchain-ai/langsmith-sdk",
-     2834,
-     638
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:zhanshuyou:ai",
-   "arm": "P",
-   "author": "zhanshuyou",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "zilliztech/zilliz-launchpad",
-     19,
-     335
-    ],
-    [
-     "zilliztech/zilliz-launchpad",
-     22,
-     183
-    ],
-    [
-     "zilliztech/zilliz-launchpad",
-     18,
-     1380
-    ],
-    [
-     "zilliztech/zilliz-launchpad",
-     20,
-     406
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:zhanshuyou:nonai",
-   "arm": "P",
-   "author": "zhanshuyou",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "milvus-io/milvus.io",
-     2297,
-     416
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:dsikka:ai",
-   "arm": "P",
-   "author": "dsikka",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "vllm-project/speculators",
-     381,
-     53
-    ],
-    [
-     "vllm-project/llm-compressor",
-     2638,
-     90
-    ],
-    [
-     "vllm-project/speculators",
-     460,
-     62
-    ],
-    [
-     "vllm-project/compressed-tensors",
-     668,
-     57
-    ],
-    [
-     "vllm-project/llm-compressor",
-     2614,
-     789
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:dsikka:nonai",
-   "arm": "P",
-   "author": "dsikka",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "vllm-project/llm-compressor",
-     2578,
-     50
-    ],
-    [
-     "vllm-project/llm-compressor",
-     2564,
-     304
-    ],
-    [
-     "vllm-project/llm-compressor",
-     2673,
-     66
-    ],
-    [
-     "vllm-project/speculators",
-     428,
-     77
-    ],
-    [
-     "vllm-project/llm-compressor",
-     2577,
-     132
-    ],
-    [
-     "vllm-project/speculators",
-     380,
-     60
-    ],
-    [
-     "vllm-project/vllm",
-     41664,
-     384
-    ],
-    [
-     "vllm-project/llm-compressor",
-     2573,
-     132
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:princepride:ai",
-   "arm": "P",
-   "author": "princepride",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "vllm-project/vllm-omni",
-     2554,
-     281
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:princepride:nonai",
-   "arm": "P",
-   "author": "princepride",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "vllm-project/vllm-omni",
-     2502,
-     219
-    ],
-    [
-     "vllm-project/vllm-omni",
-     2801,
-     127
-    ],
-    [
-     "vllm-project/vllm-omni",
-     3258,
-     69
-    ],
-    [
-     "vllm-project/vllm-omni",
-     2447,
-     489
-    ],
-    [
-     "vllm-project/vllm-omni",
-     2650,
-     357
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:CUHKSZzxy:ai",
-   "arm": "P",
-   "author": "CUHKSZzxy",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "InternLM/lmdeploy",
-     4563,
-     1164
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:CUHKSZzxy:nonai",
-   "arm": "P",
-   "author": "CUHKSZzxy",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "InternLM/lmdeploy",
-     4501,
-     180
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:sarahdeaton:ai",
-   "arm": "P",
-   "author": "sarahdeaton",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "anthropics/claude-agent-sdk-python",
-     822,
-     60
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:sarahdeaton:nonai",
-   "arm": "P",
-   "author": "sarahdeaton",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "anthropics/claude-agent-sdk-python",
-     865,
-     53
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:wayyoungboy:ai",
-   "arm": "P",
-   "author": "wayyoungboy",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "oceanbase/obdiag",
-     1240,
-     489
-    ],
-    [
-     "oceanbase/obdiag",
-     1229,
-     632
-    ],
-    [
-     "oceanbase/powermem",
-     911,
-     92
-    ],
-    [
-     "oceanbase/powermem",
-     910,
-     119
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:wayyoungboy:nonai",
-   "arm": "P",
-   "author": "wayyoungboy",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "oceanbase/obdiag",
-     1223,
-     377
-    ],
-    [
-     "oceanbase/obdiag",
-     1225,
-     1098
-    ],
-    [
-     "oceanbase/obdiag",
-     1221,
-     527
-    ],
-    [
-     "oceanbase/obdiag",
-     1234,
-     151
-    ],
-    [
-     "oceanbase/obdiag",
-     1224,
-     276
-    ],
-    [
-     "oceanbase/obdiag",
-     1233,
-     62
-    ],
-    [
-     "oceanbase/obdiag",
-     1235,
-     102
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:dexters1:ai",
-   "arm": "P",
-   "author": "dexters1",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "topoteretes/cognee",
-     2596,
-     204
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:dexters1:nonai",
-   "arm": "P",
-   "author": "dexters1",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "topoteretes/cognee",
-     2665,
-     227
-    ],
-    [
-     "topoteretes/cognee",
-     2564,
-     360
-    ],
-    [
-     "topoteretes/cognee",
-     2535,
-     731
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:Manfredss:ai",
-   "arm": "P",
-   "author": "Manfredss",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "PaddlePaddle/docs",
-     7893,
-     236
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:Manfredss:nonai",
-   "arm": "P",
-   "author": "Manfredss",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "PaddlePaddle/Paddle",
-     78811,
-     1101
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     78651,
-     64
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     78823,
-     503
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     78593,
-     286
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     78883,
-     493
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:JoelNiklaus:ai",
-   "arm": "P",
-   "author": "JoelNiklaus",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "huggingface/physics-intern",
-     13,
-     837
-    ],
-    [
-     "huggingface/physics-intern",
-     16,
+     "browser-use/desktop",
+     146,
      650
     ],
     [
-     "huggingface/physics-intern",
-     12,
-     1000
+     "browser-use/desktop",
+     155,
+     324
     ],
     [
-     "huggingface/physics-intern",
-     14,
-     195
+     "browser-use/desktop",
+     390,
+     531
+    ],
+    [
+     "browser-use/desktop",
+     127,
+     1157
+    ],
+    [
+     "browser-use/terminal",
+     56,
+     272
+    ],
+    [
+     "browser-use/desktop",
+     398,
+     55
+    ],
+    [
+     "browser-use/desktop",
+     134,
+     1544
+    ],
+    [
+     "browser-use/desktop",
+     117,
+     757
+    ],
+    [
+     "browser-use/desktop",
+     145,
+     78
     ]
    ]
   },
   {
-   "slot": "P:Q2-2026:JoelNiklaus:nonai",
+   "slot": "P:Q2-2026:lhb8125:ai",
    "arm": "P",
-   "author": "JoelNiklaus",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "huggingface/physics-intern",
-     4,
-     169
-    ],
-    [
-     "huggingface/physics-intern",
-     6,
-     101
-    ],
-    [
-     "huggingface/datatrove",
-     482,
-     1780
-    ],
-    [
-     "huggingface/datatrove",
-     484,
-     1039
-    ],
-    [
-     "huggingface/physics-intern",
-     10,
-     131
-    ],
-    [
-     "huggingface/physics-intern",
-     11,
-     189
-    ],
-    [
-     "huggingface/physics-intern",
-     5,
-     91
-    ],
-    [
-     "huggingface/physics-intern",
-     2,
-     794
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:alamashir:ai",
-   "arm": "P",
-   "author": "alamashir",
+   "author": "lhb8125",
    "period": "Q2-2026",
    "ai": true,
    "candidates": [
     [
-     "apache/airflow",
-     65499,
-     1598
+     "NVIDIA/TransformerEngine",
+     3047,
+     128
+    ],
+    [
+     "NVIDIA/TransformerEngine",
+     3090,
+     87
+    ],
+    [
+     "NVIDIA/Megatron-LM",
+     5175,
+     251
     ]
    ]
   },
   {
-   "slot": "P:Q2-2026:alamashir:nonai",
+   "slot": "P:Q2-2026:lhb8125:nonai",
    "arm": "P",
-   "author": "alamashir",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "apache/airflow",
-     64752,
-     269
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:jjovicicTT:ai",
-   "arm": "P",
-   "author": "jjovicicTT",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "tenstorrent/tt-metal",
-     42087,
-     405
-    ],
-    [
-     "tenstorrent/tt-metal",
-     41670,
-     676
-    ],
-    [
-     "tenstorrent/tt-metal",
-     42567,
-     434
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:jjovicicTT:nonai",
-   "arm": "P",
-   "author": "jjovicicTT",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "tenstorrent/tt-metal",
-     42568,
-     1381
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:VascoSch92:ai",
-   "arm": "P",
-   "author": "VascoSch92",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "OpenHands/OpenHands",
-     14288,
-     1582
-    ],
-    [
-     "OpenHands/OpenHands",
-     14301,
-     718
-    ],
-    [
-     "OpenHands/OpenHands",
-     14193,
-     74
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:VascoSch92:nonai",
-   "arm": "P",
-   "author": "VascoSch92",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "OpenHands/OpenHands",
-     13825,
-     123
-    ],
-    [
-     "OpenHands/OpenHands",
-     13918,
-     461
-    ],
-    [
-     "OpenHands/OpenHands",
-     14286,
-     60
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:Tracin:ai",
-   "arm": "P",
-   "author": "Tracin",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "flashinfer-ai/flashinfer",
-     3136,
-     123
-    ],
-    [
-     "NVIDIA/TensorRT-LLM",
-     13608,
-     925
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:Tracin:nonai",
-   "arm": "P",
-   "author": "Tracin",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "NVIDIA/TensorRT-LLM",
-     13117,
-     573
-    ],
-    [
-     "NVIDIA/TensorRT-LLM",
-     13428,
-     1037
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:snimu:ai",
-   "arm": "P",
-   "author": "snimu",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "PrimeIntellect-ai/research-environments",
-     298,
-     1144
-    ],
-    [
-     "PrimeIntellect-ai/rlm-harness",
-     59,
-     110
-    ],
-    [
-     "PrimeIntellect-ai/verifiers",
-     1097,
-     75
-    ],
-    [
-     "PrimeIntellect-ai/verifiers",
-     1085,
-     330
-    ],
-    [
-     "PrimeIntellect-ai/rlm-harness",
-     31,
-     443
-    ],
-    [
-     "PrimeIntellect-ai/rlm-harness",
-     71,
-     214
-    ],
-    [
-     "PrimeIntellect-ai/rlm-harness",
-     41,
-     410
-    ],
-    [
-     "PrimeIntellect-ai/verifiers",
-     1102,
-     53
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:snimu:nonai",
-   "arm": "P",
-   "author": "snimu",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "PrimeIntellect-ai/research-environments",
-     307,
-     184
-    ],
-    [
-     "PrimeIntellect-ai/verifiers",
-     1178,
-     499
-    ],
-    [
-     "PrimeIntellect-ai/rlm-harness",
-     15,
-     57
-    ],
-    [
-     "PrimeIntellect-ai/verifiers",
-     1195,
-     101
-    ],
-    [
-     "PrimeIntellect-ai/rlm-harness",
-     35,
-     277
-    ],
-    [
-     "PrimeIntellect-ai/rlm-harness",
-     20,
-     1314
-    ],
-    [
-     "PrimeIntellect-ai/research-environments",
-     301,
-     72
-    ],
-    [
-     "PrimeIntellect-ai/rlm-harness",
-     32,
-     521
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:tt-aho:ai",
-   "arm": "P",
-   "author": "tt-aho",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "tenstorrent/tt-metal",
-     41956,
-     248
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:tt-aho:nonai",
-   "arm": "P",
-   "author": "tt-aho",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "tenstorrent/tt-metal",
-     43228,
-     125
-    ],
-    [
-     "tenstorrent/tt-metal",
-     43546,
-     227
-    ],
-    [
-     "tenstorrent/tt-metal",
-     41768,
-     142
-    ],
-    [
-     "tenstorrent/tt-metal",
-     41350,
-     171
-    ],
-    [
-     "tenstorrent/tt-metal",
-     42439,
-     120
-    ],
-    [
-     "tenstorrent/tt-metal",
-     42653,
-     357
-    ],
-    [
-     "tenstorrent/tt-metal",
-     42062,
-     50
-    ],
-    [
-     "tenstorrent/tt-metal",
-     42806,
-     178
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:ShigureNyako:ai",
-   "arm": "P",
-   "author": "ShigureNyako",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "PaddlePaddle/PaddleFleet",
-     761,
-     99
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:ShigureNyako:nonai",
-   "arm": "P",
-   "author": "ShigureNyako",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "PaddlePaddle/PaddleFleet",
-     752,
-     165
-    ],
-    [
-     "PaddlePaddle/PaddleFleet",
-     721,
-     225
-    ],
-    [
-     "PaddlePaddle/FastDeploy",
-     7348,
-     92
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     78565,
-     93
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     78607,
-     197
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     78590,
-     206
-    ],
-    [
-     "PaddlePaddle/PaddleFormers",
-     4191,
-     428
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     78571,
-     93
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:huicongyao:ai",
-   "arm": "P",
-   "author": "huicongyao",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "PaddlePaddle/FastDeploy",
-     7669,
-     341
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:huicongyao:nonai",
-   "arm": "P",
-   "author": "huicongyao",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "PaddlePaddle/FastDeploy",
-     7406,
-     530
-    ],
-    [
-     "PaddlePaddle/FastDeploy",
-     7585,
-     532
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:owenowenisme:ai",
-   "arm": "P",
-   "author": "owenowenisme",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "ray-project/ray",
-     63099,
-     80
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:owenowenisme:nonai",
-   "arm": "P",
-   "author": "owenowenisme",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "ray-project/ray",
-     62948,
-     132
-    ],
-    [
-     "ray-project/ray",
-     62908,
-     76
-    ],
-    [
-     "ray-project/ray",
-     62757,
-     130
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:acicovicTT:ai",
-   "arm": "P",
-   "author": "acicovicTT",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "tenstorrent/tt-xla",
-     4280,
-     54
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:acicovicTT:nonai",
-   "arm": "P",
-   "author": "acicovicTT",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "tenstorrent/tt-xla",
-     4396,
-     69
-    ],
-    [
-     "tenstorrent/tt-xla",
-     4170,
-     430
-    ],
-    [
-     "tenstorrent/tt-xla",
-     4503,
-     103
-    ],
-    [
-     "tenstorrent/tt-mlir",
-     7878,
-     676
-    ],
-    [
-     "tenstorrent/tt-xla",
-     4139,
-     113
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:KinyooZ:ai",
-   "arm": "P",
-   "author": "KinyooZ",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "dataelement/Clawith",
-     286,
-     1163
-    ],
-    [
-     "dataelement/Clawith",
-     279,
-     74
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:KinyooZ:nonai",
-   "arm": "P",
-   "author": "KinyooZ",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "dataelement/Clawith",
-     321,
-     260
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:sraman-rgb:ai",
-   "arm": "P",
-   "author": "sraman-rgb",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "NVIDIA-NeMo/Megatron-Bridge",
-     3344,
-     99
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:sraman-rgb:nonai",
-   "arm": "P",
-   "author": "sraman-rgb",
+   "author": "lhb8125",
    "period": "Q2-2026",
    "ai": false,
    "candidates": [
     [
      "NVIDIA/Megatron-LM",
-     4318,
-     294
+     5082,
+     173
     ]
    ]
   },
   {
-   "slot": "P:Q2-2026:felixkrrr:ai",
+   "slot": "P:Q2-2026:dgomezTT:ai",
    "arm": "P",
-   "author": "felixkrrr",
+   "author": "dgomezTT",
    "period": "Q2-2026",
    "ai": true,
    "candidates": [
     [
-     "langfuse/langfuse-docs",
-     2879,
-     194
-    ],
-    [
-     "langfuse/langfuse-docs",
-     2826,
-     371
-    ],
-    [
-     "langfuse/langfuse-docs",
-     2856,
-     415
-    ],
-    [
-     "langfuse/langfuse-docs",
-     2862,
-     312
-    ],
-    [
-     "langfuse/langfuse-docs",
-     2845,
-     302
-    ],
-    [
-     "langfuse/langfuse-docs",
-     2852,
-     113
-    ],
-    [
-     "langfuse/langfuse-docs",
-     2831,
-     164
-    ],
-    [
-     "langfuse/langfuse-docs",
-     2875,
-     138
+     "tenstorrent/tt-metal",
+     45429,
+     74
     ]
    ]
   },
   {
-   "slot": "P:Q2-2026:felixkrrr:nonai",
+   "slot": "P:Q2-2026:dgomezTT:nonai",
    "arm": "P",
-   "author": "felixkrrr",
+   "author": "dgomezTT",
    "period": "Q2-2026",
    "ai": false,
    "candidates": [
     [
-     "langfuse/langfuse-docs",
-     2775,
-     893
+     "tenstorrent/tt-metal",
+     45066,
+     162
     ],
     [
-     "langfuse/langfuse-docs",
-     2873,
-     1279
+     "tenstorrent/tt-metal",
+     45076,
+     623
     ],
     [
-     "langfuse/langfuse-docs",
-     2785,
-     1126
+     "tenstorrent/tt-metal",
+     43675,
+     264
     ],
     [
-     "langfuse/langfuse-docs",
-     2886,
-     64
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:WuKongAI-CMU:ai",
-   "arm": "P",
-   "author": "WuKongAI-CMU",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "NVIDIA/NemoClaw",
-     1800,
-     142
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:WuKongAI-CMU:nonai",
-   "arm": "P",
-   "author": "WuKongAI-CMU",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "NVIDIA/NemoClaw",
-     1818,
-     69
-    ],
-    [
-     "NousResearch/hermes-agent",
-     10133,
-     76
-    ],
-    [
-     "NVIDIA/NemoClaw",
-     1819,
-     99
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:HuiyingLi:ai",
-   "arm": "P",
-   "author": "HuiyingLi",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "NVIDIA-NeMo/Automodel",
-     1698,
-     353
-    ],
-    [
-     "NVIDIA-NeMo/Automodel",
-     1682,
-     720
-    ],
-    [
-     "NVIDIA-NeMo/Automodel",
-     2091,
-     262
-    ],
-    [
-     "NVIDIA-NeMo/Automodel",
-     1882,
-     124
-    ],
-    [
-     "NVIDIA-NeMo/Automodel",
-     1685,
-     366
-    ],
-    [
-     "NVIDIA-NeMo/Automodel",
-     1906,
-     243
-    ],
-    [
-     "NVIDIA-NeMo/Automodel",
-     1869,
-     748
-    ],
-    [
-     "NVIDIA-NeMo/Automodel",
-     2117,
-     307
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:HuiyingLi:nonai",
-   "arm": "P",
-   "author": "HuiyingLi",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "NVIDIA-NeMo/Automodel",
-     1657,
-     516
-    ],
-    [
-     "NVIDIA-NeMo/Automodel",
-     1720,
+     "tenstorrent/tt-metal",
+     42481,
      229
     ],
     [
-     "NVIDIA-NeMo/Automodel",
-     1785,
-     129
-    ],
-    [
-     "NVIDIA-NeMo/Automodel",
-     1992,
-     114
-    ],
-    [
-     "NVIDIA-NeMo/Automodel",
-     2111,
-     239
-    ],
-    [
-     "NVIDIA-NeMo/Automodel",
-     1658,
-     417
-    ],
-    [
-     "NVIDIA-NeMo/Automodel",
-     2103,
+     "tenstorrent/tt-metal",
+     42467,
      241
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:xiaocai2333:ai",
-   "arm": "P",
-   "author": "xiaocai2333",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "milvus-io/milvus",
-     49125,
-     251
-    ],
-    [
-     "milvus-io/pymilvus",
-     3388,
-     75
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:xiaocai2333:nonai",
-   "arm": "P",
-   "author": "xiaocai2333",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "milvus-io/pymilvus",
-     3445,
-     317
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:shljessie:ai",
-   "arm": "P",
-   "author": "shljessie",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "NVIDIA/Model-Optimizer",
-     1362,
-     164
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:shljessie:nonai",
-   "arm": "P",
-   "author": "shljessie",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "NVIDIA/skills",
-     3,
-     175
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:lowyelling:ai",
-   "arm": "P",
-   "author": "lowyelling",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "plastic-labs/vercel-ai-sdk",
-     3,
-     1369
-    ],
-    [
-     "plastic-labs/vercel-ai-sdk",
-     5,
-     556
-    ],
-    [
-     "plastic-labs/sillytavern-honcho",
-     13,
-     111
-    ],
-    [
-     "plastic-labs/vercel-ai-sdk",
-     4,
-     203
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:lowyelling:nonai",
-   "arm": "P",
-   "author": "lowyelling",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "plastic-labs/sillytavern-honcho",
-     14,
-     164
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:andimarafioti:ai",
-   "arm": "P",
-   "author": "andimarafioti",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "huggingface/speech-to-speech",
-     261,
-     116
-    ],
-    [
-     "huggingface/speech-to-speech",
-     239,
-     236
-    ],
-    [
-     "huggingface/speech-to-speech",
-     237,
-     65
-    ],
-    [
-     "huggingface/speech-to-speech",
-     240,
-     225
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:andimarafioti:nonai",
-   "arm": "P",
-   "author": "andimarafioti",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "huggingface/speech-to-speech",
-     276,
-     58
-    ],
-    [
-     "huggingface/speech-to-speech",
-     245,
-     53
-    ],
-    [
-     "huggingface/speech-to-speech",
-     266,
-     51
-    ],
-    [
-     "huggingface/speech-to-speech",
-     262,
-     664
-    ],
-    [
-     "huggingface/speech-to-speech",
-     238,
-     185
-    ],
-    [
-     "huggingface/speech-to-speech",
-     278,
-     64
-    ],
-    [
-     "huggingface/speech-to-speech",
-     257,
-     78
-    ],
-    [
-     "huggingface/speech-to-speech",
-     233,
-     894
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:YAMY1234:ai",
-   "arm": "P",
-   "author": "YAMY1234",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "NVIDIA/srt-slurm",
-     115,
-     662
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:YAMY1234:nonai",
-   "arm": "P",
-   "author": "YAMY1234",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "sgl-project/sglang",
-     21921,
-     248
-    ],
-    [
-     "NVIDIA/srt-slurm",
-     94,
-     63
-    ],
-    [
-     "sgl-project/sglang",
-     23773,
-     164
-    ],
-    [
-     "sgl-project/sglang",
-     22536,
-     966
-    ],
-    [
-     "NVIDIA/srt-slurm",
-     73,
-     1115
-    ],
-    [
-     "sgl-project/sglang",
-     23189,
-     254
-    ],
-    [
-     "sgl-project/sglang",
-     22240,
-     145
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:pingsutw:ai",
-   "arm": "P",
-   "author": "pingsutw",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "flyteorg/flyte",
-     7247,
-     565
-    ],
-    [
-     "flyteorg/flyte-sdk",
-     989,
-     234
-    ],
-    [
-     "flyteorg/flyte",
-     7243,
-     194
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:pingsutw:nonai",
-   "arm": "P",
-   "author": "pingsutw",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "flyteorg/flyte-sdk",
-     913,
-     201
-    ],
-    [
-     "flyteorg/flyte",
-     7254,
-     237
-    ],
-    [
-     "flyteorg/flyte-sdk",
-     1016,
-     142
-    ],
-    [
-     "flyteorg/flyte",
-     7157,
-     455
-    ],
-    [
-     "flyteorg/flyte",
-     7134,
-     1238
-    ],
-    [
-     "flyteorg/flyte-sdk",
-     905,
-     130
-    ],
-    [
-     "flyteorg/flyte",
-     7153,
-     57
-    ],
-    [
-     "flyteorg/flyte",
-     7282,
-     368
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:kajalj22:ai",
-   "arm": "P",
-   "author": "kajalj22",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "NVIDIA-NeMo/RL",
-     2383,
-     104
-    ],
-    [
-     "NVIDIA-NeMo/Gym",
-     1018,
-     272
-    ],
-    [
-     "NVIDIA-NeMo/Gym",
-     1081,
-     730
-    ],
-    [
-     "NVIDIA-NeMo/RL",
-     2243,
-     290
-    ],
-    [
-     "NVIDIA-NeMo/Gym",
-     1149,
-     571
-    ],
-    [
-     "NVIDIA-NeMo/Gym",
-     1212,
-     79
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:kajalj22:nonai",
-   "arm": "P",
-   "author": "kajalj22",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "NVIDIA-NeMo/RL",
-     2201,
-     1455
-    ],
-    [
-     "NVIDIA-NeMo/RL",
-     2214,
-     229
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:everettVT:ai",
-   "arm": "P",
-   "author": "everettVT",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "Eventual-Inc/Daft",
-     6702,
-     242
-    ],
-    [
-     "Eventual-Inc/Daft",
-     6621,
-     98
-    ],
-    [
-     "Eventual-Inc/Daft",
-     6664,
-     976
-    ],
-    [
-     "Eventual-Inc/Daft",
-     6709,
-     65
-    ],
-    [
-     "Eventual-Inc/Daft",
-     6649,
-     90
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:everettVT:nonai",
-   "arm": "P",
-   "author": "everettVT",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "Eventual-Inc/Daft",
-     6836,
-     296
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:whhe:ai",
-   "arm": "P",
-   "author": "whhe",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "bytedance/deer-flow",
-     2601,
-     165
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:whhe:nonai",
-   "arm": "P",
-   "author": "whhe",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "bytedance/deer-flow",
-     2466,
-     69
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:alexnails:ai",
-   "arm": "P",
-   "author": "alexnails",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "sgl-project/sglang",
-     22548,
-     123
-    ],
-    [
-     "sgl-project/sglang",
-     23898,
-     134
-    ],
-    [
-     "sgl-project/sglang",
-     22567,
-     56
-    ],
-    [
-     "sgl-project/sglang",
-     23542,
-     51
-    ],
-    [
-     "sgl-project/sglang",
-     24096,
-     363
-    ],
-    [
-     "sgl-project/sglang",
-     23700,
-     87
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:alexnails:nonai",
-   "arm": "P",
-   "author": "alexnails",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "sgl-project/sglang",
-     22736,
-     484
-    ],
-    [
-     "sgl-project/sglang",
-     23017,
-     54
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:prakhar-singh1928:ai",
-   "arm": "P",
-   "author": "prakhar-singh1928",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "IBM/mcp-context-forge",
-     4469,
-     146
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:prakhar-singh1928:nonai",
-   "arm": "P",
-   "author": "prakhar-singh1928",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "IBM/mcp-context-forge",
-     4408,
-     61
-    ],
-    [
-     "IBM/mcp-context-forge",
-     4461,
-     321
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:abegnoche:ai",
-   "arm": "P",
-   "author": "abegnoche",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "NVIDIA/ai-cloud-validation",
-     179,
-     622
-    ],
-    [
-     "NVIDIA/ai-cloud-validation",
-     186,
-     615
-    ],
-    [
-     "NVIDIA/ai-cloud-validation",
-     397,
-     161
-    ],
-    [
-     "NVIDIA/ai-cloud-validation",
-     385,
-     1017
-    ],
-    [
-     "NVIDIA/ai-cloud-validation",
-     376,
-     528
-    ],
-    [
-     "NVIDIA/ai-cloud-validation",
-     236,
-     107
-    ],
-    [
-     "NVIDIA/ai-cloud-validation",
-     369,
-     1524
-    ],
-    [
-     "NVIDIA/ai-cloud-validation",
-     398,
-     1564
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:abegnoche:nonai",
-   "arm": "P",
-   "author": "abegnoche",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "NVIDIA/ai-cloud-validation",
-     357,
-     334
-    ],
-    [
-     "NVIDIA/ai-cloud-validation",
-     374,
-     642
-    ],
-    [
-     "NVIDIA/ai-cloud-validation",
-     195,
-     75
-    ],
-    [
-     "NVIDIA/ai-cloud-validation",
-     190,
-     65
-    ],
-    [
-     "NVIDIA/ai-cloud-validation",
-     193,
-     328
-    ],
-    [
-     "NVIDIA/ai-cloud-validation",
-     389,
-     104
-    ],
-    [
-     "NVIDIA/ai-cloud-validation",
-     378,
-     459
-    ],
-    [
-     "NVIDIA/ai-cloud-validation",
-     238,
-     404
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:geoHeil:ai",
-   "arm": "P",
-   "author": "geoHeil",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "docling-project/docling",
-     3274,
-     309
-    ],
-    [
-     "docling-project/docling",
-     3237,
-     193
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:geoHeil:nonai",
-   "arm": "P",
-   "author": "geoHeil",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "docling-project/docling",
-     3397,
-     77
-    ],
-    [
-     "docling-project/docling",
-     3332,
-     1054
-    ],
-    [
-     "docling-project/docling",
-     3277,
-     212
-    ],
-    [
-     "docling-project/docling",
-     3291,
-     260
-    ],
-    [
-     "docling-project/docling",
-     3389,
-     57
-    ],
-    [
-     "docling-project/docling",
-     3272,
-     175
-    ],
-    [
-     "docling-project/docling",
-     3387,
-     64
-    ],
-    [
-     "docling-project/docling",
-     3346,
-     1207
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:sollhui:ai",
-   "arm": "P",
-   "author": "sollhui",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "apache/doris",
-     62089,
-     78
-    ],
-    [
-     "apache/doris",
-     62007,
-     1099
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:sollhui:nonai",
-   "arm": "P",
-   "author": "sollhui",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "apache/doris",
-     62032,
-     51
-    ],
-    [
-     "apache/doris",
-     62289,
-     51
-    ],
-    [
-     "apache/doris",
-     62893,
-     135
-    ],
-    [
-     "apache/doris",
-     62288,
-     53
-    ],
-    [
-     "apache/doris",
-     62889,
-     134
-    ],
-    [
-     "apache/doris",
-     62331,
-     117
-    ],
-    [
-     "apache/doris",
-     62969,
-     91
-    ],
-    [
-     "apache/doris",
-     62282,
-     136
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:morandot:ai",
-   "arm": "P",
-   "author": "morandot",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "HKUDS/nanobot",
-     3114,
-     102
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:morandot:nonai",
-   "arm": "P",
-   "author": "morandot",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "HKUDS/nanobot",
-     2903,
-     263
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:Knapp-Kevin:ai",
-   "arm": "P",
-   "author": "Knapp-Kevin",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "microsoft/agent-governance-toolkit",
-     741,
-     1566
-    ],
-    [
-     "microsoft/agent-governance-toolkit",
-     745,
-     488
-    ],
-    [
-     "microsoft/agent-governance-toolkit",
-     746,
-     70
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:Knapp-Kevin:nonai",
-   "arm": "P",
-   "author": "Knapp-Kevin",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "microsoft/agent-governance-toolkit",
-     752,
-     539
-    ],
-    [
-     "microsoft/agent-governance-toolkit",
-     747,
-     1053
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:vishnu-ssuresh:ai",
-   "arm": "P",
-   "author": "vishnu-ssuresh",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "langchain-ai/langsmith-sdk",
-     2747,
-     1077
-    ],
-    [
-     "langchain-ai/langsmith-sdk",
-     2748,
-     585
-    ],
-    [
-     "langchain-ai/langsmith-sdk",
-     2746,
-     1746
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:vishnu-ssuresh:nonai",
-   "arm": "P",
-   "author": "vishnu-ssuresh",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "langchain-ai/deepagents",
-     2923,
-     1975
-    ],
-    [
-     "langchain-ai/langsmith-sdk",
-     2745,
-     158
-    ],
-    [
-     "langchain-ai/langsmith-cli",
-     100,
-     522
-    ],
-    [
-     "langchain-ai/deepagents",
-     2921,
-     87
-    ],
-    [
-     "langchain-ai/deepagents",
-     2927,
-     619
-    ],
-    [
-     "langchain-ai/langsmith-sdk",
-     2787,
-     57
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:rlmanrique:ai",
-   "arm": "P",
-   "author": "rlmanrique",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "weaviate/weaviate-cli",
-     166,
-     194
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:rlmanrique:nonai",
-   "arm": "P",
-   "author": "rlmanrique",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "weaviate/weaviate",
-     10991,
-     217
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:fortunecookiee:ai",
-   "arm": "P",
-   "author": "fortunecookiee",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "sgl-project/sglang",
-     23513,
-     85
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:fortunecookiee:nonai",
-   "arm": "P",
-   "author": "fortunecookiee",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "sgl-project/sglang",
-     22544,
-     1504
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:johnlanni:ai",
-   "arm": "P",
-   "author": "johnlanni",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "agentscope-ai/AgentTeams",
-     636,
-     204
-    ],
-    [
-     "agentscope-ai/AgentTeams",
-     609,
-     886
-    ],
-    [
-     "agentscope-ai/AgentTeams",
-     605,
-     137
-    ],
-    [
-     "agentscope-ai/AgentTeams",
-     624,
-     731
-    ],
-    [
-     "agentscope-ai/AgentTeams",
-     534,
-     53
-    ],
-    [
-     "agentscope-ai/AgentTeams",
-     589,
-     333
-    ],
-    [
-     "agentscope-ai/AgentTeams",
-     551,
-     1626
-    ],
-    [
-     "agentscope-ai/AgentTeams",
-     597,
-     495
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:johnlanni:nonai",
-   "arm": "P",
-   "author": "johnlanni",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "agentscope-ai/AgentTeams",
-     674,
-     195
-    ],
-    [
-     "agentscope-ai/AgentTeams",
-     678,
-     200
-    ],
-    [
-     "agentscope-ai/AgentTeams",
-     722,
-     334
     ],
     [
-     "agentscope-ai/AgentTeams",
-     686,
-     602
+     "tenstorrent/tt-metal",
+     42468,
+     245
     ],
     [
-     "agentscope-ai/AgentTeams",
-     715,
-     212
+     "tenstorrent/tt-metal",
+     42492,
+     470
     ],
     [
-     "agentscope-ai/AgentTeams",
-     689,
-     54
+     "tenstorrent/tt-metal",
+     44405,
+     294
     ],
     [
-     "agentscope-ai/AgentTeams",
-     695,
-     1755
+     "tenstorrent/tt-metal",
+     44401,
+     109
     ],
     [
-     "agentscope-ai/AgentTeams",
-     654,
-     651
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:coldxiangyu163:ai",
-   "arm": "P",
-   "author": "coldxiangyu163",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "HKUDS/nanobot",
-     3578,
-     81
-    ],
-    [
-     "HKUDS/nanobot",
-     3579,
-     126
-    ],
-    [
-     "HKUDS/nanobot",
-     3575,
-     80
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:coldxiangyu163:nonai",
-   "arm": "P",
-   "author": "coldxiangyu163",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "HKUDS/nanobot",
-     3295,
-     56
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:w41ter:ai",
-   "arm": "P",
-   "author": "w41ter",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "apache/doris",
-     62857,
-     62
-    ],
-    [
-     "apache/doris",
-     62859,
-     84
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:w41ter:nonai",
-   "arm": "P",
-   "author": "w41ter",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "apache/doris",
-     62622,
-     139
-    ],
-    [
-     "apache/doris",
-     62775,
-     247
-    ],
-    [
-     "apache/doris",
-     62584,
-     145
-    ],
-    [
-     "apache/doris",
-     62851,
-     51
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:DanverImbue:ai",
-   "arm": "P",
-   "author": "DanverImbue",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "imbue-ai/offload",
-     191,
-     275
-    ],
-    [
-     "imbue-ai/offload",
-     201,
-     491
-    ],
-    [
-     "imbue-ai/offload",
-     205,
-     1924
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:DanverImbue:nonai",
-   "arm": "P",
-   "author": "DanverImbue",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "imbue-ai/offload",
-     208,
-     997
-    ],
-    [
-     "imbue-ai/ratchets",
-     9,
-     103
+     "tenstorrent/tt-metal",
+     45452,
+     155
     ],
     [
-     "imbue-ai/mngr",
-     1123,
-     577
+     "tenstorrent/tt-metal",
+     42496,
+     370
     ],
     [
-     "imbue-ai/offload",
-     172,
-     67
+     "tenstorrent/tt-metal",
+     44402,
+     630
     ],
     [
-     "imbue-ai/offload",
-     154,
-     592
+     "tenstorrent/tt-metal",
+     45423,
+     1108
     ],
     [
-     "imbue-ai/offload",
-     136,
-     674
+     "tenstorrent/tt-metal",
+     42476,
+     310
     ],
     [
-     "imbue-ai/offload",
-     141,
-     128
+     "tenstorrent/tt-metal",
+     44411,
+     406
     ],
-    [
-     "imbue-ai/offload",
-     181,
-     352
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:xylaaaaa:ai",
-   "arm": "P",
-   "author": "xylaaaaa",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "apache/doris",
-     62986,
-     118
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:xylaaaaa:nonai",
-   "arm": "P",
-   "author": "xylaaaaa",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "apache/doris",
-     62927,
-     801
-    ],
-    [
-     "apache/doris",
-     62732,
-     334
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:sanmaopep:ai",
-   "arm": "P",
-   "author": "sanmaopep",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "bytedance/flowgram.ai",
-     1127,
-     142
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:sanmaopep:nonai",
-   "arm": "P",
-   "author": "sanmaopep",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "bytedance/flowgram.ai",
-     1128,
-     319
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:davidzollo:ai",
-   "arm": "P",
-   "author": "davidzollo",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "apache/seatunnel",
-     10689,
-     341
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:davidzollo:nonai",
-   "arm": "P",
-   "author": "davidzollo",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "apache/seatunnel",
-     10728,
-     349
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:jwchmodx:ai",
-   "arm": "P",
-   "author": "jwchmodx",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
     [
-     "HKUDS/RAG-Anything",
-     240,
+     "tenstorrent/tt-metal",
+     42494,
      289
     ]
    ]
   },
   {
-   "slot": "P:Q2-2026:jwchmodx:nonai",
+   "slot": "P:Q2-2026:aidanfnv:ai",
    "arm": "P",
-   "author": "jwchmodx",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "HKUDS/RAG-Anything",
-     237,
-     191
-    ],
-    [
-     "HKUDS/RAG-Anything",
-     236,
-     177
-    ],
-    [
-     "HKUDS/RAG-Anything",
-     238,
-     475
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:cglagovichTT:ai",
-   "arm": "P",
-   "author": "cglagovichTT",
+   "author": "aidanfnv",
    "period": "Q2-2026",
    "ai": true,
    "candidates": [
     [
-     "tenstorrent/tt-metal",
-     42717,
-     107
+     "NVIDIA/flashdreams",
+     229,
+     207
     ],
     [
-     "tenstorrent/tt-metal",
-     42976,
-     1844
+     "NVIDIA/flashdreams",
+     246,
+     314
     ]
    ]
   },
   {
-   "slot": "P:Q2-2026:cglagovichTT:nonai",
+   "slot": "P:Q2-2026:aidanfnv:nonai",
    "arm": "P",
-   "author": "cglagovichTT",
+   "author": "aidanfnv",
    "period": "Q2-2026",
    "ai": false,
    "candidates": [
     [
-     "tenstorrent/tt-metal",
-     42111,
-     124
+     "NVIDIA/flashdreams",
+     261,
+     166
     ],
     [
-     "tenstorrent/tt-inference-server",
-     3107,
-     170
+     "NVIDIA/flashdreams",
+     267,
+     652
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:camjay:ai",
+   "arm": "P",
+   "author": "camjay",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "Portkey-AI/terraform-provider-portkey",
+     22,
+     387
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:camjay:nonai",
+   "arm": "P",
+   "author": "camjay",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "Portkey-AI/terraform-provider-portkey",
+     23,
+     203
     ],
     [
-     "tenstorrent/tt-metal",
-     42526,
-     748
+     "Portkey-AI/terraform-provider-portkey",
+     40,
+     134
     ],
     [
-     "tenstorrent/tt-metal",
-     42191,
+     "Portkey-AI/terraform-provider-portkey",
+     31,
+     357
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:anvyle:ai",
+   "arm": "P",
+   "author": "anvyle",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "Significant-Gravitas/AutoGPT",
+     12731,
+     1578
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:anvyle:nonai",
+   "arm": "P",
+   "author": "anvyle",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "Significant-Gravitas/AutoGPT",
+     12880,
+     1587
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:sufubao:ai",
+   "arm": "P",
+   "author": "sufubao",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "ModelTC/LightLLM",
+     1272,
+     649
+    ],
+    [
+     "ModelTC/LightLLM",
+     1248,
+     449
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:sufubao:nonai",
+   "arm": "P",
+   "author": "sufubao",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "ModelTC/LightLLM",
+     1282,
+     767
+    ],
+    [
+     "ModelTC/LightLLM",
+     1288,
+     99
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:ChenhanYu:ai",
+   "arm": "P",
+   "author": "ChenhanYu",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA/Model-Optimizer",
+     1288,
+     650
+    ],
+    [
+     "NVIDIA/Megatron-LM",
+     4187,
+     129
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:ChenhanYu:nonai",
+   "arm": "P",
+   "author": "ChenhanYu",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/Model-Optimizer",
+     1638,
+     99
+    ],
+    [
+     "NVIDIA/Model-Optimizer",
+     1496,
+     76
+    ],
+    [
+     "NVIDIA/Model-Optimizer",
+     1176,
+     1376
+    ],
+    [
+     "NVIDIA/Model-Optimizer",
+     1531,
+     1130
+    ],
+    [
+     "NVIDIA/Model-Optimizer",
+     1574,
+     67
+    ],
+    [
+     "NVIDIA/Model-Optimizer",
+     1564,
+     338
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:ggnnggez:ai",
+   "arm": "P",
+   "author": "ggnnggez",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "bytedance/deer-flow",
+     2752,
+     917
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:ggnnggez:nonai",
+   "arm": "P",
+   "author": "ggnnggez",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "bytedance/deer-flow",
+     2458,
+     638
+    ],
+    [
+     "bytedance/deer-flow",
+     2642,
+     339
+    ],
+    [
+     "bytedance/deer-flow",
+     2907,
+     645
+    ],
+    [
+     "bytedance/deer-flow",
+     2199,
+     56
+    ],
+    [
+     "bytedance/deer-flow",
+     2962,
+     66
+    ],
+    [
+     "bytedance/deer-flow",
+     2181,
+     51
+    ],
+    [
+     "bytedance/deer-flow",
+     3280,
+     241
+    ],
+    [
+     "bytedance/deer-flow",
+     2958,
+     237
+    ],
+    [
+     "bytedance/deer-flow",
+     2351,
      68
+    ],
+    [
+     "bytedance/deer-flow",
+     2696,
+     67
+    ],
+    [
+     "bytedance/deer-flow",
+     2725,
+     119
+    ],
+    [
+     "bytedance/deer-flow",
+     3141,
+     78
+    ],
+    [
+     "bytedance/deer-flow",
+     3167,
+     249
+    ],
+    [
+     "bytedance/deer-flow",
+     2891,
+     133
+    ],
+    [
+     "bytedance/deer-flow",
+     2850,
+     149
+    ],
+    [
+     "bytedance/deer-flow",
+     3321,
+     367
     ]
    ]
   },
   {
-   "slot": "P:Q2-2026:DanielSun11:ai",
+   "slot": "P:Q2-2026:ppcvote:ai",
    "arm": "P",
-   "author": "DanielSun11",
+   "author": "ppcvote",
    "period": "Q2-2026",
    "ai": true,
    "candidates": [
     [
-     "PaddlePaddle/Paddle",
-     78603,
-     1660
+     "microsoft/agent-governance-toolkit",
+     854,
+     1210
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:ppcvote:nonai",
+   "arm": "P",
+   "author": "ppcvote",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "microsoft/PyRIT",
+     1868,
+     1112
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:pzharrington:ai",
+   "arm": "P",
+   "author": "pzharrington",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA/earth2studio",
+     859,
+     1219
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:pzharrington:nonai",
+   "arm": "P",
+   "author": "pzharrington",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/physicsnemo",
+     1597,
+     222
     ],
     [
-     "PaddlePaddle/PaddleFleet",
-     856,
-     488
+     "NVIDIA/physicsnemo",
+     1614,
+     496
     ],
     [
-     "PaddlePaddle/Paddle",
-     78608,
-     163
+     "NVIDIA/earth2studio",
+     817,
+     227
     ],
     [
-     "PaddlePaddle/Paddle",
-     78599,
-     806
+     "NVIDIA/physicsnemo",
+     1566,
+     600
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:dhawal1:ai",
+   "arm": "P",
+   "author": "dhawal1",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "ComposioHQ/composio",
+     3364,
+     966
     ],
     [
-     "PaddlePaddle/Paddle",
-     78543,
-     1667
+     "ComposioHQ/composio",
+     3309,
+     501
     ],
     [
-     "PaddlePaddle/Paddle",
-     78568,
-     756
+     "ComposioHQ/composio",
+     3369,
+     568
     ],
     [
-     "PaddlePaddle/Paddle",
-     78601,
+     "ComposioHQ/composio",
+     3375,
+     415
+    ],
+    [
+     "ComposioHQ/composio",
+     3310,
+     165
+    ],
+    [
+     "ComposioHQ/composio",
+     3348,
+     336
+    ],
+    [
+     "ComposioHQ/composio",
+     3370,
+     50
+    ],
+    [
+     "ComposioHQ/composio",
+     3165,
+     50
+    ],
+    [
+     "ComposioHQ/composio",
+     3314,
+     63
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:dhawal1:nonai",
+   "arm": "P",
+   "author": "dhawal1",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "ComposioHQ/composio",
+     3151,
+     238
+    ],
+    [
+     "ComposioHQ/composio",
+     3161,
+     69
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:hamishivi:ai",
+   "arm": "P",
+   "author": "hamishivi",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "allenai/open-instruct",
+     1609,
+     230
+    ],
+    [
+     "allenai/olmo-eval",
+     110,
+     130
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:hamishivi:nonai",
+   "arm": "P",
+   "author": "hamishivi",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "allenai/open-instruct",
+     1617,
+     97
+    ],
+    [
+     "allenai/open-instruct",
+     1584,
+     182
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:AndreiCautisanu:ai",
+   "arm": "P",
+   "author": "AndreiCautisanu",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "comet-ml/opik",
+     6897,
+     457
+    ],
+    [
+     "comet-ml/opik",
+     6498,
+     58
+    ],
+    [
+     "comet-ml/opik",
+     6768,
+     1952
+    ],
+    [
+     "comet-ml/opik",
+     6876,
+     455
+    ],
+    [
+     "comet-ml/opik",
+     6523,
+     870
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:AndreiCautisanu:nonai",
+   "arm": "P",
+   "author": "AndreiCautisanu",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "comet-ml/opik",
+     6874,
+     799
+    ],
+    [
+     "comet-ml/opik",
+     6823,
+     563
+    ],
+    [
+     "comet-ml/opik",
+     6868,
+     1596
+    ],
+    [
+     "comet-ml/opik",
+     6859,
+     527
+    ],
+    [
+     "comet-ml/opik",
+     6770,
+     249
+    ],
+    [
+     "comet-ml/opik",
+     6707,
+     180
+    ],
+    [
+     "comet-ml/opik",
+     6851,
+     577
+    ],
+    [
+     "comet-ml/opik",
+     6677,
+     629
+    ],
+    [
+     "comet-ml/opik",
+     6644,
+     513
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:Kiteeater:ai",
+   "arm": "P",
+   "author": "Kiteeater",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "bytedance/deer-flow",
+     2583,
+     277
+    ],
+    [
+     "bytedance/deer-flow",
+     2582,
+     94
+    ],
+    [
+     "bytedance/deer-flow",
+     2585,
+     65
+    ],
+    [
+     "bytedance/deer-flow",
+     2584,
+     74
+    ],
+    [
+     "bytedance/deer-flow",
+     2414,
      311
     ]
    ]
   },
   {
-   "slot": "P:Q2-2026:DanielSun11:nonai",
+   "slot": "P:Q2-2026:Kiteeater:nonai",
    "arm": "P",
-   "author": "DanielSun11",
+   "author": "Kiteeater",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "bytedance/deer-flow",
+     2834,
+     168
+    ],
+    [
+     "bytedance/deer-flow",
+     2588,
+     307
+    ],
+    [
+     "bytedance/deer-flow",
+     2589,
+     407
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:3outeille:ai",
+   "arm": "P",
+   "author": "3outeille",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "huggingface/transformers",
+     45408,
+     1118
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:3outeille:nonai",
+   "arm": "P",
+   "author": "3outeille",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "huggingface/transformers",
+     46292,
+     1524
+    ],
+    [
+     "huggingface/transformers",
+     45409,
+     359
+    ],
+    [
+     "huggingface/transformers",
+     46394,
+     140
+    ],
+    [
+     "huggingface/transformers",
+     46102,
+     138
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:Vasilije1990:ai",
+   "arm": "P",
+   "author": "Vasilije1990",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "topoteretes/cognee",
+     2703,
+     75
+    ],
+    [
+     "topoteretes/cognee",
+     2991,
+     105
+    ],
+    [
+     "topoteretes/cognee",
+     2760,
+     217
+    ],
+    [
+     "topoteretes/cognee",
+     2641,
+     1410
+    ],
+    [
+     "topoteretes/cognee-integrations",
+     42,
+     1431
+    ],
+    [
+     "topoteretes/cognee",
+     2762,
+     164
+    ],
+    [
+     "topoteretes/cognee",
+     2594,
+     115
+    ],
+    [
+     "topoteretes/cognee",
+     2781,
+     306
+    ],
+    [
+     "topoteretes/cognee",
+     2541,
+     90
+    ],
+    [
+     "topoteretes/cognee",
+     2940,
+     335
+    ],
+    [
+     "topoteretes/cognee-integrations",
+     39,
+     1491
+    ],
+    [
+     "topoteretes/cognee",
+     2993,
+     52
+    ],
+    [
+     "topoteretes/cognee",
+     2759,
+     217
+    ],
+    [
+     "topoteretes/cognee-integrations",
+     44,
+     260
+    ],
+    [
+     "topoteretes/cognee",
+     2581,
+     117
+    ],
+    [
+     "topoteretes/cognee",
+     2595,
+     1288
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:Vasilije1990:nonai",
+   "arm": "P",
+   "author": "Vasilije1990",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "topoteretes/cognee",
+     2936,
+     136
+    ],
+    [
+     "topoteretes/cognee",
+     2836,
+     180
+    ],
+    [
+     "topoteretes/cognee-integrations",
+     61,
+     1391
+    ],
+    [
+     "topoteretes/cognee-integrations",
+     45,
+     477
+    ],
+    [
+     "topoteretes/cognee-integrations",
+     52,
+     1248
+    ],
+    [
+     "topoteretes/cognee",
+     2767,
+     169
+    ],
+    [
+     "topoteretes/cognee",
+     2894,
+     553
+    ],
+    [
+     "topoteretes/cognee",
+     2757,
+     350
+    ],
+    [
+     "topoteretes/cognee",
+     2934,
+     81
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:maxdeichmann:ai",
+   "arm": "P",
+   "author": "maxdeichmann",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "langfuse/langfuse",
+     13535,
+     397
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2971,
+     547
+    ],
+    [
+     "langfuse/langfuse",
+     13556,
+     70
+    ],
+    [
+     "langfuse/langfuse",
+     13467,
+     170
+    ],
+    [
+     "langfuse/langfuse",
+     13475,
+     1145
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2794,
+     51
+    ],
+    [
+     "langfuse/langfuse",
+     13564,
+     53
+    ],
+    [
+     "langfuse/langfuse",
+     13563,
+     79
+    ],
+    [
+     "langfuse/langfuse",
+     13635,
+     58
+    ],
+    [
+     "langfuse/langfuse",
+     13831,
+     70
+    ],
+    [
+     "langfuse/langfuse",
+     13519,
+     124
+    ],
+    [
+     "langfuse/langfuse",
+     13642,
+     213
+    ],
+    [
+     "langfuse/langfuse",
+     13555,
+     216
+    ],
+    [
+     "langfuse/langfuse",
+     14055,
+     138
+    ],
+    [
+     "langfuse/langfuse",
+     12930,
+     56
+    ],
+    [
+     "langfuse/langfuse",
+     13457,
+     286
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:maxdeichmann:nonai",
+   "arm": "P",
+   "author": "maxdeichmann",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "langfuse/langfuse",
+     13143,
+     88
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:rmillerTT:ai",
+   "arm": "P",
+   "author": "rmillerTT",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "tenstorrent/tt-metal",
+     42992,
+     763
+    ],
+    [
+     "tenstorrent/tt-metal",
+     42073,
+     152
+    ],
+    [
+     "tenstorrent/tt-metal",
+     45037,
+     1484
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:rmillerTT:nonai",
+   "arm": "P",
+   "author": "rmillerTT",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "tenstorrent/tt-metal",
+     42432,
+     480
+    ],
+    [
+     "tenstorrent/tt-metal",
+     43920,
+     56
+    ],
+    [
+     "tenstorrent/tt-metal",
+     44341,
+     554
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:Xreki:ai",
+   "arm": "P",
+   "author": "Xreki",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "PaddlePaddle/GraphNet",
+     701,
+     112
+    ],
+    [
+     "PaddlePaddle/GraphNet",
+     707,
+     386
+    ],
+    [
+     "PaddlePaddle/PassNet",
+     92,
+     476
+    ],
+    [
+     "PaddlePaddle/GraphNet",
+     709,
+     834
+    ],
+    [
+     "PaddlePaddle/GraphNet",
+     717,
+     582
+    ],
+    [
+     "PaddlePaddle/GraphNet",
+     702,
+     1155
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:Xreki:nonai",
+   "arm": "P",
+   "author": "Xreki",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "PaddlePaddle/GraphNet",
+     695,
+     82
+    ],
+    [
+     "PaddlePaddle/PassNet",
+     78,
+     230
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     79142,
+     900
+    ],
+    [
+     "PaddlePaddle/GraphNet",
+     692,
+     130
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     79092,
+     155
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     78610,
+     639
+    ],
+    [
+     "PaddlePaddle/PassNet",
+     73,
+     180
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     79083,
+     1046
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:yangzheli:ai",
+   "arm": "P",
+   "author": "yangzheli",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "bytedance/deer-flow",
+     2279,
+     685
+    ],
+    [
+     "bytedance/deer-flow",
+     1846,
+     51
+    ],
+    [
+     "bytedance/deer-flow",
+     1904,
+     85
+    ],
+    [
+     "bytedance/deer-flow",
+     2147,
+     892
+    ],
+    [
+     "bytedance/deer-flow",
+     2713,
+     1017
+    ],
+    [
+     "bytedance/deer-flow",
+     1896,
+     112
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:yangzheli:nonai",
+   "arm": "P",
+   "author": "yangzheli",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "bytedance/deer-flow",
+     2679,
+     158
+    ],
+    [
+     "bytedance/deer-flow",
+     1848,
+     74
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:davezfr:ai",
+   "arm": "P",
+   "author": "davezfr",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "nexu-io/open-design",
+     1691,
+     685
+    ],
+    [
+     "nexu-io/open-design",
+     3652,
+     549
+    ],
+    [
+     "nexu-io/open-design",
+     2963,
+     1739
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:davezfr:nonai",
+   "arm": "P",
+   "author": "davezfr",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "nexu-io/open-design",
+     326,
+     761
+    ],
+    [
+     "nexu-io/open-design",
+     397,
+     245
+    ],
+    [
+     "nexu-io/open-design",
+     434,
+     1612
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:cuichenx:ai",
+   "arm": "P",
+   "author": "cuichenx",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     4070,
+     55
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     3502,
+     135
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     3839,
+     811
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     3100,
+     933
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:cuichenx:nonai",
+   "arm": "P",
+   "author": "cuichenx",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/skills",
+     151,
+     52
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     3553,
+     390
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     3753,
+     326
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     3907,
+     83
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     3852,
+     220
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     4026,
+     532
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     3313,
+     149
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     3755,
+     958
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     4030,
+     393
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     4031,
+     401
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     3829,
+     213
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     4023,
+     126
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     3635,
+     61
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     4033,
+     377
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     3673,
+     186
+    ],
+    [
+     "NVIDIA-NeMo/Megatron-Bridge",
+     4117,
+     1081
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:joeylee12629-star:ai",
+   "arm": "P",
+   "author": "joeylee12629-star",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "nexu-io/html-anything",
+     4,
+     746
+    ],
+    [
+     "nexu-io/html-anything",
+     24,
+     1634
+    ],
+    [
+     "nexu-io/html-anything",
+     22,
+     120
+    ],
+    [
+     "nexu-io/html-anything",
+     5,
+     240
+    ],
+    [
+     "nexu-io/html-anything",
+     6,
+     281
+    ],
+    [
+     "nexu-io/html-anything",
+     17,
+     261
+    ],
+    [
+     "nexu-io/html-anything",
+     3,
+     66
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:joeylee12629-star:nonai",
+   "arm": "P",
+   "author": "joeylee12629-star",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "nexu-io/open-design",
+     1450,
+     229
+    ],
+    [
+     "nexu-io/open-design",
+     795,
+     1055
+    ],
+    [
+     "nexu-io/html-anything",
+     47,
+     121
+    ],
+    [
+     "nexu-io/open-design",
+     187,
+     88
+    ],
+    [
+     "nexu-io/open-design",
+     295,
+     61
+    ],
+    [
+     "nexu-io/html-anything",
+     44,
+     190
+    ],
+    [
+     "nexu-io/open-design",
+     666,
+     1334
+    ],
+    [
+     "nexu-io/open-design",
+     1290,
+     1366
+    ],
+    [
+     "nexu-io/open-design",
+     685,
+     241
+    ],
+    [
+     "nexu-io/open-design",
+     1966,
+     84
+    ],
+    [
+     "nexu-io/open-design",
+     794,
+     1875
+    ],
+    [
+     "nexu-io/open-design",
+     2200,
+     95
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:AnthonyTsu1984:ai",
+   "arm": "P",
+   "author": "AnthonyTsu1984",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "zilliztech/zdoc_cn",
+     27,
+     727
+    ],
+    [
+     "zilliztech/zdoc",
+     87,
+     846
+    ],
+    [
+     "zilliztech/zdoc",
+     112,
+     386
+    ],
+    [
+     "zilliztech/zdoc_cn",
+     29,
+     105
+    ],
+    [
+     "zilliztech/zdoc",
+     85,
+     139
+    ],
+    [
+     "zilliztech/zdoc_cn",
+     28,
+     102
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:AnthonyTsu1984:nonai",
+   "arm": "P",
+   "author": "AnthonyTsu1984",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "zilliztech/zdoc",
+     108,
+     489
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:Jie-Fang:ai",
+   "arm": "P",
+   "author": "Jie-Fang",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "vllm-project/vllm",
+     43584,
+     1458
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:Jie-Fang:nonai",
+   "arm": "P",
+   "author": "Jie-Fang",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "vllm-project/vllm",
+     44230,
+     461
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:serena-ruan:ai",
+   "arm": "P",
+   "author": "serena-ruan",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "mlflow/mlflow",
+     22963,
+     143
+    ],
+    [
+     "mlflow/mlflow",
+     22743,
+     860
+    ],
+    [
+     "mlflow/mlflow",
+     22633,
+     85
+    ],
+    [
+     "mlflow/mlflow",
+     22820,
+     319
+    ],
+    [
+     "mlflow/mlflow",
+     22615,
+     61
+    ],
+    [
+     "mlflow/mlflow",
+     22786,
+     132
+    ],
+    [
+     "mlflow/mlflow",
+     22840,
+     78
+    ],
+    [
+     "mlflow/mlflow",
+     22819,
+     1178
+    ],
+    [
+     "mlflow/mlflow",
+     22990,
+     1037
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:serena-ruan:nonai",
+   "arm": "P",
+   "author": "serena-ruan",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "mlflow/mlflow",
+     22821,
+     392
+    ],
+    [
+     "mlflow/mlflow",
+     22925,
+     53
+    ],
+    [
+     "mlflow/mlflow",
+     22248,
+     198
+    ],
+    [
+     "mlflow/mlflow",
+     22921,
+     69
+    ],
+    [
+     "mlflow/mlflow",
+     22703,
+     66
+    ],
+    [
+     "mlflow/mlflow",
+     22781,
+     104
+    ],
+    [
+     "mlflow/mlflow",
+     22239,
+     153
+    ],
+    [
+     "mlflow/mlflow",
+     22919,
+     74
+    ],
+    [
+     "mlflow/mlflow",
+     22222,
+     62
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:thirtiseven:ai",
+   "arm": "P",
+   "author": "thirtiseven",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA/cudf-spark",
+     14920,
+     78
+    ],
+    [
+     "NVIDIA/cudf-spark",
+     14575,
+     1621
+    ],
+    [
+     "NVIDIA/cudf-spark-jni",
+     4661,
+     161
+    ],
+    [
+     "NVIDIA/cudf-spark",
+     14545,
+     911
+    ],
+    [
+     "NVIDIA/cudf-spark-jni",
+     4431,
+     849
+    ],
+    [
+     "NVIDIA/cudf-spark",
+     14651,
+     385
+    ],
+    [
+     "NVIDIA/cudf-spark-jni",
+     4460,
+     253
+    ],
+    [
+     "NVIDIA/cudf-spark-jni",
+     4646,
+     388
+    ],
+    [
+     "NVIDIA/cudf-spark-jni",
+     4499,
+     431
+    ],
+    [
+     "NVIDIA/cudf-spark",
+     14885,
+     207
+    ],
+    [
+     "NVIDIA/cudf-spark-jni",
+     4644,
+     967
+    ],
+    [
+     "NVIDIA/cudf-spark-jni",
+     4628,
+     605
+    ],
+    [
+     "NVIDIA/cudf-spark-jni",
+     4521,
+     104
+    ],
+    [
+     "NVIDIA/cudf-spark",
+     14877,
+     358
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:thirtiseven:nonai",
+   "arm": "P",
+   "author": "thirtiseven",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/cudf-spark",
+     14618,
+     503
+    ],
+    [
+     "NVIDIA/cudf-spark-jni",
+     4493,
+     64
+    ],
+    [
+     "NVIDIA/cudf-spark",
+     14724,
+     405
+    ],
+    [
+     "NVIDIA/cudf-spark",
+     14706,
+     332
+    ],
+    [
+     "NVIDIA/cudf-spark",
+     14825,
+     157
+    ],
+    [
+     "NVIDIA/cudf-spark",
+     14878,
+     168
+    ],
+    [
+     "NVIDIA/cudf-spark",
+     14783,
+     238
+    ],
+    [
+     "NVIDIA/cudf-spark-jni",
+     4585,
+     75
+    ],
+    [
+     "NVIDIA/cudf-spark-jni",
+     4507,
+     729
+    ],
+    [
+     "NVIDIA/cudf-spark",
+     14772,
+     89
+    ],
+    [
+     "NVIDIA/cudf-spark-jni",
+     4448,
+     226
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:dleshchev:ai",
+   "arm": "P",
+   "author": "dleshchev",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA/daqiri",
+     71,
+     60
+    ],
+    [
+     "NVIDIA/daqiri",
+     19,
+     1317
+    ],
+    [
+     "NVIDIA/daqiri",
+     38,
+     375
+    ],
+    [
+     "NVIDIA/daqiri",
+     104,
+     693
+    ],
+    [
+     "NVIDIA/daqiri",
+     116,
+     602
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:dleshchev:nonai",
+   "arm": "P",
+   "author": "dleshchev",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/daqiri",
+     117,
+     487
+    ],
+    [
+     "NVIDIA/daqiri",
+     118,
+     274
+    ],
+    [
+     "NVIDIA/daqiri",
+     107,
+     349
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:shivamrawat1:ai",
+   "arm": "P",
+   "author": "shivamrawat1",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "BerriAI/litellm",
+     28030,
+     748
+    ],
+    [
+     "BerriAI/litellm",
+     27573,
+     368
+    ],
+    [
+     "BerriAI/litellm",
+     27028,
+     57
+    ],
+    [
+     "BerriAI/litellm",
+     25991,
+     232
+    ],
+    [
+     "BerriAI/litellm",
+     29734,
+     245
+    ],
+    [
+     "BerriAI/litellm",
+     29739,
+     525
+    ],
+    [
+     "BerriAI/litellm",
+     28510,
+     1319
+    ],
+    [
+     "BerriAI/litellm",
+     27556,
+     696
+    ],
+    [
+     "BerriAI/litellm",
+     26528,
+     201
+    ],
+    [
+     "BerriAI/litellm",
+     28425,
+     252
+    ],
+    [
+     "BerriAI/litellm",
+     25994,
+     563
+    ],
+    [
+     "BerriAI/litellm",
+     28418,
+     235
+    ],
+    [
+     "BerriAI/litellm",
+     29256,
+     1284
+    ],
+    [
+     "BerriAI/litellm",
+     26466,
+     263
+    ],
+    [
+     "BerriAI/litellm",
+     28661,
+     84
+    ],
+    [
+     "BerriAI/litellm",
+     29202,
+     306
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:shivamrawat1:nonai",
+   "arm": "P",
+   "author": "shivamrawat1",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "BerriAI/litellm",
+     26351,
+     355
+    ],
+    [
+     "BerriAI/litellm",
+     25980,
+     58
+    ],
+    [
+     "BerriAI/litellm",
+     26208,
+     418
+    ],
+    [
+     "BerriAI/litellm",
+     25464,
+     291
+    ],
+    [
+     "BerriAI/litellm",
+     26826,
+     241
+    ],
+    [
+     "BerriAI/litellm",
+     26144,
+     108
+    ],
+    [
+     "BerriAI/litellm",
+     25391,
+     162
+    ],
+    [
+     "BerriAI/litellm",
+     25458,
+     558
+    ],
+    [
+     "BerriAI/litellm",
+     25929,
+     229
+    ],
+    [
+     "BerriAI/litellm",
+     25383,
+     162
+    ],
+    [
+     "BerriAI/litellm",
+     26950,
+     137
+    ],
+    [
+     "BerriAI/litellm",
+     25736,
+     104
+    ],
+    [
+     "BerriAI/litellm",
+     25254,
+     148
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:akshayv:ai",
+   "arm": "P",
+   "author": "akshayv",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "vllm-project/semantic-router",
+     1926,
+     670
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:akshayv:nonai",
+   "arm": "P",
+   "author": "akshayv",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "vllm-project/semantic-router",
+     1922,
+     584
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:aivong-openhands:ai",
+   "arm": "P",
+   "author": "aivong-openhands",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "OpenHands/OpenHands",
+     13966,
+     382
+    ],
+    [
+     "OpenHands/OpenHands",
+     14163,
+     104
+    ],
+    [
+     "OpenHands/OpenHands",
+     14657,
+     58
+    ],
+    [
+     "OpenHands/OpenHands",
+     14479,
+     194
+    ],
+    [
+     "OpenHands/OpenHands",
+     13705,
+     84
+    ],
+    [
+     "OpenHands/OpenHands",
+     14299,
+     1208
+    ],
+    [
+     "OpenHands/OpenHands",
+     14660,
+     451
+    ],
+    [
+     "OpenHands/OpenHands",
+     14259,
+     276
+    ],
+    [
+     "OpenHands/OpenHands",
+     13968,
+     266
+    ],
+    [
+     "OpenHands/OpenHands",
+     13711,
+     94
+    ],
+    [
+     "OpenHands/OpenHands",
+     14409,
+     53
+    ],
+    [
+     "OpenHands/OpenHands",
+     14662,
+     70
+    ],
+    [
+     "OpenHands/OpenHands",
+     14689,
+     636
+    ],
+    [
+     "OpenHands/OpenHands",
+     14664,
+     1322
+    ],
+    [
+     "OpenHands/OpenHands",
+     14652,
+     112
+    ],
+    [
+     "OpenHands/OpenHands",
+     14097,
+     224
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:aivong-openhands:nonai",
+   "arm": "P",
+   "author": "aivong-openhands",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "OpenHands/OpenHands",
+     14635,
+     86
+    ],
+    [
+     "OpenHands/OpenHands",
+     14649,
+     50
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:nv-jakob:ai",
+   "arm": "P",
+   "author": "nv-jakob",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA/IsaacTeleop",
+     483,
+     337
+    ],
+    [
+     "NVIDIA/IsaacTeleop",
+     511,
+     337
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:nv-jakob:nonai",
+   "arm": "P",
+   "author": "nv-jakob",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/IsaacTeleop",
+     626,
+     52
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:kcze:ai",
+   "arm": "P",
+   "author": "kcze",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "Significant-Gravitas/AutoGPT",
+     13238,
+     915
+    ],
+    [
+     "Significant-Gravitas/AutoGPT",
+     13146,
+     271
+    ],
+    [
+     "Significant-Gravitas/AutoGPT",
+     12792,
+     452
+    ],
+    [
+     "Significant-Gravitas/AutoGPT",
+     13237,
+     290
+    ],
+    [
+     "Significant-Gravitas/AutoGPT",
+     13117,
+     95
+    ],
+    [
+     "Significant-Gravitas/AutoGPT",
+     13145,
+     219
+    ],
+    [
+     "Significant-Gravitas/AutoGPT",
+     12974,
+     86
+    ],
+    [
+     "Significant-Gravitas/AutoGPT",
+     13231,
+     160
+    ],
+    [
+     "Significant-Gravitas/AutoGPT",
+     13135,
+     793
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:kcze:nonai",
+   "arm": "P",
+   "author": "kcze",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "Significant-Gravitas/AutoGPT",
+     13089,
+     955
+    ],
+    [
+     "Significant-Gravitas/AutoGPT",
+     13232,
+     355
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:mprahl:ai",
+   "arm": "P",
+   "author": "mprahl",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "mlflow/mlflow",
+     22387,
+     778
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:mprahl:nonai",
+   "arm": "P",
+   "author": "mprahl",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "mlflow/mlflow",
+     23115,
+     163
+    ],
+    [
+     "mlflow/mlflow",
+     22520,
+     531
+    ],
+    [
+     "mlflow/mlflow",
+     23366,
+     405
+    ],
+    [
+     "mlflow/mlflow",
+     23769,
+     250
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:kpham-sgl:ai",
+   "arm": "P",
+   "author": "kpham-sgl",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "sgl-project/sglang",
+     22471,
+     83
+    ],
+    [
+     "sgl-project/sglang",
+     22549,
+     94
+    ],
+    [
+     "sgl-project/sglang",
+     25539,
+     161
+    ],
+    [
+     "sgl-project/sglang",
+     24552,
+     535
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:kpham-sgl:nonai",
+   "arm": "P",
+   "author": "kpham-sgl",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "sgl-project/sglang",
+     25016,
+     52
+    ],
+    [
+     "sgl-project/sglang",
+     24436,
+     1956
+    ],
+    [
+     "sgl-project/sglang",
+     24395,
+     144
+    ],
+    [
+     "sgl-project/sglang",
+     23874,
+     242
+    ],
+    [
+     "sgl-project/sglang",
+     27233,
+     355
+    ],
+    [
+     "sgl-project/sglang",
+     23292,
+     1061
+    ],
+    [
+     "sgl-project/sglang",
+     24433,
+     91
+    ],
+    [
+     "sgl-project/sglang",
+     24172,
+     362
+    ],
+    [
+     "sgl-project/sglang",
+     22487,
+     67
+    ],
+    [
+     "sgl-project/sglang",
+     22294,
+     218
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:ashwing:ai",
+   "arm": "P",
+   "author": "ashwing",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "vllm-project/vllm",
+     43757,
+     148
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:ashwing:nonai",
+   "arm": "P",
+   "author": "ashwing",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "vllm-project/agentic-api",
+     44,
+     259
+    ],
+    [
+     "vllm-project/agentic-api",
+     39,
+     139
+    ],
+    [
+     "vllm-project/vllm",
+     43401,
+     191
+    ],
+    [
+     "vllm-project/vllm",
+     43051,
+     88
+    ],
+    [
+     "vllm-project/agentic-api",
+     37,
+     317
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:lin-snow:ai",
+   "arm": "P",
+   "author": "lin-snow",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "langgenius/dify",
+     36356,
+     1780
+    ],
+    [
+     "langgenius/dify",
+     36896,
+     1815
+    ],
+    [
+     "langgenius/dify",
+     37090,
+     992
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:lin-snow:nonai",
+   "arm": "P",
+   "author": "lin-snow",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "langgenius/dify",
+     35891,
+     262
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:zhijianma:ai",
+   "arm": "P",
+   "author": "zhijianma",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "agentscope-ai/QwenPaw",
+     4236,
+     532
+    ],
+    [
+     "agentscope-ai/QwenPaw",
+     4679,
+     125
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:zhijianma:nonai",
+   "arm": "P",
+   "author": "zhijianma",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "agentscope-ai/QwenPaw",
+     3180,
+     592
+    ],
+    [
+     "agentscope-ai/QwenPaw",
+     3511,
+     65
+    ],
+    [
+     "agentscope-ai/QwenPaw",
+     3189,
+     388
+    ],
+    [
+     "agentscope-ai/QwenPaw",
+     4720,
+     123
+    ],
+    [
+     "agentscope-ai/QwenPaw",
+     2803,
+     194
+    ],
+    [
+     "agentscope-ai/QwenPaw",
+     3512,
+     1152
+    ],
+    [
+     "agentscope-ai/QwenPaw",
+     3766,
+     1069
+    ],
+    [
+     "agentscope-ai/QwenPaw",
+     3696,
+     839
+    ],
+    [
+     "agentscope-ai/QwenPaw",
+     4734,
+     229
+    ],
+    [
+     "agentscope-ai/QwenPaw",
+     3738,
+     747
+    ],
+    [
+     "agentscope-ai/QwenPaw",
+     3137,
+     116
+    ],
+    [
+     "agentscope-ai/QwenPaw",
+     3676,
+     333
+    ],
+    [
+     "agentscope-ai/QwenPaw",
+     3208,
+     899
+    ],
+    [
+     "agentscope-ai/QwenPaw",
+     3354,
+     217
+    ],
+    [
+     "agentscope-ai/QwenPaw",
+     4080,
+     1780
+    ],
+    [
+     "agentscope-ai/QwenPaw",
+     4117,
+     189
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:sanjaysundaramTT:ai",
+   "arm": "P",
+   "author": "sanjaysundaramTT",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "tenstorrent/tt-metal",
+     45272,
+     637
+    ],
+    [
+     "tenstorrent/tt-metal",
+     45056,
+     402
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:sanjaysundaramTT:nonai",
+   "arm": "P",
+   "author": "sanjaysundaramTT",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "tenstorrent/tt-metal",
+     45768,
+     92
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:JNSimba:ai",
+   "arm": "P",
+   "author": "JNSimba",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "apache/doris",
+     62680,
+     148
+    ],
+    [
+     "apache/doris",
+     62700,
+     1078
+    ],
+    [
+     "apache/doris",
+     62269,
+     258
+    ],
+    [
+     "apache/doris",
+     62526,
+     1288
+    ],
+    [
+     "apache/doris",
+     62804,
+     151
+    ],
+    [
+     "apache/doris",
+     62747,
+     609
+    ],
+    [
+     "apache/doris",
+     62212,
+     67
+    ],
+    [
+     "apache/doris",
+     62816,
+     142
+    ],
+    [
+     "apache/doris",
+     62449,
+     353
+    ],
+    [
+     "apache/doris",
+     62224,
+     163
+    ],
+    [
+     "apache/doris",
+     62298,
+     250
+    ],
+    [
+     "apache/doris",
+     62490,
+     1026
+    ],
+    [
+     "apache/doris",
+     62345,
+     210
+    ],
+    [
+     "apache/doris",
+     62553,
+     545
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:JNSimba:nonai",
+   "arm": "P",
+   "author": "JNSimba",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "apache/doris",
+     62626,
+     353
+    ],
+    [
+     "apache/doris",
+     64075,
+     1287
+    ],
+    [
+     "apache/doris",
+     63480,
+     308
+    ],
+    [
+     "apache/doris",
+     63898,
+     110
+    ],
+    [
+     "apache/doris",
+     63618,
+     1696
+    ],
+    [
+     "apache/doris",
+     64013,
+     306
+    ],
+    [
+     "apache/doris",
+     62902,
+     381
+    ],
+    [
+     "apache/doris",
+     63514,
+     945
+    ],
+    [
+     "apache/doris",
+     63833,
+     427
+    ],
+    [
+     "apache/doris",
+     62625,
+     353
+    ],
+    [
+     "apache/doris",
+     62636,
+     182
+    ],
+    [
+     "apache/doris",
+     63274,
+     689
+    ],
+    [
+     "apache/doris",
+     62870,
+     127
+    ],
+    [
+     "apache/doris",
+     63404,
+     1679
+    ],
+    [
+     "apache/doris",
+     64112,
+     306
+    ],
+    [
+     "apache/doris",
+     63543,
+     1347
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:aoshen02:ai",
+   "arm": "P",
+   "author": "aoshen02",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "vllm-project/vime",
+     26,
+     54
+    ],
+    [
+     "vllm-project/vime",
+     138,
+     1949
+    ],
+    [
+     "vllm-project/vime",
+     114,
+     153
+    ],
+    [
+     "vllm-project/vime",
+     116,
+     671
+    ],
+    [
+     "vllm-project/vime",
+     141,
+     133
+    ],
+    [
+     "vllm-project/vime",
+     155,
+     538
+    ],
+    [
+     "vllm-project/vime",
+     85,
+     335
+    ],
+    [
+     "vllm-project/vime",
+     98,
+     52
+    ],
+    [
+     "vllm-project/vime",
+     154,
+     148
+    ],
+    [
+     "vllm-project/vime",
+     38,
+     1690
+    ],
+    [
+     "vllm-project/vime",
+     96,
+     149
+    ],
+    [
+     "vllm-project/vllm",
+     42694,
+     531
+    ],
+    [
+     "vllm-project/vime",
+     143,
+     565
+    ],
+    [
+     "vllm-project/vime",
+     17,
+     119
+    ],
+    [
+     "vllm-project/vime",
+     48,
+     447
+    ],
+    [
+     "vllm-project/vime",
+     158,
+     57
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:aoshen02:nonai",
+   "arm": "P",
+   "author": "aoshen02",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "vllm-project/vllm",
+     42434,
+     1991
+    ],
+    [
+     "vllm-project/vime",
+     127,
+     365
+    ],
+    [
+     "vllm-project/vime",
+     47,
+     170
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:kriscon-db:ai",
+   "arm": "P",
+   "author": "kriscon-db",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "mlflow/mlflow",
+     22574,
+     190
+    ],
+    [
+     "mlflow/mlflow",
+     22629,
+     64
+    ],
+    [
+     "mlflow/mlflow",
+     23597,
+     1753
+    ],
+    [
+     "mlflow/mlflow",
+     22853,
+     1585
+    ],
+    [
+     "mlflow/mlflow",
+     22407,
+     212
+    ],
+    [
+     "mlflow/mlflow",
+     22459,
+     70
+    ],
+    [
+     "mlflow/mlflow",
+     22410,
+     1720
+    ],
+    [
+     "mlflow/mlflow",
+     22461,
+     62
+    ],
+    [
+     "mlflow/mlflow",
+     22466,
+     78
+    ],
+    [
+     "mlflow/mlflow",
+     22462,
+     101
+    ],
+    [
+     "mlflow/mlflow",
+     22409,
+     368
+    ],
+    [
+     "mlflow/mlflow",
+     22465,
+     319
+    ],
+    [
+     "mlflow/mlflow",
+     22614,
+     288
+    ],
+    [
+     "mlflow/mlflow",
+     23603,
+     1411
+    ],
+    [
+     "mlflow/mlflow",
+     22456,
+     51
+    ],
+    [
+     "mlflow/mlflow",
+     22448,
+     68
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:kriscon-db:nonai",
+   "arm": "P",
+   "author": "kriscon-db",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "mlflow/mlflow",
+     23804,
+     1540
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:Torantulino:ai",
+   "arm": "P",
+   "author": "Torantulino",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "Significant-Gravitas/AutoGPT",
+     12969,
+     231
+    ],
+    [
+     "Significant-Gravitas/AutoGPT",
+     12968,
+     123
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:Torantulino:nonai",
+   "arm": "P",
+   "author": "Torantulino",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "Significant-Gravitas/AutoGPT",
+     12672,
+     77
+    ],
+    [
+     "Significant-Gravitas/AutoGPT",
+     13185,
+     144
+    ],
+    [
+     "Significant-Gravitas/AutoGPT",
+     12996,
+     149
+    ],
+    [
+     "Significant-Gravitas/AutoGPT",
+     13070,
+     516
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:wenshao:ai",
+   "arm": "P",
+   "author": "wenshao",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "QwenLM/qwen-code",
+     2914,
+     1369
+    ],
+    [
+     "QwenLM/qwen-code",
+     3120,
+     92
+    ],
+    [
+     "QwenLM/qwen-code",
+     3077,
+     78
+    ],
+    [
+     "QwenLM/qwen-code",
+     4125,
+     660
+    ],
+    [
+     "QwenLM/qwen-code",
+     2921,
+     564
+    ],
+    [
+     "QwenLM/qwen-code",
+     2904,
+     1252
+    ],
+    [
+     "QwenLM/qwen-code",
+     2854,
+     69
+    ],
+    [
+     "QwenLM/qwen-code",
+     2923,
+     1642
+    ],
+    [
+     "QwenLM/qwen-code",
+     2897,
+     436
+    ],
+    [
+     "QwenLM/qwen-code",
+     2871,
+     358
+    ],
+    [
+     "QwenLM/qwen-code",
+     3091,
+     310
+    ],
+    [
+     "QwenLM/qwen-code",
+     2898,
+     356
+    ],
+    [
+     "QwenLM/qwen-code",
+     2872,
+     756
+    ],
+    [
+     "QwenLM/qwen-code",
+     2864,
+     380
+    ],
+    [
+     "QwenLM/qwen-code",
+     2916,
+     718
+    ],
+    [
+     "QwenLM/qwen-code",
+     2932,
+     1041
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:wenshao:nonai",
+   "arm": "P",
+   "author": "wenshao",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "QwenLM/qwen-code",
+     3630,
+     53
+    ],
+    [
+     "QwenLM/qwen-code",
+     3434,
+     706
+    ],
+    [
+     "QwenLM/qwen-code",
+     3581,
+     802
+    ],
+    [
+     "QwenLM/qwen-code",
+     3383,
+     372
+    ],
+    [
+     "QwenLM/qwen-code",
+     3873,
+     903
+    ],
+    [
+     "QwenLM/qwen-code",
+     3809,
+     650
+    ],
+    [
+     "QwenLM/qwen-code",
+     3919,
+     726
+    ],
+    [
+     "QwenLM/qwen-code",
+     3482,
+     492
+    ],
+    [
+     "QwenLM/qwen-code",
+     3842,
+     1003
+    ],
+    [
+     "QwenLM/qwen-code",
+     3155,
+     449
+    ],
+    [
+     "QwenLM/qwen-code",
+     3313,
+     700
+    ],
+    [
+     "QwenLM/qwen-code",
+     3894,
+     950
+    ],
+    [
+     "QwenLM/qwen-code",
+     3512,
+     377
+    ],
+    [
+     "QwenLM/qwen-code",
+     3892,
+     442
+    ],
+    [
+     "QwenLM/qwen-code",
+     4030,
+     183
+    ],
+    [
+     "QwenLM/qwen-code",
+     3508,
+     347
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:delkc:ai",
+   "arm": "P",
+   "author": "delkc",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "aaif-goose/goose",
+     8931,
+     66
+    ],
+    [
+     "aaif-goose/goose",
+     8886,
+     434
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:delkc:nonai",
+   "arm": "P",
+   "author": "delkc",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "aaif-goose/goose",
+     8951,
+     205
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:coszio:ai",
+   "arm": "P",
+   "author": "coszio",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "qdrant/qdrant",
+     8792,
+     786
+    ],
+    [
+     "qdrant/qdrant",
+     9208,
+     131
+    ],
+    [
+     "qdrant/qdrant",
+     8928,
+     64
+    ],
+    [
+     "qdrant/qdrant",
+     8945,
+     139
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:coszio:nonai",
+   "arm": "P",
+   "author": "coszio",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "qdrant/qdrant",
+     9059,
+     168
+    ],
+    [
+     "qdrant/qdrant",
+     9234,
+     83
+    ],
+    [
+     "qdrant/qdrant",
+     8946,
+     118
+    ],
+    [
+     "qdrant/qdrant",
+     9128,
+     53
+    ],
+    [
+     "qdrant/qdrant",
+     9270,
+     117
+    ],
+    [
+     "qdrant/qdrant",
+     9214,
+     155
+    ],
+    [
+     "qdrant/qdrant",
+     8893,
+     247
+    ],
+    [
+     "qdrant/qdrant",
+     9047,
+     65
+    ],
+    [
+     "qdrant/qdrant",
+     9339,
+     1043
+    ],
+    [
+     "qdrant/qdrant",
+     9123,
+     128
+    ],
+    [
+     "qdrant/qdrant",
+     8679,
+     82
+    ],
+    [
+     "qdrant/qdrant",
+     9097,
+     899
+    ],
+    [
+     "qdrant/qdrant",
+     9294,
+     148
+    ],
+    [
+     "qdrant/qdrant",
+     9256,
+     89
+    ],
+    [
+     "qdrant/qdrant",
+     8961,
+     137
+    ],
+    [
+     "qdrant/qdrant",
+     8833,
+     245
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:orangedeng:ai",
+   "arm": "P",
+   "author": "orangedeng",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "gpustack/gpustack-higress-plugin",
+     13,
+     615
+    ],
+    [
+     "gpustack/gpustack-higress-plugin",
+     11,
+     1707
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:orangedeng:nonai",
+   "arm": "P",
+   "author": "orangedeng",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "gpustack/gpustack",
+     5177,
+     449
+    ],
+    [
+     "gpustack/gpustack",
+     5394,
+     383
+    ],
+    [
+     "gpustack/gpustack",
+     5400,
+     110
+    ],
+    [
+     "gpustack/gpustack",
+     5366,
+     277
+    ],
+    [
+     "gpustack/gpustack",
+     5310,
+     633
+    ],
+    [
+     "gpustack/gpustack",
+     5275,
+     1552
+    ],
+    [
+     "gpustack/gpustack",
+     5361,
+     92
+    ],
+    [
+     "gpustack/gpustack",
+     5378,
+     1375
+    ],
+    [
+     "gpustack/gpustack-higress-plugin",
+     7,
+     515
+    ],
+    [
+     "gpustack/gpustack-higress-plugin",
+     17,
+     304
+    ],
+    [
+     "gpustack/gpustack",
+     5339,
+     112
+    ],
+    [
+     "gpustack/gpustack",
+     5335,
+     774
+    ],
+    [
+     "gpustack/gpustack",
+     5112,
+     295
+    ],
+    [
+     "gpustack/gpustack",
+     5354,
+     297
+    ],
+    [
+     "gpustack/gpustack",
+     5418,
+     123
+    ],
+    [
+     "gpustack/gpustack",
+     5257,
+     304
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:ragnorc:ai",
+   "arm": "P",
+   "author": "ragnorc",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "lance-format/lance",
+     6781,
+     180
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:ragnorc:nonai",
+   "arm": "P",
+   "author": "ragnorc",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "lance-format/lance",
+     6965,
+     357
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:pghuge-cloudwiz:ai",
+   "arm": "P",
+   "author": "pghuge-cloudwiz",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "BerriAI/litellm",
+     29415,
+     77
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:pghuge-cloudwiz:nonai",
+   "arm": "P",
+   "author": "pghuge-cloudwiz",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "BerriAI/litellm",
+     29751,
+     271
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:ianu82:ai",
+   "arm": "P",
+   "author": "ianu82",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "mindsdb/cowork",
+     28,
+     442
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:ianu82:nonai",
+   "arm": "P",
+   "author": "ianu82",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "mindsdb/anton",
+     96,
+     94
+    ],
+    [
+     "mindsdb/anton",
+     98,
+     100
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:zhengbuqian:ai",
+   "arm": "P",
+   "author": "zhengbuqian",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "milvus-io/milvus",
+     48688,
+     65
+    ],
+    [
+     "milvus-io/milvus",
+     48686,
+     63
+    ],
+    [
+     "milvus-io/milvus",
+     49183,
+     102
+    ],
+    [
+     "milvus-io/milvus",
+     48859,
+     267
+    ],
+    [
+     "milvus-io/milvus",
+     49050,
+     1104
+    ],
+    [
+     "milvus-io/milvus-design-docs",
+     36,
+     546
+    ],
+    [
+     "milvus-io/milvus",
+     48906,
+     837
+    ],
+    [
+     "milvus-io/milvus",
+     49396,
+     346
+    ],
+    [
+     "milvus-io/milvus",
+     49049,
+     1096
+    ],
+    [
+     "milvus-io/milvus",
+     48708,
+     1139
+    ],
+    [
+     "milvus-io/milvus",
+     49171,
+     102
+    ],
+    [
+     "milvus-io/milvus",
+     49184,
+     102
+    ],
+    [
+     "milvus-io/milvus",
+     48905,
+     133
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:zhengbuqian:nonai",
+   "arm": "P",
+   "author": "zhengbuqian",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "milvus-io/milvus",
+     50116,
+     109
+    ],
+    [
+     "milvus-io/milvus",
+     49429,
+     291
+    ],
+    [
+     "milvus-io/milvus",
+     50095,
+     536
+    ],
+    [
+     "milvus-io/milvus",
+     50117,
+     109
+    ],
+    [
+     "milvus-io/milvus",
+     48886,
+     148
+    ],
+    [
+     "milvus-io/milvus",
+     49006,
+     206
+    ],
+    [
+     "milvus-io/milvus",
+     49990,
+     1289
+    ],
+    [
+     "milvus-io/milvus",
+     50167,
+     465
+    ],
+    [
+     "milvus-io/milvus",
+     49381,
+     150
+    ],
+    [
+     "milvus-io/milvus",
+     50265,
+     136
+    ],
+    [
+     "milvus-io/milvus",
+     49916,
+     324
+    ],
+    [
+     "milvus-io/milvus-design-docs",
+     35,
+     359
+    ],
+    [
+     "milvus-io/milvus",
+     50166,
+     421
+    ],
+    [
+     "milvus-io/milvus",
+     48997,
+     206
+    ],
+    [
+     "milvus-io/milvus",
+     49905,
+     521
+    ],
+    [
+     "milvus-io/milvus",
+     50243,
+     1697
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:yysindi:ai",
+   "arm": "P",
+   "author": "yysindi",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA/NVSentinel",
+     1210,
+     206
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:yysindi:nonai",
+   "arm": "P",
+   "author": "yysindi",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/NVSentinel",
+     1095,
+     78
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:samsja:ai",
+   "arm": "P",
+   "author": "samsja",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "PrimeIntellect-ai/renderers",
+     58,
+     104
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2192,
+     127
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2214,
+     76
+    ],
+    [
+     "PrimeIntellect-ai/pydantic-config",
+     2,
+     85
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2441,
+     80
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2173,
+     105
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2373,
+     72
+    ],
+    [
+     "PrimeIntellect-ai/pydantic-config",
+     4,
+     160
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2416,
+     399
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2314,
+     53
+    ],
+    [
+     "PrimeIntellect-ai/pydantic-config",
+     5,
+     162
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2519,
+     394
+    ],
+    [
+     "PrimeIntellect-ai/rlm-harness",
+     54,
+     614
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2384,
+     286
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2266,
+     63
+    ],
+    [
+     "PrimeIntellect-ai/rlm-harness",
+     84,
+     560
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:samsja:nonai",
+   "arm": "P",
+   "author": "samsja",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2437,
+     490
+    ],
+    [
+     "PrimeIntellect-ai/research-environments",
+     383,
+     1194
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2234,
+     82
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2448,
+     490
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2177,
+     201
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2690,
+     577
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2592,
+     286
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2505,
+     282
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2521,
+     86
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2596,
+     50
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2479,
+     864
+    ],
+    [
+     "PrimeIntellect-ai/prime-rl",
+     2168,
+     60
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:marta-sd:ai",
+   "arm": "P",
+   "author": "marta-sd",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA-NeMo/Gym",
+     1430,
+     268
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:marta-sd:nonai",
+   "arm": "P",
+   "author": "marta-sd",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA-NeMo/Evaluator",
+     1020,
+     1412
+    ],
+    [
+     "NVIDIA-NeMo/Evaluator",
+     902,
+     185
+    ],
+    [
+     "NVIDIA-NeMo/Evaluator",
+     898,
+     54
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:QuantumGhost:ai",
+   "arm": "P",
+   "author": "QuantumGhost",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "langgenius/dify",
+     36412,
+     877
+    ],
+    [
+     "langgenius/dify",
+     35987,
+     101
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:QuantumGhost:nonai",
+   "arm": "P",
+   "author": "QuantumGhost",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "langgenius/graphon",
+     113,
+     145
+    ],
+    [
+     "langgenius/graphon",
+     55,
+     1783
+    ],
+    [
+     "langgenius/graphon",
+     138,
+     361
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:owenlin0:ai",
+   "arm": "P",
+   "author": "owenlin0",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "openai/codex",
+     22578,
+     398
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:owenlin0:nonai",
+   "arm": "P",
+   "author": "owenlin0",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "openai/codex",
+     22178,
+     419
+    ],
+    [
+     "openai/codex",
+     22520,
+     77
+    ],
+    [
+     "openai/codex",
+     20682,
+     202
+    ],
+    [
+     "openai/codex",
+     16912,
+     221
+    ],
+    [
+     "openai/codex",
+     25318,
+     58
+    ],
+    [
+     "openai/codex",
+     21847,
+     254
+    ],
+    [
+     "openai/codex",
+     16956,
+     113
+    ],
+    [
+     "openai/codex",
+     22878,
+     1733
+    ],
+    [
+     "openai/codex",
+     16924,
+     110
+    ],
+    [
+     "openai/codex",
+     20260,
+     357
+    ],
+    [
+     "openai/codex",
+     23335,
+     196
+    ],
+    [
+     "openai/codex",
+     24160,
+     473
+    ],
+    [
+     "openai/codex",
+     16462,
+     1405
+    ],
+    [
+     "openai/codex",
+     16701,
+     704
+    ],
+    [
+     "openai/codex",
+     17269,
+     925
+    ],
+    [
+     "openai/codex",
+     21566,
+     613
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:Pierrci:ai",
+   "arm": "P",
+   "author": "Pierrci",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "huggingface/hub-docs",
+     2355,
+     69
+    ],
+    [
+     "huggingface/hub-docs",
+     2354,
+     81
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:Pierrci:nonai",
+   "arm": "P",
+   "author": "Pierrci",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "huggingface/huggingface.js",
+     2112,
+     436
+    ],
+    [
+     "huggingface/hub-docs",
+     2388,
+     59
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:Rainchar9119:ai",
+   "arm": "P",
+   "author": "Rainchar9119",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "PaddlePaddle/Paddle",
+     78801,
+     95
+    ]
+   ]
+  },
+  {
+   "slot": "P:Q2-2026:Rainchar9119:nonai",
+   "arm": "P",
+   "author": "Rainchar9119",
    "period": "Q2-2026",
    "ai": false,
    "candidates": [
     [
      "PaddlePaddle/Paddle",
-     78544,
-     98
-    ],
-    [
-     "PaddlePaddle/PaddleFleet",
-     844,
-     437
-    ],
-    [
-     "PaddlePaddle/PaddleFleet",
-     888,
-     145
-    ],
-    [
-     "PaddlePaddle/PaddleFleet",
-     787,
-     53
-    ],
-    [
-     "PaddlePaddle/PaddleFleet",
-     768,
-     675
+     79085,
+     155
     ]
    ]
   },
   {
-   "slot": "P:Q2-2026:agronskiy:ai",
+   "slot": "P:Q2-2026:chris-maes:ai",
    "arm": "P",
-   "author": "agronskiy",
+   "author": "chris-maes",
    "period": "Q2-2026",
    "ai": true,
    "candidates": [
     [
-     "NVIDIA-NeMo/Evaluator",
-     911,
-     90
-    ],
-    [
-     "NVIDIA-NeMo/Gym",
-     1229,
-     290
-    ],
-    [
-     "NVIDIA-NeMo/Gym",
-     1150,
-     110
-    ],
-    [
-     "NVIDIA-NeMo/Gym",
-     1228,
-     527
+     "NVIDIA/cuopt",
+     1353,
+     83
     ]
    ]
   },
   {
-   "slot": "P:Q2-2026:agronskiy:nonai",
+   "slot": "P:Q2-2026:chris-maes:nonai",
    "arm": "P",
-   "author": "agronskiy",
+   "author": "chris-maes",
    "period": "Q2-2026",
    "ai": false,
    "candidates": [
     [
-     "NVIDIA-NeMo/Gym",
-     1198,
-     290
+     "NVIDIA/cuopt",
+     1237,
+     166
     ],
     [
-     "NVIDIA-NeMo/Gym",
-     1226,
-     513
+     "NVIDIA/cuopt",
+     1377,
+     60
     ],
     [
-     "NVIDIA-NeMo/Gym",
-     1208,
-     55
+     "NVIDIA/cuopt",
+     1103,
+     1631
     ],
     [
-     "NVIDIA-NeMo/Evaluator",
-     940,
-     237
-    ],
-    [
-     "NVIDIA-NeMo/Evaluator",
-     916,
-     51
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:aoiasd:ai",
-   "arm": "P",
-   "author": "aoiasd",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "milvus-io/milvus-design-docs",
-     33,
-     115
-    ],
-    [
-     "milvus-io/milvus",
-     48894,
-     284
-    ],
-    [
-     "milvus-io/milvus",
-     49097,
-     69
-    ],
-    [
-     "milvus-io/milvus",
-     48893,
-     284
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:aoiasd:nonai",
-   "arm": "P",
-   "author": "aoiasd",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "milvus-io/milvus",
-     49124,
-     175
-    ],
-    [
-     "milvus-io/milvus",
-     49134,
-     67
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:mbachaud:ai",
-   "arm": "P",
-   "author": "mbachaud",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "headroomlabs-ai/headroom",
-     204,
-     80
-    ],
-    [
-     "headroomlabs-ai/headroom",
-     298,
-     73
-    ],
-    [
-     "headroomlabs-ai/headroom",
-     303,
-     172
-    ]
-   ]
-  },
-  {
-   "slot": "P:Q2-2026:mbachaud:nonai",
-   "arm": "P",
-   "author": "mbachaud",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "headroomlabs-ai/headroom",
-     152,
-     423
+     "NVIDIA/cuopt",
+     1239,
+     852
     ]
    ]
   }

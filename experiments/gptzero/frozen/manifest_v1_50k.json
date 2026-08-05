@@ -1,18 +1,1796 @@
 {
  "design": "v1-50k",
- "fingerprint": "92f508e0d059b272",
+ "fingerprint": "6edba0c2b350b694",
  "params": {
   "design": "v1-50k",
   "n_authors": 30,
   "n_q1": 20,
   "n_b1": 10,
-  "k_cand": 8,
+  "k_cand": 16,
   "word_cap": 600,
   "word_floor": 100,
   "min_loc": 50,
   "max_loc": 2000
  },
  "slots": [
+  {
+   "slot": "P:04cb:ai",
+   "arm": "P",
+   "author": "04cb",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "HKUDS/nanobot",
+     3609,
+     68
+    ]
+   ]
+  },
+  {
+   "slot": "P:04cb:nonai",
+   "arm": "P",
+   "author": "04cb",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "HKUDS/nanobot",
+     2715,
+     123
+    ],
+    [
+     "HKUDS/nanobot",
+     3061,
+     138
+    ],
+    [
+     "HKUDS/nanobot",
+     3975,
+     63
+    ],
+    [
+     "HKUDS/nanobot",
+     4054,
+     56
+    ],
+    [
+     "HKUDS/nanobot",
+     3157,
+     52
+    ],
+    [
+     "HKUDS/nanobot",
+     3616,
+     126
+    ],
+    [
+     "HKUDS/nanobot",
+     4169,
+     72
+    ],
+    [
+     "HKUDS/nanobot",
+     4048,
+     71
+    ],
+    [
+     "HKUDS/nanobot",
+     4104,
+     54
+    ],
+    [
+     "HKUDS/nanobot",
+     4114,
+     179
+    ],
+    [
+     "HKUDS/nanobot",
+     4147,
+     54
+    ],
+    [
+     "HKUDS/nanobot",
+     3543,
+     124
+    ],
+    [
+     "HKUDS/nanobot",
+     3045,
+     144
+    ],
+    [
+     "HKUDS/nanobot",
+     3967,
+     128
+    ],
+    [
+     "HKUDS/nanobot",
+     3269,
+     71
+    ]
+   ]
+  },
+  {
+   "slot": "P:ksapru:ai",
+   "arm": "P",
+   "author": "ksapru",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA/NemoClaw",
+     2442,
+     496
+    ]
+   ]
+  },
+  {
+   "slot": "P:ksapru:nonai",
+   "arm": "P",
+   "author": "ksapru",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/NemoClaw",
+     1835,
+     105
+    ],
+    [
+     "NVIDIA/NemoClaw",
+     2027,
+     87
+    ],
+    [
+     "NVIDIA/NemoClaw",
+     1754,
+     69
+    ]
+   ]
+  },
+  {
+   "slot": "P:wprazuch:ai",
+   "arm": "P",
+   "author": "wprazuch",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA-NeMo/Evaluator",
+     959,
+     411
+    ],
+    [
+     "NVIDIA-NeMo/Evaluator",
+     957,
+     288
+    ],
+    [
+     "NVIDIA-NeMo/Evaluator",
+     956,
+     475
+    ],
+    [
+     "NVIDIA-NeMo/Evaluator",
+     958,
+     580
+    ]
+   ]
+  },
+  {
+   "slot": "P:wprazuch:nonai",
+   "arm": "P",
+   "author": "wprazuch",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA-NeMo/Evaluator",
+     945,
+     329
+    ],
+    [
+     "NVIDIA-NeMo/Evaluator",
+     1007,
+     191
+    ],
+    [
+     "NVIDIA-NeMo/Evaluator",
+     999,
+     1509
+    ],
+    [
+     "NVIDIA-NeMo/Evaluator",
+     1014,
+     937
+    ],
+    [
+     "NVIDIA-NeMo/Evaluator",
+     976,
+     217
+    ],
+    [
+     "NVIDIA-NeMo/Evaluator",
+     1010,
+     126
+    ],
+    [
+     "NVIDIA-NeMo/Evaluator",
+     912,
+     54
+    ],
+    [
+     "NVIDIA-NeMo/Evaluator",
+     990,
+     100
+    ]
+   ]
+  },
+  {
+   "slot": "P:nsmithtt:ai",
+   "arm": "P",
+   "author": "nsmithtt",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "tenstorrent/tt-mlir",
+     8394,
+     83
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     8373,
+     227
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     8361,
+     592
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     7929,
+     276
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     8275,
+     103
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     8393,
+     115
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     8572,
+     1404
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     8421,
+     67
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     8231,
+     370
+    ]
+   ]
+  },
+  {
+   "slot": "P:nsmithtt:nonai",
+   "arm": "P",
+   "author": "nsmithtt",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "tenstorrent/tt-xla",
+     4528,
+     58
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     7924,
+     150
+    ],
+    [
+     "tenstorrent/tt-mlir",
+     8211,
+     118
+    ]
+   ]
+  },
+  {
+   "slot": "P:xxyux:ai",
+   "arm": "P",
+   "author": "xxyux",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "PaddlePaddle/Paddle",
+     78784,
+     1169
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     78716,
+     894
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     78748,
+     1169
+    ]
+   ]
+  },
+  {
+   "slot": "P:xxyux:nonai",
+   "arm": "P",
+   "author": "xxyux",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "PaddlePaddle/PaddleFormers",
+     4511,
+     78
+    ],
+    [
+     "PaddlePaddle/PaddleFormers",
+     4444,
+     321
+    ],
+    [
+     "PaddlePaddle/PaddleFormers",
+     4589,
+     582
+    ],
+    [
+     "PaddlePaddle/PaddleFormers",
+     4501,
+     68
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     79042,
+     75
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     79048,
+     75
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     78773,
+     283
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     78916,
+     86
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     79041,
+     730
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     78928,
+     86
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     78814,
+     167
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     78828,
+     167
+    ],
+    [
+     "PaddlePaddle/PaddleFormers",
+     4506,
+     68
+    ],
+    [
+     "PaddlePaddle/PaddleFormers",
+     4231,
+     623
+    ],
+    [
+     "PaddlePaddle/PaddleFormers",
+     4532,
+     305
+    ]
+   ]
+  },
+  {
+   "slot": "P:lifeizhou-ap:ai",
+   "arm": "P",
+   "author": "lifeizhou-ap",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "aaif-goose/goose",
+     8366,
+     966
+    ]
+   ]
+  },
+  {
+   "slot": "P:lifeizhou-ap:nonai",
+   "arm": "P",
+   "author": "lifeizhou-ap",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "aaif-goose/goose",
+     8458,
+     95
+    ],
+    [
+     "aaif-goose/goose",
+     9596,
+     409
+    ],
+    [
+     "aaif-goose/goose",
+     9238,
+     1898
+    ],
+    [
+     "aaif-goose/goose",
+     8394,
+     81
+    ],
+    [
+     "aaif-goose/goose",
+     8651,
+     116
+    ],
+    [
+     "aaif-goose/goose",
+     9575,
+     126
+    ],
+    [
+     "aaif-goose/goose",
+     8667,
+     166
+    ],
+    [
+     "aaif-goose/goose",
+     9098,
+     408
+    ],
+    [
+     "aaif-goose/goose",
+     9074,
+     108
+    ],
+    [
+     "aaif-goose/goose",
+     8251,
+     356
+    ],
+    [
+     "aaif-goose/goose",
+     8854,
+     168
+    ],
+    [
+     "aaif-goose/goose",
+     8656,
+     436
+    ],
+    [
+     "aaif-goose/goose",
+     9097,
+     1489
+    ],
+    [
+     "aaif-goose/goose",
+     9076,
+     601
+    ],
+    [
+     "aaif-goose/goose",
+     8797,
+     328
+    ],
+    [
+     "aaif-goose/goose",
+     8368,
+     65
+    ]
+   ]
+  },
+  {
+   "slot": "P:xiaofan-luan:ai",
+   "arm": "P",
+   "author": "xiaofan-luan",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "milvus-io/milvus",
+     48753,
+     226
+    ],
+    [
+     "milvus-io/milvus",
+     49409,
+     184
+    ],
+    [
+     "milvus-io/milvus",
+     49951,
+     144
+    ],
+    [
+     "milvus-io/milvus",
+     48766,
+     830
+    ],
+    [
+     "milvus-io/milvus",
+     49948,
+     157
+    ],
+    [
+     "milvus-io/milvus",
+     50228,
+     599
+    ],
+    [
+     "milvus-io/milvus",
+     49923,
+     78
+    ],
+    [
+     "milvus-io/milvus",
+     49949,
+     157
+    ],
+    [
+     "milvus-io/milvus",
+     48741,
+     50
+    ],
+    [
+     "milvus-io/milvus",
+     48696,
+     123
+    ],
+    [
+     "zilliztech/VectorDBBench",
+     761,
+     119
+    ],
+    [
+     "milvus-io/milvus",
+     48784,
+     226
+    ]
+   ]
+  },
+  {
+   "slot": "P:xiaofan-luan:nonai",
+   "arm": "P",
+   "author": "xiaofan-luan",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "milvus-io/milvus",
+     49937,
+     299
+    ]
+   ]
+  },
+  {
+   "slot": "P:zpqiu:ai",
+   "arm": "P",
+   "author": "zpqiu",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA-NeMo/Automodel",
+     1896,
+     968
+    ],
+    [
+     "NVIDIA-NeMo/RL",
+     2312,
+     518
+    ],
+    [
+     "NVIDIA-NeMo/Automodel",
+     1894,
+     79
+    ]
+   ]
+  },
+  {
+   "slot": "P:zpqiu:nonai",
+   "arm": "P",
+   "author": "zpqiu",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA-NeMo/Automodel",
+     2064,
+     244
+    ]
+   ]
+  },
+  {
+   "slot": "P:ployts:ai",
+   "arm": "P",
+   "author": "ployts",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "agentscope-ai/QwenPaw",
+     4936,
+     116
+    ]
+   ]
+  },
+  {
+   "slot": "P:ployts:nonai",
+   "arm": "P",
+   "author": "ployts",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "agentscope-ai/ReMe",
+     257,
+     1357
+    ],
+    [
+     "agentscope-ai/ReMe",
+     216,
+     1125
+    ],
+    [
+     "agentscope-ai/ReMe",
+     250,
+     60
+    ],
+    [
+     "agentscope-ai/ReMe",
+     217,
+     347
+    ],
+    [
+     "agentscope-ai/ReMe",
+     240,
+     1840
+    ],
+    [
+     "agentscope-ai/ReMe",
+     254,
+     1844
+    ]
+   ]
+  },
+  {
+   "slot": "P:lawrence-u10d:ai",
+   "arm": "P",
+   "author": "lawrence-u10d",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "Unstructured-IO/unstructured-api",
+     573,
+     348
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     4335,
+     155
+    ],
+    [
+     "Unstructured-IO/unstructured-ingest",
+     682,
+     345
+    ],
+    [
+     "Unstructured-IO/unstructured-api",
+     571,
+     1553
+    ]
+   ]
+  },
+  {
+   "slot": "P:lawrence-u10d:nonai",
+   "arm": "P",
+   "author": "lawrence-u10d",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "Unstructured-IO/unstructured",
+     4318,
+     300
+    ],
+    [
+     "Unstructured-IO/unstructured-inference",
+     503,
+     149
+    ]
+   ]
+  },
+  {
+   "slot": "P:tillahoffmann:ai",
+   "arm": "P",
+   "author": "tillahoffmann",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "ml-explore/mlx",
+     3630,
+     61
+    ]
+   ]
+  },
+  {
+   "slot": "P:tillahoffmann:nonai",
+   "arm": "P",
+   "author": "tillahoffmann",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "ml-explore/mlx",
+     3492,
+     55
+    ]
+   ]
+  },
+  {
+   "slot": "P:AnirudhDagar:ai",
+   "arm": "P",
+   "author": "AnirudhDagar",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "autogluon/autogluon-cloud",
+     213,
+     893
+    ],
+    [
+     "autogluon/autogluon-cloud",
+     222,
+     597
+    ]
+   ]
+  },
+  {
+   "slot": "P:AnirudhDagar:nonai",
+   "arm": "P",
+   "author": "AnirudhDagar",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "autogluon/autogluon-cloud",
+     233,
+     118
+    ],
+    [
+     "autogluon/autogluon-cloud",
+     236,
+     556
+    ]
+   ]
+  },
+  {
+   "slot": "P:zhewenl:ai",
+   "arm": "P",
+   "author": "zhewenl",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "vllm-project/vllm",
+     42689,
+     1440
+    ],
+    [
+     "vllm-project/recipes",
+     374,
+     90
+    ],
+    [
+     "vllm-project/router",
+     151,
+     398
+    ],
+    [
+     "vllm-project/vllm",
+     39596,
+     68
+    ],
+    [
+     "vllm-project/vllm",
+     43281,
+     74
+    ]
+   ]
+  },
+  {
+   "slot": "P:zhewenl:nonai",
+   "arm": "P",
+   "author": "zhewenl",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "vllm-project/vllm",
+     40414,
+     480
+    ]
+   ]
+  },
+  {
+   "slot": "P:CLiqing:ai",
+   "arm": "P",
+   "author": "CLiqing",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "milvus-io/milvus",
+     48699,
+     152
+    ],
+    [
+     "zilliztech/VectorDBBench",
+     747,
+     288
+    ],
+    [
+     "zilliztech/VectorDBBench",
+     754,
+     108
+    ],
+    [
+     "zilliztech/VectorDBBench",
+     751,
+     288
+    ]
+   ]
+  },
+  {
+   "slot": "P:CLiqing:nonai",
+   "arm": "P",
+   "author": "CLiqing",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "milvus-io/milvus",
+     50064,
+     213
+    ],
+    [
+     "milvus-io/milvus",
+     50216,
+     77
+    ],
+    [
+     "milvus-io/milvus",
+     50299,
+     265
+    ]
+   ]
+  },
+  {
+   "slot": "P:sweetcornna:ai",
+   "arm": "P",
+   "author": "sweetcornna",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NousResearch/hermes-agent",
+     38098,
+     97
+    ]
+   ]
+  },
+  {
+   "slot": "P:sweetcornna:nonai",
+   "arm": "P",
+   "author": "sweetcornna",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NousResearch/hermes-agent",
+     33817,
+     202
+    ]
+   ]
+  },
+  {
+   "slot": "P:kheiss-uwzoo:ai",
+   "arm": "P",
+   "author": "kheiss-uwzoo",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA/NeMo-Retriever",
+     1970,
+     332
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     1968,
+     950
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     1954,
+     259
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     1963,
+     460
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     1995,
+     511
+    ]
+   ]
+  },
+  {
+   "slot": "P:kheiss-uwzoo:nonai",
+   "arm": "P",
+   "author": "kheiss-uwzoo",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/NeMo-Retriever",
+     2144,
+     151
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     2059,
+     64
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     1806,
+     146
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     1904,
+     284
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     2091,
+     307
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     2067,
+     97
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     1855,
+     1666
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     2082,
+     231
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     1983,
+     73
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     2103,
+     60
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     2074,
+     85
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     2179,
+     282
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     2166,
+     490
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     2098,
+     51
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     2062,
+     54
+    ],
+    [
+     "NVIDIA/NeMo-Retriever",
+     1903,
+     57
+    ]
+   ]
+  },
+  {
+   "slot": "P:yushengsu-thu:ai",
+   "arm": "P",
+   "author": "yushengsu-thu",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "sgl-project/sglang",
+     24262,
+     189
+    ],
+    [
+     "sgl-project/sglang",
+     24246,
+     129
+    ]
+   ]
+  },
+  {
+   "slot": "P:yushengsu-thu:nonai",
+   "arm": "P",
+   "author": "yushengsu-thu",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "sgl-project/sglang",
+     22381,
+     200
+    ],
+    [
+     "sgl-project/sglang",
+     24007,
+     67
+    ],
+    [
+     "sgl-project/sglang",
+     22323,
+     538
+    ],
+    [
+     "sgl-project/sglang",
+     23414,
+     72
+    ]
+   ]
+  },
+  {
+   "slot": "P:shijie-oai:ai",
+   "arm": "P",
+   "author": "shijie-oai",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "openai/codex",
+     19389,
+     377
+    ],
+    [
+     "openai/codex",
+     19085,
+     117
+    ]
+   ]
+  },
+  {
+   "slot": "P:shijie-oai:nonai",
+   "arm": "P",
+   "author": "shijie-oai",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "openai/codex",
+     23537,
+     814
+    ],
+    [
+     "openai/codex",
+     22559,
+     62
+    ],
+    [
+     "openai/codex",
+     22788,
+     164
+    ],
+    [
+     "openai/codex",
+     22649,
+     190
+    ],
+    [
+     "openai/codex",
+     26335,
+     556
+    ],
+    [
+     "openai/codex",
+     21059,
+     154
+    ],
+    [
+     "openai/codex",
+     17946,
+     81
+    ],
+    [
+     "openai/codex",
+     19635,
+     85
+    ],
+    [
+     "openai/codex",
+     22513,
+     76
+    ],
+    [
+     "openai/codex",
+     25988,
+     195
+    ],
+    [
+     "openai/codex",
+     19708,
+     287
+    ],
+    [
+     "openai/codex",
+     22443,
+     76
+    ],
+    [
+     "openai/codex",
+     17783,
+     392
+    ],
+    [
+     "openai/codex",
+     19053,
+     322
+    ]
+   ]
+  },
+  {
+   "slot": "P:jannikmaierhoefer:ai",
+   "arm": "P",
+   "author": "jannikmaierhoefer",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "langfuse/langfuse-docs",
+     2943,
+     222
+    ],
+    [
+     "langfuse/langfuse-docs",
+     3028,
+     131
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2924,
+     92
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2921,
+     105
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2902,
+     179
+    ],
+    [
+     "langfuse/langfuse-docs",
+     3058,
+     264
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2980,
+     741
+    ],
+    [
+     "langfuse/langfuse-docs",
+     3031,
+     272
+    ],
+    [
+     "langfuse/langfuse",
+     13864,
+     93
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2923,
+     72
+    ],
+    [
+     "langfuse/langfuse-docs",
+     3000,
+     176
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2922,
+     90
+    ],
+    [
+     "langfuse/langfuse-docs",
+     3040,
+     185
+    ],
+    [
+     "langfuse/langfuse-docs",
+     3036,
+     109
+    ],
+    [
+     "langfuse/langfuse",
+     14007,
+     155
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2887,
+     427
+    ]
+   ]
+  },
+  {
+   "slot": "P:jannikmaierhoefer:nonai",
+   "arm": "P",
+   "author": "jannikmaierhoefer",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "langfuse/langfuse-docs",
+     2817,
+     190
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2919,
+     88
+    ],
+    [
+     "langfuse/langfuse-docs",
+     2768,
+     234
+    ]
+   ]
+  },
+  {
+   "slot": "P:ch-wan:ai",
+   "arm": "P",
+   "author": "ch-wan",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "sgl-project/sglang",
+     23120,
+     134
+    ],
+    [
+     "sgl-project/sglang",
+     27193,
+     456
+    ],
+    [
+     "sgl-project/sglang",
+     23019,
+     1249
+    ],
+    [
+     "sgl-project/sglang",
+     23760,
+     728
+    ],
+    [
+     "sgl-project/sglang",
+     26166,
+     1067
+    ],
+    [
+     "sgl-project/sglang",
+     26012,
+     51
+    ],
+    [
+     "sgl-project/sglang",
+     27316,
+     219
+    ],
+    [
+     "sgl-project/sglang",
+     26658,
+     348
+    ],
+    [
+     "sgl-project/sglang",
+     25190,
+     78
+    ],
+    [
+     "sgl-project/sglang",
+     24726,
+     134
+    ],
+    [
+     "sgl-project/sglang",
+     27192,
+     587
+    ],
+    [
+     "sgl-project/sglang",
+     22545,
+     323
+    ],
+    [
+     "sgl-project/sglang",
+     25825,
+     67
+    ],
+    [
+     "sgl-project/sglang",
+     23707,
+     425
+    ],
+    [
+     "sgl-project/sglang",
+     26513,
+     83
+    ],
+    [
+     "sgl-project/sglang",
+     26516,
+     61
+    ]
+   ]
+  },
+  {
+   "slot": "P:ch-wan:nonai",
+   "arm": "P",
+   "author": "ch-wan",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "sgl-project/sglang",
+     25311,
+     683
+    ],
+    [
+     "sgl-project/sglang",
+     25845,
+     147
+    ],
+    [
+     "sgl-project/sglang",
+     25824,
+     472
+    ],
+    [
+     "sgl-project/sglang",
+     27187,
+     84
+    ],
+    [
+     "sgl-project/sglang",
+     22557,
+     53
+    ],
+    [
+     "sgl-project/sglang",
+     27138,
+     228
+    ]
+   ]
+  },
+  {
+   "slot": "P:michelligabriele:ai",
+   "arm": "P",
+   "author": "michelligabriele",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "BerriAI/litellm",
+     25644,
+     100
+    ]
+   ]
+  },
+  {
+   "slot": "P:michelligabriele:nonai",
+   "arm": "P",
+   "author": "michelligabriele",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "BerriAI/litellm",
+     26924,
+     96
+    ],
+    [
+     "BerriAI/litellm",
+     26704,
+     337
+    ],
+    [
+     "BerriAI/litellm",
+     24949,
+     162
+    ],
+    [
+     "BerriAI/litellm",
+     27324,
+     341
+    ],
+    [
+     "BerriAI/litellm",
+     28487,
+     392
+    ],
+    [
+     "BerriAI/litellm",
+     26340,
+     330
+    ],
+    [
+     "BerriAI/litellm",
+     28502,
+     314
+    ],
+    [
+     "BerriAI/litellm",
+     25673,
+     103
+    ],
+    [
+     "BerriAI/litellm",
+     28805,
+     269
+    ],
+    [
+     "BerriAI/litellm",
+     26448,
+     444
+    ],
+    [
+     "BerriAI/litellm",
+     27764,
+     238
+    ],
+    [
+     "BerriAI/litellm",
+     27406,
+     176
+    ],
+    [
+     "BerriAI/litellm",
+     28803,
+     309
+    ],
+    [
+     "BerriAI/litellm",
+     24996,
+     215
+    ],
+    [
+     "BerriAI/litellm",
+     29690,
+     59
+    ],
+    [
+     "BerriAI/litellm",
+     26427,
+     85
+    ]
+   ]
+  },
+  {
+   "slot": "P:jaydns:ai",
+   "arm": "P",
+   "author": "jaydns",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "BerriAI/litellm",
+     25445,
+     471
+    ]
+   ]
+  },
+  {
+   "slot": "P:jaydns:nonai",
+   "arm": "P",
+   "author": "jaydns",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "BerriAI/litellm",
+     25818,
+     571
+    ]
+   ]
+  },
+  {
+   "slot": "P:AlexejPenner:ai",
+   "arm": "P",
+   "author": "AlexejPenner",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "zenml-io/kitaru",
+     94,
+     184
+    ]
+   ]
+  },
+  {
+   "slot": "P:AlexejPenner:nonai",
+   "arm": "P",
+   "author": "AlexejPenner",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "zenml-io/zenml",
+     4662,
+     697
+    ]
+   ]
+  },
+  {
+   "slot": "P:ArturNiederfahrenhorst:ai",
+   "arm": "P",
+   "author": "ArturNiederfahrenhorst",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "ray-project/ray",
+     62763,
+     63
+    ],
+    [
+     "ray-project/ray",
+     63105,
+     104
+    ],
+    [
+     "ray-project/ray",
+     63128,
+     468
+    ],
+    [
+     "ray-project/ray",
+     62473,
+     383
+    ],
+    [
+     "ray-project/ray",
+     62475,
+     72
+    ],
+    [
+     "ray-project/ray",
+     63572,
+     110
+    ],
+    [
+     "ray-project/ray",
+     63303,
+     150
+    ],
+    [
+     "ray-project/ray",
+     62884,
+     143
+    ],
+    [
+     "ray-project/ray",
+     63849,
+     605
+    ]
+   ]
+  },
+  {
+   "slot": "P:ArturNiederfahrenhorst:nonai",
+   "arm": "P",
+   "author": "ArturNiederfahrenhorst",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "ray-project/ray",
+     62478,
+     85
+    ]
+   ]
+  },
+  {
+   "slot": "P:cassirer-openai:ai",
+   "arm": "P",
+   "author": "cassirer-openai",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "openai/codex",
+     18878,
+     1623
+    ],
+    [
+     "openai/codex",
+     19839,
+     595
+    ],
+    [
+     "openai/codex",
+     18877,
+     644
+    ],
+    [
+     "openai/codex",
+     18880,
+     1655
+    ]
+   ]
+  },
+  {
+   "slot": "P:cassirer-openai:nonai",
+   "arm": "P",
+   "author": "cassirer-openai",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "openai/codex",
+     22326,
+     265
+    ],
+    [
+     "openai/codex",
+     22311,
+     78
+    ],
+    [
+     "openai/codex",
+     20066,
+     330
+    ],
+    [
+     "openai/codex",
+     20123,
+     215
+    ]
+   ]
+  },
+  {
+   "slot": "P:superm1:ai",
+   "arm": "P",
+   "author": "superm1",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "lemonade-sdk/lemonade",
+     2084,
+     267
+    ]
+   ]
+  },
+  {
+   "slot": "P:superm1:nonai",
+   "arm": "P",
+   "author": "superm1",
+   "period": "Q2-2026",
+   "ai": false,
+   "candidates": [
+    [
+     "lemonade-sdk/lemonade",
+     1651,
+     56
+    ],
+    [
+     "lemonade-sdk/lemonade",
+     1866,
+     122
+    ],
+    [
+     "lemonade-sdk/lemonade",
+     2106,
+     259
+    ],
+    [
+     "lemonade-sdk/lemonade",
+     1648,
+     288
+    ],
+    [
+     "lemonade-sdk/lemonade",
+     1997,
+     315
+    ],
+    [
+     "lemonade-sdk/lemonade",
+     1520,
+     253
+    ],
+    [
+     "lemonade-sdk/lemonade",
+     1900,
+     595
+    ],
+    [
+     "lemonade-sdk/lemonade",
+     1670,
+     308
+    ]
+   ]
+  },
   {
    "slot": "P:hussein1362:ai",
    "arm": "P",
@@ -73,1949 +1851,636 @@
      "HKUDS/nanobot",
      3491,
      267
+    ],
+    [
+     "HKUDS/nanobot",
+     3338,
+     667
+    ],
+    [
+     "HKUDS/nanobot",
+     3299,
+     185
     ]
    ]
   },
   {
-   "slot": "P:generall:ai",
+   "slot": "P:zainhas:ai",
    "arm": "P",
-   "author": "generall",
+   "author": "zainhas",
    "period": "Q2-2026",
    "ai": true,
    "candidates": [
     [
-     "qdrant/qdrant",
-     8803,
-     104
-    ],
-    [
-     "qdrant/qdrant",
-     8626,
-     107
-    ],
-    [
-     "qdrant/qdrant",
-     8881,
-     585
-    ],
-    [
-     "qdrant/qdrant",
-     8755,
-     462
-    ],
-    [
-     "qdrant/qdrant",
-     8882,
-     363
-    ],
-    [
-     "qdrant/qdrant",
-     8888,
-     1904
-    ],
-    [
-     "qdrant/qdrant",
-     8879,
-     1478
-    ],
-    [
-     "qdrant/qdrant",
-     8715,
-     596
+     "togethercomputer/skills",
+     19,
+     118
     ]
    ]
   },
   {
-   "slot": "P:generall:nonai",
+   "slot": "P:zainhas:nonai",
    "arm": "P",
-   "author": "generall",
+   "author": "zainhas",
    "period": "Q2-2026",
    "ai": false,
    "candidates": [
     [
-     "qdrant/qdrant",
-     8855,
-     209
-    ],
-    [
-     "qdrant/qdrant",
-     8654,
-     547
-    ],
-    [
-     "qdrant/qdrant",
-     8852,
-     659
-    ],
-    [
-     "qdrant/qdrant",
-     8638,
-     273
-    ],
-    [
-     "qdrant/qdrant",
-     8681,
-     1371
-    ],
-    [
-     "qdrant/qdrant",
-     8636,
-     102
-    ],
-    [
-     "qdrant/qdrant",
-     8714,
-     259
-    ],
-    [
-     "qdrant/qdrant",
-     8887,
-     261
-    ]
-   ]
-  },
-  {
-   "slot": "P:duncankmckinnon:ai",
-   "arm": "P",
-   "author": "duncankmckinnon",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "Arize-ai/coding-harness-tracing",
+     "togethercomputer/skills",
      23,
-     1257
-    ],
-    [
-     "Arize-ai/coding-harness-tracing",
-     5,
-     1700
-    ],
-    [
-     "Arize-ai/coding-harness-tracing",
-     7,
-     1112
-    ],
-    [
-     "Arize-ai/coding-harness-tracing",
-     22,
-     840
-    ],
-    [
-     "Arize-ai/coding-harness-tracing",
-     26,
-     843
-    ],
-    [
-     "Arize-ai/coding-harness-tracing",
-     6,
-     1935
-    ],
-    [
-     "Arize-ai/coding-harness-tracing",
-     25,
-     1017
-    ],
-    [
-     "Arize-ai/coding-harness-tracing",
-     27,
-     801
-    ]
-   ]
-  },
-  {
-   "slot": "P:duncankmckinnon:nonai",
-   "arm": "P",
-   "author": "duncankmckinnon",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "Arize-ai/openinference",
-     3003,
-     89
-    ]
-   ]
-  },
-  {
-   "slot": "P:zhagnlu:ai",
-   "arm": "P",
-   "author": "zhagnlu",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "milvus-io/milvus-design-docs",
-     34,
-     510
-    ]
-   ]
-  },
-  {
-   "slot": "P:zhagnlu:nonai",
-   "arm": "P",
-   "author": "zhagnlu",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "milvus-io/milvus",
-     48912,
-     551
-    ],
-    [
-     "milvus-io/milvus-design-docs",
-     40,
-     196
-    ],
-    [
-     "milvus-io/milvus",
-     49321,
-     1044
-    ],
-    [
-     "milvus-io/milvus",
-     49446,
-     189
-    ],
-    [
-     "milvus-io/milvus",
-     49445,
-     103
-    ],
-    [
-     "milvus-io/milvus",
-     49249,
-     493
-    ]
-   ]
-  },
-  {
-   "slot": "P:MrPresent-Han:ai",
-   "arm": "P",
-   "author": "MrPresent-Han",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "milvus-io/milvus-design-docs",
-     38,
-     518
-    ],
-    [
-     "milvus-io/milvus",
-     48819,
-     1319
-    ],
-    [
-     "milvus-io/milvus",
-     48865,
-     1418
-    ],
-    [
-     "milvus-io/milvus",
-     49169,
-     1319
-    ]
-   ]
-  },
-  {
-   "slot": "P:MrPresent-Han:nonai",
-   "arm": "P",
-   "author": "MrPresent-Han",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "milvus-io/milvus-proto",
-     582,
-     238
-    ],
-    [
-     "milvus-io/milvus",
-     49456,
-     1954
-    ],
-    [
-     "milvus-io/milvus",
-     49471,
-     1954
-    ]
-   ]
-  },
-  {
-   "slot": "P:SyedShahmeerAli12:ai",
-   "arm": "P",
-   "author": "SyedShahmeerAli12",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "deepset-ai/haystack-core-integrations",
-     3173,
-     977
-    ]
-   ]
-  },
-  {
-   "slot": "P:SyedShahmeerAli12:nonai",
-   "arm": "P",
-   "author": "SyedShahmeerAli12",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "deepset-ai/haystack-core-integrations",
-     3196,
-     590
-    ],
-    [
-     "deepset-ai/haystack-core-integrations",
-     3114,
-     94
-    ],
-    [
-     "deepset-ai/haystack-core-integrations",
-     3249,
-     241
-    ],
-    [
-     "deepset-ai/haystack-core-integrations",
-     3228,
-     471
-    ],
-    [
-     "deepset-ai/haystack",
-     11165,
-     550
-    ],
-    [
-     "deepset-ai/haystack-core-integrations",
-     3126,
-     361
-    ],
-    [
-     "deepset-ai/haystack-integrations",
-     452,
-     103
-    ],
-    [
-     "deepset-ai/haystack-core-integrations",
-     3103,
-     218
-    ]
-   ]
-  },
-  {
-   "slot": "P:Anerudhan:ai",
-   "arm": "P",
-   "author": "Anerudhan",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "NVIDIA/cudnn-frontend",
-     219,
-     74
-    ],
-    [
-     "NVIDIA/cudnn-frontend",
-     235,
-     69
-    ],
-    [
-     "NVIDIA/cudnn-frontend",
-     226,
-     299
-    ]
-   ]
-  },
-  {
-   "slot": "P:Anerudhan:nonai",
-   "arm": "P",
-   "author": "Anerudhan",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "NVIDIA/cudnn-frontend",
-     216,
-     186
-    ],
-    [
-     "NVIDIA/cudnn-frontend",
-     234,
-     90
-    ]
-   ]
-  },
-  {
-   "slot": "P:jasonvigil:ai",
-   "arm": "P",
-   "author": "jasonvigil",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "chroma-core/chroma",
-     6958,
-     223
-    ]
-   ]
-  },
-  {
-   "slot": "P:jasonvigil:nonai",
-   "arm": "P",
-   "author": "jasonvigil",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "chroma-core/chroma",
-     6944,
-     559
-    ],
-    [
-     "chroma-core/chroma",
-     6965,
-     223
-    ]
-   ]
-  },
-  {
-   "slot": "P:wenscarl:ai",
-   "arm": "P",
-   "author": "wenscarl",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "sgl-project/sglang",
-     23273,
-     251
-    ],
-    [
-     "sgl-project/sglang",
-     24435,
-     305
-    ]
-   ]
-  },
-  {
-   "slot": "P:wenscarl:nonai",
-   "arm": "P",
-   "author": "wenscarl",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "sgl-project/sglang",
-     23402,
-     550
-    ]
-   ]
-  },
-  {
-   "slot": "P:khalatepradnya:ai",
-   "arm": "P",
-   "author": "khalatepradnya",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "NVIDIA/cuda-quantum",
-     4439,
-     1363
-    ],
-    [
-     "NVIDIA/cuda-quantum",
-     4405,
-     469
-    ]
-   ]
-  },
-  {
-   "slot": "P:khalatepradnya:nonai",
-   "arm": "P",
-   "author": "khalatepradnya",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "NVIDIA/cuda-quantum",
-     4267,
-     76
-    ],
-    [
-     "NVIDIA/cuda-quantum",
-     4346,
-     117
-    ],
-    [
-     "NVIDIA/cudaqx",
-     504,
-     130
-    ],
-    [
-     "NVIDIA/cudaqx",
-     509,
-     130
-    ],
-    [
-     "NVIDIA/cuda-quantum",
-     4403,
-     145
-    ],
-    [
-     "NVIDIA/cuda-quantum",
-     4266,
-     196
-    ],
-    [
-     "NVIDIA/cuda-quantum",
-     4404,
-     251
-    ]
-   ]
-  },
-  {
-   "slot": "P:Torantulino:ai",
-   "arm": "P",
-   "author": "Torantulino",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "Significant-Gravitas/AutoGPT",
-     12969,
-     231
-    ],
-    [
-     "Significant-Gravitas/AutoGPT",
-     12968,
-     123
-    ]
-   ]
-  },
-  {
-   "slot": "P:Torantulino:nonai",
-   "arm": "P",
-   "author": "Torantulino",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "Significant-Gravitas/AutoGPT",
-     12672,
-     77
-    ],
-    [
-     "Significant-Gravitas/AutoGPT",
-     12996,
-     149
-    ]
-   ]
-  },
-  {
-   "slot": "P:chuqCTC:ai",
-   "arm": "P",
-   "author": "chuqCTC",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "PrefectHQ/prefect",
-     21622,
-     144
-    ],
-    [
-     "PrefectHQ/prefect",
-     21792,
-     149
-    ]
-   ]
-  },
-  {
-   "slot": "P:chuqCTC:nonai",
-   "arm": "P",
-   "author": "chuqCTC",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "PrefectHQ/prefect",
-     21458,
-     319
-    ]
-   ]
-  },
-  {
-   "slot": "P:RUCYancy:ai",
-   "arm": "P",
-   "author": "RUCYancy",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "dataelement/bisheng",
-     2004,
-     1259
-    ]
-   ]
-  },
-  {
-   "slot": "P:RUCYancy:nonai",
-   "arm": "P",
-   "author": "RUCYancy",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "dataelement/bisheng",
-     2030,
-     493
-    ],
-    [
-     "dataelement/bisheng",
-     2036,
-     628
-    ],
-    [
-     "dataelement/bisheng",
-     2011,
-     254
-    ]
-   ]
-  },
-  {
-   "slot": "P:stuxf:ai",
-   "arm": "P",
-   "author": "stuxf",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "BerriAI/litellm",
-     26489,
-     419
-    ],
-    [
-     "BerriAI/litellm",
-     27013,
-     174
-    ],
-    [
-     "BerriAI/litellm",
-     26968,
-     373
-    ],
-    [
-     "BerriAI/litellm",
-     27015,
-     432
-    ],
-    [
-     "BerriAI/litellm",
-     26969,
-     510
-    ],
-    [
-     "BerriAI/litellm",
-     26915,
-     310
-    ],
-    [
-     "BerriAI/litellm",
-     27009,
-     151
-    ],
-    [
-     "BerriAI/litellm",
-     26953,
-     600
-    ]
-   ]
-  },
-  {
-   "slot": "P:stuxf:nonai",
-   "arm": "P",
-   "author": "stuxf",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "BerriAI/litellm",
-     25834,
-     129
-    ],
-    [
-     "BerriAI/litellm",
-     26854,
-     385
-    ],
-    [
-     "BerriAI/litellm",
-     26860,
-     1218
-    ],
-    [
-     "BerriAI/litellm",
-     25904,
-     1403
-    ],
-    [
-     "BerriAI/litellm",
-     26365,
-     1394
-    ],
-    [
-     "BerriAI/litellm",
-     26841,
-     246
-    ],
-    [
-     "BerriAI/litellm",
-     26849,
-     466
-    ],
-    [
-     "BerriAI/litellm",
-     26836,
-     557
-    ]
-   ]
-  },
-  {
-   "slot": "P:wochinge:ai",
-   "arm": "P",
-   "author": "wochinge",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "langfuse/langfuse",
-     12937,
-     634
-    ],
-    [
-     "langfuse/langfuse",
-     13374,
-     591
-    ],
-    [
-     "langfuse/langfuse",
-     13194,
-     130
-    ],
-    [
-     "langfuse/langfuse-js",
-     783,
-     94
-    ],
-    [
-     "langfuse/langfuse",
-     13200,
-     341
-    ],
-    [
-     "langfuse/langfuse",
-     12999,
-     157
-    ],
-    [
-     "langfuse/langfuse",
-     13225,
-     63
-    ],
-    [
-     "langfuse/langfuse",
-     13129,
-     141
-    ]
-   ]
-  },
-  {
-   "slot": "P:wochinge:nonai",
-   "arm": "P",
-   "author": "wochinge",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "langfuse/langfuse",
-     13412,
-     73
-    ],
-    [
-     "langfuse/langfuse-js",
-     795,
-     408
-    ],
-    [
-     "langfuse/langfuse",
-     13048,
-     267
-    ],
-    [
-     "langfuse/langfuse",
-     13456,
-     312
-    ],
-    [
-     "langfuse/langfuse-docs",
-     2888,
-     939
-    ],
-    [
-     "langfuse/langfuse",
-     13155,
-     267
-    ]
-   ]
-  },
-  {
-   "slot": "P:39499740:ai",
-   "arm": "P",
-   "author": "39499740",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "dataelement/Clawith",
-     292,
-     525
-    ],
-    [
-     "dataelement/Clawith",
-     268,
-     519
-    ]
-   ]
-  },
-  {
-   "slot": "P:39499740:nonai",
-   "arm": "P",
-   "author": "39499740",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "dataelement/Clawith",
-     361,
-     1261
-    ]
-   ]
-  },
-  {
-   "slot": "P:tugsbayasgalan:ai",
-   "arm": "P",
-   "author": "tugsbayasgalan",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "pytorch/torchtitan",
-     3046,
-     510
-    ]
-   ]
-  },
-  {
-   "slot": "P:tugsbayasgalan:nonai",
-   "arm": "P",
-   "author": "tugsbayasgalan",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "pytorch/torchtitan",
-     2784,
-     88
-    ],
-    [
-     "pytorch/torchtitan",
-     2882,
-     741
-    ],
-    [
-     "pytorch/torchtitan",
-     2875,
-     202
-    ],
-    [
-     "pytorch/torchtitan",
-     3164,
-     714
-    ],
-    [
-     "pytorch/torchtitan",
-     2945,
-     55
-    ]
-   ]
-  },
-  {
-   "slot": "P:lipikaramaswamy:ai",
-   "arm": "P",
-   "author": "lipikaramaswamy",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "NVIDIA-NeMo/Anonymizer",
-     124,
-     423
-    ]
-   ]
-  },
-  {
-   "slot": "P:lipikaramaswamy:nonai",
-   "arm": "P",
-   "author": "lipikaramaswamy",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "NVIDIA-NeMo/Anonymizer",
-     101,
-     70
-    ],
-    [
-     "NVIDIA-NeMo/Anonymizer",
-     91,
-     56
-    ],
-    [
-     "NVIDIA-NeMo/Anonymizer",
-     96,
-     176
-    ],
-    [
-     "NVIDIA-NeMo/Anonymizer",
-     102,
-     1634
-    ],
-    [
-     "NVIDIA-NeMo/Anonymizer",
-     92,
-     376
-    ],
-    [
-     "NVIDIA-NeMo/Anonymizer",
-     88,
-     183
-    ],
-    [
-     "NVIDIA-NeMo/Anonymizer",
-     103,
-     144
-    ]
-   ]
-  },
-  {
-   "slot": "P:Doondi-Ashlesh:ai",
-   "arm": "P",
-   "author": "Doondi-Ashlesh",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "NVIDIA-NeMo/Nemotron",
-     145,
-     1230
-    ]
-   ]
-  },
-  {
-   "slot": "P:Doondi-Ashlesh:nonai",
-   "arm": "P",
-   "author": "Doondi-Ashlesh",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "NVIDIA-NeMo/Megatron-Bridge",
-     3349,
-     86
-    ]
-   ]
-  },
-  {
-   "slot": "P:vincenzopalazzo:ai",
-   "arm": "P",
-   "author": "vincenzopalazzo",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "aaif-goose/goose",
-     8448,
-     440
-    ],
-    [
-     "aaif-goose/goose",
-     8450,
-     260
-    ]
-   ]
-  },
-  {
-   "slot": "P:vincenzopalazzo:nonai",
-   "arm": "P",
-   "author": "vincenzopalazzo",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "aaif-goose/goose",
-     8386,
-     116
-    ]
-   ]
-  },
-  {
-   "slot": "P:yangzheli:ai",
-   "arm": "P",
-   "author": "yangzheli",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "bytedance/deer-flow",
-     1904,
-     85
-    ],
-    [
-     "bytedance/deer-flow",
-     2147,
-     892
-    ],
-    [
-     "bytedance/deer-flow",
-     1896,
-     112
-    ],
-    [
-     "bytedance/deer-flow",
-     2279,
-     685
-    ],
-    [
-     "bytedance/deer-flow",
-     1846,
-     51
-    ],
-    [
-     "bytedance/deer-flow",
-     2713,
-     1017
-    ]
-   ]
-  },
-  {
-   "slot": "P:yangzheli:nonai",
-   "arm": "P",
-   "author": "yangzheli",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "bytedance/deer-flow",
-     1848,
-     74
-    ],
-    [
-     "bytedance/deer-flow",
-     2679,
-     158
-    ]
-   ]
-  },
-  {
-   "slot": "P:vmaksimovicTT:ai",
-   "arm": "P",
-   "author": "vmaksimovicTT",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "tenstorrent/tt-inference-server",
-     2723,
-     518
-    ]
-   ]
-  },
-  {
-   "slot": "P:vmaksimovicTT:nonai",
-   "arm": "P",
-   "author": "vmaksimovicTT",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "tenstorrent/tt-inference-server",
-     2790,
      53
     ],
     [
-     "tenstorrent/tt-inference-server",
-     3157,
-     202
-    ],
-    [
-     "tenstorrent/tt-inference-server",
-     3156,
-     105
-    ],
-    [
-     "tenstorrent/tt-inference-server",
-     3227,
-     857
-    ],
-    [
-     "tenstorrent/tt-inference-server",
-     2795,
-     150
-    ],
-    [
-     "tenstorrent/tt-inference-server",
-     3096,
-     221
-    ]
-   ]
-  },
-  {
-   "slot": "P:Genmin:ai",
-   "arm": "P",
-   "author": "Genmin",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "langchain-ai/langchainjs",
-     10790,
-     59
-    ],
-    [
-     "langchain-ai/langchainjs",
-     10791,
-     115
-    ]
-   ]
-  },
-  {
-   "slot": "P:Genmin:nonai",
-   "arm": "P",
-   "author": "Genmin",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "mlflow/mlflow",
-     23036,
-     107
-    ],
-    [
-     "vllm-project/aibrix",
-     2168,
-     71
-    ],
-    [
-     "run-llama/llama_index",
-     21507,
-     84
-    ],
-    [
-     "langchain-ai/langchainjs",
-     10811,
-     193
-    ]
-   ]
-  },
-  {
-   "slot": "P:samstokes:ai",
-   "arm": "P",
-   "author": "samstokes",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "Eventual-Inc/Daft",
-     6697,
-     946
-    ],
-    [
-     "Eventual-Inc/Daft",
-     6716,
-     660
-    ],
-    [
-     "Eventual-Inc/Daft",
-     6861,
-     586
-    ],
-    [
-     "Eventual-Inc/Daft",
-     6838,
-     523
-    ],
-    [
-     "Eventual-Inc/Daft",
-     6763,
-     368
-    ],
-    [
-     "Eventual-Inc/Daft",
-     6878,
-     406
-    ],
-    [
-     "Eventual-Inc/Daft",
-     6879,
-     281
-    ],
-    [
-     "Eventual-Inc/Daft",
-     6881,
-     396
-    ]
-   ]
-  },
-  {
-   "slot": "P:samstokes:nonai",
-   "arm": "P",
-   "author": "samstokes",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "Eventual-Inc/Daft",
-     6632,
-     109
-    ]
-   ]
-  },
-  {
-   "slot": "P:Prayer3th:ai",
-   "arm": "P",
-   "author": "Prayer3th",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "sgl-project/sglang-jax",
-     969,
-     203
-    ]
-   ]
-  },
-  {
-   "slot": "P:Prayer3th:nonai",
-   "arm": "P",
-   "author": "Prayer3th",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "sgl-project/sglang-jax",
-     1021,
-     314
-    ]
-   ]
-  },
-  {
-   "slot": "P:mdragulaTT:ai",
-   "arm": "P",
-   "author": "mdragulaTT",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "tenstorrent/tt-metal",
-     42968,
+     "togethercomputer/skills",
+     2,
      317
-    ]
-   ]
-  },
-  {
-   "slot": "P:mdragulaTT:nonai",
-   "arm": "P",
-   "author": "mdragulaTT",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "tenstorrent/tt-metal",
-     41617,
-     241
-    ]
-   ]
-  },
-  {
-   "slot": "P:rpavlovicTT:ai",
-   "arm": "P",
-   "author": "rpavlovicTT",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "tenstorrent/tt-metal",
-     41550,
-     56
     ],
     [
-     "tenstorrent/tt-mlir",
-     8256,
-     280
-    ],
-    [
-     "tenstorrent/tt-mlir",
-     7903,
-     97
-    ],
-    [
-     "tenstorrent/tt-mlir",
-     8098,
-     270
-    ],
-    [
-     "tenstorrent/tt-mlir",
-     8235,
-     68
-    ],
-    [
-     "tenstorrent/tt-mlir",
-     7974,
-     528
-    ],
-    [
-     "tenstorrent/tt-mlir",
-     7818,
-     86
-    ],
-    [
-     "tenstorrent/tt-mlir",
-     7856,
-     612
-    ]
-   ]
-  },
-  {
-   "slot": "P:rpavlovicTT:nonai",
-   "arm": "P",
-   "author": "rpavlovicTT",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "tenstorrent/tt-mlir",
-     8093,
-     87
-    ],
-    [
-     "tenstorrent/tt-metal",
-     41744,
-     56
-    ]
-   ]
-  },
-  {
-   "slot": "P:ffuugoo:ai",
-   "arm": "P",
-   "author": "ffuugoo",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "qdrant/qdrant",
-     8759,
-     583
-    ]
-   ]
-  },
-  {
-   "slot": "P:ffuugoo:nonai",
-   "arm": "P",
-   "author": "ffuugoo",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "qdrant/qdrant",
-     8702,
-     201
-    ],
-    [
-     "qdrant/qdrant",
-     8850,
-     107
-    ],
-    [
-     "qdrant/qdrant",
-     8685,
-     910
-    ],
-    [
-     "qdrant/qdrant",
-     8791,
-     227
-    ],
-    [
-     "qdrant/qdrant",
-     8894,
-     233
-    ],
-    [
-     "qdrant/qdrant",
-     8586,
-     570
-    ],
-    [
-     "qdrant/qdrant",
-     8592,
-     444
-    ]
-   ]
-  },
-  {
-   "slot": "P:xr843:ai",
-   "arm": "P",
-   "author": "xr843",
-   "period": "Q2-2026",
-   "ai": true,
-   "candidates": [
-    [
-     "BerriAI/litellm",
-     26868,
-     84
-    ],
-    [
-     "langgenius/dify",
-     35726,
-     52
-    ],
-    [
-     "BerriAI/litellm",
-     25777,
-     490
-    ],
-    [
-     "langgenius/dify",
-     34379,
+     "togethercomputer/skills",
+     6,
      80
     ]
    ]
   },
   {
-   "slot": "P:xr843:nonai",
+   "slot": "P:zhaochenyang20:ai",
    "arm": "P",
-   "author": "xr843",
-   "period": "Q2-2026",
-   "ai": false,
-   "candidates": [
-    [
-     "langgenius/dify",
-     35793,
-     89
-    ],
-    [
-     "langgenius/dify",
-     35267,
-     111
-    ],
-    [
-     "langgenius/dify",
-     35796,
-     51
-    ]
-   ]
-  },
-  {
-   "slot": "P:jlost:ai",
-   "arm": "P",
-   "author": "jlost",
+   "author": "zhaochenyang20",
    "period": "Q2-2026",
    "ai": true,
    "candidates": [
     [
-     "kserve/kserve",
-     5378,
-     208
+     "sgl-project/sglang-omni",
+     422,
+     169
+    ],
+    [
+     "sgl-project/sglang-omni",
+     287,
+     178
+    ],
+    [
+     "sgl-project/sglang-omni",
+     388,
+     270
+    ],
+    [
+     "sgl-project/sglang-omni",
+     532,
+     536
+    ],
+    [
+     "sgl-project/sglang-omni",
+     331,
+     191
+    ],
+    [
+     "sgl-project/sglang-omni",
+     251,
+     704
+    ],
+    [
+     "sgl-project/sglang-omni",
+     403,
+     323
+    ],
+    [
+     "sgl-project/sglang-omni",
+     297,
+     104
+    ],
+    [
+     "sgl-project/sglang-omni",
+     339,
+     345
+    ],
+    [
+     "sgl-project/sglang-omni",
+     629,
+     150
     ]
    ]
   },
   {
-   "slot": "P:jlost:nonai",
+   "slot": "P:zhaochenyang20:nonai",
    "arm": "P",
-   "author": "jlost",
+   "author": "zhaochenyang20",
    "period": "Q2-2026",
    "ai": false,
    "candidates": [
     [
-     "kserve/kserve",
-     5396,
-     266
+     "sgl-project/sglang-omni",
+     530,
+     1075
     ],
     [
-     "kserve/kserve",
-     5420,
-     168
+     "sgl-project/sglang-omni",
+     547,
+     299
     ],
     [
-     "kserve/kserve",
-     5363,
-     322
-    ],
-    [
-     "kserve/kserve",
-     5427,
-     64
-    ]
-   ]
-  },
-  {
-   "slot": "B1:generall",
-   "arm": "B1",
-   "author": "generall",
-   "period": "Q1-2024",
-   "ai": false,
-   "same_repo": true,
-   "candidates": [
-    [
-     "qdrant/qdrant",
-     3896,
-     285
-    ],
-    [
-     "qdrant/qdrant",
-     3581,
-     64
-    ],
-    [
-     "qdrant/qdrant",
-     3748,
-     51
-    ],
-    [
-     "qdrant/qdrant",
-     3900,
-     752
-    ],
-    [
-     "qdrant/landing_page",
-     503,
-     137
-    ],
-    [
-     "qdrant/landing_page",
-     605,
-     316
-    ],
-    [
-     "qdrant/landing_page",
-     766,
-     1188
-    ],
-    [
-     "qdrant/landing_page",
-     505,
+     "sgl-project/sglang-omni",
+     685,
      57
+    ],
+    [
+     "sgl-project/sglang-omni",
+     641,
+     74
+    ],
+    [
+     "sgl-project/sglang-omni",
+     546,
+     1826
+    ],
+    [
+     "sgl-project/sglang-omni",
+     517,
+     859
+    ],
+    [
+     "sgl-project/sglang-omni",
+     542,
+     1462
+    ],
+    [
+     "sgl-project/sglang-omni",
+     550,
+     109
+    ],
+    [
+     "sgl-project/sglang-omni",
+     633,
+     169
+    ],
+    [
+     "sgl-project/sglang-omni",
+     552,
+     55
+    ],
+    [
+     "sgl-project/sglang-omni",
+     531,
+     100
+    ],
+    [
+     "sgl-project/sglang-omni",
+     634,
+     199
+    ],
+    [
+     "sgl-project/sglang-omni",
+     681,
+     88
     ]
    ]
   },
   {
-   "slot": "B1:zhagnlu",
-   "arm": "B1",
-   "author": "zhagnlu",
-   "period": "Q1-2024",
-   "ai": false,
-   "same_repo": true,
+   "slot": "P:wangjinjie722:ai",
+   "arm": "P",
+   "author": "wangjinjie722",
+   "period": "Q2-2026",
+   "ai": true,
    "candidates": [
     [
-     "milvus-io/milvus",
-     30324,
-     1024
+     "camel-ai/GBQA",
+     1,
+     1189
     ],
     [
-     "milvus-io/milvus",
-     30578,
-     53
-    ],
-    [
-     "milvus-io/milvus",
-     30079,
-     144
-    ],
-    [
-     "milvus-io/milvus",
-     31636,
-     531
-    ],
-    [
-     "milvus-io/milvus",
-     30834,
-     69
-    ],
-    [
-     "milvus-io/milvus",
-     30384,
-     172
-    ],
-    [
-     "milvus-io/milvus",
-     31499,
-     531
+     "camel-ai/GBQA",
+     6,
+     712
     ]
    ]
   },
   {
-   "slot": "B1:MrPresent-Han",
-   "arm": "B1",
-   "author": "MrPresent-Han",
-   "period": "Q1-2024",
+   "slot": "P:wangjinjie722:nonai",
+   "arm": "P",
+   "author": "wangjinjie722",
+   "period": "Q2-2026",
    "ai": false,
-   "same_repo": true,
    "candidates": [
     [
-     "milvus-io/milvus",
-     30882,
-     645
-    ],
-    [
-     "milvus-io/milvus",
-     30947,
-     241
-    ],
-    [
-     "milvus-io/milvus",
-     30017,
-     155
-    ],
-    [
-     "milvus-io/milvus",
-     30644,
-     1407
-    ],
-    [
-     "milvus-io/milvus",
-     30091,
-     112
-    ],
-    [
-     "milvus-io/milvus",
-     31200,
-     120
-    ],
-    [
-     "milvus-io/milvus",
-     29614,
-     72
-    ],
-    [
-     "milvus-io/pymilvus",
-     1854,
-     70
+     "camel-ai/GBQA",
+     19,
+     984
     ]
    ]
   },
   {
-   "slot": "B1:Anerudhan",
+   "slot": "B1:nsmithtt",
    "arm": "B1",
-   "author": "Anerudhan",
-   "period": "Q1-2024",
-   "ai": false,
-   "same_repo": true,
-   "candidates": [
-    [
-     "NVIDIA/cudnn-frontend",
-     53,
-     344
-    ],
-    [
-     "NVIDIA/cudnn-frontend",
-     59,
-     125
-    ],
-    [
-     "NVIDIA/cudnn-frontend",
-     69,
-     402
-    ]
-   ]
-  },
-  {
-   "slot": "B1:khalatepradnya",
-   "arm": "B1",
-   "author": "khalatepradnya",
-   "period": "Q1-2024",
-   "ai": false,
-   "same_repo": true,
-   "candidates": [
-    [
-     "NVIDIA/cuda-quantum",
-     1339,
-     592
-    ],
-    [
-     "NVIDIA/cuda-quantum",
-     1317,
-     236
-    ],
-    [
-     "NVIDIA/cuda-quantum",
-     1334,
-     2000
-    ],
-    [
-     "NVIDIA/cuda-quantum",
-     1256,
-     1211
-    ],
-    [
-     "NVIDIA/cuda-quantum",
-     1172,
-     149
-    ],
-    [
-     "NVIDIA/cuda-quantum",
-     1207,
-     1802
-    ],
-    [
-     "NVIDIA/cuda-quantum",
-     1335,
-     459
-    ],
-    [
-     "NVIDIA/cuda-quantum",
-     1197,
-     443
-    ]
-   ]
-  },
-  {
-   "slot": "B1:wochinge",
-   "arm": "B1",
-   "author": "wochinge",
+   "author": "nsmithtt",
    "period": "Q1-2024",
    "ai": false,
    "same_repo": false,
    "candidates": [
     [
-     "deepset-ai/haystack",
-     7206,
-     184
+     "tenstorrent/tt-metal",
+     6105,
+     964
     ],
     [
-     "deepset-ai/deepset-cloud-sdk",
-     156,
-     84
+     "tenstorrent/tt-metal",
+     6085,
+     73
     ],
     [
-     "deepset-ai/haystack",
-     7207,
-     1269
+     "tenstorrent/tt-metal",
+     6207,
+     90
     ],
     [
-     "deepset-ai/haystack",
-     7126,
-     331
+     "tenstorrent/tt-metal",
+     6904,
+     300
     ],
     [
-     "deepset-ai/haystack",
-     7052,
-     285
+     "tenstorrent/tt-metal",
+     5429,
+     105
     ],
     [
-     "deepset-ai/deepset-cloud-sdk",
-     157,
-     53
+     "tenstorrent/tt-metal",
+     6141,
+     183
     ],
     [
-     "deepset-ai/haystack-core-integrations",
-     550,
-     117
+     "tenstorrent/tt-metal",
+     5700,
+     366
     ],
     [
-     "deepset-ai/haystack-core-integrations",
-     535,
-     408
+     "tenstorrent/tt-metal",
+     6158,
+     798
+    ],
+    [
+     "tenstorrent/tt-metal",
+     5650,
+     1530
+    ],
+    [
+     "tenstorrent/tt-metal",
+     6050,
+     744
+    ],
+    [
+     "tenstorrent/tt-metal",
+     6408,
+     66
+    ],
+    [
+     "tenstorrent/tt-metal",
+     6335,
+     513
+    ],
+    [
+     "tenstorrent/tt-metal",
+     6309,
+     52
+    ],
+    [
+     "tenstorrent/tt-metal",
+     5775,
+     529
+    ],
+    [
+     "tenstorrent/tt-metal",
+     6484,
+     99
     ]
    ]
   },
   {
-   "slot": "B1:ffuugoo",
+   "slot": "B1:xiaofan-luan",
    "arm": "B1",
-   "author": "ffuugoo",
+   "author": "xiaofan-luan",
    "period": "Q1-2024",
    "ai": false,
    "same_repo": true,
    "candidates": [
     [
-     "qdrant/qdrant",
-     3757,
-     58
+     "milvus-io/milvus",
+     31356,
+     69
     ],
     [
-     "qdrant/qdrant",
-     3408,
-     1293
+     "milvus-io/milvus",
+     30676,
+     101
     ],
     [
-     "qdrant/qdrant",
-     3645,
-     854
+     "milvus-io/milvus",
+     31353,
+     69
     ],
     [
-     "qdrant/qdrant",
-     3776,
-     102
-    ],
-    [
-     "qdrant/qdrant",
-     3506,
-     319
-    ],
-    [
-     "qdrant/qdrant",
-     3929,
-     59
-    ],
-    [
-     "qdrant/qdrant",
-     3931,
-     336
-    ],
-    [
-     "qdrant/qdrant",
-     3784,
-     170
+     "milvus-io/milvus",
+     31327,
+     90
     ]
    ]
   },
   {
-   "slot": "B2:koaning",
-   "arm": "B2",
-   "author": "koaning",
+   "slot": "B1:AlexejPenner",
+   "arm": "B1",
+   "author": "AlexejPenner",
    "period": "Q1-2024",
    "ai": false,
+   "same_repo": true,
    "candidates": [
     [
-     "lancedb/lancedb",
-     1122,
-     224
+     "zenml-io/zenml",
+     2451,
+     55
+    ],
+    [
+     "zenml-io/zenml",
+     2481,
+     621
+    ],
+    [
+     "zenml-io/zenml",
+     2433,
+     196
+    ],
+    [
+     "zenml-io/zenml",
+     2492,
+     927
     ]
    ]
   },
   {
-   "slot": "B2:wjhsf",
+   "slot": "B1:zainhas",
+   "arm": "B1",
+   "author": "zainhas",
+   "period": "Q1-2024",
+   "ai": false,
+   "same_repo": false,
+   "candidates": [
+    [
+     "weaviate/weaviate-io",
+     1864,
+     192
+    ]
+   ]
+  },
+  {
+   "slot": "B2:klecki",
    "arm": "B2",
-   "author": "wjhsf",
+   "author": "klecki",
    "period": "Q1-2024",
    "ai": false,
    "candidates": [
     [
-     "salesforce/lwc",
-     4054,
-     600
+     "NVIDIA/DALI",
+     5357,
+     556
     ],
     [
-     "salesforce/lwc",
-     4028,
-     293
+     "NVIDIA/DALI",
+     5322,
+     967
     ],
     [
-     "salesforce/lwc",
-     3955,
-     329
+     "NVIDIA/DALI",
+     5380,
+     777
     ],
     [
-     "salesforce/lwc",
-     4027,
-     107
+     "NVIDIA/DALI",
+     5387,
+     156
     ],
     [
-     "salesforce/lwc",
-     3992,
-     70
+     "NVIDIA/DALI",
+     5345,
+     514
     ],
     [
-     "salesforce/lwc",
-     3951,
-     225
+     "NVIDIA/DALI",
+     5263,
+     438
     ],
     [
-     "salesforce/lwc",
-     3995,
-     354
+     "NVIDIA/DALI",
+     5344,
+     705
     ],
     [
-     "salesforce/lwc",
-     3967,
+     "NVIDIA/DALI",
+     5302,
+     1902
+    ],
+    [
+     "NVIDIA/DALI",
+     5367,
+     202
+    ],
+    [
+     "NVIDIA/DALI",
+     5372,
+     257
+    ],
+    [
+     "NVIDIA/DALI",
+     5338,
+     357
+    ],
+    [
+     "NVIDIA/DALI",
+     5396,
+     492
+    ],
+    [
+     "NVIDIA/DALI",
+     5360,
+     117
+    ],
+    [
+     "NVIDIA/DALI",
+     5268,
+     228
+    ]
+   ]
+  },
+  {
+   "slot": "B2:winter-wang",
+   "arm": "B2",
+   "author": "winter-wang",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "PaddlePaddle/Paddle",
+     62897,
+     261
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     60507,
+     430
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     62422,
+     122
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     61657,
+     158
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     60895,
+     209
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     62571,
+     217
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     61310,
+     209
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     62030,
+     109
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     63052,
+     180
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     62659,
+     929
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     62743,
+     548
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     60675,
+     93
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     62547,
      214
+    ],
+    [
+     "PaddlePaddle/Paddle",
+     61978,
+     757
     ]
    ]
   },
   {
-   "slot": "B2:ayulockin",
+   "slot": "B2:aymeric-roucher",
    "arm": "B2",
-   "author": "ayulockin",
+   "author": "aymeric-roucher",
    "period": "Q1-2024",
    "ai": false,
    "candidates": [
     [
-     "EleutherAI/lm-evaluation-harness",
-     1339,
-     582
+     "huggingface/blog",
+     1756,
+     290
+    ],
+    [
+     "huggingface/transformers",
+     29937,
+     1830
+    ],
+    [
+     "langchain-ai/langchain",
+     17254,
+     1341
     ]
    ]
   },
   {
-   "slot": "B2:lhoestq",
+   "slot": "B2:letonghan",
    "arm": "B2",
-   "author": "lhoestq",
+   "author": "letonghan",
    "period": "Q1-2024",
    "ai": false,
    "candidates": [
     [
-     "huggingface/datasets",
-     6551,
-     53
+     "intel/intel-extension-for-transformers",
+     1292,
+     138
     ],
     [
-     "huggingface/dataset-viewer",
-     2554,
-     121
+     "intel/intel-extension-for-transformers",
+     1361,
+     249
     ],
     [
-     "huggingface/dataset-viewer",
-     2642,
-     304
+     "intel/intel-extension-for-transformers",
+     1210,
+     177
     ],
     [
-     "huggingface/datasets",
-     6705,
-     68
+     "intel/intel-extension-for-transformers",
+     1180,
+     202
     ],
     [
-     "huggingface/dataset-viewer",
-     2454,
-     895
+     "intel/intel-extension-for-transformers",
+     1236,
+     240
     ],
     [
-     "huggingface/huggingface_hub",
-     1967,
+     "intel/intel-extension-for-transformers",
+     1233,
+     379
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1208,
+     202
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1161,
+     457
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1433,
+     448
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1321,
      128
     ],
     [
-     "huggingface/dataset-viewer",
-     2635,
-     218
+     "intel/intel-extension-for-transformers",
+     1135,
+     160
     ],
     [
-     "huggingface/huggingface_hub",
-     1996,
-     87
+     "intel/intel-extension-for-transformers",
+     1398,
+     68
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1334,
+     411
     ]
    ]
   },
@@ -2048,140 +2513,312 @@
    ]
   },
   {
-   "slot": "B2:benkonz",
+   "slot": "B2:benjibc",
    "arm": "B2",
-   "author": "benkonz",
+   "author": "benjibc",
    "period": "Q1-2024",
    "ai": false,
    "candidates": [
     [
-     "spotify/ratatool",
-     705,
-     63
+     "langchain-ai/langchainjs",
+     4447,
+     684
+    ],
+    [
+     "run-llama/llama_index",
+     11359,
+     468
+    ],
+    [
+     "langchain-ai/langchain",
+     18372,
+     127
+    ],
+    [
+     "run-llama/llama_index",
+     11343,
+     1338
     ]
    ]
   },
   {
-   "slot": "B2:loveyang1990",
+   "slot": "B2:lorentzenchr",
    "arm": "B2",
-   "author": "loveyang1990",
+   "author": "lorentzenchr",
    "period": "Q1-2024",
    "ai": false,
    "candidates": [
     [
-     "apache/seatunnel",
-     6471,
-     75
+     "scikit-learn/scikit-learn",
+     28074,
+     128
+    ],
+    [
+     "scikit-learn/scikit-learn",
+     28070,
+     84
+    ],
+    [
+     "scikit-learn/scikit-learn",
+     28656,
+     1053
+    ],
+    [
+     "scikit-learn/scikit-learn",
+     28640,
+     52
+    ],
+    [
+     "scikit-learn/scikit-learn",
+     28451,
+     325
+    ],
+    [
+     "scikit-learn/scikit-learn",
+     28048,
+     213
+    ],
+    [
+     "scikit-learn/scikit-learn",
+     28703,
+     627
     ]
    ]
   },
   {
-   "slot": "B2:afranchuk",
+   "slot": "B2:afourney",
    "arm": "B2",
-   "author": "afranchuk",
+   "author": "afourney",
    "period": "Q1-2024",
    "ai": false,
    "candidates": [
     [
-     "mozilla/sccache",
-     2030,
-     118
+     "microsoft/autogen",
+     1483,
+     1812
+    ],
+    [
+     "microsoft/autogen",
+     1847,
+     1515
+    ],
+    [
+     "microsoft/autogen",
+     1569,
+     171
+    ],
+    [
+     "microsoft/autogen",
+     2174,
+     64
+    ],
+    [
+     "microsoft/autogen",
+     1548,
+     253
+    ],
+    [
+     "microsoft/autogen",
+     1226,
+     62
     ]
    ]
   },
   {
-   "slot": "B2:zesongw",
+   "slot": "B2:zeppombal",
    "arm": "B2",
-   "author": "zesongw",
+   "author": "zeppombal",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "vllm-project/vllm",
+     3433,
+     338
+    ]
+   ]
+  },
+  {
+   "slot": "B2:wmaxey",
+   "arm": "B2",
+   "author": "wmaxey",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/cccl",
+     1526,
+     337
+    ]
+   ]
+  },
+  {
+   "slot": "B2:shuke987",
+   "arm": "B2",
+   "author": "shuke987",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "apache/doris",
+     30165,
+     653
+    ],
+    [
+     "apache/doris",
+     29905,
+     77
+    ]
+   ]
+  },
+  {
+   "slot": "B2:mohanajuhi166",
+   "arm": "B2",
+   "author": "mohanajuhi166",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "microsoft/genaiops-promptflow-template",
+     106,
+     78
+    ]
+   ]
+  },
+  {
+   "slot": "B2:fbertsch",
+   "arm": "B2",
+   "author": "fbertsch",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "mozilla/bigquery-etl",
+     4875,
+     62
+    ],
+    [
+     "mozilla/looker-spoke-default",
+     738,
+     198
+    ],
+    [
+     "mozilla/bigquery-etl",
+     4887,
+     126
+    ],
+    [
+     "mozilla/bigquery-etl",
+     4868,
+     322
+    ],
+    [
+     "mozilla/bigquery-etl",
+     4860,
+     92
+    ]
+   ]
+  },
+  {
+   "slot": "B2:justinchuby",
+   "arm": "B2",
+   "author": "justinchuby",
    "period": "Q1-2024",
    "ai": false,
    "candidates": [
     [
      "microsoft/onnxruntime",
-     19103,
-     411
+     19878,
+     1466
     ],
     [
      "microsoft/onnxruntime",
-     19988,
-     106
+     19471,
+     316
+    ]
+   ]
+  },
+  {
+   "slot": "B2:eshoguli",
+   "arm": "B2",
+   "author": "eshoguli",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "openvinotoolkit/openvino",
+     23692,
+     69
     ],
     [
-     "microsoft/onnxruntime",
-     19713,
+     "openvinotoolkit/openvino",
+     23286,
+     76
+    ],
+    [
+     "openvinotoolkit/openvino",
+     22522,
+     150
+    ],
+    [
+     "openvinotoolkit/openvino",
+     23202,
+     137
+    ],
+    [
+     "openvinotoolkit/openvino",
+     23115,
      73
-    ]
-   ]
-  },
-  {
-   "slot": "B2:writinwaters",
-   "arm": "B2",
-   "author": "writinwaters",
-   "period": "Q1-2024",
-   "ai": false,
-   "candidates": [
-    [
-     "infiniflow/ragflow",
-     175,
-     75
     ],
     [
-     "infiniflow/ragflow",
-     183,
-     175
+     "openvinotoolkit/openvino",
+     22937,
+     181
     ],
     [
-     "infiniflow/ragflow",
-     168,
-     89
+     "openvinotoolkit/openvino",
+     22869,
+     196
     ],
     [
-     "infiniflow/ragflow",
-     177,
-     51
+     "openvinotoolkit/openvino",
+     23387,
+     214
     ],
     [
-     "infiniflow/ragflow",
-     165,
-     91
+     "openvinotoolkit/openvino",
+     23086,
+     164
     ],
     [
-     "infiniflow/ragflow",
-     176,
-     99
-    ]
-   ]
-  },
-  {
-   "slot": "B2:siddartha-RE",
-   "arm": "B2",
-   "author": "siddartha-RE",
-   "period": "Q1-2024",
-   "ai": false,
-   "candidates": [
-    [
-     "huggingface/peft",
-     1368,
-     217
-    ]
-   ]
-  },
-  {
-   "slot": "B2:molbap",
-   "arm": "B2",
-   "author": "molbap",
-   "period": "Q1-2024",
-   "ai": false,
-   "candidates": [
-    [
-     "huggingface/transformers",
-     28843,
-     1190
+     "openvinotoolkit/openvino",
+     23065,
+     148
     ],
     [
-     "huggingface/transformers",
-     29063,
-     956
+     "openvinotoolkit/openvino",
+     22687,
+     711
+    ],
+    [
+     "openvinotoolkit/openvino",
+     23266,
+     81
+    ],
+    [
+     "openvinotoolkit/openvino",
+     23285,
+     71
+    ],
+    [
+     "openvinotoolkit/openvino",
+     23141,
+     131
+    ],
+    [
+     "openvinotoolkit/openvino",
+     23450,
+     73
     ]
    ]
   }
