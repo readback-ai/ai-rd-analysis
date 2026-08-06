@@ -1159,17 +1159,24 @@ def _freeze_env(tmp_path, monkeypatch):
     """Minimal coherent corpus for cmd_freeze: one filled+scored doc
     with its cached response and document text, all manifests
     present."""
+    import b3
     import gz
     for name in ("LOCAL", "MANIFEST", "MANIFEST_B3", "MANIFEST_ERAS",
                  "MANIFEST_PC", "DOCS", "DOCS_RETEST", "RESULTS",
-                 "RESULTS_RETEST", "RESERVATIONS", "RESP_CACHE",
-                 "DOC_CACHE"):
+                 "RESULTS_RETEST", "RESULTS_SEM", "DOCS_NEWFILE",
+                 "RESULTS_SEM_NF", "RESULTS_SEM_NF_FULL", "RESULTS_NF",
+                 "RESERVATIONS", "RESP_CACHE", "DOC_CACHE"):
         monkeypatch.setattr(gz, name, tmp_path / getattr(gz, name).name)
     monkeypatch.setattr(gz, "FROZEN", tmp_path / "frozen")
     monkeypatch.setattr(gptzero_client, "PINNED_VERSION", "pinver")
-    gz.MANIFEST_B3.write_text(json.dumps({"slots": [{"slot": "B3:o/r"}]}))
-    for m in (gz.MANIFEST, gz.MANIFEST_ERAS, gz.MANIFEST_PC):
-        m.write_text(json.dumps({"slots": []}))
+    gz.MANIFEST_B3.write_text(json.dumps(
+        {"slots": [{"slot": "B3:o/r"}],
+         "params": {**b3.B3_PARAMS, "word_cap": 600,
+                    "word_floor": 100}}))
+    for m, params in ((gz.MANIFEST, sampling.PARAMS),
+                      (gz.MANIFEST_ERAS, eras.PARAMS),
+                      (gz.MANIFEST_PC, pc.PARAMS)):
+        m.write_text(json.dumps({"slots": [], "params": params}))
     gz.DOCS.write_text(json.dumps(
         {"slot": "B3:o/r", "arm": "B3", "ai": False, "period": "Q3-2022",
          "doc_sha": "s", "words": 200, "truncated": True}) + "\n")
@@ -1271,6 +1278,43 @@ def test_report_newfile_renders_without_gptzero_rows(capsys):
     assert "—" in out
 
 
+def test_sem13c_inference_version_invalidates_cached_rows(tmp_path):
+    """PR #29 round-2 review P1: inference preprocessing changed (pad
+    to 4096 before chunking, matching the authors' published path), but
+    the resume key was (slot, doc_sha, model_revision) — every stale
+    row would have been treated as valid. Rows scored under a different
+    (or absent) inference version must be rescored, and sem_bound must
+    exclude them."""
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
+    (docs_dir / "s1.txt").write_text("code()")
+    rows = [{"slot": "P:a:ai", "arm": "P", "author": "a",
+             "period": "Q2-2026", "ai": True, "doc_sha": "s1",
+             "words": 100, "truncated": False}]
+    out = tmp_path / "sem.jsonl"
+    stale = {"slot": "P:a:ai", "arm": "P", "author": "a",
+             "period": "Q2-2026", "ai": True, "doc_sha": "s1",
+             "sem_probs": {"human": 1.0, "ai": 0.0, "hybrid": 0.0,
+                           "adversarial": 0.0}, "sem_pred": "human",
+             "model_revision": sem13c.HF_REVISION}   # no inference key
+    out.write_text(json.dumps(stale) + "\n")
+    calls = []
+
+    def stub(text):
+        calls.append(text)
+        return {"human": 0.0, "ai": 1.0, "hybrid": 0.0,
+                "adversarial": 0.0}
+
+    assert sem13c.score_rows(rows, docs_dir, out, predictor=stub) == 1
+    assert len(calls) == 1                    # stale row NOT trusted
+    scored = [json.loads(ln) for ln in out.read_text().splitlines()]
+    assert scored[-1]["inference"] == sem13c.INFERENCE
+    current = [{"slot": "P:a:ai", "doc_sha": "s1"}]
+    bound = analyze.sem_bound(current, scored,
+                              inference=sem13c.INFERENCE)
+    assert len(bound) == 1 and bound[0]["sem_pred"] == "ai"
+
+
 def test_sem13c_scores_resume_and_bind(tmp_path):
     """The sem13c scorer appends one row per (slot, doc_sha) under the
     pinned revision, skips already-scored docs on re-run, and
@@ -1302,6 +1346,66 @@ def test_sem13c_scores_resume_and_bind(tmp_path):
                {"slot": "P:a:nonai", "doc_sha": "REDRAWN"}]
     bound = analyze.sem_bound(current, scored)
     assert [r["slot"] for r in bound] == ["P:a:ai"]
+
+
+def test_score_newfile_refuses_unpinned(tmp_path, monkeypatch):
+    """PR #29 round-2 review P2: the created-file billed pass could
+    run the whole arm with PINNED_VERSION = None (no smoke-run limit
+    exists on this path). It must refuse before rewriting results or
+    issuing any API call."""
+    import gz
+    monkeypatch.setattr(gz, "DOCS_NEWFILE",
+                        tmp_path / "docs_newfile.jsonl")
+    monkeypatch.setattr(gz, "RESULTS_NF", tmp_path / "scores_nf.jsonl")
+    gz.DOCS_NEWFILE.write_text(json.dumps(
+        {"slot": "P:a:ai", "arm": "P", "author": "a",
+         "period": "Q2-2026", "ai": True, "doc_sha": "s",
+         "words": 100}) + "\n")
+    monkeypatch.setattr(gptzero_client, "PINNED_VERSION", None)
+    with pytest.raises(SystemExit, match="pin"):
+        gz.cmd_score_newfile()
+    assert not gz.RESULTS_NF.exists()
+
+
+def test_freeze_refuses_stale_design_manifests(tmp_path, monkeypatch):
+    """PR #29 round-2 review P1: source PARAMS and frozen manifests
+    could describe different experiments (code n_q1=60 vs manifest 20)
+    and --freeze validated only internal consistency. A manifest whose
+    recorded params differ from the current module PARAMS must refuse
+    the freeze until resampled."""
+    gz = _freeze_env(tmp_path, monkeypatch)
+    gz.cmd_freeze()                                # matching: passes
+    m = json.loads(gz.MANIFEST.read_text())
+    m["params"] = {**m["params"], "n_q1": 999}
+    gz.MANIFEST.write_text(json.dumps(m))
+    with pytest.raises(SystemExit, match="design"):
+        gz.cmd_freeze()
+
+
+def test_freeze_requires_complete_sem_coverage(tmp_path, monkeypatch):
+    """PR #29 round-2 review P2: sem13c results were optional and
+    unversioned at freeze time while the report's conclusion was
+    unconditional. When a sem results file exists, every frozen score
+    row needs exactly one bound current-inference sem row, else the
+    freeze refuses."""
+    gz = _freeze_env(tmp_path, monkeypatch)
+
+    def sem_row(sha):
+        return {"slot": "B3:o/r", "arm": "B3", "period": "Q3-2022",
+                "ai": False, "author": "dev", "doc_sha": sha,
+                "sem_pred": "human",
+                "sem_probs": {"human": 1.0, "ai": 0.0, "hybrid": 0.0,
+                              "adversarial": 0.0},
+                "model_revision": sem13c.HF_REVISION,
+                "inference": sem13c.INFERENCE}
+
+    gz.RESULTS_SEM.write_text(json.dumps(sem_row("STALE")) + "\n")
+    with pytest.raises(SystemExit, match="sem13c"):
+        gz.cmd_freeze()
+    gz.RESULTS_SEM.write_text(json.dumps(sem_row("s")) + "\n")
+    gz.cmd_freeze()                                # complete: passes
+    assert (gz.FROZEN / "scores_sem13c.jsonl").is_file()
+    assert "sem13c" in (gz.FROZEN / "report.txt").read_text()
 
 
 def test_freeze_writes_the_audit_set(tmp_path, monkeypatch):
@@ -1409,10 +1513,12 @@ def test_freeze_refuses_retest_and_manifest_incoherence(
     write(gz.DOCS, docs)
 
     gz.MANIFEST.write_text(json.dumps(
-        {"slots": [{"slot": "P:ghost:ai"}]}))         # uncovered manifest
+        {"slots": [{"slot": "P:ghost:ai"}],
+         "params": sampling.PARAMS}))                 # uncovered manifest
     with pytest.raises(SystemExit, match="manifest"):
         gz.cmd_freeze()
-    gz.MANIFEST.write_text(json.dumps({"slots": []}))
+    gz.MANIFEST.write_text(json.dumps({"slots": [],
+                                       "params": sampling.PARAMS}))
 
     # PR #28 review round 4: same slot twice with DIFFERENT long-doc
     # hashes, mirrored in both retest files — full-tuple uniqueness and
@@ -1429,7 +1535,8 @@ def test_freeze_refuses_retest_and_manifest_incoherence(
 
     # duplicate slot definitions across manifests must refuse, not
     # silently collapse into the coverage set
-    gz.MANIFEST.write_text(json.dumps({"slots": [{"slot": "B3:o/r"}]}))
+    gz.MANIFEST.write_text(json.dumps({"slots": [{"slot": "B3:o/r"}],
+                                       "params": sampling.PARAMS}))
     with pytest.raises(SystemExit, match="duplicate"):
         gz.cmd_freeze()
 

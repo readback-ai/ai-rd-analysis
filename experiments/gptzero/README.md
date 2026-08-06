@@ -20,20 +20,32 @@ experiment calibrates GPTZero against the study's own labels.
     one document per arm per author (within-author contrast).
   - **B1** — those authors' own Q1-2024 PRs where they exist
     (same-author-across-eras anchor).
-  - **B2** — independent Q1-2024 authors, to 20 baseline docs total.
-  - **Eras** (design eras-v1) — the paired contrast at 90 authors per
-    quarter across Q4-2025, Q1-2026 and Q2-2026 (own manifest,
-    quarter-namespaced seeds, prefix-stable deepening). Q2-2026 is an
-    expansion: v1's authors are excluded and keep their v1 slots, so
-    the pooled quarter is 90 distinct authors.
+  - **B2** — independent Q1-2024 authors, to 60 baseline docs total
+    (whole-pool shuffle then prefix: deepening extends membership).
+  - **Eras** (design eras-v1) — the paired contrast across Q4-2025,
+    Q1-2026 and Q2-2026 (own manifest, quarter-namespaced seeds,
+    prefix-stable deepening; per-quarter targets: Q4-2025 at its
+    169-author pool cap, Q1-2026 at 90, Q2-2026 at 180). Q2-2026 is an
+    expansion: v1's authors are excluded and keep their v1 slots.
   - **Length sensitivity** — every document truncated at the 600-word
     cap is also scored at a 1200-word assembly (`--retest`, separate
     results file): the dose-response section bounds what document
     length does to the detector.
-  - **Known-AI positive control** (design pc-v1) — agent-authored
-    (layer-B) PRs from Q1/Q2-2026 through the same pipeline: validates
-    the instrument and sets the score ceiling for reading the paired
-    arms' mixtures. One slot per (agent, repo), per-login cap.
+  - **Known-AI positive control** (design pc-v2) — canonical
+    agent-authored (layer-B) PRs, Q4-2025..Q2-2026, through the same
+    pipeline. One slot per (agent, repo) with per-agent quarterly
+    targets (copilot/devin 10, pool-limited cursor/claude 5) and
+    group deepening via disjoint candidate chunks.
+  - **sem13c second detector** — the released linear MIL component of
+    the SemEval-2026 T13c 1st-place system scores the same corpus
+    locally (`--score-sem`; free; pinned HF revision + inference
+    version). Needs the `sem13c` dependency group:
+    `uv run --group sem13c python experiments/gptzero/gz.py --score-sem`.
+  - **Created-file arm** — the largest `new file mode` code file per
+    scored slot, as whole-file documents in capped (600-word) and full
+    variants (`--newfile` assembles + sem13c-scores both, free;
+    `--score-newfile` is the billed GPTZero pass, pin-enforced;
+    `--report-newfile` compares).
 - **Determinism**: study seed 20260630, namespaced streams; manifest
   fingerprints AS_OF/CUTOFF/params/pool and is rebuilt-not-trusted.
   Candidate lists are seeded whole-pool shuffles, so deepening `k_cand`

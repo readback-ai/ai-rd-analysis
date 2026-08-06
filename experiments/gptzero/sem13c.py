@@ -1,21 +1,26 @@
-"""Second detector: the SemEval-2026 Task 13 Subtask C winning system's
-MIL-UniXcoder stream (Gainulla & Shamsadinov 2026, "YoungDSMLKZ at
-SemEval-2026 Task 13", macro-F1 0.7855) scoring the SAME document
-corpus as GPTZero — locally and free.
+"""Second detector: the RELEASED LINEAR MIL COMPONENT of the
+SemEval-2026 Task 13 Subtask C 1st-place team's system (Gainulla &
+Shamsadinov 2026, "YoungDSMLKZ at SemEval-2026 Task 13") scoring the
+SAME document corpus as GPTZero — locally and free.
+
+Component, not the winning ensemble: the paper reports ~0.5906
+macro-F1 for this linear max-pooling MIL model standalone, 0.6331
+with its CatBoost head, and 0.7855 for the full routed ensemble —
+only the linear component's weights are released, so transfer
+conclusions here bind to the component alone.
 
 Four-way code classification: human / ai / hybrid / adversarial — a
 code-native instrument with exactly the hybrid class GPTZero never
-produces. The architecture is re-implemented here from the published
-description (512-token chunks, stride 256, up to 16 chunks — first
-and last 8 when longer — per-chunk linear logits, max-pooled);
-fine-tuned weights load from the authors' HuggingFace repo at a
-PINNED revision, so scores are reproducible. The full competition
-system routed classes across three streams; the released MIL stream
-carried its AI/adversarial detection.
+produces. Inference mirrors the authors' published path: every
+document PADS TO THE FULL 4096-token context before 512-token
+chunking (stride 256), per-chunk linear logits max-pooled. Weights
+load from the authors' HuggingFace repo at a PINNED revision and
+rows carry an INFERENCE version, so a preprocessing change
+invalidates cached scores instead of silently coexisting with them.
 
 Domain note: the model was trained on whole source files, not
-diff-assembled documents — scores share that domain shift with
-GPTZero and are read comparatively, not absolutely.
+diff-assembled documents — scores are read comparatively, not
+absolutely.
 """
 from __future__ import annotations
 
@@ -27,6 +32,10 @@ HF_REPO = "YoungDSMLKZ/UnixCoder-MIL"
 HF_REVISION = "0619dccaf165ab4e310ed8213936b15bda572b8f"
 BACKBONE = "microsoft/unixcoder-base"
 CHUNK, STRIDE, MAX_CHUNKS, MAX_LEN = 512, 256, 16, 4096
+# Preprocessing identity: cached rows scored under any other value are
+# invalid and rescored. pad4096 = pad every document to MAX_LEN before
+# chunking, matching the authors' published inference path.
+INFERENCE = "pad4096"
 
 
 def _load():
@@ -89,7 +98,7 @@ def make_predictor():
 
     def predict(text: str) -> dict:
         enc = tok(text, truncation=True, max_length=MAX_LEN,
-                  return_tensors="pt")
+                  padding="max_length", return_tensors="pt")
         with torch.no_grad():
             logits = model(enc["input_ids"], enc["attention_mask"])
             probs = torch.softmax(logits[0], dim=-1).tolist()
@@ -107,7 +116,8 @@ def score_rows(doc_rows: list[dict], doc_cache: Path, out_path: Path,
         for ln in out_path.read_text().splitlines():
             if ln.strip():
                 r = json.loads(ln)
-                if r.get("model_revision") == HF_REVISION:
+                if (r.get("model_revision") == HF_REVISION
+                        and r.get("inference") == INFERENCE):
                     done.add((r["slot"], r["doc_sha"]))
     todo = [r for r in doc_rows
             if (r["slot"], r["doc_sha"]) not in done]
@@ -128,7 +138,8 @@ def score_rows(doc_rows: list[dict], doc_cache: Path, out_path: Path,
                  "words": r.get("words"),
                  "truncated": r.get("truncated"),
                  "sem_probs": probs, "sem_pred": pred,
-                 "model_revision": HF_REVISION}) + "\n")
+                 "model_revision": HF_REVISION,
+                 "inference": INFERENCE}) + "\n")
             out.flush()
             n += 1
             print(f"sem13c {r['slot']}: {pred} "

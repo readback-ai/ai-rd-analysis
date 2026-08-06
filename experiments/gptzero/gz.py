@@ -425,6 +425,9 @@ def cmd_score_newfile() -> None:
     """GPTZero over the capped created-file documents (billed; same
     ledger, cache, and version discipline as every other arm)."""
     import gptzero_client as gzc
+    if gzc.PINNED_VERSION is None:
+        raise SystemExit("newfile scoring requires a pinned detector "
+                         "version — no unpinned billed runs")
     rows = _load_rows(DOCS_NEWFILE)
     old = [r for r in _load_rows(RESULTS_NF)
            if any(r["slot"] == d["slot"] and r["doc_sha"] == d["doc_sha"]
@@ -618,6 +621,28 @@ def cmd_freeze() -> None:
     missing = [p.name for p in required if not p.is_file()]
     if missing:
         raise SystemExit(f"freeze refused: missing {missing}")
+    # The frozen set must describe the experiment the CODE currently
+    # defines: a manifest whose recorded params differ from the module
+    # PARAMS is a stale design and needs resampling first.
+    import b3
+    import eras
+    import pc
+    import sampling
+    expected_params = {
+        MANIFEST: sampling.PARAMS,
+        MANIFEST_B3: {**b3.B3_PARAMS, "word_cap": 600,
+                      "word_floor": 100},
+        MANIFEST_ERAS: eras.PARAMS,
+        MANIFEST_PC: pc.PARAMS,
+    }
+    stale_designs = [
+        p.name for p, want in expected_params.items()
+        if json.loads(p.read_text()).get("params")
+        != json.loads(json.dumps(want))]
+    if stale_designs:
+        raise SystemExit(
+            f"freeze refused: manifest design stale vs code (resample "
+            f"first): {stale_designs}")
     manifest_slots = [s["slot"]
                       for p in (MANIFEST, MANIFEST_B3, MANIFEST_ERAS,
                                 MANIFEST_PC)
@@ -632,22 +657,58 @@ def cmd_freeze() -> None:
         shutil.rmtree(FROZEN)
     FROZEN.mkdir()
     kept = []
-    for p in (*required, DOCS_RETEST, RESULTS_RETEST, PARAGRAPHS):
+    for p in (*required, DOCS_RETEST, RESULTS_RETEST, PARAGRAPHS,
+              DOCS_NEWFILE):
         if p.is_file():
             shutil.copy(p, FROZEN / p.name)
             kept.append(p.name)
-    if RESULTS_SEM.is_file():
-        # append-only log: freeze only the rows bound to the current
-        # corpus (one per slot, pinned revision)
-        bound = analyze.sem_bound(score_rows,
-                                  _load_rows(RESULTS_SEM))
-        (FROZEN / RESULTS_SEM.name).write_text(
+
+    def freeze_bound(results_path, base_rows, sha_key, what):
+        """A reported analysis must cover its corpus COMPLETELY under
+        the current inference version, and only bound rows freeze."""
+        import sem13c
+        current = [{"slot": r["slot"], "doc_sha": r[sha_key]}
+                   for r in base_rows]
+        bound = analyze.sem_bound(current, _load_rows(results_path),
+                                  inference=sem13c.INFERENCE)
+        if {r["slot"] for r in bound} != {r["slot"] for r in current}:
+            raise SystemExit(
+                f"freeze refused: sem13c {what} coverage incomplete "
+                f"({len(bound)}/{len(current)} bound current-inference "
+                f"rows) — rescore first")
+        (FROZEN / results_path.name).write_text(
             "".join(json.dumps(r) + "\n" for r in bound))
-        kept.append(RESULTS_SEM.name)
+        kept.append(results_path.name)
+
+    if RESULTS_SEM.is_file():
+        freeze_bound(RESULTS_SEM, score_rows, "doc_sha", "corpus")
+    nf_rows = _load_rows(DOCS_NEWFILE)
+    if nf_rows:
+        if RESULTS_SEM_NF.is_file():
+            freeze_bound(RESULTS_SEM_NF, nf_rows, "doc_sha",
+                         "newfile-capped")
+        if RESULTS_SEM_NF_FULL.is_file():
+            freeze_bound(RESULTS_SEM_NF_FULL, nf_rows, "doc_sha_full",
+                         "newfile-full")
+        if RESULTS_NF.is_file():
+            shutil.copy(RESULTS_NF, FROZEN / RESULTS_NF.name)
+            kept.append(RESULTS_NF.name)
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
-        analyze.report(RESULTS, RESULTS_RETEST, PARAGRAPHS,
-                       RESULTS_SEM)
+        # the report is generated from the FROZEN copies, so the
+        # committed numbers can only come from the committed rows
+        analyze.report(
+            FROZEN / RESULTS.name,
+            FROZEN / RESULTS_RETEST.name,
+            FROZEN / PARAGRAPHS.name,
+            (FROZEN / RESULTS_SEM.name)
+            if (FROZEN / RESULTS_SEM.name).is_file() else None)
+        if nf_rows:
+            analyze.report_newfile(
+                nf_rows,
+                _load_rows(FROZEN / RESULTS_SEM_NF.name),
+                _load_rows(FROZEN / RESULTS_SEM_NF_FULL.name),
+                _load_rows(FROZEN / RESULTS_NF.name))
     (FROZEN / "report.txt").write_text(buf.getvalue())
     (FROZEN / "PROVENANCE.md").write_text(
         f"# Frozen audit set ({date.today().isoformat()})\n\n"

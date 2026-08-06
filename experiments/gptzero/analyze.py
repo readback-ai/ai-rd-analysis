@@ -67,12 +67,14 @@ Caveats (they bound every number above):
   verdicts largely miss agent code.
 - Near-uniform scores in ALL arms would itself be the answer: no signal
   on bare added-lines code.
-- sem13c does NOT transfer to diff-assembled documents: 30% of the
-  pre-ChatGPT Q3-2022 baseline is classified "ai" (GPTZero: 0%), the
-  era trend runs backwards, paired contrasts are null, and its scores
-  are uncorrelated with GPTZero's (r=-0.01). Its in-domain macro-F1
-  (0.7855 on whole source files) does not survive the domain shift;
-  treat its verdicts on this corpus as uninformative."""
+- sem13c is the RELEASED LINEAR MIL COMPONENT of the T13c 1st-place
+  system (paper: ~0.5906 macro-F1 standalone; 0.6331 with its
+  unreleased CatBoost head; 0.7855 for the full unreleased ensemble)
+  — transfer conclusions bind to the component alone. On this corpus
+  it does not transfer: high false-positive rates on pre-ChatGPT
+  code, an inverted era trend, null paired contrasts, and scores
+  uncorrelated with GPTZero's; treat its verdicts here as
+  uninformative."""
 
 
 def load_rows(path: Path) -> list[dict]:
@@ -328,13 +330,18 @@ def report_languages(para_rows: list[dict], top: int = 6) -> None:
               f"{statistics.fmean(no_ps) if no_ps else float('nan'):>10.2f}")
 
 
-def sem_bound(rows: list[dict], sem_rows: list[dict]) -> list[dict]:
+def sem_bound(rows: list[dict], sem_rows: list[dict],
+              inference: str | None = None) -> list[dict]:
     """sem13c rows bound to the CURRENT document per slot (append-only
-    scoring log ages out redrawn docs here), one row per slot."""
+    scoring log ages out redrawn docs here), one row per slot; when an
+    inference version is given, rows scored under any other
+    preprocessing are excluded."""
     current = {r["slot"]: r["doc_sha"] for r in rows}
     out, seen = [], set()
     for r in sem_rows:
         if r["slot"] in seen:
+            continue
+        if inference is not None and r.get("inference") != inference:
             continue
         if current.get(r["slot"]) == r["doc_sha"]:
             out.append(r)
@@ -343,14 +350,15 @@ def sem_bound(rows: list[dict], sem_rows: list[dict]) -> list[dict]:
 
 
 def report_sem(rows: list[dict], sem_rows: list[dict]) -> None:
-    bound = sem_bound(rows, sem_rows)
+    import sem13c
+    bound = sem_bound(rows, sem_rows, inference=sem13c.INFERENCE)
     if not bound:
         return
     for r in bound:
         r["aihyb"] = r["sem_probs"]["ai"] + r["sem_probs"]["hybrid"]
-    print(f"\nsem13c (SemEval-2026 T13c winner, MIL-UniXcoder stream; "
-          f"4-way code classifier; {len(bound)}/{len(rows)} docs "
-          f"bound):")
+    print(f"\nsem13c (released linear MIL component of the T13c "
+          f"1st-place system, ~0.59 standalone in-domain; 4-way code "
+          f"classifier; {len(bound)}/{len(rows)} docs bound):")
     print(f"{'arm':14}{'n':>4}{'p_ai':>7}{'p_hyb':>7}{'p_adv':>7}"
           f"{'ai%':>6}{'hyb%':>6}{'adv%':>6}{'hum%':>6}")
     for name, pred in ARMS:

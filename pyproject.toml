@@ -11,6 +11,14 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.15.20",
 ]
+# local sem13c detector inference (experiments/gptzero/sem13c.py):
+#   uv run --group sem13c python experiments/gptzero/gz.py --score-sem
+sem13c = [
+    "torch>=2.4",
+    "transformers>=4.44",
+    "safetensors>=0.4",
+    "huggingface_hub>=0.24",
+]
 
 [build-system]
 requires = ["hatchling"]
