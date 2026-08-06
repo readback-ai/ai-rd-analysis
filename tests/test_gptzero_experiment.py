@@ -1497,6 +1497,32 @@ def test_freeze_failure_preserves_previous_snapshot(
     assert (gz.FROZEN / "report.txt").read_text() == marker
 
 
+def test_freeze_swap_failure_preserves_previous_snapshot(
+        tmp_path, monkeypatch):
+    """PR #29 round-4 review P2: the final swap deleted the previous
+    snapshot before renaming the staging directory, so a crash or
+    rename failure between the two lost both. The old snapshot must
+    survive a failed swap (kept as backup, rolled back on
+    exception)."""
+    from pathlib import PosixPath
+    gz = _freeze_env(tmp_path, monkeypatch)
+    gz.cmd_freeze()
+    marker = (gz.FROZEN / "report.txt").read_text()
+
+    real_rename = PosixPath.rename
+
+    def flaky(self, target):
+        if self.name.endswith(".tmp"):
+            raise OSError("simulated rename failure")
+        return real_rename(self, target)
+
+    monkeypatch.setattr(PosixPath, "rename", flaky)
+    with pytest.raises(OSError, match="simulated"):
+        gz.cmd_freeze()
+    monkeypatch.setattr(PosixPath, "rename", real_rename)
+    assert (gz.FROZEN / "report.txt").read_text() == marker
+
+
 def test_freeze_writes_the_audit_set(tmp_path, monkeypatch):
     """--freeze snapshots manifests, row files, paragraph summaries,
     the generated report, and provenance into the committed frozen/

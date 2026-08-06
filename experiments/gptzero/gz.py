@@ -756,9 +756,22 @@ def cmd_freeze() -> None:
         f"runs); reconcile against the GPTZero dashboard by archiving "
         f"the ledger and seeding it with one dashboard-confirmed row "
         f"(see README).\n")
+    # Crash-safe swap: the previous snapshot survives as a backup
+    # until the staging rename has succeeded, and is restored if the
+    # rename raises — no window where neither snapshot exists.
+    backup = FROZEN.with_name(FROZEN.name + ".old")
+    if backup.is_dir():
+        shutil.rmtree(backup)
     if FROZEN.is_dir():
-        shutil.rmtree(FROZEN)
-    stage.rename(FROZEN)
+        FROZEN.rename(backup)
+    try:
+        stage.rename(FROZEN)
+    except BaseException:
+        if backup.is_dir() and not FROZEN.is_dir():
+            backup.rename(FROZEN)
+        raise
+    if backup.is_dir():
+        shutil.rmtree(backup)
     print(f"frozen: {len(kept) + 2} files -> {FROZEN}")
 
 
