@@ -1,10 +1,10 @@
 {
  "design": "v1-50k",
- "fingerprint": "6edba0c2b350b694",
+ "fingerprint": "d414450f65a3c3ef",
  "params": {
   "design": "v1-50k",
   "n_authors": 30,
-  "n_q1": 20,
+  "n_q1": 60,
   "n_b1": 10,
   "k_cand": 16,
   "word_cap": 600,
@@ -2229,596 +2229,1616 @@
    ]
   },
   {
-   "slot": "B2:klecki",
+   "slot": "B2:mgbvox",
    "arm": "B2",
-   "author": "klecki",
+   "author": "mgbvox",
    "period": "Q1-2024",
    "ai": false,
    "candidates": [
     [
-     "NVIDIA/DALI",
-     5357,
-     556
-    ],
-    [
-     "NVIDIA/DALI",
-     5322,
-     967
-    ],
-    [
-     "NVIDIA/DALI",
-     5380,
-     777
-    ],
-    [
-     "NVIDIA/DALI",
-     5387,
-     156
-    ],
-    [
-     "NVIDIA/DALI",
-     5345,
-     514
-    ],
-    [
-     "NVIDIA/DALI",
-     5263,
-     438
-    ],
-    [
-     "NVIDIA/DALI",
-     5344,
-     705
-    ],
-    [
-     "NVIDIA/DALI",
-     5302,
-     1902
-    ],
-    [
-     "NVIDIA/DALI",
-     5367,
-     202
-    ],
-    [
-     "NVIDIA/DALI",
-     5372,
-     257
-    ],
-    [
-     "NVIDIA/DALI",
-     5338,
-     357
-    ],
-    [
-     "NVIDIA/DALI",
-     5396,
-     492
-    ],
-    [
-     "NVIDIA/DALI",
-     5360,
-     117
-    ],
-    [
-     "NVIDIA/DALI",
-     5268,
-     228
+     "stanfordnlp/dspy",
+     611,
+     1022
     ]
    ]
   },
   {
-   "slot": "B2:winter-wang",
+   "slot": "B2:shohamy7",
    "arm": "B2",
-   "author": "winter-wang",
-   "period": "Q1-2024",
-   "ai": false,
-   "candidates": [
-    [
-     "PaddlePaddle/Paddle",
-     62897,
-     261
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     60507,
-     430
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     62422,
-     122
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     61657,
-     158
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     60895,
-     209
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     62571,
-     217
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     61310,
-     209
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     62030,
-     109
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     63052,
-     180
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     62659,
-     929
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     62743,
-     548
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     60675,
-     93
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     62547,
-     214
-    ],
-    [
-     "PaddlePaddle/Paddle",
-     61978,
-     757
-    ]
-   ]
-  },
-  {
-   "slot": "B2:aymeric-roucher",
-   "arm": "B2",
-   "author": "aymeric-roucher",
-   "period": "Q1-2024",
-   "ai": false,
-   "candidates": [
-    [
-     "huggingface/blog",
-     1756,
-     290
-    ],
-    [
-     "huggingface/transformers",
-     29937,
-     1830
-    ],
-    [
-     "langchain-ai/langchain",
-     17254,
-     1341
-    ]
-   ]
-  },
-  {
-   "slot": "B2:letonghan",
-   "arm": "B2",
-   "author": "letonghan",
-   "period": "Q1-2024",
-   "ai": false,
-   "candidates": [
-    [
-     "intel/intel-extension-for-transformers",
-     1292,
-     138
-    ],
-    [
-     "intel/intel-extension-for-transformers",
-     1361,
-     249
-    ],
-    [
-     "intel/intel-extension-for-transformers",
-     1210,
-     177
-    ],
-    [
-     "intel/intel-extension-for-transformers",
-     1180,
-     202
-    ],
-    [
-     "intel/intel-extension-for-transformers",
-     1236,
-     240
-    ],
-    [
-     "intel/intel-extension-for-transformers",
-     1233,
-     379
-    ],
-    [
-     "intel/intel-extension-for-transformers",
-     1208,
-     202
-    ],
-    [
-     "intel/intel-extension-for-transformers",
-     1161,
-     457
-    ],
-    [
-     "intel/intel-extension-for-transformers",
-     1433,
-     448
-    ],
-    [
-     "intel/intel-extension-for-transformers",
-     1321,
-     128
-    ],
-    [
-     "intel/intel-extension-for-transformers",
-     1135,
-     160
-    ],
-    [
-     "intel/intel-extension-for-transformers",
-     1398,
-     68
-    ],
-    [
-     "intel/intel-extension-for-transformers",
-     1334,
-     411
-    ]
-   ]
-  },
-  {
-   "slot": "B2:ImpressionableRaccoon",
-   "arm": "B2",
-   "author": "ImpressionableRaccoon",
+   "author": "shohamy7",
    "period": "Q1-2024",
    "ai": false,
    "candidates": [
     [
      "apache/airflow",
-     38589,
-     419
-    ]
-   ]
-  },
-  {
-   "slot": "B2:AlabasterAxe",
-   "arm": "B2",
-   "author": "AlabasterAxe",
-   "period": "Q1-2024",
-   "ai": false,
-   "candidates": [
-    [
-     "chroma-core/chroma",
-     1817,
-     484
-    ]
-   ]
-  },
-  {
-   "slot": "B2:benjibc",
-   "arm": "B2",
-   "author": "benjibc",
-   "period": "Q1-2024",
-   "ai": false,
-   "candidates": [
-    [
-     "langchain-ai/langchainjs",
-     4447,
-     684
+     36543,
+     55
     ],
     [
-     "run-llama/llama_index",
-     11359,
-     468
+     "apache/airflow",
+     36581,
+     116
     ],
     [
-     "langchain-ai/langchain",
-     18372,
-     127
+     "apache/airflow",
+     36636,
+     130
     ],
     [
-     "run-llama/llama_index",
-     11343,
-     1338
-    ]
-   ]
-  },
-  {
-   "slot": "B2:lorentzenchr",
-   "arm": "B2",
-   "author": "lorentzenchr",
-   "period": "Q1-2024",
-   "ai": false,
-   "candidates": [
-    [
-     "scikit-learn/scikit-learn",
-     28074,
-     128
+     "apache/airflow",
+     36720,
+     85
     ],
     [
-     "scikit-learn/scikit-learn",
-     28070,
-     84
-    ],
-    [
-     "scikit-learn/scikit-learn",
-     28656,
-     1053
-    ],
-    [
-     "scikit-learn/scikit-learn",
-     28640,
-     52
-    ],
-    [
-     "scikit-learn/scikit-learn",
-     28451,
-     325
-    ],
-    [
-     "scikit-learn/scikit-learn",
-     28048,
-     213
-    ],
-    [
-     "scikit-learn/scikit-learn",
-     28703,
-     627
-    ]
-   ]
-  },
-  {
-   "slot": "B2:afourney",
-   "arm": "B2",
-   "author": "afourney",
-   "period": "Q1-2024",
-   "ai": false,
-   "candidates": [
-    [
-     "microsoft/autogen",
-     1483,
-     1812
-    ],
-    [
-     "microsoft/autogen",
-     1847,
-     1515
-    ],
-    [
-     "microsoft/autogen",
-     1569,
-     171
-    ],
-    [
-     "microsoft/autogen",
-     2174,
-     64
-    ],
-    [
-     "microsoft/autogen",
-     1548,
-     253
-    ],
-    [
-     "microsoft/autogen",
-     1226,
+     "apache/airflow",
+     36561,
      62
     ]
    ]
   },
   {
-   "slot": "B2:zeppombal",
+   "slot": "B2:FrankXia",
    "arm": "B2",
-   "author": "zeppombal",
+   "author": "FrankXia",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "agno-agi/agno",
+     114,
+     425
+    ]
+   ]
+  },
+  {
+   "slot": "B2:wz337",
+   "arm": "B2",
+   "author": "wz337",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "pytorch/pytorch",
+     122495,
+     205
+    ]
+   ]
+  },
+  {
+   "slot": "B2:mosheber",
+   "arm": "B2",
+   "author": "mosheber",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "langchain-ai/langchain",
+     17391,
+     1029
+    ]
+   ]
+  },
+  {
+   "slot": "B2:dersia",
+   "arm": "B2",
+   "author": "dersia",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "microsoft/semantic-kernel",
+     5008,
+     157
+    ]
+   ]
+  },
+  {
+   "slot": "B2:wangshuo128",
+   "arm": "B2",
+   "author": "wangshuo128",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "apache/doris",
+     32681,
+     125
+    ]
+   ]
+  },
+  {
+   "slot": "B2:tyumentsev4",
+   "arm": "B2",
+   "author": "tyumentsev4",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "langchain-ai/langchain",
+     19341,
+     165
+    ]
+   ]
+  },
+  {
+   "slot": "B2:Carl-Zhou-CN",
+   "arm": "B2",
+   "author": "Carl-Zhou-CN",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "apache/seatunnel",
+     6232,
+     386
+    ],
+    [
+     "apache/seatunnel",
+     6258,
+     905
+    ]
+   ]
+  },
+  {
+   "slot": "B2:baichuan-assistant",
+   "arm": "B2",
+   "author": "baichuan-assistant",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "langchain-ai/langchain",
+     16724,
+     319
+    ],
+    [
+     "langchain-ai/langchain",
+     16568,
+     277
+    ]
+   ]
+  },
+  {
+   "slot": "B2:stephenroller",
+   "arm": "B2",
+   "author": "stephenroller",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "huggingface/tokenizers",
+     1433,
+     70
+    ]
+   ]
+  },
+  {
+   "slot": "B2:ihamer-tt",
+   "arm": "B2",
+   "author": "ihamer-tt",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "tenstorrent/tt-metal",
+     5597,
+     204
+    ],
+    [
+     "tenstorrent/tt-metal",
+     6287,
+     135
+    ],
+    [
+     "tenstorrent/tt-metal",
+     6072,
+     354
+    ],
+    [
+     "tenstorrent/tt-metal",
+     5696,
+     113
+    ]
+   ]
+  },
+  {
+   "slot": "B2:tianyu-l",
+   "arm": "B2",
+   "author": "tianyu-l",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "pytorch/torchtitan",
+     117,
+     66
+    ],
+    [
+     "pytorch/torchtitan",
+     57,
+     137
+    ],
+    [
+     "pytorch/torchtitan",
+     97,
+     79
+    ],
+    [
+     "pytorch/torchtitan",
+     147,
+     275
+    ],
+    [
+     "pytorch/torchtitan",
+     173,
+     82
+    ],
+    [
+     "pytorch/torchtitan",
+     132,
+     223
+    ],
+    [
+     "pytorch/torchtitan",
+     151,
+     94
+    ]
+   ]
+  },
+  {
+   "slot": "B2:rutikthakre",
+   "arm": "B2",
+   "author": "rutikthakre",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "onyx-dot-app/onyx",
+     931,
+     483
+    ]
+   ]
+  },
+  {
+   "slot": "B2:SwapnilDreams100",
+   "arm": "B2",
+   "author": "SwapnilDreams100",
    "period": "Q1-2024",
    "ai": false,
    "candidates": [
     [
      "vllm-project/vllm",
-     3433,
-     338
+     3516,
+     110
     ]
    ]
   },
   {
-   "slot": "B2:wmaxey",
+   "slot": "B2:daikiad",
    "arm": "B2",
-   "author": "wmaxey",
+   "author": "daikiad",
    "period": "Q1-2024",
    "ai": false,
    "candidates": [
     [
-     "NVIDIA/cccl",
-     1526,
-     337
+     "langflow-ai/langflow",
+     1551,
+     105
     ]
    ]
   },
   {
-   "slot": "B2:shuke987",
+   "slot": "B2:pcmoritz",
    "arm": "B2",
-   "author": "shuke987",
+   "author": "pcmoritz",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "vllm-project/vllm",
+     2979,
+     312
+    ],
+    [
+     "vllm-project/vllm",
+     2854,
+     404
+    ],
+    [
+     "vllm-project/vllm",
+     2860,
+     307
+    ],
+    [
+     "vllm-project/vllm",
+     2834,
+     53
+    ],
+    [
+     "vllm-project/vllm",
+     2542,
+     224
+    ],
+    [
+     "vllm-project/vllm",
+     2677,
+     174
+    ]
+   ]
+  },
+  {
+   "slot": "B2:fuleinist",
+   "arm": "B2",
+   "author": "fuleinist",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "langchain-ai/langchainjs",
+     4157,
+     97
+    ]
+   ]
+  },
+  {
+   "slot": "B2:dataroaring",
+   "arm": "B2",
+   "author": "dataroaring",
    "period": "Q1-2024",
    "ai": false,
    "candidates": [
     [
      "apache/doris",
-     30165,
-     653
+     29690,
+     56
     ],
     [
      "apache/doris",
-     29905,
+     29751,
+     56
+    ],
+    [
+     "apache/doris",
+     32336,
+     513
+    ],
+    [
+     "apache/doris",
+     32716,
+     716
+    ],
+    [
+     "apache/doris",
+     29430,
+     119
+    ]
+   ]
+  },
+  {
+   "slot": "B2:Coniferish",
+   "arm": "B2",
+   "author": "Coniferish",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "Unstructured-IO/unstructured",
+     2554,
+     672
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2657,
+     64
+    ],
+    [
+     "Unstructured-IO/unstructured-python-client",
+     39,
+     80
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2424,
+     54
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2369,
+     173
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2370,
+     90
+    ],
+    [
+     "Unstructured-IO/unstructured-python-client",
+     35,
+     238
+    ],
+    [
+     "Unstructured-IO/unstructured-python-client",
+     32,
+     261
+    ],
+    [
+     "Unstructured-IO/unstructured-python-client",
+     47,
+     96
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2435,
+     254
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2454,
+     226
+    ],
+    [
+     "Unstructured-IO/unstructured-python-client",
+     64,
+     646
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2392,
+     86
+    ]
+   ]
+  },
+  {
+   "slot": "B2:linzs148",
+   "arm": "B2",
+   "author": "linzs148",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "openvinotoolkit/openvino",
+     23085,
+     86
+    ]
+   ]
+  },
+  {
+   "slot": "B2:gfphoenix78",
+   "arm": "B2",
+   "author": "gfphoenix78",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "apache/cloudberry",
+     380,
+     153
+    ]
+   ]
+  },
+  {
+   "slot": "B2:sharsha315",
+   "arm": "B2",
+   "author": "sharsha315",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "microsoft/autogen",
+     2130,
+     186
+    ]
+   ]
+  },
+  {
+   "slot": "B2:Fhrozen",
+   "arm": "B2",
+   "author": "Fhrozen",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "espnet/espnet",
+     5672,
+     64
+    ]
+   ]
+  },
+  {
+   "slot": "B2:eejbyfeldt",
+   "arm": "B2",
+   "author": "eejbyfeldt",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "apache/airflow",
+     37768,
+     476
+    ]
+   ]
+  },
+  {
+   "slot": "B2:Izukimat",
+   "arm": "B2",
+   "author": "Izukimat",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "run-llama/llama_index",
+     12415,
+     81
+    ]
+   ]
+  },
+  {
+   "slot": "B2:sjoshi6",
+   "arm": "B2",
+   "author": "sjoshi6",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "ray-project/ray",
+     43434,
+     87
+    ],
+    [
+     "ray-project/ray",
+     43150,
      77
     ]
    ]
   },
   {
-   "slot": "B2:mohanajuhi166",
+   "slot": "B2:elezar",
    "arm": "B2",
-   "author": "mohanajuhi166",
+   "author": "elezar",
    "period": "Q1-2024",
    "ai": false,
    "candidates": [
     [
-     "microsoft/genaiops-promptflow-template",
-     106,
-     78
-    ]
-   ]
-  },
-  {
-   "slot": "B2:fbertsch",
-   "arm": "B2",
-   "author": "fbertsch",
-   "period": "Q1-2024",
-   "ai": false,
-   "candidates": [
+     "NVIDIA/k8s-device-plugin",
+     561,
+     63
+    ],
     [
-     "mozilla/bigquery-etl",
-     4875,
+     "NVIDIA/k8s-device-plugin",
+     612,
+     273
+    ],
+    [
+     "NVIDIA/k8s-device-plugin",
+     564,
      62
     ],
     [
-     "mozilla/looker-spoke-default",
-     738,
-     198
+     "NVIDIA/k8s-device-plugin",
+     595,
+     218
     ],
     [
-     "mozilla/bigquery-etl",
-     4887,
-     126
+     "NVIDIA/k8s-device-plugin",
+     492,
+     59
     ],
     [
-     "mozilla/bigquery-etl",
-     4868,
-     322
+     "NVIDIA/k8s-device-plugin",
+     550,
+     53
     ],
     [
-     "mozilla/bigquery-etl",
-     4860,
-     92
+     "NVIDIA/k8s-device-plugin",
+     516,
+     138
+    ],
+    [
+     "NVIDIA/k8s-device-plugin",
+     487,
+     63
+    ],
+    [
+     "NVIDIA/k8s-device-plugin",
+     503,
+     637
+    ],
+    [
+     "NVIDIA/k8s-device-plugin",
+     496,
+     79
+    ],
+    [
+     "NVIDIA/k8s-device-plugin",
+     537,
+     151
+    ],
+    [
+     "NVIDIA/k8s-device-plugin",
+     575,
+     88
+    ],
+    [
+     "NVIDIA/k8s-device-plugin",
+     593,
+     224
+    ],
+    [
+     "NVIDIA/k8s-device-plugin",
+     567,
+     783
+    ],
+    [
+     "NVIDIA/k8s-device-plugin",
+     495,
+     621
+    ],
+    [
+     "NVIDIA/k8s-device-plugin",
+     507,
+     104
     ]
    ]
   },
   {
-   "slot": "B2:justinchuby",
+   "slot": "B2:KevinHuSh",
    "arm": "B2",
-   "author": "justinchuby",
+   "author": "KevinHuSh",
    "period": "Q1-2024",
    "ai": false,
    "candidates": [
     [
-     "microsoft/onnxruntime",
-     19878,
-     1466
+     "infiniflow/ragflow",
+     131,
+     201
     ],
     [
-     "microsoft/onnxruntime",
-     19471,
-     316
-    ]
-   ]
-  },
-  {
-   "slot": "B2:eshoguli",
-   "arm": "B2",
-   "author": "eshoguli",
-   "period": "Q1-2024",
-   "ai": false,
-   "candidates": [
-    [
-     "openvinotoolkit/openvino",
-     23692,
-     69
+     "infiniflow/ragflow",
+     87,
+     63
     ],
     [
-     "openvinotoolkit/openvino",
-     23286,
-     76
+     "infiniflow/ragflow",
+     46,
+     624
     ],
     [
-     "openvinotoolkit/openvino",
-     22522,
-     150
-    ],
-    [
-     "openvinotoolkit/openvino",
-     23202,
-     137
-    ],
-    [
-     "openvinotoolkit/openvino",
-     23115,
+     "infiniflow/ragflow",
+     41,
      73
     ],
     [
-     "openvinotoolkit/openvino",
-     22937,
-     181
+     "infiniflow/ragflow",
+     126,
+     124
     ],
     [
-     "openvinotoolkit/openvino",
-     22869,
-     196
+     "infiniflow/ragflow",
+     137,
+     167
     ],
     [
-     "openvinotoolkit/openvino",
-     23387,
-     214
+     "infiniflow/ragflow",
+     49,
+     604
     ],
     [
-     "openvinotoolkit/openvino",
-     23086,
-     164
+     "infiniflow/ragflow",
+     112,
+     51
     ],
     [
-     "openvinotoolkit/openvino",
-     23065,
-     148
+     "infiniflow/ragflow",
+     53,
+     715
     ],
     [
-     "openvinotoolkit/openvino",
-     22687,
-     711
+     "infiniflow/ragflow",
+     82,
+     173
     ],
     [
-     "openvinotoolkit/openvino",
-     23266,
+     "infiniflow/ragflow",
+     91,
+     163
+    ],
+    [
+     "infiniflow/ragflow",
+     119,
+     221
+    ],
+    [
+     "infiniflow/ragflow",
+     84,
+     123
+    ],
+    [
+     "infiniflow/ragflow",
+     40,
+     285
+    ],
+    [
+     "infiniflow/ragflow",
+     166,
+     66
+    ],
+    [
+     "infiniflow/ragflow",
+     109,
+     86
+    ]
+   ]
+  },
+  {
+   "slot": "B2:etiennedi",
+   "arm": "B2",
+   "author": "etiennedi",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "weaviate/weaviate",
+     4398,
+     141
+    ],
+    [
+     "weaviate/weaviate",
+     4444,
+     62
+    ],
+    [
+     "weaviate/weaviate",
+     4443,
+     63
+    ],
+    [
+     "weaviate/weaviate-chaos-engineering",
+     172,
+     384
+    ],
+    [
+     "weaviate/weaviate",
+     4203,
+     165
+    ],
+    [
+     "weaviate/weaviate",
+     4120,
+     106
+    ],
+    [
+     "weaviate/weaviate",
+     4313,
+     51
+    ]
+   ]
+  },
+  {
+   "slot": "B2:rodrigo-pedro",
+   "arm": "B2",
+   "author": "rodrigo-pedro",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "run-llama/llama_index",
+     10015,
+     67
+    ]
+   ]
+  },
+  {
+   "slot": "B2:sgrebnov",
+   "arm": "B2",
+   "author": "sgrebnov",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "spiceai/spiceai",
+     891,
+     127
+    ],
+    [
+     "spiceai/spiceai",
+     706,
+     185
+    ],
+    [
+     "spiceai/spiceai",
+     726,
+     87
+    ],
+    [
+     "spiceai/spiceai",
+     992,
+     82
+    ],
+    [
+     "spiceai/spiceai",
+     713,
+     50
+    ],
+    [
+     "spiceai/spiceai",
+     917,
+     224
+    ],
+    [
+     "spiceai/spiceai",
+     679,
+     334
+    ],
+    [
+     "spiceai/spiceai",
+     707,
+     504
+    ],
+    [
+     "spiceai/spiceai",
+     965,
+     63
+    ],
+    [
+     "spiceai/spiceai",
+     668,
+     275
+    ],
+    [
+     "spiceai/spiceai",
+     905,
+     114
+    ],
+    [
+     "spiceai/spiceai",
+     885,
+     142
+    ],
+    [
+     "spiceai/spiceai",
+     859,
+     68
+    ],
+    [
+     "spiceai/spiceai",
+     689,
+     464
+    ],
+    [
+     "spiceai/spiceai",
+     995,
+     50
+    ],
+    [
+     "spiceai/docs",
+     155,
+     66
+    ]
+   ]
+  },
+  {
+   "slot": "B2:vjern",
+   "arm": "B2",
+   "author": "vjern",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "Giskard-AI/giskard-oss",
+     1773,
+     180
+    ]
+   ]
+  },
+  {
+   "slot": "B2:dsinghvi",
+   "arm": "B2",
+   "author": "dsinghvi",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "elevenlabs/elevenlabs-python",
+     174,
+     1372
+    ],
+    [
+     "elevenlabs/elevenlabs-js",
+     2,
      81
     ],
     [
-     "openvinotoolkit/openvino",
-     23285,
-     71
+     "elevenlabs/elevenlabs-python",
+     164,
+     512
     ],
     [
-     "openvinotoolkit/openvino",
-     23141,
+     "elevenlabs/elevenlabs-js",
+     3,
+     105
+    ],
+    [
+     "elevenlabs/elevenlabs-js",
+     1,
+     221
+    ]
+   ]
+  },
+  {
+   "slot": "B2:selimchergui",
+   "arm": "B2",
+   "author": "selimchergui",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "apache/airflow",
+     37055,
+     86
+    ]
+   ]
+  },
+  {
+   "slot": "B2:chilo-ms",
+   "arm": "B2",
+   "author": "chilo-ms",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "microsoft/onnxruntime",
+     19575,
+     469
+    ],
+    [
+     "microsoft/onnxruntime",
+     19301,
+     54
+    ],
+    [
+     "microsoft/onnxruntime",
+     19154,
+     786
+    ],
+    [
+     "microsoft/onnxruntime",
+     19248,
+     110
+    ]
+   ]
+  },
+  {
+   "slot": "B2:scanny",
+   "arm": "B2",
+   "author": "scanny",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "Unstructured-IO/unstructured-api",
+     349,
+     89
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2545,
+     388
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2524,
+     378
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2649,
+     148
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2556,
+     549
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2668,
+     574
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2645,
+     146
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2534,
+     589
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2380,
+     888
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2345,
+     184
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2656,
+     330
+    ],
+    [
+     "Unstructured-IO/unstructured-api",
+     351,
+     518
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2367,
+     451
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2550,
+     286
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2564,
+     154
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2647,
+     284
+    ]
+   ]
+  },
+  {
+   "slot": "B2:sean0042",
+   "arm": "B2",
+   "author": "sean0042",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "EleutherAI/lm-evaluation-harness",
+     1530,
+     128
+    ]
+   ]
+  },
+  {
+   "slot": "B2:drahnr",
+   "arm": "B2",
+   "author": "drahnr",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "mozilla/sccache",
+     2085,
+     378
+    ]
+   ]
+  },
+  {
+   "slot": "B2:lh0x00",
+   "arm": "B2",
+   "author": "lh0x00",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "huggingface/transformers",
+     28746,
+     56
+    ]
+   ]
+  },
+  {
+   "slot": "B2:ChuyueSun",
+   "arm": "B2",
+   "author": "ChuyueSun",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "sgl-project/sglang",
+     148,
+     89
+    ]
+   ]
+  },
+  {
+   "slot": "B2:awalker4",
+   "arm": "B2",
+   "author": "awalker4",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "Unstructured-IO/unstructured-api",
+     369,
+     280
+    ],
+    [
+     "Unstructured-IO/unstructured",
+     2342,
+     52
+    ]
+   ]
+  },
+  {
+   "slot": "B2:parkererickson-tg",
+   "arm": "B2",
+   "author": "parkererickson-tg",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "langchain-ai/langchain",
+     16280,
      131
+    ]
+   ]
+  },
+  {
+   "slot": "B2:peterj",
+   "arm": "B2",
+   "author": "peterj",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "mem0ai/mem0",
+     1172,
+     66
+    ]
+   ]
+  },
+  {
+   "slot": "B2:loliverhennigh",
+   "arm": "B2",
+   "author": "loliverhennigh",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/physicsnemo",
+     296,
+     81
     ],
     [
-     "openvinotoolkit/openvino",
-     23450,
-     73
+     "NVIDIA/physicsnemo",
+     378,
+     962
+    ],
+    [
+     "NVIDIA/physicsnemo",
+     385,
+     395
+    ],
+    [
+     "NVIDIA/physicsnemo",
+     291,
+     1637
+    ]
+   ]
+  },
+  {
+   "slot": "B2:echarlaix",
+   "arm": "B2",
+   "author": "echarlaix",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "huggingface/optimum-intel",
+     534,
+     76
+    ],
+    [
+     "huggingface/blog",
+     1925,
+     80
+    ],
+    [
+     "huggingface/optimum-intel",
+     565,
+     589
+    ],
+    [
+     "huggingface/optimum-intel",
+     624,
+     64
+    ],
+    [
+     "huggingface/optimum-intel",
+     640,
+     99
+    ],
+    [
+     "huggingface/optimum-intel",
+     516,
+     1159
+    ],
+    [
+     "huggingface/optimum-intel",
+     590,
+     156
+    ],
+    [
+     "huggingface/optimum-intel",
+     570,
+     143
+    ],
+    [
+     "huggingface/optimum-intel",
+     601,
+     152
+    ],
+    [
+     "huggingface/optimum-intel",
+     560,
+     470
+    ],
+    [
+     "huggingface/optimum-intel",
+     536,
+     259
+    ],
+    [
+     "huggingface/optimum-intel",
+     557,
+     879
+    ],
+    [
+     "huggingface/optimum-intel",
+     563,
+     120
+    ],
+    [
+     "huggingface/optimum-intel",
+     615,
+     143
+    ],
+    [
+     "huggingface/blog",
+     1753,
+     157
+    ],
+    [
+     "huggingface/blog",
+     1778,
+     374
+    ]
+   ]
+  },
+  {
+   "slot": "B2:HuiyingLi",
+   "arm": "B2",
+   "author": "HuiyingLi",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA-NeMo/Speech",
+     8358,
+     134
+    ],
+    [
+     "NVIDIA-NeMo/Speech",
+     8298,
+     323
+    ],
+    [
+     "NVIDIA-NeMo/Speech",
+     8261,
+     58
+    ]
+   ]
+  },
+  {
+   "slot": "B2:wejoncy",
+   "arm": "B2",
+   "author": "wejoncy",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "microsoft/onnxruntime",
+     19106,
+     1176
+    ]
+   ]
+  },
+  {
+   "slot": "B2:aliuTT",
+   "arm": "B2",
+   "author": "aliuTT",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "tenstorrent/tt-metal",
+     4932,
+     118
+    ],
+    [
+     "tenstorrent/tt-metal",
+     5118,
+     54
+    ],
+    [
+     "tenstorrent/tt-metal",
+     6523,
+     117
+    ],
+    [
+     "tenstorrent/tt-metal",
+     5347,
+     57
+    ],
+    [
+     "tenstorrent/tt-metal",
+     6231,
+     51
+    ],
+    [
+     "tenstorrent/tt-metal",
+     6172,
+     248
+    ],
+    [
+     "tenstorrent/tt-metal",
+     4725,
+     1001
+    ],
+    [
+     "tenstorrent/tt-metal",
+     5470,
+     354
+    ],
+    [
+     "tenstorrent/tt-metal",
+     4845,
+     1945
+    ]
+   ]
+  },
+  {
+   "slot": "B2:VincyZhang",
+   "arm": "B2",
+   "author": "VincyZhang",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "intel/intel-extension-for-transformers",
+     1286,
+     62
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1277,
+     54
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1305,
+     50
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1263,
+     98
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1280,
+     150
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1122,
+     129
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1336,
+     287
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1273,
+     52
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1242,
+     451
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1346,
+     56
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1396,
+     79
+    ]
+   ]
+  },
+  {
+   "slot": "B2:qiyuangong",
+   "arm": "B2",
+   "author": "qiyuangong",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "intel/ipex-llm",
+     10006,
+     82
+    ]
+   ]
+  },
+  {
+   "slot": "B2:GindaChen",
+   "arm": "B2",
+   "author": "GindaChen",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "hao-ai-lab/hao-ai-lab.github.io",
+     1,
+     221
+    ],
+    [
+     "vllm-project/vllm",
+     2522,
+     53
+    ]
+   ]
+  },
+  {
+   "slot": "B2:Sevenannn",
+   "arm": "B2",
+   "author": "Sevenannn",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "spiceai/spiceai",
+     793,
+     228
+    ],
+    [
+     "spiceai/spiceai",
+     763,
+     108
+    ],
+    [
+     "spiceai/spiceai",
+     720,
+     118
+    ],
+    [
+     "spiceai/spiceai",
+     755,
+     210
+    ]
+   ]
+  },
+  {
+   "slot": "B2:changwangss",
+   "arm": "B2",
+   "author": "changwangss",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "intel/intel-extension-for-transformers",
+     1282,
+     450
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1406,
+     60
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1114,
+     58
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1393,
+     53
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1258,
+     420
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1163,
+     55
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1164,
+     188
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1107,
+     756
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1400,
+     79
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1410,
+     153
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1391,
+     124
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1330,
+     74
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1227,
+     134
+    ],
+    [
+     "intel/intel-extension-for-transformers",
+     1312,
+     143
+    ]
+   ]
+  },
+  {
+   "slot": "B2:justHungryMan",
+   "arm": "B2",
+   "author": "justHungryMan",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "huggingface/datatrove",
+     134,
+     60
+    ]
+   ]
+  },
+  {
+   "slot": "B2:set5think",
+   "arm": "B2",
+   "author": "set5think",
+   "period": "Q1-2024",
+   "ai": false,
+   "candidates": [
+    [
+     "apache/airflow",
+     38221,
+     53
     ]
    ]
   }

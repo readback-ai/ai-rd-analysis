@@ -1,6 +1,6 @@
 {
  "design": "pc-v2",
- "fingerprint": "a503115d3bcedcb6",
+ "fingerprint": "841c620772f25723",
  "params": {
   "design": "pc-v2",
   "quarters": [
@@ -9,6 +9,10 @@
    "Q2-2026"
   ],
   "n_per_agent_quarter": 5,
+  "agent_targets": {
+   "copilot-swe-agent": 10,
+   "devin-ai-integration": 10
+  },
   "per_group": 3,
   "k_cand": 8,
   "extra_cand": 4,
@@ -125,6 +129,126 @@
      "intel/ScalableVectorSearch",
      196,
      468
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:vllm-project/semantic-router",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "vllm-project/semantic-router",
+     326,
+     698
+    ],
+    [
+     "vllm-project/semantic-router",
+     493,
+     604
+    ],
+    [
+     "vllm-project/semantic-router",
+     508,
+     623
+    ],
+    [
+     "vllm-project/semantic-router",
+     510,
+     483
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:PaddlePaddle/FastDeploy",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "PaddlePaddle/FastDeploy",
+     5769,
+     140
+    ],
+    [
+     "PaddlePaddle/FastDeploy",
+     5709,
+     74
+    ],
+    [
+     "PaddlePaddle/FastDeploy",
+     5713,
+     433
+    ],
+    [
+     "PaddlePaddle/FastDeploy",
+     4510,
+     877
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:microsoft/semantic-kernel",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/semantic-kernel",
+     13397,
+     457
+    ],
+    [
+     "microsoft/semantic-kernel",
+     13404,
+     1464
+    ],
+    [
+     "microsoft/semantic-kernel",
+     13396,
+     130
+    ],
+    [
+     "microsoft/semantic-kernel",
+     13218,
+     171
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:microsoft/agent-lightning",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/agent-lightning",
+     371,
+     210
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:AIDotNet/OpenDeepWiki",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "AIDotNet/OpenDeepWiki",
+     278,
+     56
+    ],
+    [
+     "AIDotNet/OpenDeepWiki",
+     294,
+     158
     ]
    ]
   },
@@ -284,6 +408,35 @@
    ]
   },
   {
+   "slot": "PC:Q4-2025:devin-ai-integration:PrefectHQ/prefect:2",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     19733,
+     324
+    ],
+    [
+     "PrefectHQ/prefect",
+     19737,
+     550
+    ],
+    [
+     "PrefectHQ/prefect",
+     19975,
+     117
+    ],
+    [
+     "PrefectHQ/prefect",
+     19675,
+     174
+    ]
+   ]
+  },
+  {
    "slot": "PC:Q1-2026:copilot-swe-agent:langchain-ai/langchain-litellm",
    "arm": "PC",
    "author": "copilot-swe-agent",
@@ -355,6 +508,146 @@
      "microsoft/vscode-jupyter",
      17274,
      103
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:copilot-swe-agent:mlflow/mlflow",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "mlflow/mlflow",
+     21088,
+     58
+    ],
+    [
+     "mlflow/mlflow",
+     19899,
+     348
+    ],
+    [
+     "mlflow/mlflow",
+     21414,
+     246
+    ],
+    [
+     "mlflow/mlflow",
+     21196,
+     1108
+    ],
+    [
+     "mlflow/mlflow",
+     20967,
+     171
+    ],
+    [
+     "mlflow/mlflow",
+     21130,
+     61
+    ],
+    [
+     "mlflow/mlflow",
+     20735,
+     58
+    ],
+    [
+     "mlflow/mlflow",
+     20640,
+     70
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:copilot-swe-agent:microsoft/PromptKit",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/PromptKit",
+     14,
+     578
+    ],
+    [
+     "microsoft/PromptKit",
+     157,
+     783
+    ],
+    [
+     "microsoft/PromptKit",
+     105,
+     212
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:copilot-swe-agent:tenstorrent/tt-umd",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "tenstorrent/tt-umd",
+     2043,
+     51
+    ],
+    [
+     "tenstorrent/tt-umd",
+     2015,
+     665
+    ],
+    [
+     "tenstorrent/tt-umd",
+     2080,
+     1141
+    ],
+    [
+     "tenstorrent/tt-umd",
+     2011,
+     875
+    ],
+    [
+     "tenstorrent/tt-umd",
+     2016,
+     290
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:copilot-swe-agent:pytorch/ignite",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "pytorch/ignite",
+     3500,
+     142
+    ],
+    [
+     "pytorch/ignite",
+     3689,
+     78
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:copilot-swe-agent:NVIDIA/numba-cuda",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA/numba-cuda",
+     705,
+     90
     ]
    ]
   },
@@ -721,6 +1014,88 @@
    ]
   },
   {
+   "slot": "PC:Q2-2026:copilot-swe-agent:microsoft/FLAML",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/FLAML",
+     1536,
+     82
+    ],
+    [
+     "microsoft/FLAML",
+     1527,
+     74
+    ],
+    [
+     "microsoft/FLAML",
+     1538,
+     329
+    ],
+    [
+     "microsoft/FLAML",
+     1537,
+     60
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:copilot-swe-agent:datawhalechina/hello-claw",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "datawhalechina/hello-claw",
+     60,
+     50
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:copilot-swe-agent:sgl-project/sgl-kernel-xpu",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "sgl-project/sgl-kernel-xpu",
+     220,
+     103
+    ],
+    [
+     "sgl-project/sgl-kernel-xpu",
+     155,
+     66
+    ],
+    [
+     "sgl-project/sgl-kernel-xpu",
+     156,
+     250
+    ],
+    [
+     "sgl-project/sgl-kernel-xpu",
+     171,
+     244
+    ],
+    [
+     "sgl-project/sgl-kernel-xpu",
+     158,
+     800
+    ],
+    [
+     "sgl-project/sgl-kernel-xpu",
+     201,
+     1087
+    ]
+   ]
+  },
+  {
    "slot": "PC:Q2-2026:devin-ai-integration:PrefectHQ/prefect",
    "arm": "PC",
    "author": "devin-ai-integration",
@@ -770,6 +1145,40 @@
    ]
   },
   {
+   "slot": "PC:Q2-2026:copilot-swe-agent:dotnet/maui-labs",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "dotnet/maui-labs",
+     193,
+     200
+    ],
+    [
+     "dotnet/maui-labs",
+     71,
+     309
+    ],
+    [
+     "dotnet/maui-labs",
+     308,
+     1794
+    ],
+    [
+     "dotnet/maui-labs",
+     139,
+     419
+    ],
+    [
+     "dotnet/maui-labs",
+     63,
+     62
+    ]
+   ]
+  },
+  {
    "slot": "PC:Q2-2026:devin-ai-integration:crewAIInc/crewAI",
    "arm": "PC",
    "author": "devin-ai-integration",
@@ -780,6 +1189,25 @@
      "crewAIInc/crewAI",
      6003,
      145
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:copilot-swe-agent:microsoft/finnts",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/finnts",
+     243,
+     1551
+    ],
+    [
+     "microsoft/finnts",
+     247,
+     268
     ]
    ]
   },
@@ -976,6 +1404,64 @@
      "togethercomputer/detect_agent",
      9,
      391
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:devin-ai-integration:PrefectHQ/prefect:1",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     21803,
+     280
+    ],
+    [
+     "PrefectHQ/prefect",
+     21509,
+     118
+    ],
+    [
+     "PrefectHQ/prefect",
+     22076,
+     117
+    ],
+    [
+     "PrefectHQ/prefect",
+     21418,
+     69
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:devin-ai-integration:PrefectHQ/prefect:2",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     22100,
+     309
+    ],
+    [
+     "PrefectHQ/prefect",
+     22122,
+     185
+    ],
+    [
+     "PrefectHQ/prefect",
+     21669,
+     62
+    ],
+    [
+     "PrefectHQ/prefect",
+     21411,
+     122
     ]
    ]
   }

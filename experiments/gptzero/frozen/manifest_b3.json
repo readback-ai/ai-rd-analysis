@@ -1,9 +1,9 @@
 {
  "design": "v1-50k-b3",
- "fingerprint": "dc128f151b1e7cb3",
+ "fingerprint": "eb0bc0a4aa379901",
  "params": {
   "design": "v1-50k-b3",
-  "n_docs": 26,
+  "n_docs": 60,
   "k_cand": 8,
   "spare": 15,
   "min_repo_prs": 20,
@@ -719,6 +719,857 @@
      "Giskard-AI/giskard-oss",
      242,
      576
+    ]
+   ]
+  },
+  {
+   "slot": "B3:Lightning-AI/pytorch-lightning",
+   "arm": "B3",
+   "author": "awaelchli",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "Lightning-AI/pytorch-lightning",
+     14901,
+     532
+    ],
+    [
+     "Lightning-AI/pytorch-lightning",
+     14912,
+     51
+    ],
+    [
+     "Lightning-AI/pytorch-lightning",
+     14952,
+     501
+    ],
+    [
+     "Lightning-AI/pytorch-lightning",
+     14966,
+     297
+    ],
+    [
+     "Lightning-AI/pytorch-lightning",
+     14929,
+     112
+    ],
+    [
+     "Lightning-AI/pytorch-lightning",
+     14921,
+     229
+    ],
+    [
+     "Lightning-AI/pytorch-lightning",
+     14960,
+     249
+    ]
+   ]
+  },
+  {
+   "slot": "B3:IBM/speech-to-text-code-pattern",
+   "arm": "B3",
+   "author": "jmeis",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "IBM/speech-to-text-code-pattern",
+     321,
+     76
+    ],
+    [
+     "IBM/speech-to-text-code-pattern",
+     315,
+     356
+    ],
+    [
+     "IBM/speech-to-text-code-pattern",
+     349,
+     249
+    ]
+   ]
+  },
+  {
+   "slot": "B3:scikit-learn/scikit-learn",
+   "arm": "B3",
+   "author": "betatim",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "scikit-learn/scikit-learn",
+     24539,
+     96
+    ]
+   ]
+  },
+  {
+   "slot": "B3:bentoml/BentoML",
+   "arm": "B3",
+   "author": "bojiang",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "bentoml/BentoML",
+     2996,
+     93
+    ],
+    [
+     "bentoml/BentoML",
+     3018,
+     399
+    ],
+    [
+     "bentoml/BentoML",
+     3054,
+     405
+    ]
+   ]
+  },
+  {
+   "slot": "B3:mozilla/fx-private-relay",
+   "arm": "B3",
+   "author": "Vinnl",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "mozilla/fx-private-relay",
+     2537,
+     191
+    ],
+    [
+     "mozilla/fx-private-relay",
+     2556,
+     191
+    ],
+    [
+     "mozilla/fx-private-relay",
+     2531,
+     267
+    ],
+    [
+     "mozilla/fx-private-relay",
+     2532,
+     88
+    ]
+   ]
+  },
+  {
+   "slot": "B3:openvinotoolkit/openvino",
+   "arm": "B3",
+   "author": "msmykx-intel",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "openvinotoolkit/openvino",
+     13259,
+     73
+    ],
+    [
+     "openvinotoolkit/openvino",
+     13261,
+     73
+    ],
+    [
+     "openvinotoolkit/openvino",
+     13297,
+     89
+    ],
+    [
+     "openvinotoolkit/openvino",
+     13298,
+     91
+    ],
+    [
+     "openvinotoolkit/openvino",
+     13283,
+     70
+    ]
+   ]
+  },
+  {
+   "slot": "B3:huggingface/blog",
+   "arm": "B3",
+   "author": "meg-huggingface",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "huggingface/blog",
+     533,
+     72
+    ]
+   ]
+  },
+  {
+   "slot": "B3:apache/tvm",
+   "arm": "B3",
+   "author": "zxybazh",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "apache/tvm",
+     12936,
+     393
+    ],
+    [
+     "apache/tvm",
+     12948,
+     343
+    ]
+   ]
+  },
+  {
+   "slot": "B3:mozilla/experimenter",
+   "arm": "B3",
+   "author": "jaredlockhart",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "mozilla/experimenter",
+     7710,
+     216
+    ],
+    [
+     "mozilla/experimenter",
+     7681,
+     463
+    ],
+    [
+     "mozilla/experimenter",
+     7748,
+     1945
+    ],
+    [
+     "mozilla/experimenter",
+     7724,
+     1933
+    ]
+   ]
+  },
+  {
+   "slot": "B3:NVIDIA/cudf-spark-jni",
+   "arm": "B3",
+   "author": "hyperbolic2346",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/cudf-spark-jni",
+     562,
+     966
+    ]
+   ]
+  },
+  {
+   "slot": "B3:google/XNNPACK",
+   "arm": "B3",
+   "author": "Maratyszcza",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "google/XNNPACK",
+     3543,
+     716
+    ]
+   ]
+  },
+  {
+   "slot": "B3:GoogleCloudPlatform/document-ai-samples",
+   "arm": "B3",
+   "author": "PicardParis",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "GoogleCloudPlatform/document-ai-samples",
+     129,
+     657
+    ],
+    [
+     "GoogleCloudPlatform/document-ai-samples",
+     136,
+     220
+    ]
+   ]
+  },
+  {
+   "slot": "B3:huggingface/transformers",
+   "arm": "B3",
+   "author": "tomsercu",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "huggingface/transformers",
+     19221,
+     61
+    ]
+   ]
+  },
+  {
+   "slot": "B3:PrefectHQ/prefect",
+   "arm": "B3",
+   "author": "anticorrelator",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     6986,
+     146
+    ],
+    [
+     "PrefectHQ/prefect",
+     7047,
+     410
+    ],
+    [
+     "PrefectHQ/prefect",
+     7007,
+     131
+    ]
+   ]
+  },
+  {
+   "slot": "B3:apache/incubator-kie-optaplanner",
+   "arm": "B3",
+   "author": "radtriste",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "apache/incubator-kie-optaplanner",
+     2176,
+     95
+    ],
+    [
+     "apache/incubator-kie-optaplanner",
+     2217,
+     362
+    ]
+   ]
+  },
+  {
+   "slot": "B3:milvus-io/milvus",
+   "arm": "B3",
+   "author": "xige-16",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "milvus-io/milvus",
+     19517,
+     1284
+    ]
+   ]
+  },
+  {
+   "slot": "B3:alibaba/EasyCV",
+   "arm": "B3",
+   "author": "zzoneee",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "alibaba/EasyCV",
+     196,
+     79
+    ],
+    [
+     "alibaba/EasyCV",
+     171,
+     1207
+    ]
+   ]
+  },
+  {
+   "slot": "B3:pytorch/ignite",
+   "arm": "B3",
+   "author": "JakubDz2208",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "pytorch/ignite",
+     2704,
+     173
+    ]
+   ]
+  },
+  {
+   "slot": "B3:salesforce/lwc",
+   "arm": "B3",
+   "author": "abdulsattar",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "salesforce/lwc",
+     3068,
+     66
+    ],
+    [
+     "salesforce/lwc",
+     3028,
+     156
+    ],
+    [
+     "salesforce/lwc",
+     3050,
+     395
+    ],
+    [
+     "salesforce/lwc",
+     3066,
+     110
+    ]
+   ]
+  },
+  {
+   "slot": "B3:vespa-engine/documentation",
+   "arm": "B3",
+   "author": "kkraune",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "vespa-engine/documentation",
+     2248,
+     243
+    ],
+    [
+     "vespa-engine/documentation",
+     2257,
+     90
+    ],
+    [
+     "vespa-engine/documentation",
+     2252,
+     427
+    ],
+    [
+     "vespa-engine/documentation",
+     2270,
+     50
+    ],
+    [
+     "vespa-engine/documentation",
+     2260,
+     156
+    ],
+    [
+     "vespa-engine/documentation",
+     2295,
+     177
+    ],
+    [
+     "vespa-engine/documentation",
+     2256,
+     58
+    ],
+    [
+     "vespa-engine/documentation",
+     2247,
+     97
+    ]
+   ]
+  },
+  {
+   "slot": "B3:truera/trulens",
+   "arm": "B3",
+   "author": "coreyhu",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "truera/trulens",
+     83,
+     55
+    ]
+   ]
+  },
+  {
+   "slot": "B3:huggingface/tokenizers",
+   "arm": "B3",
+   "author": "Narsil",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "huggingface/tokenizers",
+     1047,
+     230
+    ],
+    [
+     "huggingface/tokenizers",
+     1069,
+     112
+    ],
+    [
+     "huggingface/tokenizers",
+     1051,
+     835
+    ],
+    [
+     "huggingface/tokenizers",
+     1052,
+     351
+    ],
+    [
+     "huggingface/tokenizers",
+     1064,
+     63
+    ],
+    [
+     "huggingface/tokenizers",
+     1054,
+     230
+    ],
+    [
+     "huggingface/tokenizers",
+     1048,
+     96
+    ],
+    [
+     "huggingface/tokenizers",
+     1056,
+     431
+    ]
+   ]
+  },
+  {
+   "slot": "B3:stanford-crfm/helm",
+   "arm": "B3",
+   "author": "rishibommasani",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "stanford-crfm/helm",
+     891,
+     686
+    ],
+    [
+     "stanford-crfm/helm",
+     909,
+     88
+    ]
+   ]
+  },
+  {
+   "slot": "B3:autogluon/autogluon",
+   "arm": "B3",
+   "author": "Innixma",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "autogluon/autogluon",
+     2145,
+     63
+    ],
+    [
+     "autogluon/autogluon",
+     2124,
+     175
+    ]
+   ]
+  },
+  {
+   "slot": "B3:intel/ipex-llm",
+   "arm": "B3",
+   "author": "Litchilitchy",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "intel/ipex-llm",
+     5986,
+     1728
+    ],
+    [
+     "intel/ipex-llm",
+     6017,
+     55
+    ]
+   ]
+  },
+  {
+   "slot": "B3:pycaret/pycaret",
+   "arm": "B3",
+   "author": "ngupta23",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "pycaret/pycaret",
+     2820,
+     452
+    ],
+    [
+     "pycaret/pycaret",
+     2792,
+     59
+    ],
+    [
+     "pycaret/pycaret",
+     2898,
+     139
+    ]
+   ]
+  },
+  {
+   "slot": "B3:huggingface/datasets",
+   "arm": "B3",
+   "author": "JoelNiklaus",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "huggingface/datasets",
+     5042,
+     148
+    ],
+    [
+     "huggingface/datasets",
+     5019,
+     124
+    ]
+   ]
+  },
+  {
+   "slot": "B3:PaddlePaddle/community",
+   "arm": "B3",
+   "author": "zhangyuqin1998",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "PaddlePaddle/community",
+     243,
+     213
+    ]
+   ]
+  },
+  {
+   "slot": "B3:NVIDIA/cudf-spark",
+   "arm": "B3",
+   "author": "nvauto",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/cudf-spark",
+     6618,
+     55
+    ],
+    [
+     "NVIDIA/cudf-spark",
+     6653,
+     945
+    ],
+    [
+     "NVIDIA/cudf-spark",
+     6633,
+     109
+    ],
+    [
+     "NVIDIA/cudf-spark",
+     6669,
+     1257
+    ],
+    [
+     "NVIDIA/cudf-spark",
+     6655,
+     182
+    ]
+   ]
+  },
+  {
+   "slot": "B3:qdrant/qdrant",
+   "arm": "B3",
+   "author": "generall",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "qdrant/qdrant",
+     1030,
+     700
+    ],
+    [
+     "qdrant/qdrant",
+     1026,
+     95
+    ],
+    [
+     "qdrant/qdrant",
+     1050,
+     81
+    ],
+    [
+     "qdrant/qdrant",
+     1053,
+     686
+    ],
+    [
+     "qdrant/qdrant",
+     1062,
+     74
+    ],
+    [
+     "qdrant/qdrant",
+     1080,
+     183
+    ]
+   ]
+  },
+  {
+   "slot": "B3:GoogleCloudPlatform/vertex-ai-samples",
+   "arm": "B3",
+   "author": "andrewferlitsch",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "GoogleCloudPlatform/vertex-ai-samples",
+     1018,
+     90
+    ],
+    [
+     "GoogleCloudPlatform/vertex-ai-samples",
+     1004,
+     59
+    ],
+    [
+     "GoogleCloudPlatform/vertex-ai-samples",
+     1016,
+     80
+    ],
+    [
+     "GoogleCloudPlatform/vertex-ai-samples",
+     1045,
+     77
+    ]
+   ]
+  },
+  {
+   "slot": "B3:ray-project/kuberay",
+   "arm": "B3",
+   "author": "kevin85421",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "ray-project/kuberay",
+     554,
+     82
+    ],
+    [
+     "ray-project/kuberay",
+     546,
+     52
+    ],
+    [
+     "ray-project/kuberay",
+     605,
+     409
+    ],
+    [
+     "ray-project/kuberay",
+     564,
+     55
+    ],
+    [
+     "ray-project/kuberay",
+     577,
+     112
+    ],
+    [
+     "ray-project/kuberay",
+     572,
+     54
+    ],
+    [
+     "ray-project/kuberay",
+     589,
+     117
+    ]
+   ]
+  },
+  {
+   "slot": "B3:PaddlePaddle/docs",
+   "arm": "B3",
+   "author": "moguguo",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "PaddlePaddle/docs",
+     5322,
+     632
+    ],
+    [
+     "PaddlePaddle/docs",
+     5324,
+     332
+    ]
+   ]
+  },
+  {
+   "slot": "B3:mozilla/treeherder",
+   "arm": "B3",
+   "author": "jmaher",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "mozilla/treeherder",
+     7520,
+     300
+    ],
+    [
+     "mozilla/treeherder",
+     7492,
+     104
+    ],
+    [
+     "mozilla/treeherder",
+     7506,
+     793
+    ],
+    [
+     "mozilla/treeherder",
+     7526,
+     66
+    ],
+    [
+     "mozilla/treeherder",
+     7512,
+     536
+    ],
+    [
+     "mozilla/treeherder",
+     7511,
+     148
+    ],
+    [
+     "mozilla/treeherder",
+     7519,
+     237
+    ],
+    [
+     "mozilla/treeherder",
+     7501,
+     133
     ]
    ]
   }
