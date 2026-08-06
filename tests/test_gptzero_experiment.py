@@ -644,10 +644,11 @@ def test_b3_node_hygiene_mirrors_frame_rules():
     assert b3.eligible_nodes(nodes) == [("dev", 1, 100)]
 
 
-def test_b3_draw_is_deterministic_and_one_doc_per_author():
+def test_b3_draw_is_deterministic_and_one_doc_per_author(monkeypatch):
     """The repo draw is seeded PPS; slots take one document per author
     across the whole arm."""
     import b3
+    monkeypatch.setitem(b3.B3_PARAMS, "n_docs", 20)
     pool = {f"o/r{i}": 50 + i for i in range(30)}
     assert b3.draw_repos(pool) == b3.draw_repos(pool)
     pages = {r: [_b3_node(1, login="samedev"), _b3_node(2, login=f"u{r}")]
@@ -1471,6 +1472,7 @@ def test_eras_deepening_keeps_existing_slots_and_exclusions_hold(
     authors (the v1 Q2-2026 draw) never appear and reduce the quarter's
     target so the pooled quarter still totals n_authors pairs."""
     pool = _eras_pools(q2_26=("carol", "dana", "erin", "fred"))
+    monkeypatch.setitem(eras.PARAMS, "quarter_targets", {})
     monkeypatch.setitem(eras.PARAMS, "n_authors", 2)
     shallow = [s for s in eras.draw(pool) if s["period"] == "Q4-2025"]
     monkeypatch.setitem(eras.PARAMS, "n_authors", 3)
@@ -1487,6 +1489,7 @@ def test_eras_deepening_keeps_existing_slots_and_exclusions_hold(
 
 
 def test_eras_draw_skips_unmixed_authors_and_caps_depth(monkeypatch):
+    monkeypatch.setitem(eras.PARAMS, "quarter_targets", {})
     p = _eras_pools()
     p["Q4-2025"]["aionly"] = {"ai": [("o/r", 9, 100)], "nonai": []}
     assert not [s for s in eras.draw(p) if s["author"] == "aionly"]
@@ -1581,6 +1584,65 @@ def test_pc_draw_targets_per_agent_with_group_deepening():
     fp = pc.fingerprint(pools_)
     pools_["Q2-2026"][("botD", "o/y")] = [("o/y", 9, 100)]
     assert pc.fingerprint(pools_) != fp
+
+
+def test_pc_agent_targets_override_default(monkeypatch):
+    """Deep-pool agents take their agent_targets quota while default
+    agents keep n_per_agent_quarter; raising a target only APPENDS
+    slots (existing ids and candidate chunks unchanged)."""
+    from collections import Counter
+    prs = [("o/z", n, 100) for n in range(1, 30)]
+    pools_ = {"Q4-2025": {}, "Q1-2026": {},
+              "Q2-2026": {("deep", f"o/r{i}"): [(f"o/r{i}", 1, 100)]
+                          for i in range(12)}}
+    pools_["Q2-2026"][("shallow", "o/z")] = prs
+    pools_["Q2-2026"][("shallow", "o/y")] = [("o/y", n, 100)
+                                             for n in range(1, 30)]
+    monkeypatch.setitem(pc.PARAMS, "agent_targets", {"deep": 10})
+    slots = pc.draw(pools_)
+    per = Counter(s["author"] for s in slots)
+    assert per["deep"] == 10
+    assert per["shallow"] == pc.PARAMS["n_per_agent_quarter"]
+    monkeypatch.setitem(pc.PARAMS, "agent_targets", {"deep": 4})
+    fewer = [s for s in pc.draw(pools_) if s["author"] == "deep"]
+    more = [s for s in slots if s["author"] == "deep"]
+    assert more[:len(fewer)] == fewer          # deepening appends only
+
+
+def test_eras_quarter_targets_override_and_deepen(monkeypatch):
+    """quarter_targets raises one quarter's author target without
+    touching others, and the deepened draw keeps the shallower draw as
+    a prefix."""
+    pool = _eras_pools(q4=tuple(f"a{i}" for i in range(8)))
+    monkeypatch.setitem(eras.PARAMS, "n_authors", 2)
+    monkeypatch.setitem(eras.PARAMS, "quarter_targets", {})
+    shallow = [s for s in eras.draw(pool) if s["period"] == "Q4-2025"]
+    assert len({s["author"] for s in shallow}) == 2
+    monkeypatch.setitem(eras.PARAMS, "quarter_targets", {"Q4-2025": 5})
+    deep = [s for s in eras.draw(pool) if s["period"] == "Q4-2025"]
+    assert len({s["author"] for s in deep}) == 5
+    assert deep[:len(shallow)] == shallow
+    q1 = [s for s in eras.draw(pool) if s["period"] == "Q1-2026"]
+    assert len({s["author"] for s in q1}) <= 2   # others keep default
+
+
+def test_b2_deepening_keeps_membership_prefix():
+    """B2 draws by whole-pool shuffle then prefix, so raising n_q1
+    extends the arm without redrawing who is already in it (PR #28
+    review noted random.sample redrew membership on every change)."""
+    pools_ = _pools(q1=tuple(f"q{i}" for i in range(30)))
+    old_nq1 = sampling.PARAMS["n_q1"]
+    try:
+        sampling.PARAMS["n_q1"] = 5
+        small = [s["author"] for s in sampling.draw(pools_)
+                 if s["arm"] == "B2"]
+        sampling.PARAMS["n_q1"] = 12
+        big = [s["author"] for s in sampling.draw(pools_)
+               if s["arm"] == "B2"]
+    finally:
+        sampling.PARAMS["n_q1"] = old_nq1
+    assert big[:len(small)] == small
+    assert len(big) > len(small)
 
 
 def test_eras_pools_use_paired_eligibility(monkeypatch):

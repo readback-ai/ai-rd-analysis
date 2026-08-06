@@ -29,7 +29,7 @@ from sampling import SEED
 
 RANGE = "2022-07-01..2022-09-30"
 PERIOD = "Q3-2022"
-B3_PARAMS = dict(design="v1-50k-b3", n_docs=26, k_cand=8, spare=15,
+B3_PARAMS = dict(design="v1-50k-b3", n_docs=60, k_cand=8, spare=15,
                  min_repo_prs=20, min_loc=50, max_loc=2000)
 
 PAGE_QUERY = ("query($q:String!){ search(query:$q, type:ISSUE, "

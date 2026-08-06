@@ -33,7 +33,7 @@ BATCH_FILES = 50          # API limit per request (support, 2026-07-29)
 BATCH_WORDS = 20_000      # server-side processing budget per request:
                           # bigger uploads time out inside the API
                           # (200 + {"error": ..., "status": 408})
-BUDGET_WORDS = 355_000
+BUDGET_WORDS = 500_000
 PINNED_VERSION: str | None = "2026-07-04-base"   # from the 2026-07-29
                                                  # smoke run's responses
 TRANSIENT_HTTP = (408, 429, 500, 502, 503, 504)

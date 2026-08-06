@@ -34,6 +34,10 @@ from sampling import SEED
 
 QUARTERS = ("Q4-2025", "Q1-2026", "Q2-2026")
 PARAMS = dict(design="eras-v1", quarters=list(QUARTERS), n_authors=90,
+              # per-quarter overrides: Q4-2025 to its pool cap (169
+              # mixed authors exist), Q2-2026 to 180 (pool 1293);
+              # Q1-2026 stays at the default
+              quarter_targets={"Q4-2025": 169, "Q2-2026": 180},
               k_cand=16, word_cap=600, word_floor=100, min_loc=50,
               max_loc=2000)
 
@@ -67,8 +71,9 @@ def draw(pools_: dict, exclude: dict | None = None) -> list[dict]:
         rng = random.Random(f"{SEED}:gptzero:eras:{q}:paired")
         mixed = sorted(a for a, v in pools_[q].items()
                        if v["ai"] and v["nonai"])
-        take_n = PARAMS["n_authors"] - sum(1 for a in mixed
-                                           if a in excl)
+        goal = PARAMS.get("quarter_targets", {}).get(
+            q, PARAMS["n_authors"])
+        take_n = goal - sum(1 for a in mixed if a in excl)
         rng.shuffle(mixed)
         # filter AFTER the whole-pool shuffle: the surviving order (and
         # so the drawn prefix) is stable under exclusion-set changes

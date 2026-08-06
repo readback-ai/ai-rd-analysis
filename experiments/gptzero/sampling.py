@@ -28,7 +28,7 @@ from pipeline.detect import AS_OF, CUTOFF, is_bot_login
 from pipeline.frame import ai_contrast_eligible, study_frame
 
 SEED = 20260630
-PARAMS = dict(design="v1-50k", n_authors=30, n_q1=20, n_b1=10, k_cand=16,
+PARAMS = dict(design="v1-50k", n_authors=30, n_q1=60, n_b1=10, k_cand=16,
               word_cap=600, word_floor=100, min_loc=50, max_loc=2000)
 
 
@@ -124,10 +124,12 @@ def draw(pools_: dict) -> list[dict]:
     rng2 = random.Random(f"{SEED}:gptzero:v1:q1")
     # B2 is the INDEPENDENT baseline: exclude every paired author, not
     # just the B1 subset — a paired author past the B1 cap is still not
-    # independent of Arm P
+    # independent of Arm P. Whole-pool shuffle then prefix, so raising
+    # n_q1 deepens the arm without redrawing its membership.
     rest = sorted(a for a in pools_["q1"] if a not in set(take))
+    rng2.shuffle(rest)
     n_b2 = max(PARAMS["n_q1"] - len(b1_authors), 0)
-    for author in rng2.sample(rest, min(n_b2, len(rest))):
+    for author in rest[:n_b2]:
         crng = random.Random(f"{SEED}:gptzero:v1:cand:{author}:q1")
         slots.append({
             "slot": f"B2:{author}", "arm": "B2", "author": author,

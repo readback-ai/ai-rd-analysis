@@ -35,9 +35,14 @@ from sampling import SEED
 
 QUARTERS = ("Q4-2025", "Q1-2026", "Q2-2026")
 PARAMS = dict(design="pc-v2", quarters=list(QUARTERS),
-              n_per_agent_quarter=5, per_group=3, k_cand=8,
-              extra_cand=4, word_cap=600, word_floor=100, min_loc=50,
-              max_loc=2000)
+              n_per_agent_quarter=5,
+              # deep-pool agents take higher targets (survey: copilot
+              # 137 repo-groups / devin 652 PRs); cursor/claude are
+              # pool-limited and stay at the default
+              agent_targets={"copilot-swe-agent": 10,
+                             "devin-ai-integration": 10},
+              per_group=3, k_cand=8, extra_cand=4, word_cap=600,
+              word_floor=100, min_loc=50, max_loc=2000)
 
 
 def _raw_loc(pr: dict) -> int:
@@ -100,8 +105,12 @@ def draw(pools_: dict) -> list[dict]:
         rng.shuffle(keys)
         docs: Counter = Counter()
         chosen: list[tuple[str, str, list]] = []
+        def target(login):
+            return PARAMS["agent_targets"].get(
+                login, PARAMS["n_per_agent_quarter"])
+
         for login, repo in keys:
-            if docs[login] >= PARAMS["n_per_agent_quarter"]:
+            if docs[login] >= target(login):
                 continue
             order = _group_shuffle(q, login, repo,
                                    pools_[q][(login, repo)])
@@ -113,7 +122,7 @@ def draw(pools_: dict) -> list[dict]:
             docs[login] += 1
         for k in range(1, PARAMS["per_group"]):
             for login, repo, order in chosen:
-                if docs[login] >= PARAMS["n_per_agent_quarter"]:
+                if docs[login] >= target(login):
                     continue
                 cands = _chunk(order, k)
                 if not cands:
