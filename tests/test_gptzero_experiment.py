@@ -1408,6 +1408,95 @@ def test_freeze_requires_complete_sem_coverage(tmp_path, monkeypatch):
     assert "sem13c" in (gz.FROZEN / "report.txt").read_text()
 
 
+def test_sem_bound_requires_current_revision():
+    """PR #29 round-3 review P1: binding filtered only the inference
+    version and kept the first matching row, so a row from an older
+    HF_REVISION could pass and mask the current row. Binding requires
+    the exact (revision, inference) pair."""
+    current = [{"slot": "s", "doc_sha": "d"}]
+    stale = {"slot": "s", "doc_sha": "d", "sem_pred": "human",
+             "model_revision": "OLD", "inference": sem13c.INFERENCE}
+    fresh = {**stale, "model_revision": sem13c.HF_REVISION,
+             "sem_pred": "ai"}
+    bound = analyze.sem_bound(current, [stale, fresh],
+                              inference=sem13c.INFERENCE,
+                              revision=sem13c.HF_REVISION)
+    assert [r["sem_pred"] for r in bound] == ["ai"]
+
+
+def test_freeze_refuses_duplicate_and_incomplete_nf_artifacts(
+        tmp_path, monkeypatch):
+    """PR #29 round-3 review P1: duplicate current sem rows passed the
+    coverage check, the created-file billed results were copied without
+    coverage/version validation, and the two created-file sem variants
+    were independently optional. With DOCS_NEWFILE present both sem
+    variants are required; RESULTS_NF, when present, needs exactly one
+    current-document row per created-file doc under PINNED_VERSION."""
+    gz = _freeze_env(tmp_path, monkeypatch)
+
+    def sem_row(slot, sha):
+        return {"slot": slot, "arm": "B3", "period": "Q3-2022",
+                "ai": False, "author": "dev", "doc_sha": sha,
+                "sem_pred": "human",
+                "sem_probs": {"human": 1.0, "ai": 0.0, "hybrid": 0.0,
+                              "adversarial": 0.0},
+                "model_revision": sem13c.HF_REVISION,
+                "inference": sem13c.INFERENCE}
+
+    gz.RESULTS_SEM.write_text(json.dumps(sem_row("B3:o/r", "s")) + "\n"
+                              + json.dumps(sem_row("B3:o/r", "s"))
+                              + "\n")                 # duplicate current
+    with pytest.raises(SystemExit, match="duplicate"):
+        gz.cmd_freeze()
+    gz.RESULTS_SEM.write_text(json.dumps(sem_row("B3:o/r", "s")) + "\n")
+
+    nf = {"slot": "B3:o/r", "arm": "B3", "period": "Q3-2022",
+          "ai": False, "author": "dev", "repo": "o/r", "num": 1,
+          "path": "a.py", "doc_sha": "nfc", "words": 150,
+          "truncated": False, "doc_sha_full": "nff", "words_full": 200}
+    gz.DOCS_NEWFILE.write_text(json.dumps(nf) + "\n")
+    with pytest.raises(SystemExit, match="newfile"):
+        gz.cmd_freeze()                    # sem NF variants required
+    for path, sha in ((gz.RESULTS_SEM_NF, "nfc"),
+                      (gz.RESULTS_SEM_NF_FULL, "nff")):
+        path.write_text(json.dumps(sem_row("B3:o/r", sha)) + "\n")
+    gz.cmd_freeze()                        # complete: passes
+
+    bad_nf = {**nf, "doc_sha": "STALE", "predicted_class": "human",
+              "model_version": "pinver", "billed_words": 150}
+    gz.RESULTS_NF.write_text(json.dumps(bad_nf) + "\n")
+    with pytest.raises(SystemExit, match="created-file"):
+        gz.cmd_freeze()                    # stale doc_sha refused
+    good_nf = {**bad_nf, "doc_sha": "nfc", "model_version": "OTHER"}
+    gz.RESULTS_NF.write_text(json.dumps(good_nf) + "\n")
+    with pytest.raises(SystemExit, match="created-file"):
+        gz.cmd_freeze()                    # wrong pin refused
+    gz.RESULTS_NF.write_text(json.dumps(
+        {**good_nf, "model_version": "pinver"}) + "\n")
+    gz.cmd_freeze()
+    assert (gz.FROZEN / gz.RESULTS_NF.name).is_file()
+
+
+def test_freeze_failure_preserves_previous_snapshot(
+        tmp_path, monkeypatch):
+    """PR #29 round-3 review P2: frozen/ was removed before the sem and
+    created-file validations ran, so a late refusal destroyed the prior
+    audit set. Freeze stages into a temporary directory and replaces
+    the snapshot only after every validation passes."""
+    gz = _freeze_env(tmp_path, monkeypatch)
+    gz.cmd_freeze()
+    marker = (gz.FROZEN / "report.txt").read_text()
+    gz.RESULTS_SEM.write_text(json.dumps(
+        {"slot": "B3:o/r", "doc_sha": "STALE", "sem_pred": "human",
+         "sem_probs": {"human": 1.0, "ai": 0.0, "hybrid": 0.0,
+                       "adversarial": 0.0},
+         "model_revision": sem13c.HF_REVISION,
+         "inference": sem13c.INFERENCE}) + "\n")
+    with pytest.raises(SystemExit):
+        gz.cmd_freeze()
+    assert (gz.FROZEN / "report.txt").read_text() == marker
+
+
 def test_freeze_writes_the_audit_set(tmp_path, monkeypatch):
     """--freeze snapshots manifests, row files, paragraph summaries,
     the generated report, and provenance into the committed frozen/

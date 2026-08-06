@@ -653,64 +653,96 @@ def cmd_freeze() -> None:
                      _load_rows(DOCS_RETEST), _load_rows(RESULTS_RETEST))
     PARAGRAPHS.write_text("".join(
         json.dumps(r) + "\n" for r in _paragraph_summaries(score_rows)))
-    if FROZEN.is_dir():
-        shutil.rmtree(FROZEN)
-    FROZEN.mkdir()
+    # Everything validates into a STAGING directory; the previous
+    # snapshot is replaced only after every check has passed.
+    stage = FROZEN.with_name(FROZEN.name + ".tmp")
+    if stage.is_dir():
+        shutil.rmtree(stage)
+    stage.mkdir()
     kept = []
     for p in (*required, DOCS_RETEST, RESULTS_RETEST, PARAGRAPHS,
               DOCS_NEWFILE):
         if p.is_file():
-            shutil.copy(p, FROZEN / p.name)
+            shutil.copy(p, stage / p.name)
             kept.append(p.name)
 
     def freeze_bound(results_path, base_rows, sha_key, what):
-        """A reported analysis must cover its corpus COMPLETELY under
-        the current inference version, and only bound rows freeze."""
+        """A reported analysis must have EXACTLY ONE row per document
+        under the current (revision, inference) identity — no gaps, no
+        duplicates, no stale rows masking current ones."""
         import sem13c
         current = [{"slot": r["slot"], "doc_sha": r[sha_key]}
                    for r in base_rows]
-        bound = analyze.sem_bound(current, _load_rows(results_path),
-                                  inference=sem13c.INFERENCE)
-        if {r["slot"] for r in bound} != {r["slot"] for r in current}:
+        log = _load_rows(results_path)
+        want = {(r["slot"], r["doc_sha"]) for r in current}
+        matches = [r for r in log
+                   if (r["slot"], r["doc_sha"]) in want
+                   and r.get("inference") == sem13c.INFERENCE
+                   and r.get("model_revision") == sem13c.HF_REVISION]
+        from collections import Counter
+        dupes = [s for s, n in Counter(
+            r["slot"] for r in matches).items() if n > 1]
+        if dupes:
+            raise SystemExit(f"freeze refused: duplicate current "
+                             f"sem13c {what} rows: {sorted(dupes)[:5]}")
+        if len(matches) != len(current):
             raise SystemExit(
                 f"freeze refused: sem13c {what} coverage incomplete "
-                f"({len(bound)}/{len(current)} bound current-inference "
+                f"({len(matches)}/{len(current)} current-identity "
                 f"rows) — rescore first")
-        (FROZEN / results_path.name).write_text(
-            "".join(json.dumps(r) + "\n" for r in bound))
+        (stage / results_path.name).write_text(
+            "".join(json.dumps(r) + "\n" for r in matches))
         kept.append(results_path.name)
 
     if RESULTS_SEM.is_file():
         freeze_bound(RESULTS_SEM, score_rows, "doc_sha", "corpus")
     nf_rows = _load_rows(DOCS_NEWFILE)
     if nf_rows:
-        if RESULTS_SEM_NF.is_file():
-            freeze_bound(RESULTS_SEM_NF, nf_rows, "doc_sha",
-                         "newfile-capped")
-        if RESULTS_SEM_NF_FULL.is_file():
-            freeze_bound(RESULTS_SEM_NF_FULL, nf_rows, "doc_sha_full",
-                         "newfile-full")
+        if not (RESULTS_SEM_NF.is_file()
+                and RESULTS_SEM_NF_FULL.is_file()):
+            raise SystemExit("freeze refused: newfile documents exist "
+                             "but sem13c newfile variants are not both "
+                             "scored — run --newfile first")
+        freeze_bound(RESULTS_SEM_NF, nf_rows, "doc_sha",
+                     "newfile-capped")
+        freeze_bound(RESULTS_SEM_NF_FULL, nf_rows, "doc_sha_full",
+                     "newfile-full")
         if RESULTS_NF.is_file():
-            shutil.copy(RESULTS_NF, FROZEN / RESULTS_NF.name)
+            want_nf = {(r["slot"], r["doc_sha"]) for r in nf_rows}
+            nf_scores = [r for r in _load_rows(RESULTS_NF)
+                         if (r["slot"], r["doc_sha"]) in want_nf
+                         and r.get("model_version")
+                         == gzc.PINNED_VERSION]
+            from collections import Counter
+            nf_dupes = [s for s, n in Counter(
+                r["slot"] for r in nf_scores).items() if n > 1]
+            if nf_dupes or len(nf_scores) != len(nf_rows):
+                raise SystemExit(
+                    f"freeze refused: created-file billed results must "
+                    f"have exactly one current-document row per doc "
+                    f"under the pin ({len(nf_scores)}/{len(nf_rows)}, "
+                    f"dupes {sorted(nf_dupes)[:3]})")
+            (stage / RESULTS_NF.name).write_text(
+                "".join(json.dumps(r) + "\n" for r in nf_scores))
             kept.append(RESULTS_NF.name)
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
-        # the report is generated from the FROZEN copies, so the
+        # the report is generated from the STAGED copies, so the
         # committed numbers can only come from the committed rows
         analyze.report(
-            FROZEN / RESULTS.name,
-            FROZEN / RESULTS_RETEST.name,
-            FROZEN / PARAGRAPHS.name,
-            (FROZEN / RESULTS_SEM.name)
-            if (FROZEN / RESULTS_SEM.name).is_file() else None)
+            stage / RESULTS.name,
+            stage / RESULTS_RETEST.name,
+            stage / PARAGRAPHS.name,
+            (stage / RESULTS_SEM.name)
+            if (stage / RESULTS_SEM.name).is_file() else None)
         if nf_rows:
             analyze.report_newfile(
                 nf_rows,
-                _load_rows(FROZEN / RESULTS_SEM_NF.name),
-                _load_rows(FROZEN / RESULTS_SEM_NF_FULL.name),
-                _load_rows(FROZEN / RESULTS_NF.name))
-    (FROZEN / "report.txt").write_text(buf.getvalue())
-    (FROZEN / "PROVENANCE.md").write_text(
+                _load_rows(stage / RESULTS_SEM_NF.name),
+                _load_rows(stage / RESULTS_SEM_NF_FULL.name),
+                _load_rows(stage / RESULTS_NF.name))
+    (stage / "report.txt").write_text(buf.getvalue())
+    (stage / "PROVENANCE.md").write_text(
         f"# Frozen audit set ({date.today().isoformat()})\n\n"
         f"- detector version pin: {gzc.PINNED_VERSION}\n"
         f"- reservation ledger: {ledger_total()} words reserved, "
@@ -724,6 +756,9 @@ def cmd_freeze() -> None:
         f"runs); reconcile against the GPTZero dashboard by archiving "
         f"the ledger and seeding it with one dashboard-confirmed row "
         f"(see README).\n")
+    if FROZEN.is_dir():
+        shutil.rmtree(FROZEN)
+    stage.rename(FROZEN)
     print(f"frozen: {len(kept) + 2} files -> {FROZEN}")
 
 

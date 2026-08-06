@@ -331,17 +331,22 @@ def report_languages(para_rows: list[dict], top: int = 6) -> None:
 
 
 def sem_bound(rows: list[dict], sem_rows: list[dict],
-              inference: str | None = None) -> list[dict]:
+              inference: str | None = None,
+              revision: str | None = None) -> list[dict]:
     """sem13c rows bound to the CURRENT document per slot (append-only
-    scoring log ages out redrawn docs here), one row per slot; when an
-    inference version is given, rows scored under any other
-    preprocessing are excluded."""
+    scoring log ages out redrawn docs here), one row per slot; rows
+    scored under any other preprocessing (inference) or checkpoint
+    (revision) are excluded when those identities are given — an older
+    row must never mask the current one."""
     current = {r["slot"]: r["doc_sha"] for r in rows}
     out, seen = [], set()
     for r in sem_rows:
         if r["slot"] in seen:
             continue
         if inference is not None and r.get("inference") != inference:
+            continue
+        if revision is not None \
+                and r.get("model_revision") != revision:
             continue
         if current.get(r["slot"]) == r["doc_sha"]:
             out.append(r)
@@ -351,7 +356,8 @@ def sem_bound(rows: list[dict], sem_rows: list[dict],
 
 def report_sem(rows: list[dict], sem_rows: list[dict]) -> None:
     import sem13c
-    bound = sem_bound(rows, sem_rows, inference=sem13c.INFERENCE)
+    bound = sem_bound(rows, sem_rows, inference=sem13c.INFERENCE,
+                      revision=sem13c.HF_REVISION)
     if not bound:
         return
     for r in bound:

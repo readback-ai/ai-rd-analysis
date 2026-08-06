@@ -31,6 +31,7 @@ CLASS_NAMES = ("human", "ai", "hybrid", "adversarial")
 HF_REPO = "YoungDSMLKZ/UnixCoder-MIL"
 HF_REVISION = "0619dccaf165ab4e310ed8213936b15bda572b8f"
 BACKBONE = "microsoft/unixcoder-base"
+BACKBONE_REVISION = "5604afdc964f6c53782a6813140ade5216b99006"
 CHUNK, STRIDE, MAX_CHUNKS, MAX_LEN = 512, 256, 16, 4096
 # Preprocessing identity: cached rows scored under any other value are
 # invalid and rescored. pad4096 = pad every document to MAX_LEN before
@@ -51,8 +52,10 @@ def _load():
     class MilUniXcoder(nn.Module):
         def __init__(self):
             super().__init__()
-            self.config = AutoConfig.from_pretrained(BACKBONE)
-            self.unixcoder = AutoModel.from_pretrained(BACKBONE)
+            self.config = AutoConfig.from_pretrained(
+                BACKBONE, revision=BACKBONE_REVISION)
+            self.unixcoder = AutoModel.from_pretrained(
+                BACKBONE, revision=BACKBONE_REVISION)
             self.dropout = nn.Dropout(0.1)
             self.classifier = nn.Linear(self.config.hidden_size,
                                         len(CLASS_NAMES))
