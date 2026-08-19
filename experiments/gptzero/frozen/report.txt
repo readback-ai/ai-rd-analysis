@@ -143,3 +143,11 @@ known-AI        10      20%        0%      100%       —        —
   sem13c-full paired Q4-2025: n=14, 4/14 higher, gap -0.05, p=0.971
   sem13c-full paired Q1-2026: n=17, 11/16 higher, gap +0.06, p=0.105
   sem13c-full paired Q2-2026: n=20, 12/20 higher, gap +0.10, p=0.252
+
+comment/code ablation (within document; does prose carry the signal?):
+group          n  original  code-only  comment-only   Δ code       p
+Q2-2026       20      0.60       0.35          0.78    -0.25   0.001
+baseline      20      0.10       0.03          0.02    -0.07   0.942
+  era gap (Q2-2026 - baseline) on original     : +0.50
+  era gap (Q2-2026 - baseline) on code-only    : +0.32
+  era gap (Q2-2026 - baseline) on comment-only : +0.77

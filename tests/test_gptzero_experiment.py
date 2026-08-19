@@ -1166,7 +1166,8 @@ def _freeze_env(tmp_path, monkeypatch):
                  "MANIFEST_PC", "DOCS", "DOCS_RETEST", "RESULTS",
                  "RESULTS_RETEST", "RESULTS_SEM", "DOCS_NEWFILE",
                  "RESULTS_SEM_NF", "RESULTS_SEM_NF_FULL", "RESULTS_NF",
-                 "RESERVATIONS", "RESP_CACHE", "DOC_CACHE"):
+                 "DOCS_ABL", "RESULTS_ABL", "RESERVATIONS",
+                 "RESP_CACHE", "DOC_CACHE"):
         monkeypatch.setattr(gz, name, tmp_path / getattr(gz, name).name)
     monkeypatch.setattr(gz, "FROZEN", tmp_path / "frozen")
     monkeypatch.setattr(gptzero_client, "PINNED_VERSION", "pinver")

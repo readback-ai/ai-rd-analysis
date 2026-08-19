@@ -713,7 +713,7 @@ def cmd_freeze() -> None:
     stage.mkdir()
     kept = []
     for p in (*required, DOCS_RETEST, RESULTS_RETEST, PARAGRAPHS,
-              DOCS_NEWFILE):
+              DOCS_NEWFILE, DOCS_ABL):
         if p.is_file():
             shutil.copy(p, stage / p.name)
             kept.append(p.name)
@@ -777,6 +777,25 @@ def cmd_freeze() -> None:
             (stage / RESULTS_NF.name).write_text(
                 "".join(json.dumps(r) + "\n" for r in nf_scores))
             kept.append(RESULTS_NF.name)
+    abl_rows = _load_rows(DOCS_ABL)
+    if abl_rows:
+        want_abl = {(r["slot"], r["doc_sha"]) for r in abl_rows}
+        abl_scores = [r for r in _load_rows(RESULTS_ABL)
+                      if (r["slot"], r["doc_sha"]) in want_abl
+                      and r.get("model_version") == gzc.PINNED_VERSION]
+        from collections import Counter
+        abl_dupes = [k for k, n in Counter(
+            (r["slot"], r["variant"]) for r in abl_scores).items()
+            if n > 1]
+        if abl_dupes or len(abl_scores) != len(abl_rows):
+            raise SystemExit(
+                f"freeze refused: ablation results must have exactly "
+                f"one current-document row per variant under the pin "
+                f"({len(abl_scores)}/{len(abl_rows)}, dupes "
+                f"{abl_dupes[:3]})")
+        (stage / RESULTS_ABL.name).write_text(
+            "".join(json.dumps(r) + "\n" for r in abl_scores))
+        kept.append(RESULTS_ABL.name)
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
         # the report is generated from the STAGED copies, so the
@@ -793,6 +812,11 @@ def cmd_freeze() -> None:
                 _load_rows(stage / RESULTS_SEM_NF.name),
                 _load_rows(stage / RESULTS_SEM_NF_FULL.name),
                 _load_rows(stage / RESULTS_NF.name))
+        if abl_rows:
+            print()
+            analyze.report_ablation(
+                _load_rows(stage / RESULTS.name),
+                _load_rows(stage / RESULTS_ABL.name))
     (stage / "report.txt").write_text(buf.getvalue())
     (stage / "PROVENANCE.md").write_text(
         f"# Frozen audit set ({date.today().isoformat()})\n\n"
