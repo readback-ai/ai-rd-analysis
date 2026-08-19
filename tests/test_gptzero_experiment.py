@@ -13,6 +13,7 @@ import analyze          # noqa: E402
 import diffs            # noqa: E402
 import eras             # noqa: E402
 import gptzero_client   # noqa: E402
+import ablation         # noqa: E402
 import newfile          # noqa: E402
 import pc               # noqa: E402
 import sampling         # noqa: E402
@@ -1276,6 +1277,80 @@ def test_report_newfile_renders_without_gptzero_rows(capsys):
     out = capsys.readouterr().out
     assert "Q2-26-AI" in out and "TypeError" not in out
     assert "—" in out
+
+
+ABL_DOC = """\
+// file: src/a.py
+# a real comment explaining the thing
+def f(x):
+    return x + 1
+// file: src/b.js
+// another comment line here
+const y = 2;
+"""
+
+
+def test_ablation_split_separates_streams_and_drops_headers():
+    """Variants are code-only and comments-only; the `// file:`
+    headers belong to the document format and enter neither stream."""
+    code, comment = ablation.split_document(ABL_DOC)
+    assert "// file:" not in code and "// file:" not in comment
+    assert "def f(x):" in code and "const y = 2;" in code
+    assert "a real comment" in comment and "another comment" in comment
+    assert "def f(x):" not in comment and "a real comment" not in code
+
+
+def test_ablation_rows_are_paired_floored_and_deterministic(
+        tmp_path, monkeypatch):
+    """Two variants per selected document, each carrying its parent
+    doc_sha for within-document pairing; documents whose variants fall
+    under the floor are skipped; selection is seeded and stable."""
+    monkeypatch.setattr(ablation, "WORD_FLOOR", 3)
+    monkeypatch.setattr(ablation, "N_PER_GROUP", 1)
+    cache = tmp_path / "docs"
+    cache.mkdir()
+    rich = ABL_DOC
+    thin = "// file: t.py\nx = 1\n"          # no comments -> ineligible
+    scores = []
+    for i, (sha, text, arm, period) in enumerate((
+            ("sha1", rich, "B3", "Q3-2022"),
+            ("sha2", rich, "P", "Q2-2026"),
+            ("sha3", thin, "P", "Q2-2026"))):
+        (cache / f"{sha}.txt").write_text(text)
+        scores.append({"slot": f"s{i}", "arm": arm, "author": "a",
+                       "period": period, "ai": True, "repo": "o/r",
+                       "num": i, "doc_sha": sha})
+    rows = ablation.build_rows(scores, cache)
+    assert rows == ablation.build_rows(scores, cache)   # deterministic
+    assert {r["slot"] for r in rows} == {"s0", "s1"}    # thin excluded
+    assert sorted(r["variant"] for r in rows) == [
+        "code", "code", "comment", "comment"]
+    assert {r["group"] for r in rows} == {"baseline", "Q2-2026"}
+    for r in rows:
+        assert r["parent_doc_sha"] in {"sha1", "sha2"}
+        assert (cache / f"{r['doc_sha']}.txt").is_file()
+
+
+def test_ablation_stats_pair_within_document():
+    """Variants bind to the parent's CURRENT doc_sha; a variant whose
+    parent was redrawn never pairs, and both variants are required."""
+    rows = [{"slot": "s1", "doc_sha": "d1",
+             "class_probabilities": {"ai": 0.8}},
+            {"slot": "s2", "doc_sha": "d2",
+             "class_probabilities": {"ai": 0.6}}]
+
+    def v(slot, parent, variant, p, group="Q2-2026"):
+        return {"slot": slot, "parent_doc_sha": parent,
+                "variant": variant, "group": group,
+                "class_probabilities": {"ai": p}}
+    abl = [v("s1", "d1", "code", 0.2), v("s1", "d1", "comment", 0.9),
+           v("s2", "STALE", "code", 0.1),
+           v("s2", "STALE", "comment", 0.1)]
+    got = ablation_groups = analyze.ablation_stats(rows, abl)
+    assert set(got) == {"Q2-2026"}
+    assert len(ablation_groups["Q2-2026"]) == 1
+    e = got["Q2-2026"][0]
+    assert (e["orig"], e["code"], e["comment"]) == (0.8, 0.2, 0.9)
 
 
 def test_sem13c_inference_version_invalidates_cached_rows(tmp_path):

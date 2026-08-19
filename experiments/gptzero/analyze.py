@@ -458,6 +458,61 @@ def report_newfile(nf_rows: list[dict], sem_cap: list[dict],
                       f"p={pr['sign_p']:.3f}")
 
 
+def ablation_stats(rows: list[dict], abl_rows: list[dict]) -> dict:
+    """Within-document comment/code decomposition: each selected
+    document's ORIGINAL score against its code-only and comments-only
+    variants, grouped by era. Deltas are paired (same document), so
+    the sign test needs no length matching."""
+    orig = {r["slot"]: r for r in rows}
+    by_slot: dict[str, dict] = {}
+    for r in abl_rows:
+        parent = orig.get(r["slot"])
+        if parent is None or parent["doc_sha"] != r["parent_doc_sha"]:
+            continue
+        p = ai_prob(r)
+        if p is None:
+            continue
+        e = by_slot.setdefault(r["slot"], {"group": r["group"],
+                                           "orig": ai_prob(parent)})
+        e[r["variant"]] = p
+    out: dict[str, list] = {}
+    for slot, e in by_slot.items():
+        if "code" in e and "comment" in e and e["orig"] is not None:
+            out.setdefault(e["group"], []).append(e)
+    return out
+
+
+def report_ablation(rows: list[dict], abl_rows: list[dict]) -> None:
+    groups = ablation_stats(rows, abl_rows)
+    if not groups:
+        print("no ablation rows — run --ablate first")
+        return
+    print("comment/code ablation (within document; does prose carry "
+          "the signal?):")
+    print(f"{'group':12}{'n':>4}{'original':>10}{'code-only':>11}"
+          f"{'comment-only':>14}{'Δ code':>9}{'p':>8}")
+    for g in sorted(groups):
+        es = groups[g]
+        n = len(es)
+        d = [e["code"] - e["orig"] for e in es]
+        wins = sum(1 for x in d if x < 0)     # code-only scores LOWER
+        losses = sum(1 for x in d if x > 0)
+        print(f"{g:12}{n:>4}"
+              f"{statistics.fmean(e['orig'] for e in es):>10.2f}"
+              f"{statistics.fmean(e['code'] for e in es):>11.2f}"
+              f"{statistics.fmean(e['comment'] for e in es):>14.2f}"
+              f"{statistics.fmean(d):>+9.2f}"
+              f"{_sign_p(wins, wins + losses):>8.3f}")
+    if len(groups) == 2 and "baseline" in groups:
+        modern = [g for g in groups if g != "baseline"][0]
+        for key, label in (("orig", "original"), ("code", "code-only"),
+                           ("comment", "comment-only")):
+            b = statistics.fmean(e[key] for e in groups["baseline"])
+            m = statistics.fmean(e[key] for e in groups[modern])
+            print(f"  era gap ({modern} - baseline) on {label:13}: "
+                  f"{m - b:+.2f}")
+
+
 def paragraph_stats(para_rows: list[dict]) -> dict | None:
     """Aggregates over per-document paragraph summaries (frozen beside
     the scores): the document verdict discards within-document

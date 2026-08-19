@@ -42,6 +42,8 @@ RESULTS_SEM_NF = LOCAL / "results" / "scores_sem13c_newfile.jsonl"
 RESULTS_SEM_NF_FULL = (LOCAL / "results"
                        / "scores_sem13c_newfile_full.jsonl")
 RESULTS_NF = LOCAL / "results" / "scores_newfile.jsonl"
+DOCS_ABL = LOCAL / "docs_ablation.jsonl"
+RESULTS_ABL = LOCAL / "results" / "scores_ablation.jsonl"
 RETEST_CAP = 1200   # dose-response stage: docs truncated at the design
                     # cap are re-assembled and re-scored at this cap
 RESERVATIONS = LOCAL / "results" / "reservations_v1.jsonl"
@@ -421,6 +423,56 @@ def cmd_newfile() -> None:
     print(f"sem13c newfile: {n} capped + {nf} full newly scored")
 
 
+def cmd_ablate() -> None:
+    """Assemble the comment/code ablation variants and score them
+    (billed, pin-enforced, resumable). Each variant's parent document
+    is already scored, so the analysis pairs within document."""
+    import ablation
+    import gptzero_client as gzc
+    if gzc.PINNED_VERSION is None:
+        raise SystemExit("ablation scoring requires a pinned detector "
+                         "version — no unpinned billed runs")
+    rows = ablation.build_rows(_load_rows(RESULTS), DOC_CACHE)
+    ablation.write_rows(rows, DOCS_ABL)
+    print(f"ablation: {len(rows)} variant documents, "
+          f"{sum(r['words'] for r in rows)} words", flush=True)
+    old = [r for r in _load_rows(RESULTS_ABL)
+           if any(r["slot"] == d["slot"] and r["doc_sha"] == d["doc_sha"]
+                  for d in rows)
+           and r.get("model_version") == gzc.PINNED_VERSION]
+    RESULTS_ABL.parent.mkdir(parents=True, exist_ok=True)
+    with RESULTS_ABL.open("w") as out:
+        for r in old:
+            out.write(json.dumps(r) + "\n")
+        done = {(r["slot"], r["doc_sha"]) for r in old}
+        todo = [r for r in rows
+                if (r["slot"], r["doc_sha"]) not in done]
+        batches = _batches(todo)
+        for i, chunk in enumerate(batches):
+            items = [(r["doc_sha"], DOC_CACHE / f"{r['doc_sha']}.txt")
+                     for r in chunk]
+            try:
+                scored = gzc.score_batch(items, RESP_CACHE, RESERVATIONS)
+            except RuntimeError as e:
+                print(f"BATCH FAIL: {e}", flush=True)
+                continue
+            except urllib.error.HTTPError as e:
+                raise SystemExit(
+                    f"HTTP {e.code} on a batch — results so far are "
+                    f"recorded; re-run --ablate to resume.") from e
+            for r, (resp, billed) in zip(chunk, scored):
+                fields = gzc.doc_fields(resp)
+                out.write(json.dumps(
+                    {**r, **fields, "billed_words": billed}) + "\n")
+                out.flush()
+                print(f"ablate {r['slot']} [{r['variant']}]: "
+                      f"{fields['predicted_class']} "
+                      f"({billed} words billed)", flush=True)
+            if i + 1 < len(batches):
+                time.sleep(SCORE_PACE)
+    print(f"reserved: {ledger_total()}/{gzc.BUDGET_WORDS} words")
+
+
 def cmd_score_newfile() -> None:
     """GPTZero over the capped created-file documents (billed; same
     ledger, cache, and version discipline as every other arm)."""
@@ -793,6 +845,8 @@ def main() -> None:
     ap.add_argument("--newfile", action="store_true")
     ap.add_argument("--score-newfile", action="store_true")
     ap.add_argument("--report-newfile", action="store_true")
+    ap.add_argument("--ablate", action="store_true")
+    ap.add_argument("--report-ablation", action="store_true")
     ap.add_argument("--freeze", action="store_true")
     ap.add_argument("--limit", type=int, default=None)
     a = ap.parse_args()
@@ -816,6 +870,12 @@ def main() -> None:
         cmd_newfile()
     elif a.score_newfile:
         cmd_score_newfile()
+    elif a.ablate:
+        cmd_ablate()
+    elif a.report_ablation:
+        import analyze
+        analyze.report_ablation(_load_rows(RESULTS),
+                                _load_rows(RESULTS_ABL))
     elif a.report_newfile:
         import analyze
         analyze.report_newfile(
