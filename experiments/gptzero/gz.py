@@ -44,6 +44,9 @@ RESULTS_SEM_NF_FULL = (LOCAL / "results"
 RESULTS_NF = LOCAL / "results" / "scores_newfile.jsonl"
 DOCS_ABL = LOCAL / "docs_ablation.jsonl"
 RESULTS_ABL = LOCAL / "results" / "scores_ablation.jsonl"
+DOCS_EP = LOCAL / "docs_endpoint.jsonl"
+RESULTS_EP = LOCAL / "results" / "scores_endpoint_text.jsonl"
+RESP_CACHE_TEXT = LOCAL / "cache" / "responses_text"
 RETEST_CAP = 1200   # dose-response stage: docs truncated at the design
                     # cap are re-assembled and re-scored at this cap
 RESERVATIONS = LOCAL / "results" / "reservations_v1.jsonl"
@@ -421,6 +424,48 @@ def cmd_newfile() -> None:
                  for r in rows]
     nf = sem13c.score_rows(full_rows, DOC_CACHE, RESULTS_SEM_NF_FULL)
     print(f"sem13c newfile: {n} capped + {nf} full newly scored")
+
+
+def cmd_rescore_text(limit: int | None = None) -> None:
+    """Re-score a stratified sample through /v2/predict/TEXT under the
+    corpus's pinned model, so files-vs-text is the only variable.
+    Text responses live in their own cache namespace — the files
+    responses are already cached under the same (version, doc_sha)
+    key and must not be served here."""
+    import endpoint
+    import gptzero_client as gzc
+    if gzc.PINNED_VERSION is None:
+        raise SystemExit("endpoint comparison requires the corpus's "
+                         "pinned version — no unpinned billed runs")
+    rows = endpoint.select(_load_rows(RESULTS))
+    endpoint.write_rows(rows, DOCS_EP)
+    print(f"endpoint sample: {len(rows)} documents, "
+          f"{sum(r['words'] or 0 for r in rows)} words", flush=True)
+    done = {(r["slot"], r["doc_sha"]) for r in _load_rows(RESULTS_EP)
+            if r.get("model_version") == gzc.PINNED_VERSION}
+    todo = [r for r in rows if (r["slot"], r["doc_sha"]) not in done]
+    if limit is not None:
+        todo = todo[:limit]
+    RESULTS_EP.parent.mkdir(parents=True, exist_ok=True)
+    with RESULTS_EP.open("a") as out:
+        for i, r in enumerate(todo):
+            text = (DOC_CACHE / f"{r['doc_sha']}.txt").read_text()
+            try:
+                resp, billed = gzc.score(r["doc_sha"], text,
+                                         RESP_CACHE_TEXT, RESERVATIONS)
+            except RuntimeError as e:
+                print(f"DEFER {r['slot']}: {e}", flush=True)
+                continue
+            fields = gzc.doc_fields(resp)
+            out.write(json.dumps(
+                {**r, **fields, "billed_words": billed,
+                 "endpoint": "text"}) + "\n")
+            out.flush()
+            print(f"text {r['slot']} [{r['stratum']}]: "
+                  f"{fields['predicted_class']} ({billed}w)", flush=True)
+            if i + 1 < len(todo):
+                time.sleep(SCORE_PACE)
+    print(f"reserved: {ledger_total()}/{gzc.BUDGET_WORDS} words")
 
 
 def cmd_ablate() -> None:
@@ -870,6 +915,8 @@ def main() -> None:
     ap.add_argument("--score-newfile", action="store_true")
     ap.add_argument("--report-newfile", action="store_true")
     ap.add_argument("--ablate", action="store_true")
+    ap.add_argument("--rescore-text", action="store_true")
+    ap.add_argument("--report-endpoint", action="store_true")
     ap.add_argument("--report-ablation", action="store_true")
     ap.add_argument("--freeze", action="store_true")
     ap.add_argument("--limit", type=int, default=None)
@@ -896,6 +943,12 @@ def main() -> None:
         cmd_score_newfile()
     elif a.ablate:
         cmd_ablate()
+    elif a.rescore_text:
+        cmd_rescore_text(a.limit)
+    elif a.report_endpoint:
+        import analyze
+        analyze.report_endpoint(_load_rows(RESULTS),
+                                _load_rows(RESULTS_EP))
     elif a.report_ablation:
         import analyze
         analyze.report_ablation(_load_rows(RESULTS),

@@ -14,6 +14,7 @@ import diffs            # noqa: E402
 import eras             # noqa: E402
 import gptzero_client   # noqa: E402
 import ablation         # noqa: E402
+import endpoint         # noqa: E402
 import newfile          # noqa: E402
 import pc               # noqa: E402
 import sampling         # noqa: E402
@@ -1289,6 +1290,56 @@ def f(x):
 // another comment line here
 const y = 2;
 """
+
+
+def _ep_score(slot, arm, period, ai, sha, words=300):
+    return {"slot": slot, "arm": arm, "author": slot, "period": period,
+            "ai": ai, "repo": "o/r", "num": 1, "doc_sha": sha,
+            "words": words, "predicted_class": "human",
+            "class_probabilities": {"ai": 0.1}}
+
+
+def test_endpoint_selection_is_stratified_and_prefix_stable():
+    """The sample takes N per reporting arm from a seeded shuffle, so
+    deepening extends it rather than redrawing; documents outside the
+    reporting arms never enter."""
+    rows = ([_ep_score(f"b{i}", "B3", "Q3-2022", False, f"b{i}")
+             for i in range(6)]
+            + [_ep_score(f"p{i}", "P", "Q2-2026", i % 2 == 0, f"p{i}")
+               for i in range(8)]
+            + [_ep_score(f"a{i}", "PC", "Q2-2026", True, f"a{i}")
+               for i in range(4)]
+            + [_ep_score("x", "OTHER", "Q2-2026", False, "x")])
+    small = endpoint.select(rows, n_per_stratum=2)
+    assert small == endpoint.select(rows, n_per_stratum=2)
+    strata = {r["stratum"] for r in small}
+    assert strata == {"baseline", "Q2-2026-AI", "Q2-2026-nonAI",
+                      "known-AI"}
+    assert "x" not in {r["slot"] for r in small}
+    big = endpoint.select(rows, n_per_stratum=3)
+    for s in strata:
+        a = [r["slot"] for r in small if r["stratum"] == s]
+        b = [r["slot"] for r in big if r["stratum"] == s]
+        assert b[:len(a)] == a          # prefix-stable deepening
+
+
+def test_endpoint_pairs_bind_on_slot_and_doc_sha():
+    """Pairs form only where the SAME document was scored on both
+    endpoints — a text row against a redrawn document never pairs."""
+    files = [{"slot": "s1", "doc_sha": "d1", "predicted_class": "human",
+              "class_probabilities": {"ai": 0.02}},
+             {"slot": "s2", "doc_sha": "d2", "predicted_class": "human",
+              "class_probabilities": {"ai": 0.10}}]
+    text = [{"slot": "s1", "doc_sha": "d1", "stratum": "known-AI",
+             "predicted_class": "ai",
+             "class_probabilities": {"ai": 0.60}},
+            {"slot": "s2", "doc_sha": "STALE", "stratum": "baseline",
+             "predicted_class": "ai",
+             "class_probabilities": {"ai": 0.99}}]
+    got = analyze.endpoint_pairs(files, text)
+    assert len(got) == 1
+    assert got[0]["files_p"] == 0.02 and got[0]["text_p"] == 0.60
+    assert got[0]["files_class"] != got[0]["text_class"]
 
 
 def test_ablation_split_separates_streams_and_drops_headers():

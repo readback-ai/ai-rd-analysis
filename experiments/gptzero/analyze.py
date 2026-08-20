@@ -470,6 +470,59 @@ def report_newfile(nf_rows: list[dict], sem_cap: list[dict],
                       f"p={pr['sign_p']:.3f}")
 
 
+def endpoint_pairs(rows: list[dict], ep_rows: list[dict]) -> list[dict]:
+    """Documents scored through BOTH endpoints under the same pinned
+    model, paired on (slot, doc_sha) so only the endpoint differs."""
+    files = {(r["slot"], r["doc_sha"]): r for r in rows}
+    out = []
+    for t in ep_rows:
+        f = files.get((t["slot"], t["doc_sha"]))
+        if f is None:
+            continue
+        pf, pt = ai_prob(f), ai_prob(t)
+        if pf is None or pt is None:
+            continue
+        out.append({"stratum": t.get("stratum"), "slot": t["slot"],
+                    "files_p": pf, "text_p": pt,
+                    "files_class": f.get("predicted_class"),
+                    "text_class": t.get("predicted_class")})
+    return out
+
+
+def report_endpoint(rows: list[dict], ep_rows: list[dict]) -> None:
+    pairs = endpoint_pairs(rows, ep_rows)
+    if not pairs:
+        print("no endpoint rows — run --rescore-text first")
+        return
+    print(f"endpoint comparison, /v2/predict/files vs /v2/predict/text "
+          f"(same pinned model; {len(pairs)} documents):")
+    print(f"{'stratum':16}{'n':>4}{'files p':>9}{'text p':>9}{'Δ':>8}"
+          f"{'flips':>8}{'→ai':>6}{'→human':>8}")
+    order = sorted({p["stratum"] for p in pairs})
+    for s in order + ["ALL"]:
+        ps = pairs if s == "ALL" else [p for p in pairs
+                                       if p["stratum"] == s]
+        if not ps:
+            continue
+        d = [p["text_p"] - p["files_p"] for p in ps]
+        flips = [p for p in ps
+                 if p["files_class"] != p["text_class"]]
+        to_ai = sum(1 for p in flips if p["text_class"] == "ai")
+        to_hu = sum(1 for p in flips if p["text_class"] == "human")
+        print(f"{s:16}{len(ps):>4}"
+              f"{statistics.fmean(p['files_p'] for p in ps):>9.2f}"
+              f"{statistics.fmean(p['text_p'] for p in ps):>9.2f}"
+              f"{statistics.fmean(d):>+8.2f}"
+              f"{len(flips):>5}/{len(ps):<2}{to_ai:>6}{to_hu:>8}")
+    d = [p["text_p"] - p["files_p"] for p in pairs]
+    wins = sum(1 for x in d if x > 0)
+    losses = sum(1 for x in d if x < 0)
+    print(f"  text scores higher in {wins}/{wins + losses} decided "
+          f"documents; sign p={_sign_p(wins, wins + losses):.4f}")
+    big = [p for p in pairs if abs(p["text_p"] - p["files_p"]) >= 0.5]
+    print(f"  |Δ| >= 0.50 on {len(big)}/{len(pairs)} documents")
+
+
 def ablation_stats(rows: list[dict], abl_rows: list[dict]) -> dict:
     """Within-document comment/code decomposition: each selected
     document's ORIGINAL score against its code-only and comments-only
