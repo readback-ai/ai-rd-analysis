@@ -60,13 +60,14 @@ Caveats (they bound every number above):
   positives (early-Codex/Copilot-autocomplete volume was tiny) — the
   cleanest false-positive calibration in the design.
 - Every score here comes from the /v2/predict API document classifier.
-  The dashboard's Advanced Scan is NOT the same instrument: on one
-  agent document (openinference#3156) it reported AI 60% / mixed 5% /
-  human 35% under "Model 4.9b", while the API's own 4.9b response for
-  the identical bytes returns HUMAN_ONLY with ai=0.023, and the
-  standard dashboard scan returns 2%. Conclusions below — the
-  agent-invisibility result above all — bind to the API classifier,
-  not to every GPTZero surface.
+  Spot-checking four agent documents against the dashboard's Advanced
+  Scan (Model 4.9b) reproduced the API class probabilities on three of
+  them (including mixed 15% vs API 0.149). The fourth
+  (openinference#3156) returned AI 60% / mixed 5% / human 35% in
+  Advanced Scan where the API returns HUMAN_ONLY ai=0.023
+  deterministically across repeat calls, both model versions, and both
+  halves of the document (0.005 / 0.087) — unexplained and not
+  reproducible through the API.
 - The known-AI arm is canonical agent-authored (layer-B) PRs,
   Q4-2025..Q2-2026: as close to pure machine-written code as the study
   can sample. cursor/claude are pool-limited (21 and 9 eligible PRs
