@@ -59,15 +59,18 @@ Caveats (they bound every number above):
 - Q3-2022-era predates ChatGPT: its positives are near-pure FALSE
   positives (early-Codex/Copilot-autocomplete volume was tiny) — the
   cleanest false-positive calibration in the design.
-- Every score here comes from the /v2/predict API document classifier.
-  Spot-checking four agent documents against the dashboard's Advanced
-  Scan (Model 4.9b) reproduced the API class probabilities on three of
-  them (including mixed 15% vs API 0.149). The fourth
-  (openinference#3156) returned AI 60% / mixed 5% / human 35% in
-  Advanced Scan where the API returns HUMAN_ONLY ai=0.023
-  deterministically across repeat calls, both model versions, and both
-  halves of the document (0.005 / 0.087) — unexplained and not
-  reproducible through the API.
+- ENDPOINT ARTEFACT (2026-08-20). Every score here comes from
+  /v2/predict/FILES, which SILENTLY NORMALISES the upload before
+  scoring: across the 898 documents only 4 (0.4%) reached the model as
+  sent, mean byte loss 13.6% (max 47.9%), and just 15.9% of leading
+  whitespace survives — i.e. code indentation is largely destroyed.
+  /v2/predict/text preserves it and is what the dashboard's Advanced
+  Scan runs: on four spot-checked agent documents the text endpoint
+  reproduced Advanced Scan exactly, agreeing with the files endpoint on
+  three but FLIPPING the fourth (openinference#3156) from human
+  ai=0.023 to ai=0.596. The corpus-wide size of this effect is
+  unmeasured; every number in this report is a files-endpoint number
+  until a text-endpoint comparison is run.
 - The known-AI arm is canonical agent-authored (layer-B) PRs,
   Q4-2025..Q2-2026: as close to pure machine-written code as the study
   can sample. cursor/claude are pool-limited (21 and 9 eligible PRs
