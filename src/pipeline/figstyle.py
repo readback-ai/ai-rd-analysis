@@ -10,6 +10,8 @@ w8-provisional at the current AS_OF, marked by the standard shaded band.
 
 Importing this module selects the Agg backend; scripts use its `plt`.
 """
+import pathlib
+
 import matplotlib
 
 matplotlib.use("Agg")
@@ -178,7 +180,13 @@ def cell(rows, per, sl, key, scale=1):
     return None if v is None else scale * v
 
 
-def save(fig, path):
-    """House export: 200 dpi, tight bbox, provenance line on stdout."""
-    fig.savefig(path, dpi=200, bbox_inches="tight")
-    print(f"wrote {path}")
+def save(fig, path, formats=("png",)):
+    """House export: 200 dpi, tight bbox, provenance line on stdout.
+
+    Every requested format is written from the SAME figure object, so a
+    PNG and an SVG of one figure cost one render and cannot disagree."""
+    stem = pathlib.Path(path).with_suffix("")
+    for fmt in formats:
+        out = stem.with_suffix(f".{fmt}")
+        fig.savefig(out, dpi=200, bbox_inches="tight")
+        print(f"wrote {out}")

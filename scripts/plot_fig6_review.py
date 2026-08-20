@@ -10,14 +10,17 @@ construction (no detectable channel existed). Merged outcomes are
 mature-gated (Q2-2026 reflects PRs whose w8 window closed; finalizes
 with AS_OF re-pulls). Broken x-axis: Q1-2024 | Q4-2025..Q2-2026.
 
+Data:    artifacts/data/fig6_review_mix.csv,
+         artifacts/data/fig6_review_mix_by_ai.csv
 Outputs: artifacts/fig6_review_mix.png, artifacts/fig6_review_mix_by_ai.png
-Usage:  PYTHONPATH=src python scripts/plot_fig6_review.py
+Usage:   PYTHONPATH=src python scripts/plot_fig6_review.py
 """
 import sys
 
 sys.path.insert(0, "src")
+from pipeline.figdata import Table, figure_main
 from pipeline.figstyle import (broken_pair, cell, paired_series6, plt,
-                               quarter_series, save, shade_q2_partial)
+                               quarter_series, shade_q2_partial)
 from pipeline.studies.productivity import PERIODS, review_mix
 
 VARIANTS = [
@@ -31,35 +34,50 @@ VARIANTS = [
      "artifacts/fig6_review_mix_by_ai.png"),
 ]
 
+UNITS = [("pr", "share of merged PRs", "% of merged PRs"),
+         ("loc", "share of merged LOC", "% of merged LOC")]
 
-def render(by, dark, light, suptitle, out) -> None:
+
+def collect(name, by, dark, light) -> Table:
     rows = review_mix(by)
+    t = Table(name)
+    for unit, title, _ylabel in UNITS:
+        for ch, sl, _color, label in paired_series6(dark, light):
+            t.add_series(unit, f"{ch}_{sl}",
+                         [cell(rows, p, sl, f"{ch}_{unit}", scale=100)
+                          for p in PERIODS],
+                         x_labels=PERIODS, panel_label=title,
+                         series_label=label)
+    return t
+
+
+def render(t: Table, dark, light, suptitle):
     fig = plt.figure(figsize=(11, 4.6))
     fig.suptitle(suptitle, fontsize=12, y=-0.16)   # below the bottom legend
     subfigs = fig.subfigures(1, 2, wspace=0.05)
-    for sf, unit, title in ((subfigs.flat[0], "pr",
-                             "share of merged PRs"),
-                            (subfigs.flat[1], "loc",
-                             "share of merged LOC")):
-        axl, axr = broken_pair(sf, title)
+    for sf, (unit, _title, ylabel) in zip(subfigs.flat, UNITS):
+        axl, axr = broken_pair(sf, t.label_of(unit))
         for ch, sl, color, label in paired_series6(dark, light):
-            y = [cell(rows, p, sl, f"{ch}_{unit}", scale=100)
-                 for p in PERIODS]
-            quarter_series(axl, axr, y, color, label)
+            quarter_series(axl, axr, t.values(unit, f"{ch}_{sl}"),
+                           color, label)
         # Q2-2026 is PARTIAL: only PRs whose w8 window closed by the
         # AS_OF are classified (early-quarter weighted until the re-pull)
         shade_q2_partial(axr)
         axl.set_ylim(0, 100)
-        axl.set_ylabel("% of merged " + ("PRs" if unit == "pr" else "LOC"))
+        axl.set_ylabel(ylabel)
     handles, labels = axr.get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=4, fontsize=8,
                frameon=False, bbox_to_anchor=(0.5, -0.08))
-    save(fig, out)
+    return fig
 
 
 def main() -> None:
-    for variant in VARIANTS:
-        render(*variant)
+    for by, dark, light, suptitle, out in VARIANTS:
+        name = out.split("/")[-1].removesuffix(".png")
+        figure_main(lambda n=name, b=by, d=dark, li=light:
+                    collect(n, b, d, li),
+                    lambda t, d=dark, li=light, s=suptitle:
+                    render(t, d, li, s), out)
 
 
 if __name__ == "__main__":
