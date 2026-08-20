@@ -25,9 +25,6 @@ def main() -> None:
     rows = (len(cohorts) + 1) // 2
     fig, axes = plt.subplots(rows, 2, figsize=(9, 3.75 * rows),
                              squeeze=False)
-    fig.suptitle("Figure 2: LOC per contributor around first AI adoption, "
-                 "by adoption month (balanced cohorts, finalized months "
-                 "only)", fontsize=12, y=-0.03)
     for ax, (t0_mon, c) in zip(axes.flat, cohorts):
         offs = sorted(c["offsets"])
         for key, color, ls, label in LOC_SERIES:

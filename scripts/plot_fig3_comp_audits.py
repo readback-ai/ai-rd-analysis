@@ -42,9 +42,6 @@ def main() -> None:
     mix = review_mix(by="ai", fleet_slice=True, granularity="month")
     att = attention_by_ai(fleet_slice=True, granularity="month")
     fig = plt.figure(figsize=(11, 4.4))
-    fig.suptitle("Figure 3 companion: human review coverage and attention "
-                 "per line, by PR type (monthly, finalized months only)",
-                 fontsize=12, y=-0.08)
     subfigs = fig.subfigures(1, 2, wspace=0.05)
 
     axl, axr = panel(subfigs.flat[0], "% of merged PRs human-reviewed",
