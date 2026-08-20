@@ -40,8 +40,6 @@ def collect() -> Table:
 
 def render(t: Table):
     fig = plt.figure(figsize=(13, 7))
-    fig.suptitle("Figure A1: LOC per contributor per month, submitted and "
-                 "merged, by adoption cohort", fontsize=12, y=-0.04)
     subfigs = fig.subfigures(2, 3, hspace=0.08, wspace=0.05)
     prov = [i for i, m in enumerate(WINDOW) if not month_w8_mature(m)]
     for sf, coh in zip(subfigs.flat, t.panels()):

@@ -54,9 +54,7 @@ def collect_usage() -> Table:
 
 
 def render_usage(t: Table):
-    fig, axl, axr = broken_axes(
-        t.label_of("usage"),
-        "Figure 2: Traceable AI usage over time (CW, 95% CI; floors)")
+    fig, axl, axr = broken_axes(t.label_of("usage"))
     for key, label, color in USAGE:
         series(axl, axr, t.points("usage", key), label, color)
     axl.set_ylim(bottom=0)
@@ -81,10 +79,7 @@ def collect_core() -> Table:
 
 
 def render_core(t: Table):
-    fig, axl, axr = broken_axes(
-        t.label_of("core_loc"),
-        "Figure 3: Submitted and merged LOC per core contributor "
-        "(CW, 95% CI)")
+    fig, axl, axr = broken_axes(t.label_of("core_loc"))
     for key, _mult_key, label, color, _offset in CORE:
         series(axl, axr, t.points("core_loc", key), label, color)
     for i in range(len(t.points("core_loc", CORE[0][0]))):

@@ -59,10 +59,6 @@ def collect() -> Table:
 
 def render(t: Table):
     fig = plt.figure(figsize=(11, 4.4))
-    fig.suptitle("Figure 8: responsiveness to human review requests — AI vs "
-                 "non-AI PRs (CLEAN lane; (a) equal-probability sample, "
-                 "unweighted / (b) PPS-by-LOC, HT; fleet authors excluded)",
-                 fontsize=11, y=-0.08)
     subfigs = fig.subfigures(1, 2, wspace=0.05)
     for sf, (kind, _title) in zip(subfigs.flat, PANELS):
         title = t.label_of(kind)

@@ -38,9 +38,6 @@ def collect() -> Table:
 
 def render(t: Table):
     fig = plt.figure(figsize=(11, 4.4))
-    fig.suptitle("Figure 7: human attention per line — AI vs non-AI "
-                 "merged PRs (fleet authors excluded)", fontsize=12,
-                 y=-0.08)
     subfigs = fig.subfigures(1, 2, wspace=0.05)
     for sf, (key, _title) in zip(subfigs.flat, PANELS):
         title = t.label_of(key)

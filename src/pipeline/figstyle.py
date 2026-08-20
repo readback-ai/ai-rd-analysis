@@ -115,9 +115,10 @@ def broken_pair(subfig, title, span="quarter", window=None,
     return axl, axr
 
 
-def broken_axes(ylabel: str, title: str):
+def broken_axes(ylabel: str):
     """Whole-figure broken-axis variant (paper figures 2/3): full-length
-    quarter labels, caption below the figure."""
+    quarter labels. Figures carry no caption — the paper supplies it in
+    text, and artifacts/data/<figure>.csv carries the panel labels."""
     fig, (axl, axr) = plt.subplots(
         1, 2, sharey=True, figsize=(8, 4.5),
         gridspec_kw={"width_ratios": [1, 4], "wspace": 0.06})
@@ -130,7 +131,6 @@ def broken_axes(ylabel: str, title: str):
     axr.tick_params(left=False)
     _break_marks(axl, axr, markersize=12)
     axl.set_ylabel(ylabel)
-    fig.suptitle(title, y=-0.06)   # caption below the figure
     return fig, axl, axr
 
 

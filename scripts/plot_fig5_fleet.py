@@ -42,8 +42,6 @@ def collect() -> Table:
 
 def render(t: Table):
     fig = plt.figure(figsize=(11, 4.6))
-    fig.suptitle("Figure 5: fleet operators vs non-adopters — LOC per "
-                 "contributor per month", fontsize=12, y=-0.08)
     subfigs = fig.subfigures(1, 2, wspace=0.05)
     prov = [i for i, m in enumerate(WINDOW) if not month_w8_mature(m)]
     for sf, coh in zip(subfigs.flat, t.panels()):

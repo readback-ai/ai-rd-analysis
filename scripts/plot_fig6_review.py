@@ -25,12 +25,8 @@ from pipeline.studies.productivity import PERIODS, review_mix
 
 VARIANTS = [
     ("role", ("ins", "core"), ("ext", "external"),
-     "Figure 6: review of merged PRs and merged LOC — core vs external "
-     "(fleet authors excluded)",
      "artifacts/fig6_review_mix.png"),
     ("ai", ("ai", "AI-involved"), ("nonai", "non-AI"),
-     "Figure 6 (alt): review of merged PRs and merged LOC — AI vs "
-     "non-AI PRs (fleet authors excluded)",
      "artifacts/fig6_review_mix_by_ai.png"),
 ]
 
@@ -51,9 +47,8 @@ def collect(name, by, dark, light) -> Table:
     return t
 
 
-def render(t: Table, dark, light, suptitle):
+def render(t: Table, dark, light):
     fig = plt.figure(figsize=(11, 4.6))
-    fig.suptitle(suptitle, fontsize=12, y=-0.16)   # below the bottom legend
     subfigs = fig.subfigures(1, 2, wspace=0.05)
     for sf, (unit, _title, ylabel) in zip(subfigs.flat, UNITS):
         axl, axr = broken_pair(sf, t.label_of(unit))
@@ -72,12 +67,11 @@ def render(t: Table, dark, light, suptitle):
 
 
 def main() -> None:
-    for by, dark, light, suptitle, out in VARIANTS:
+    for by, dark, light, out in VARIANTS:
         name = out.split("/")[-1].removesuffix(".png")
         figure_main(lambda n=name, b=by, d=dark, li=light:
                     collect(n, b, d, li),
-                    lambda t, d=dark, li=light, s=suptitle:
-                    render(t, d, li, s), out)
+                    lambda t, d=dark, li=light: render(t, d, li), out)
 
 
 if __name__ == "__main__":

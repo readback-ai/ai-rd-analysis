@@ -53,9 +53,6 @@ def collect() -> Table:
 
 def render(t: Table):
     fig, axes = plt.subplots(1, 3, figsize=(12, 4.2))
-    fig.suptitle("Figure A2: LOC per contributor around first AI adoption "
-                 "(balanced panel, event time), net of the non-adopter "
-                 "mean", fontsize=12, y=-0.05)
     for ax, coh in zip(axes.flat, t.panels()):
         for key, color, ls, label in LOC_SERIES:
             pts = t.points(coh, key)
