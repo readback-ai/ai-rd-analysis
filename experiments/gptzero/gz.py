@@ -822,6 +822,26 @@ def cmd_freeze() -> None:
             (stage / RESULTS_NF.name).write_text(
                 "".join(json.dumps(r) + "\n" for r in nf_scores))
             kept.append(RESULTS_NF.name)
+    ep_rows = _load_rows(DOCS_EP)
+    if ep_rows:
+        want_ep = {(r["slot"], r["doc_sha"]) for r in ep_rows}
+        ep_scores = [r for r in _load_rows(RESULTS_EP)
+                     if (r["slot"], r["doc_sha"]) in want_ep
+                     and r.get("model_version") == gzc.PINNED_VERSION]
+        from collections import Counter
+        ep_dupes = [k for k, n in Counter(
+            (r["slot"], r["doc_sha"]) for r in ep_scores).items()
+            if n > 1]
+        if ep_dupes or len(ep_scores) != len(ep_rows):
+            raise SystemExit(
+                f"freeze refused: endpoint results must have exactly "
+                f"one row per sampled document under the pin "
+                f"({len(ep_scores)}/{len(ep_rows)}, dupes "
+                f"{ep_dupes[:3]})")
+        (stage / RESULTS_EP.name).write_text(
+            "".join(json.dumps(r) + "\n" for r in ep_scores))
+        shutil.copy(DOCS_EP, stage / DOCS_EP.name)
+        kept += [RESULTS_EP.name, DOCS_EP.name]
     abl_rows = _load_rows(DOCS_ABL)
     if abl_rows:
         want_abl = {(r["slot"], r["doc_sha"]) for r in abl_rows}
@@ -862,6 +882,11 @@ def cmd_freeze() -> None:
             analyze.report_ablation(
                 _load_rows(stage / RESULTS.name),
                 _load_rows(stage / RESULTS_ABL.name))
+        if ep_rows:
+            print()
+            analyze.report_endpoint(
+                _load_rows(stage / RESULTS.name),
+                _load_rows(stage / RESULTS_EP.name))
     (stage / "report.txt").write_text(buf.getvalue())
     (stage / "PROVENANCE.md").write_text(
         f"# Frozen audit set ({date.today().isoformat()})\n\n"
