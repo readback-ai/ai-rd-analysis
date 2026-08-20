@@ -59,18 +59,21 @@ Caveats (they bound every number above):
 - Q3-2022-era predates ChatGPT: its positives are near-pure FALSE
   positives (early-Codex/Copilot-autocomplete volume was tiny) — the
   cleanest false-positive calibration in the design.
-- ENDPOINT ARTEFACT (2026-08-20). Every score here comes from
-  /v2/predict/FILES, which SILENTLY NORMALISES the upload before
-  scoring: across the 898 documents only 4 (0.4%) reached the model as
-  sent, mean byte loss 13.6% (max 47.9%), and just 15.9% of leading
-  whitespace survives — i.e. code indentation is largely destroyed.
-  /v2/predict/text preserves it and is what the dashboard's Advanced
-  Scan runs: on four spot-checked agent documents the text endpoint
-  reproduced Advanced Scan exactly, agreeing with the files endpoint on
-  three but FLIPPING the fourth (openinference#3156) from human
-  ai=0.023 to ai=0.596. The corpus-wide size of this effect is
-  unmeasured; every number in this report is a files-endpoint number
-  until a text-endpoint comparison is run.
+- ENDPOINT (measured 2026-08-20). Scores here come from
+  /v2/predict/FILES, which normalises uploads before scoring: only 4 of
+  898 documents (0.4%) reached the model as sent, mean byte loss 13.6%,
+  and just 15.9% of leading whitespace survives. /v2/predict/text is
+  byte-faithful (96/96 exact) and is what the dashboard's Advanced Scan
+  runs. Under THIS report's pinned model (2026-07-04-base) that
+  normalisation is inert: a stratified 96-document re-score through the
+  text endpoint produced 0/96 verdict flips, 89/96 bit-identical
+  probabilities, and a maximum delta of 0.03 — so the numbers here are
+  endpoint-independent. It is NOT inert on the newer 2026-08-09-base:
+  openinference#3156 scores ai=0.096 on both endpoints under the
+  pinned model but splits to files ai=0.023 vs text ai=0.596 under the
+  newer one, i.e. the newer model is far more sensitive to indentation
+  and the files endpoint destroys it. Any future run should use
+  /v2/predict/text.
 - The known-AI arm is canonical agent-authored (layer-B) PRs,
   Q4-2025..Q2-2026: as close to pure machine-written code as the study
   can sample. cursor/claude are pool-limited (21 and 9 eligible PRs
