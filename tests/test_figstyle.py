@@ -7,6 +7,8 @@ diverged between copies, plot_fig6_review{,_ai}.py twin files).
 Every constant asserted here is the LEGACY value lifted verbatim from the
 scripts, so the migration is provably style-preserving.
 """
+import pathlib
+
 import matplotlib
 
 from pipeline import figstyle
@@ -96,15 +98,33 @@ def test_broken_pair_month_marks_every_month():
 
 
 def test_broken_axes_paper_variant():
-    """Legacy plot_paper_tables.broken_axes verbatim: its own figure,
-    full-length quarter labels, ylabel on the left panel, caption below."""
-    fig, axl, axr = broken_axes("share (%)", "Figure 2: usage")
+    """Legacy plot_paper_tables.broken_axes: its own figure, full-length
+    quarter labels, ylabel on the left panel."""
+    fig, axl, axr = broken_axes("share (%)")
     assert axl.get_xlim() == (-0.5, 0.5) and _labels(axl) == ["Q1-2024"]
     assert axr.get_xlim() == (-0.4, 2.4)
     assert _labels(axr) == ["Q4-2025", "Q1-2026", "Q2-2026"]
     assert axl.get_ylabel() == "share (%)"
     assert fig.get_size_inches().tolist() == [8, 4.5]
     figstyle.plt.close(fig)
+
+
+def test_figures_carry_no_caption():
+    """Captions belong in the paper text, not baked into the image: no
+    figure sets a suptitle, so the rendered canvas is the plot alone."""
+    fig, _axl, _axr = broken_axes("share (%)")
+    assert fig._suptitle is None
+    figstyle.plt.close(fig)
+
+
+def test_no_plot_script_sets_a_caption():
+    """The convention holds across every figure, not just the shared
+    helper — a caption baked into one script would print twice once the
+    paper supplies its own."""
+    scripts = pathlib.Path(__file__).resolve().parents[1] / "scripts"
+    offenders = [p.name for p in sorted(scripts.glob("plot_*.py"))
+                 if "suptitle" in p.read_text()]
+    assert offenders == []
 
 
 def test_shade_q2_partial_params():

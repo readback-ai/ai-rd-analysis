@@ -233,7 +233,14 @@ history; the report section title names the module. Highlights:
   month, collectable-population filter, appends to the month registry.
 - `plot_*.py` — one script per figure (`plot_paper_tables.py` renders
   Figures 2 AND 3; `plot_fig6_review.py` renders both fig6 variants —
-  core/external and AI/non-AI, formerly twin files). All house style
+  core/external and AI/non-AI, formerly twin files). Each script splits
+  into `collect()` — the study pass, returning a
+  **`src/pipeline/figdata.py`** Table written to
+  `artifacts/data/<figure>.csv` — and `render(table)`, which builds the
+  figure from that table alone. `--from-table` re-renders (a second image
+  format, a restyled axis) without reading the census store, and
+  `scripts/plot_all.py` collects every table in ONE census pass. All
+  house style
   lives in **`src/pipeline/figstyle.py`** (2026-07-26 architecture
   review, candidate 2): the broken x-axis panel pair (Q1-2024 sits ~7
   quarters before the continuous Q4-2025..Q2-2026 window), the
@@ -324,4 +331,6 @@ module invocation, printed in its section header by `scripts/report.py`.
 To reproduce one number: run that module with `PYTHONPATH=src` (the
 section title contains the exact `--table`/`--cut` argument); to
 reproduce everything: `scripts/regenerate.py`. Figures map 1:1 to
-`scripts/plot_*.py`.
+`scripts/plot_*.py`, and every plotted point is published alongside the
+image in `artifacts/data/<figure>.csv` — the table the figure was
+rendered from.
