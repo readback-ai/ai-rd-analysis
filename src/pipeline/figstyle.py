@@ -10,10 +10,17 @@ w8-provisional at the current AS_OF, marked by the standard shaded band.
 
 Importing this module selects the Agg backend; scripts use its `plt`.
 """
+import pathlib
+
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+
+# SVG element ids are salted per process unless the salt is pinned; with
+# the timestamp suppressed in save(), that makes an SVG re-render of an
+# unchanged figure byte-identical.
+matplotlib.rcParams["svg.hashsalt"] = "ai-rd-analysis"
 
 # monthly-figure x domains (fig5, A1): the Q1-2024 baseline months and the
 # continuous Oct-2025..Jun-2026 window
@@ -113,9 +120,10 @@ def broken_pair(subfig, title, span="quarter", window=None,
     return axl, axr
 
 
-def broken_axes(ylabel: str, title: str):
+def broken_axes(ylabel: str):
     """Whole-figure broken-axis variant (paper figures 2/3): full-length
-    quarter labels, caption below the figure."""
+    quarter labels. Figures carry no caption — the paper supplies it in
+    text, and artifacts/data/<figure>.csv carries the panel labels."""
     fig, (axl, axr) = plt.subplots(
         1, 2, sharey=True, figsize=(8, 4.5),
         gridspec_kw={"width_ratios": [1, 4], "wspace": 0.06})
@@ -128,7 +136,6 @@ def broken_axes(ylabel: str, title: str):
     axr.tick_params(left=False)
     _break_marks(axl, axr, markersize=12)
     axl.set_ylabel(ylabel)
-    fig.suptitle(title, y=-0.06)   # caption below the figure
     return fig, axl, axr
 
 
@@ -178,7 +185,16 @@ def cell(rows, per, sl, key, scale=1):
     return None if v is None else scale * v
 
 
-def save(fig, path):
-    """House export: 200 dpi, tight bbox, provenance line on stdout."""
-    fig.savefig(path, dpi=200, bbox_inches="tight")
-    print(f"wrote {path}")
+def save(fig, path, formats=("png",)):
+    """House export: 200 dpi, tight bbox, provenance line on stdout.
+
+    Every requested format is written from the SAME figure object, so a
+    PNG and an SVG of one figure cost one render and cannot disagree."""
+    stem = pathlib.Path(path).with_suffix("")
+    for fmt in formats:
+        out = stem.with_suffix(f".{fmt}")
+        # SVG carries a dc:date of the moment it was written; drop it so
+        # the file is a function of the figure alone
+        kw = {"metadata": {"Date": None}} if fmt == "svg" else {}
+        fig.savefig(out, dpi=200, bbox_inches="tight", **kw)
+        print(f"wrote {out}")

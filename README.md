@@ -75,7 +75,7 @@ cohorts incl. fleet).
 | 4 | `pipeline.analyze` | per-repo rates → contributor-weighted means + bootstrap CIs |
 | 5 | `pipeline.studies.layers` | exact per-PR layered decomposition (B > A > C disjoint; union = ai_involved) |
 | studies | `pipeline.studies.*` | one analysis = one module: paper figures, productivity/adoption cohorts, attention, fates, event study, responsiveness (HT-weighted), slices, layer-C precision |
-| figures | `scripts/plot_paper_tables.py`, `scripts/plot_adoption_cohorts.py` | Figures 2–4 (broken x-axis) |
+| figures | `scripts/plot_all.py` (all), `scripts/plot_*.py` (one each) | each figure's plotted points -> `artifacts/data/<figure>.csv`, then the image is rendered from that table |
 | monthly | `scripts/monthly_update.py` | incremental month ingestion (provisional-month revision + persistent month registry) |
 
 ## Reproduction
@@ -89,8 +89,10 @@ uv run python -m pipeline.org_set --verify   # population reconciliation
 # without it rather than printing empty reports. With the store present:
 uv run python scripts/regenerate.py          # full pipeline -> artifacts/report_generated.md
 PYTHONPATH=src uv run python scripts/report.py --granularity month   # monthly twin
-PYTHONPATH=src uv run python scripts/plot_paper_tables.py            # figs 2-3
-PYTHONPATH=src uv run python scripts/plot_adoption_cohorts.py        # fig 4
+PYTHONPATH=src uv run python scripts/plot_all.py                     # every figure
+                                                                     # + artifacts/data/*.csv
+# re-render from the committed tables (no census store needed):
+PYTHONPATH=src uv run python scripts/plot_all.py --from-tables --format png,svg
 ```
 
 To review the code, start with [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md) —
