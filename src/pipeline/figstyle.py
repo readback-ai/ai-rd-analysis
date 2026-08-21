@@ -17,6 +17,11 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
+# SVG element ids are salted per process unless the salt is pinned; with
+# the timestamp suppressed in save(), that makes an SVG re-render of an
+# unchanged figure byte-identical.
+matplotlib.rcParams["svg.hashsalt"] = "ai-rd-analysis"
+
 # monthly-figure x domains (fig5, A1): the Q1-2024 baseline months and the
 # continuous Oct-2025..Jun-2026 window
 BASELINE = ["2024-01", "2024-02", "2024-03"]
@@ -188,5 +193,8 @@ def save(fig, path, formats=("png",)):
     stem = pathlib.Path(path).with_suffix("")
     for fmt in formats:
         out = stem.with_suffix(f".{fmt}")
-        fig.savefig(out, dpi=200, bbox_inches="tight")
+        # SVG carries a dc:date of the moment it was written; drop it so
+        # the file is a function of the figure alone
+        kw = {"metadata": {"Date": None}} if fmt == "svg" else {}
+        fig.savefig(out, dpi=200, bbox_inches="tight", **kw)
         print(f"wrote {out}")

@@ -82,6 +82,20 @@ def test_save_writes_every_format_from_one_figure(tmp_path):
     assert out.exists() and out.with_suffix(".svg").exists()
 
 
+def test_svg_rerender_is_byte_identical(tmp_path):
+    """The point of rendering from a table is that a re-render reproduces
+    the figure. Matplotlib defaults defeat that for SVG: it stamps a
+    dc:date and salts element ids per process, so the same figure saved
+    twice differs."""
+    fig = plt.figure()
+    fig.add_subplot().plot([0, 1], [1, 2])
+    save(fig, tmp_path / "a.png", formats=("svg",))
+    save(fig, tmp_path / "b.png", formats=("svg",))
+    first = (tmp_path / "a.svg").read_bytes()
+    assert b"dc:date" not in first
+    assert first == (tmp_path / "b.svg").read_bytes()
+
+
 def test_from_table_skips_collection(tmp_path, monkeypatch, capsys):
     """--from-table must render off the committed CSV: the expensive
     study pass is never entered."""

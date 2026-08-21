@@ -78,8 +78,13 @@ def main(argv=None) -> None:
             if not a.from_tables:
                 figdata.write(table)
             save(render(table), out, formats=formats)
-        except Exception as exc:                  # keep going: one broken
-            failed.append((name, exc))            # figure must not block
+        # SystemExit too, not just Exception: a study bails that way when
+        # its inputs are stale (review_action on an out-of-date selection
+        # manifest), and one such figure must not discard the shared
+        # census pass the rest of the run depends on. KeyboardInterrupt
+        # stays uncaught so an operator can still stop the run.
+        except (Exception, SystemExit) as exc:
+            failed.append((name, exc))
             print(f"FAILED {name}: {exc}", flush=True)
     if failed:
         raise SystemExit(f"{len(failed)} figure(s) failed: "
