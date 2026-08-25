@@ -81,6 +81,19 @@ def test_q2_provisionality_note_clears_on_finalization(monkeypatch):
     assert productivity.q2_provisionality_note() == ""
 
 
+def test_figure3_caption_drops_the_q2_caveat_on_finalization(monkeypatch):
+    """Codex review P2: paper_tables.core() hard-coded '(Q2 provisional)',
+    so both the quarterly and monthly regenerated reports would keep
+    labelling Q2 provisional after the finalization re-pull."""
+    from pipeline.studies import paper_tables
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-25T00:00:00Z")
+    assert "(Q2 provisional)" in paper_tables.core_caption()
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-26T00:00:00Z")
+    caption = paper_tables.core_caption()
+    assert "provisional" not in caption
+    assert "merged = w8 rule" in caption      # the rest of it survives
+
+
 def test_event_study_mature_max_follows_as_of(monkeypatch):
     from pipeline.studies import event_study
     # Pin BOTH observation points: the contract is that maturity follows

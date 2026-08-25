@@ -147,11 +147,19 @@ def usage() -> None:
               f"  {_fmt(r['mrg_loc']):>20}")
 
 
+def core_caption() -> str:
+    """Figure 3's method line. The Q2 caveat is DERIVED from the data
+    stamp, so regenerating after the finalization re-pull drops it."""
+    from pipeline import detect
+    q2 = "" if detect.w8_closed(detect.CUTOFF) else " (Q2 provisional)"
+    return (f"contributor-weighted repo means, bootstrap 95% CI; merged = "
+            f"w8 rule{q2}; core = insider PR authors; repos with "
+            f">=2 insider authors")
+
+
 def core() -> None:
     print("Figure 3: Submitted and merged LOC per core contributor over time")
-    print("contributor-weighted repo means, bootstrap 95% CI; merged = w8 "
-          "rule (Q2 provisional); core = insider PR authors; repos with "
-          ">=2 insider authors")
+    print(core_caption())
     print(f"{'period':9}{'repos':>6}{'CW submitted kLOC/author':>28}"
           f"{'x base':>8}{'CW merged kLOC/author':>26}{'x base':>8}")
     for r in core_rows():

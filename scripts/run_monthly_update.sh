@@ -47,11 +47,14 @@ mkdir -p data/derived
 if [ -n "$AT" ]; then
     # Computed in Python: `date` parses ISO-8601 differently on BSD and GNU.
     SECS=$("$PY" - "$AT" <<'EOF'
+import math
 import sys
 from datetime import datetime, timezone
 t = datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%SZ").replace(
     tzinfo=timezone.utc)
-print(int(max(0, (t - datetime.now(timezone.utc)).total_seconds())))
+# Round UP: flooring can wake within the second before --at, which stamps
+# AS_OF a second early and trips the gate on an unattended run.
+print(max(0, math.ceil((t - datetime.now(timezone.utc)).total_seconds())))
 EOF
 )
     echo "waiting ${SECS}s until ${AT}" | tee -a "$LOG"
@@ -59,12 +62,29 @@ EOF
 fi
 
 DETECT=src/pipeline/detect.py
+BACKUP=""
+
+# The stamp is rolled back by a TRAP, not by the success path: a census
+# runs for hours and is far more likely to end on Ctrl-C or SIGTERM than
+# to return a bad status. Any exit that is not a completed, successful
+# run must leave detect.AS_OF exactly as it was found, or the tree keeps
+# a stamp claiming a census that never finished.
+rollback_as_of() {
+    [ -n "$BACKUP" ] && [ -f "$BACKUP" ] || return 0
+    cp "$BACKUP" "$DETECT"
+    rm -f "$BACKUP"
+    BACKUP=""
+    echo "run did not complete — rolled detect.AS_OF back" | tee -a "$LOG"
+}
+trap rollback_as_of EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
 if [ -n "$BUMP" ]; then
     # AS_OF stamps a collection that HAPPENED, so it is advanced here —
     # at the moment this run starts pulling — never committed ahead of
     # the pull. Commit the resulting one-line diff with the regenerated
-    # artifacts once the run succeeds. A failed run rolls it back below,
-    # so an aborted attempt leaves no stamp claiming data it never got.
+    # artifacts once the run succeeds.
     BACKUP="$(mktemp -t detect_as_of)"
     cp "$DETECT" "$BACKUP"
     "$PY" - "$(date -u +%Y-%m-%dT%H:%M:%SZ)" <<'EOF' | tee -a "$LOG"
@@ -96,11 +116,12 @@ set -e
 echo "=== $(date -u +%Y-%m-%dT%H:%M:%SZ) exit=${status} ===" | tee -a "$LOG"
 echo "log: $REPO/$LOG"
 
-if [ -n "$BUMP" ] && [ "$status" -ne 0 ]; then
-    cp "$BACKUP" "$DETECT"
-    echo "run failed — rolled detect.AS_OF back" | tee -a "$LOG"
+if [ "$status" -eq 0 ]; then
+    # Success is the only path that KEEPS the bumped stamp: discard the
+    # backup so the EXIT trap becomes a no-op.
+    rm -f "$BACKUP"
+    BACKUP=""
 fi
-[ -n "${BACKUP:-}" ] && rm -f "$BACKUP"
 
 if [ "$status" -eq 0 ]; then
     # New cells and a new stamp change published numbers, so the run is
