@@ -69,8 +69,8 @@ def check_finalizable(tok: str, now: datetime | None = None) -> None:
     whose events the census has not observed yet, so an unobserved merge
     reads as never-merged."""
     stamp = datetime.strptime(detect.AS_OF, _STAMP).replace(tzinfo=timezone.utc)
-    need = finalization_stamp(tok)
-    if stamp < datetime.strptime(need, _STAMP).replace(tzinfo=timezone.utc):
+    if not detect.w8_closed(f"{month_range(tok).split('..')[1]}T23:59:59Z"):
+        need = finalization_stamp(tok)
         raise SystemExit(
             f"refusing to finalize {tok}: detect.AS_OF is {detect.AS_OF}, "
             f"but its w8 windows close at {need}. Run on/after that "

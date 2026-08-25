@@ -121,12 +121,19 @@ AI-topic repos. Appendix cuts (org-type public/private/community via
    its rows are provisional (immature PRs carry no fate). Stale
    quarter-shaped cells overlapping a revised month are superseded PR-by-
    PR via the load-order freshness rule (`analyze.group_by_period`).
-2. (manual, per re-pull) BUMP `detect.AS_OF` to the run's start date —
-   maturity is judged against the data-collection stamp, and since mature
-   PRs are immutable, bumping only ever ADDS newly-mature PRs. The stamp
-   must clear the LAST creation date in the month being finalized: a PR
-   created 2026-06-30T23:59Z reaches 56 days only at 2026-08-26T00:00Z,
-   so a stamp of 2026-08-25 leaves June's final day immature. Fixtures
+2. BUMP `detect.AS_OF` to the run's start date — maturity is judged
+   against the data-collection stamp, and since mature PRs are immutable,
+   bumping only ever ADDS newly-mature PRs. The stamp must clear the LAST
+   creation date in the month being finalized: a PR created
+   2026-06-30T23:59Z reaches 56 days only at 2026-08-26T00:00Z, so a
+   stamp of 2026-08-25 leaves June's final day immature. It also records
+   a pull that HAPPENED and is read directly by ~17 modules, so it is
+   never committed ahead of its re-pull — a future stamp makes every
+   reader treat stale cells as final, scoring unobserved events as
+   non-events. `run_monthly_update.sh --bump-as-of` therefore advances it
+   at the instant collection starts (rolling back if the run fails), and
+   the one-line diff is committed with the regenerated artifacts of step
+   5. `test_as_of_never_leads_the_wall_clock` pins the rule. Fixtures
    never assume the constant's current value — tests that turn on
    maturity pin their own `AS_OF` (it advances at every re-pull).
    Concretely for Q2-2026: the update adding 2026-07 (run ~Aug 1)
@@ -145,6 +152,16 @@ AI-topic repos. Appendix cuts (org-type public/private/community via
    on 2026-08-26; August itself lands with a later update.
 4. Prints the monthly trend tables (`analyze --granularity month`,
    2-PR/month floor ≈ the 5-PR/quarter threshold per unit time).
+5. REGENERATE the published artifacts. New cells plus a new stamp change
+   published numbers, so a finalization is not complete until
+   `regenerate.py`, the monthly `report.py`, and `plot_all.py` have been
+   rerun and committed alongside the `AS_OF` bump — otherwise figure
+   tables, images and reports keep describing the previous stamp.
+   Provisional annotations are DERIVED from the stamp, never hard-coded
+   (`detect.w8_closed` is the single home of the question;
+   `figstyle.shade_q2_partial` drops the Q2 band and
+   `productivity.q2_provisionality_note` empties its caption once Q2
+   closes), so regeneration alone clears them.
 Step 2 is enforced, not merely documented: `check_finalizable` refuses the
 run — BEFORE any cell is wiped — unless `AS_OF` both reaches the N-2
 month's `finalization_stamp` (its last creation instant + 56d) and does
@@ -308,7 +325,7 @@ classified by its author into exactly one of three reviewer types:
    CREATION (the frame), not events — an event inside a PR's window
    counts even when it lands after CUTOFF (implicitly capped at
    CUTOFF + 56d since created <= CUTOFF), which is exactly what lets the
-   Sept 2026 re-pull finalize Q2 without changing the frame or any rule —
+   2026-08-26 re-pull finalize Q2 without changing the frame or any rule —
    only the AS_OF data stamp advances. Every
    per-PR quantity FINALIZES at w8; re-collection can never change a
    mature PR's classification — fates and review metrics alike. Measured impact of adopting the rule (pooled
@@ -437,7 +454,7 @@ by design, and per-PR dedup is what makes that safe. Combined with the
 w8 event window and the AS_OF maturity stamp, this gives the update
 calendar its meaning: a month's fates become final exactly when a
 re-collection runs after its last 8-week window closed (May at the
-~Aug 1 update, June at ~Sept 1), and nothing already mature can move.
+~Aug 1 update, June at 2026-08-26), and nothing already mature can move.
 
 Per-PR field caps: the census fetches each PR's first 12 commits and 15 reviews
 (no per-PR pagination — one search call per ~45 PRs is what makes a

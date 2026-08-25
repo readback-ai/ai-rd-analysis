@@ -251,6 +251,31 @@ def test_user_typed_bot_accounts_are_not_human_reviewers():
     assert classify_pr(ok).human_reviewed          # human name, no false positive
 
 
+def test_as_of_never_leads_the_wall_clock():
+    """Codex review P1: AS_OF was committed at 2026-08-26 while the
+    re-pull had not run. It is the stamp of a collection that HAPPENED,
+    and 17 modules read it directly — a future stamp makes every one of
+    them treat late-June PRs as mature against stale cells, reading
+    unobserved events as non-events. Bump it as part of the re-pull."""
+    from datetime import datetime, timezone
+
+    from pipeline import detect
+    stamp = datetime.strptime(detect.AS_OF, "%Y-%m-%dT%H:%M:%SZ").replace(
+        tzinfo=timezone.utc)
+    assert stamp <= datetime.now(timezone.utc), (
+        f"detect.AS_OF ({detect.AS_OF}) is in the future")
+
+
+def test_w8_closed_tracks_the_last_creation_instant(monkeypatch):
+    """The single home of 'has this period finalized?' — previously
+    recomputed in productivity, figstyle's caller, and monthly_update."""
+    from pipeline import detect
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-25T00:00:00Z")
+    assert not detect.w8_closed("2026-06-30T23:59:59Z")
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-26T00:00:00Z")
+    assert detect.w8_closed("2026-06-30T23:59:59Z")
+
+
 def test_w8_censoring_rule(monkeypatch):
     """Frozen convention: outcomes at 8 weeks post-creation; immature PRs
     carry no fate."""

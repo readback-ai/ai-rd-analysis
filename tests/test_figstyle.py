@@ -127,9 +127,24 @@ def test_no_plot_script_sets_a_caption():
     assert offenders == []
 
 
-def test_shade_q2_partial_params():
+def test_q2_band_disappears_once_the_quarter_finalizes(monkeypatch):
+    """Codex review P1: the Q2 band was unconditional, so every quarter
+    figure would keep shading and labelling Q2 'provisional' after the
+    finalization re-pull. Derive it from the data stamp instead."""
+    from pipeline import detect
+    fig, ax = figstyle.plt.subplots()
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-25T00:00:00Z")
+    assert shade_q2_partial(ax) is not None      # windows still open
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-26T00:00:00Z")
+    assert shade_q2_partial(ax) is None          # finalized: no band
+    figstyle.plt.close(fig)
+
+
+def test_shade_q2_partial_params(monkeypatch):
     """The magic band verbatim: axvspan(1.6, 2.4, color="0.85", alpha=0.5,
     zorder=0) — previously copied into 11 call sites."""
+    from pipeline import detect
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-01T00:00:00Z")
     fig, ax = figstyle.plt.subplots()
     span = shade_q2_partial(ax)
     assert (span.get_x(), span.get_x() + span.get_width()) == (1.6, 2.4)

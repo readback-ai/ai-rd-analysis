@@ -70,6 +70,17 @@ def test_attention_counts_w8_windowed_comments_past_cutoff(monkeypatch):
     assert attention.human_comment_count(pr) == 4
 
 
+def test_q2_provisionality_note_clears_on_finalization(monkeypatch):
+    """Codex review P1: report captions asserted Q2 was 'w8-deflated for
+    May/June PRs' unconditionally, so a finalized quarter would keep
+    publishing the caveat. Derive it from the data stamp."""
+    from pipeline.studies import productivity
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-25T00:00:00Z")
+    assert "w8-deflated" in productivity.q2_provisionality_note()
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-26T00:00:00Z")
+    assert productivity.q2_provisionality_note() == ""
+
+
 def test_event_study_mature_max_follows_as_of(monkeypatch):
     from pipeline.studies import event_study
     # Pin BOTH observation points: the contract is that maturity follows

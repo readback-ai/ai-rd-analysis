@@ -9,11 +9,18 @@
 # handles the waiting and keeps a durable log, and reports whatever exit
 # code the update produced.
 #
+# --bump-as-of advances detect.AS_OF to this run's start instant, right
+# before collection. The stamp records a pull that happened and every
+# analysis entry point reads it, so it is never committed ahead of the
+# pull; commit the one-line diff with the regenerated artifacts after.
+#
 # Usage:
-#   scripts/run_monthly_update.sh [--at YYYY-MM-DDTHH:MM:SSZ] <monthly_update args>
+#   scripts/run_monthly_update.sh [--at YYYY-MM-DDTHH:MM:SSZ] [--bump-as-of] \
+#       <monthly_update args>
 #
 # June-2026 finalization (August stays uncollected — it is still partial):
-#   scripts/run_monthly_update.sh --at 2026-08-26T00:00:00Z 2026-08 --revise-only
+#   scripts/run_monthly_update.sh --at 2026-08-26T00:00:00Z --bump-as-of \
+#       2026-08 --revise-only
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -23,11 +30,15 @@ PY=.venv/bin/python
 [ -x "$PY" ] || { echo "no venv at $REPO/$PY — run 'uv sync' first" >&2; exit 3; }
 
 AT=""
-if [ "${1:-}" = "--at" ]; then
-    AT="${2:?--at needs an ISO-8601 UTC instant, e.g. 2026-08-26T00:00:00Z}"
-    shift 2
-fi
-[ "$#" -gt 0 ] || { sed -n '2,16p' "$0"; exit 2; }
+BUMP=""
+while : ; do
+    case "${1:-}" in
+        --at) AT="${2:?--at needs an ISO-8601 UTC instant, e.g. 2026-08-26T00:00:00Z}"; shift 2 ;;
+        --bump-as-of) BUMP=1; shift ;;
+        *) break ;;
+    esac
+done
+[ "$#" -gt 0 ] || { sed -n '2,21p' "$0"; exit 2; }
 
 # data/derived/*.log is gitignored; one log per run, named for its start.
 LOG="data/derived/monthly_update_$(date -u +%Y%m%dT%H%M%SZ).log"
@@ -47,6 +58,31 @@ EOF
     sleep "$SECS"
 fi
 
+DETECT=src/pipeline/detect.py
+if [ -n "$BUMP" ]; then
+    # AS_OF stamps a collection that HAPPENED, so it is advanced here —
+    # at the moment this run starts pulling — never committed ahead of
+    # the pull. Commit the resulting one-line diff with the regenerated
+    # artifacts once the run succeeds. A failed run rolls it back below,
+    # so an aborted attempt leaves no stamp claiming data it never got.
+    BACKUP="$(mktemp -t detect_as_of)"
+    cp "$DETECT" "$BACKUP"
+    "$PY" - "$(date -u +%Y-%m-%dT%H:%M:%SZ)" <<'EOF' | tee -a "$LOG"
+import pathlib
+import re
+import sys
+p = pathlib.Path("src/pipeline/detect.py")
+src = p.read_text()
+new, n = re.subn(r'^AS_OF = "[^"]*"$', f'AS_OF = "{sys.argv[1]}"', src,
+                 count=1, flags=re.M)
+if n != 1:
+    sys.exit("could not find the AS_OF assignment in detect.py")
+old = re.search(r'^AS_OF = "([^"]*)"$', src, re.M).group(1)
+p.write_text(new)
+print(f"bumped detect.AS_OF: {old} -> {sys.argv[1]}")
+EOF
+fi
+
 # errexit off across the pipeline: a failed update must still reach the
 # reporting below instead of killing the script at the pipe.
 set +e
@@ -59,4 +95,24 @@ status=${PIPESTATUS[0]}
 set -e
 echo "=== $(date -u +%Y-%m-%dT%H:%M:%SZ) exit=${status} ===" | tee -a "$LOG"
 echo "log: $REPO/$LOG"
+
+if [ -n "$BUMP" ] && [ "$status" -ne 0 ]; then
+    cp "$BACKUP" "$DETECT"
+    echo "run failed — rolled detect.AS_OF back" | tee -a "$LOG"
+fi
+[ -n "${BACKUP:-}" ] && rm -f "$BACKUP"
+
+if [ "$status" -eq 0 ]; then
+    # New cells and a new stamp change published numbers, so the run is
+    # not finished until the artifacts are rebuilt from them.
+    cat <<'NEXT'
+
+next: the finalized cells are in the store, but published artifacts still
+reflect the previous stamp. Regenerate and commit them together with the
+detect.AS_OF bump:
+    uv run python scripts/regenerate.py
+    PYTHONPATH=src uv run python scripts/report.py --granularity month
+    PYTHONPATH=src uv run python scripts/plot_all.py
+NEXT
+fi
 exit "$status"

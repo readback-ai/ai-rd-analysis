@@ -40,9 +40,10 @@ CUTOFF = "2026-06-30T23:59:59Z"
 # its 56-day window closed before we last looked). BUMP at each re-pull
 # (monthly updates, the Q2 finalization) to the run's start date — mature
 # PRs are immutable, so bumping only ever ADDS newly-mature PRs. The stamp
-# must clear the last creation date of the month being finalized, so it
-# is never set ahead of the collection it stands for (METHODS §1c).
-AS_OF = "2026-08-26T00:00:00Z"
+# must clear the last creation date of the month being finalized, and it
+# records a collection that HAPPENED: never set it ahead of the re-pull it
+# stands for, or every reader treats stale cells as final (METHODS §1c).
+AS_OF = "2026-08-01T00:00:00Z"
 
 # FROZEN CENSORING RULE (METHODS conventions): all per-PR outcomes are
 # measured at 8 WEEKS after PR creation. The maturity curves show merges
@@ -57,6 +58,18 @@ W8_DAYS = 56
 def _iso(ts: str):
     from datetime import datetime
     return datetime.fromisoformat(ts.replace("Z", "+00:00"))
+
+
+def w8_closed(last_created: str) -> bool:
+    """Has every PR created at or before `last_created` reached the w8
+    horizon under the data stamp — i.e. does that span carry final fates?
+
+    The single home of the question. Periods answer it with their last
+    creation instant: a calendar month's month-end 23:59:59, and Q2-2026's
+    is CUTOFF. Reported state must be DERIVED from this rather than
+    hard-coded, so a finalized period stops being labelled provisional the
+    moment the stamp advances."""
+    return (_iso(AS_OF) - _iso(last_created)).days >= W8_DAYS
 
 
 def _within_w8(created: str, event: str | None) -> bool:
