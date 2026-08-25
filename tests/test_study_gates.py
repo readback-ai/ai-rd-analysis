@@ -5,8 +5,20 @@ number obeys the frozen rule'."""
 import json
 import re
 
+import pytest
+
 from pipeline import detect
 from pipeline.detect import MARKERS, classify_pr
+
+# The data stamp advances with every re-pull (METHODS §1c), so a fixture's
+# maturity must never ride on the module constant's current value. Pin it
+# for the whole module; tests observing a different stamp re-pin their own.
+PINNED_AS_OF = "2026-08-01T00:00:00Z"
+
+
+@pytest.fixture(autouse=True)
+def pin_as_of(monkeypatch):
+    monkeypatch.setattr(detect, "AS_OF", PINNED_AS_OF)
 
 
 def _pr(created, merged=None, num=1, reviews=(), merged_by="bob"):

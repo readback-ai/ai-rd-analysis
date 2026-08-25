@@ -76,7 +76,8 @@ cohorts incl. fleet).
 | 5 | `pipeline.studies.layers` | exact per-PR layered decomposition (B > A > C disjoint; union = ai_involved) |
 | studies | `pipeline.studies.*` | one analysis = one module: paper figures, productivity/adoption cohorts, attention, fates, event study, responsiveness (HT-weighted), slices, layer-C precision |
 | figures | `scripts/plot_all.py` (all), `scripts/plot_*.py` (one each) | each figure's plotted points -> `artifacts/data/<figure>.csv`, then the image is rendered from that table |
-| monthly | `scripts/monthly_update.py` | incremental month ingestion (provisional-month revision + persistent month registry) |
+| monthly | `scripts/monthly_update.py` | incremental month ingestion (provisional-month revision + persistent month registry; `--revise-only` finalizes the revision window without collecting a partial target month) |
+| monthly (scheduled) | `scripts/run_monthly_update.sh` | waits for a w8 finalization instant (`--at`), runs the update, logs to `data/derived/` |
 
 ## Reproduction
 

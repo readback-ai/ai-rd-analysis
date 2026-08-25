@@ -251,9 +251,13 @@ def test_user_typed_bot_accounts_are_not_human_reviewers():
     assert classify_pr(ok).human_reviewed          # human name, no false positive
 
 
-def test_w8_censoring_rule():
+def test_w8_censoring_rule(monkeypatch):
     """Frozen convention: outcomes at 8 weeks post-creation; immature PRs
     carry no fate."""
+    from pipeline import detect
+    # Pin the data stamp: it advances with every re-pull (METHODS §1c),
+    # so which fixture is immature must not ride on its current value.
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-01T00:00:00Z")
     base = {"reviews": {"nodes": []}, "commits": {"nodes": []}}
     fast = dict(base, createdAt="2026-01-01T00:00:00Z",
                 mergedAt="2026-01-20T00:00:00Z")
@@ -453,7 +457,10 @@ def test_w8_maturity_follows_data_as_of_not_frame_end(monkeypatch):
               createdAt="2026-06-20T00:00:00Z",
               mergedAt="2026-07-10T00:00:00Z",
               mergedBy={"login": "alice", "__typename": "User"})
-    assert not classify_pr(pr).w8_mature          # as-of = frame end today
+    # Pin BOTH observation points — the contract is that maturity tracks
+    # AS_OF, so neither leg may depend on the constant's current value.
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-01T00:00:00Z")
+    assert not classify_pr(pr).w8_mature          # before the re-pull
     monkeypatch.setattr(detect, "AS_OF", "2026-09-01T00:00:00Z")
     assert classify_pr(pr).w8_mature              # after the Sept re-pull
     assert classify_pr(pr).merged

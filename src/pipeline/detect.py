@@ -37,12 +37,12 @@ from dataclasses import dataclass
 CUTOFF = "2026-06-30T23:59:59Z"
 # AS_OF: the data-collection stamp — when the census cells were last
 # (re-)pulled. Governs w8 MATURITY only (a PR's fate is reportable once
-# its 56-day window closed before we last looked). Kept conservatively at
-# the frame end while the initial 2026-07-01..09 collection stands; BUMP
-# at each re-pull (monthly updates, the 2026-09-01 Q2 finalization) to
-# the run's start date — mature PRs are immutable, so bumping only ever
-# ADDS newly-mature PRs (METHODS §1c).
-AS_OF = "2026-08-01T00:00:00Z"
+# its 56-day window closed before we last looked). BUMP at each re-pull
+# (monthly updates, the Q2 finalization) to the run's start date — mature
+# PRs are immutable, so bumping only ever ADDS newly-mature PRs. The stamp
+# must clear the last creation date of the month being finalized, so it
+# is never set ahead of the collection it stands for (METHODS §1c).
+AS_OF = "2026-08-26T00:00:00Z"
 
 # FROZEN CENSORING RULE (METHODS conventions): all per-PR outcomes are
 # measured at 8 WEEKS after PR creation. The maturity curves show merges

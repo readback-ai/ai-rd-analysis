@@ -285,12 +285,16 @@ def test_monthly_update_revises_two_trailing_months():
     assert mu.months_to_revise("2027-01") == ["2026-11", "2026-12"]
 
 
-def test_review_metrics_none_until_w8_mature():
+def test_review_metrics_none_until_w8_mature(monkeypatch):
     """Repro RED first: an immature PR's review window is still open, so
     its review columns are provisional undercounts — they must be None
     (skipped), same as fates, until w8 maturity."""
+    from pipeline import detect
     from pipeline.analyze import pr_metrics
     from pipeline.detect import MARKERS
+    # Pin the data stamp: it advances with every re-pull (METHODS §1c),
+    # so which fixture is immature must not ride on its current value.
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-01T00:00:00Z")
     immature = {"number": 1, "createdAt": "2026-06-20T00:00:00Z",
                 "author": {"login": "alice", "__typename": "User"},
                 "commits": {"nodes": []}, "reviews": {"nodes": []}}
@@ -303,12 +307,16 @@ def test_review_metrics_none_until_w8_mature():
     assert m["human_review"] is False and m["no_review"] is True
 
 
-def test_self_merged_none_until_w8_mature():
+def test_self_merged_none_until_w8_mature(monkeypatch):
     """Repro RED first: an immature PR can still get merged (and thus gain
     a mergedBy) later, so self_merged is a provisional quantity — None
     until w8 maturity, same gate as fates and review columns."""
+    from pipeline import detect
     from pipeline.analyze import pr_metrics
     from pipeline.detect import MARKERS
+    # Pin the data stamp: it advances with every re-pull (METHODS §1c),
+    # so which fixture is immature must not ride on its current value.
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-01T00:00:00Z")
     immature = {"number": 1, "createdAt": "2026-06-20T00:00:00Z",
                 "mergedAt": "2026-06-25T00:00:00Z",
                 "mergedBy": {"login": "alice", "__typename": "User"},
