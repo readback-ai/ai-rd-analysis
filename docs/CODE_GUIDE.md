@@ -260,7 +260,7 @@ history; the report section title names the module. Highlights:
 
 1. All per-PR events — fates AND review submissions — at **8 weeks from
    creation** (w8), bounded by the as-of; mature PRs immutable under
-   as-of advances. Q2-2026 provisional until the Sept 1, 2026 re-pull.
+   as-of advances. Q2-2026 provisional until the 2026-08-26 re-pull.
 2. Fate comparisons only at **matched horizons**.
 3. Primary attention = **human** comments/kLOC (bot comments can never
    share a numerator with human comments).
