@@ -626,9 +626,23 @@ content.
   w8-immature at the frozen as-of and carry no fate (excluded, not
   miscounted); Q2 fate cells have less data until the 2026-08-26 re-pull
   finalizes them (§1c).
-- **284 repo-periods (3.3%; 71 repos) permanently inaccessible** — each
-  waived explicitly in `inaccessible_repos.txt` (census manifest:
-  8,284 of 8,568 repo-periods covered).
+- **Repo-periods permanently inaccessible** — each waived explicitly in
+  `inaccessible_repos.txt` (75 repos; the census manifest carries the
+  current repo-period coverage). The list GROWS as repos are deleted or
+  taken private mid-study: the 2026-08-26 June finalization added four
+  (`agno-agi/agent-platform-railway`,
+  `dataelement/shougang-group-knowledge-portal`,
+  `huggingface/transformers-test-ci`, `RunanywhereAI/RunAnywhereAgent`)
+  whose owning orgs are alive but whose repositories now answer NOT_FOUND
+  on both GraphQL and the rename-following REST route. These are a
+  different case from the 422-unsearchable repos, which are RECOVERED via
+  `census_direct` rather than waived (above) — a deleted repository has no
+  object route left. Their pre-deletion cells stay in the store and keep
+  counting; only the re-collection is waived. Between them they held 7
+  June-2026 PRs at last observation, and `huggingface/transformers-test-ci`
+  is left with a June coverage gap (its June sub-window cells were wiped
+  by the revision and cannot be re-pulled), which is why the repo-level
+  waiver — not a period-level one — is the honest treatment.
 - **Branch-PR samples are first-page (created-desc) per org-quarter** — mild
   within-quarter recency bias.
 - **Insider classification** (authorAssociation) misses staff whose org
