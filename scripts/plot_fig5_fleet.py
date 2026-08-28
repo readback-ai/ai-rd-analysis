@@ -46,7 +46,8 @@ def collect() -> Table:
     return table(adoption_monthly(), "fig5_fleet_vs_nonadopters")
 
 
-def render(t: Table, ylabel: str = "kLOC / contributor / month"):
+def render(t: Table, ylabel: str = "kLOC / contributor / month",
+           legend_title: str | None = None):
     fig = plt.figure(figsize=(11, 4.6))
     subfigs = fig.subfigures(1, 2, wspace=0.05)
     prov = [i for i, m in enumerate(WINDOW) if not month_w8_mature(m)]
@@ -62,7 +63,7 @@ def render(t: Table, ylabel: str = "kLOC / contributor / month"):
                        label="w8 windows open (merged provisional)")
         axl.set_ylim(bottom=0)
         axl.set_ylabel(ylabel)
-        axr.legend(fontsize=7,
+        axr.legend(fontsize=7, title=legend_title,
                    loc="upper left" if coh == "fleet" else "lower right")
     return fig
 

@@ -498,7 +498,8 @@ def adoption_event(max_off: int = 2, balanced: bool = True) -> dict:
     return out
 
 
-def event_by_adoption_month(max_off: int = 2) -> dict:
+def event_by_adoption_month(max_off: int = 2, stat: str = "mean",
+                            require_active: bool = True) -> dict:
     """Figure 4: per-author kLOC (six metrics: submitted/merged x
     total/AI/non-AI) at offsets [-2..+2] around first observed AI use,
     one BALANCED cohort per ADOPTION MONTH — exactly the months whose
@@ -508,8 +509,28 @@ def event_by_adoption_month(max_off: int = 2) -> dict:
     inactive months count as zero volume. Within a cohort each offset
     maps to ONE calendar month.
 
+    `require_active` (default) keeps only members who submitted >=1 PR in
+    EVERY offset month, so each has a real pre-adoption baseline to move
+    from. Without it the cohort is defined by first AI evidence alone,
+    and 30-48% of members had no activity at t-2/t-1 while 0% can be
+    inactive at t0 (AI evidence requires a PR) — zero-filled inactive
+    months then make the step at adoption partly composition (authors
+    appearing in the data) rather than the treatment being measured. Pass
+    False only to quantify that difference.
+
+    `stat` selects the per-offset statistic over cohort members, as for
+    `adoption_monthly`: "mean" is the cohort total per member, "median"
+    the TYPICAL adopter. Per-author volume is heavy-tailed, so the mean
+    follows whoever the tail happens to be (METHODS §1d.4b). Medians are
+    per METRIC and do not decompose — AI and non-AI will not sum to their
+    total, because a different member sits at the middle of each.
+
     Returns {t0_month: {"n": int, "offsets": {e: {six metrics,
     "month": str}}}}."""
+    if stat not in ("mean", "median"):
+        raise ValueError(f"unknown stat: {stat!r} (mean|median)")
+    mid = statistics.median if stat == "median" else \
+        (lambda xs: sum(xs) / len(xs))
     acc, cohort_of_login, _q_of, _fleet = _author_months_and_cohorts()
     zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
 
@@ -525,9 +546,14 @@ def event_by_adoption_month(max_off: int = 2) -> dict:
             continue
         t0 = next((i for i, m in enumerate(WINDOW_MONTHS)
                    if acc[login].get(m, zero)[2] > 0), None)
-        if t0 is not None and max_off <= t0 < len(WINDOW_MONTHS) - max_off \
-                and month_w8_mature(WINDOW_MONTHS[t0 + max_off]):
-            by_t0[t0].append(login)
+        if t0 is None or not (max_off <= t0 < len(WINDOW_MONTHS) - max_off) \
+                or not month_w8_mature(WINDOW_MONTHS[t0 + max_off]):
+            continue
+        if require_active and not all(
+                (acc[login].get(WINDOW_MONTHS[t0 + e]) or zero)[3] > 0
+                for e in range(-max_off, max_off + 1)):
+            continue                     # no baseline to move from
+        by_t0[t0].append(login)
     out = {}
     for t0, members in sorted(by_t0.items()):
         offsets = {}
@@ -536,7 +562,7 @@ def event_by_adoption_month(max_off: int = 2) -> dict:
             vals = [metrics(acc[login].get(mon) or zero)
                     for login in members]
             offsets[e] = {"month": mon,
-                          **{k: sum(v[k] for v in vals) / len(vals)
+                          **{k: mid([v[k] for v in vals])
                              for k in vals[0]}}
         out[WINDOW_MONTHS[t0]] = {"n": len(members), "offsets": offsets}
     return out
