@@ -27,12 +27,29 @@ def _hours(a, b):
             - datetime.fromisoformat(a.replace("Z", "+00:00"))).total_seconds() / 3600
 
 
+# Per-(reviewer, PR) inline-comment cap, the attention analogue of the
+# per-PR LOC cap (frame.CAP): one reviewer's exhaustive pass over a single
+# PR is one act of review, not N units of attention, and an uncapped count
+# lets a line-by-line copy-edit carry a whole series. Set at the tail, not
+# the shoulder — across 112k reviewer-PR pairs the median is 2 and this
+# truncates 0.9% of pairs (3.2% of comments).
+COMMENT_CAP = 20
+
+
 def human_comment_count(pr: dict) -> int:
     """Inline comments on reviewer!=author human reviews; split_reviews is
-    bot-clean AND w8-windowed — no extra time filter belongs here."""
+    bot-clean AND w8-windowed — no extra time filter belongs here.
+
+    Each REVIEWER's comments are totalled across their reviews on the PR
+    and capped at COMMENT_CAP, so splitting one pass over several review
+    objects cannot evade the cap while a broadly reviewed PR still counts
+    every reviewer in full."""
     human_other, _, _ = split_reviews(pr)
-    return sum((r.get("comments") or {}).get("totalCount", 0)
-               for r in human_other)
+    per_reviewer: dict[str, int] = defaultdict(int)
+    for r in human_other:
+        login = (r.get("author") or {}).get("login") or ""
+        per_reviewer[login] += (r.get("comments") or {}).get("totalCount", 0)
+    return sum(min(n, COMMENT_CAP) for n in per_reviewer.values())
 
 
 def attention_by_ai(fleet_slice: bool = False,

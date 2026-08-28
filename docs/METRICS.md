@@ -33,11 +33,12 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
   past the frame end counts) — so mature PRs are immutable and re-pulls
   only fill in immature ones. PRs
   created after ~2026-05-05 have open w8 windows at the current as-of, so
-  Q2-2026 fate cells are PROVISIONAL until the scheduled **Sept 1, 2026
-  re-pull** (re-collect trailing months, bump `detect.AS_OF` — the
-  data-collection stamp; CUTOFF itself never changes), after which every
-  Q2 window is complete — the pipeline is built for this update
-  (monthly_update re-collection; nothing else changes). Residual: per-commit
+  Q2-2026 fate cells are PROVISIONAL until the scheduled **2026-08-26
+  re-pull** (June's last window closes 2026-08-25T23:59:59Z; re-collect
+  trailing months, bump `detect.AS_OF` — the data-collection stamp;
+  CUTOFF itself never changes), after which every Q2 window is complete —
+  the pipeline is built for this update (`monthly_update --revise-only`,
+  since August is still partial; nothing else changes). Residual: per-commit
   timestamps are not collected, so a marker-bearing commit pushed after the
   as-of to a still-open in-window PR is not filterable (layer A only;
   exposure grows with re-collection lag).
@@ -179,6 +180,23 @@ argument — one section = one module invocation):
     `fig_a1_adoption_cohorts.png`; companions: `figure_2_comp_audits.png`
     (balanced event panels per adoption month), `fig5_fleet_vs_nonadopters.png`,
     `fig_a2_adoption_event.png` (event time net of non-adopters).
+    **Median twins** `fig_a1a_adoption_cohorts_median.png` and
+    `fig5a_fleet_vs_nonadopters_median.png` plot the same panels on the
+    MEDIAN cohort member (`adoption_monthly(stat="median")`). Cite the
+    median: per-contributor volume is heavy-tailed, and in 2026-06 a
+    single fleet operator supplied 54.7% of the cohort's merged LOC, so
+    the mean tracks that operator while the median tracks membership. The
+    mean twins are retained because the GAP between them is the evidence
+    of that concentration (fleet 2026-05→06: mean +50%, median −10%).
+    Medians are per series and do NOT decompose — the AI and non-AI
+    lines will not sum to their total, because a different member sits at
+    the middle of each; in the early-adopter panel the components sum to
+    ~1.8 against a total of 4.4. Figures bake in no captions (they are
+    supplied in the paper text), so that warning rides in the PANEL LABEL
+    — "… — MEDIAN member (series do not sum)" — and the paper text
+    reproducing any median panel must repeat it. Figure 3's median twin
+    is `fig3a_core_loc_median.png` (`core_rows(stat="median")`); it is
+    the source for per-contributor LEVELS.
 16. **Merged LOC by approval channel** (`--cut channels`) — humanRev /
     botOnly / selfUnrev / otherUnrev shares of merged LOC.
 17. **Figure 6: review mix of merged PRs/LOC** (`productivity --cut

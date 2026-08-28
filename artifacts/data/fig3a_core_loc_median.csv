@@ -1,0 +1,17 @@
+panel,panel_label,series,series_label,x,x_label,value,lo,hi
+core_loc,kLOC per core contributor / quarter,sub_kloc,submitted kLOC / core author,0.0,Q1-2024,4.471395201718788,3.224792507003206,6.030442550438163
+core_loc,kLOC per core contributor / quarter,sub_mult,submitted kLOC / core author (x baseline),0.0,Q1-2024,1.0,,
+core_loc,kLOC per core contributor / quarter,sub_kloc,submitted kLOC / core author,1.0,Q4-2025,5.760935447405995,4.495529216507313,7.25722880485959
+core_loc,kLOC per core contributor / quarter,sub_mult,submitted kLOC / core author (x baseline),1.0,Q4-2025,1.288397734378637,,
+core_loc,kLOC per core contributor / quarter,sub_kloc,submitted kLOC / core author,2.0,Q1-2026,8.052981118573157,6.416309016124616,10.098345099479566
+core_loc,kLOC per core contributor / quarter,sub_mult,submitted kLOC / core author (x baseline),2.0,Q1-2026,1.800999633286188,,
+core_loc,kLOC per core contributor / quarter,sub_kloc,submitted kLOC / core author,3.0,Q2-2026,14.805213710116517,10.378532500471195,19.890185299871384
+core_loc,kLOC per core contributor / quarter,sub_mult,submitted kLOC / core author (x baseline),3.0,Q2-2026,3.3110948690971105,,
+core_loc,kLOC per core contributor / quarter,kloc,merged kLOC / core author (w8),0.0,Q1-2024,3.420689663404154,2.309462315130761,4.855585879055229
+core_loc,kLOC per core contributor / quarter,mult,merged kLOC / core author (w8) (x baseline),0.0,Q1-2024,1.0,,
+core_loc,kLOC per core contributor / quarter,kloc,merged kLOC / core author (w8),1.0,Q4-2025,3.842401594478822,2.809730856183414,5.04811105363466
+core_loc,kLOC per core contributor / quarter,mult,merged kLOC / core author (w8) (x baseline),1.0,Q4-2025,1.1232827214892667,,
+core_loc,kLOC per core contributor / quarter,kloc,merged kLOC / core author (w8),2.0,Q1-2026,5.043970714521633,3.812831617326688,6.701252112449506
+core_loc,kLOC per core contributor / quarter,mult,merged kLOC / core author (w8) (x baseline),2.0,Q1-2026,1.47454788678551,,
+core_loc,kLOC per core contributor / quarter,kloc,merged kLOC / core author (w8),3.0,Q2-2026,9.991225525427424,6.9488772860806955,14.021722768261718
+core_loc,kLOC per core contributor / quarter,mult,merged kLOC / core author (w8) (x baseline),3.0,Q2-2026,2.9208219711707186,,

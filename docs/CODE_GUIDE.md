@@ -231,6 +231,12 @@ history; the report section title names the module. Highlights:
   runs tag inherently-quarterly sections `[quarterly]`.
 - `monthly_update.py` — incremental month: wipes+re-collects provisional
   month, collectable-population filter, appends to the month registry.
+  `--revise-only` runs the revision window alone, leaving the target month
+  uncollected, unregistered, and holding its own wipe-log cycle. `check_finalizable`
+  is the fail-loud gate: it runs before any wipe and refuses a stamp that
+  does not cover the N-2 month, or that leads the run's clock.
+- `run_monthly_update.sh` — waits for a finalization instant (`--at`), then
+  runs the update with a durable log; correctness lives in the Python gate.
 - `plot_*.py` — one script per figure (`plot_paper_tables.py` renders
   Figures 2 AND 3; `plot_fig6_review.py` renders both fig6 variants —
   core/external and AI/non-AI, formerly twin files). Each script splits
@@ -254,7 +260,7 @@ history; the report section title names the module. Highlights:
 
 1. All per-PR events — fates AND review submissions — at **8 weeks from
    creation** (w8), bounded by the as-of; mature PRs immutable under
-   as-of advances. Q2-2026 provisional until the Sept 1, 2026 re-pull.
+   as-of advances. Q2-2026 provisional until the 2026-08-26 re-pull.
 2. Fate comparisons only at **matched horizons**.
 3. Primary attention = **human** comments/kLOC (bot comments can never
    share a numerator with human comments).

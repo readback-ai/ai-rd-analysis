@@ -251,9 +251,38 @@ def test_user_typed_bot_accounts_are_not_human_reviewers():
     assert classify_pr(ok).human_reviewed          # human name, no false positive
 
 
-def test_w8_censoring_rule():
+def test_as_of_never_leads_the_wall_clock():
+    """Codex review P1: AS_OF was committed at 2026-08-26 while the
+    re-pull had not run. It is the stamp of a collection that HAPPENED,
+    and 17 modules read it directly — a future stamp makes every one of
+    them treat late-June PRs as mature against stale cells, reading
+    unobserved events as non-events. Bump it as part of the re-pull."""
+    from datetime import datetime, timezone
+
+    from pipeline import detect
+    stamp = datetime.strptime(detect.AS_OF, "%Y-%m-%dT%H:%M:%SZ").replace(
+        tzinfo=timezone.utc)
+    assert stamp <= datetime.now(timezone.utc), (
+        f"detect.AS_OF ({detect.AS_OF}) is in the future")
+
+
+def test_w8_closed_tracks_the_last_creation_instant(monkeypatch):
+    """The single home of 'has this period finalized?' — previously
+    recomputed in productivity, figstyle's caller, and monthly_update."""
+    from pipeline import detect
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-25T00:00:00Z")
+    assert not detect.w8_closed("2026-06-30T23:59:59Z")
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-26T00:00:00Z")
+    assert detect.w8_closed("2026-06-30T23:59:59Z")
+
+
+def test_w8_censoring_rule(monkeypatch):
     """Frozen convention: outcomes at 8 weeks post-creation; immature PRs
     carry no fate."""
+    from pipeline import detect
+    # Pin the data stamp: it advances with every re-pull (METHODS §1c),
+    # so which fixture is immature must not ride on its current value.
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-01T00:00:00Z")
     base = {"reviews": {"nodes": []}, "commits": {"nodes": []}}
     fast = dict(base, createdAt="2026-01-01T00:00:00Z",
                 mergedAt="2026-01-20T00:00:00Z")
@@ -386,7 +415,7 @@ def test_w8_events_after_frame_end_count_within_window():
     """Repro RED first (external review of w8 semantics): CUTOFF is the
     FRAME end (last PR-creation date), not an event guillotine. A merge or
     review inside a PR's 56-day window counts even when it lands after
-    CUTOFF (that is the whole point of the Sept 1 finalization re-pull);
+    CUTOFF (that is the whole point of the Q2 finalization re-pull);
     events are implicitly bounded by CUTOFF + 56d since created <= CUTOFF.
     Three sites: fates (_within_w8), split_reviews, review_action anchors."""
     # 1) fates: created in-frame, merged 20 days later but past CUTOFF
@@ -445,7 +474,7 @@ def test_agent_suffixed_user_logins_are_bots():
 def test_w8_maturity_follows_data_as_of_not_frame_end(monkeypatch):
     """Repro RED first: maturity must be judged against detect.AS_OF (the
     data-collection stamp, bumped at re-pulls) — not frame-end CUTOFF —
-    else June-2026 PRs stay 'immature' forever and the Sept finalization
+    else June-2026 PRs stay 'immature' forever and the finalization
     re-pull can never surface their fates."""
     from pipeline import detect
     pr = dict({"author": {"login": "alice", "__typename": "User"},
@@ -453,9 +482,12 @@ def test_w8_maturity_follows_data_as_of_not_frame_end(monkeypatch):
               createdAt="2026-06-20T00:00:00Z",
               mergedAt="2026-07-10T00:00:00Z",
               mergedBy={"login": "alice", "__typename": "User"})
-    assert not classify_pr(pr).w8_mature          # as-of = frame end today
+    # Pin BOTH observation points — the contract is that maturity tracks
+    # AS_OF, so neither leg may depend on the constant's current value.
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-01T00:00:00Z")
+    assert not classify_pr(pr).w8_mature          # before the re-pull
     monkeypatch.setattr(detect, "AS_OF", "2026-09-01T00:00:00Z")
-    assert classify_pr(pr).w8_mature              # after the Sept re-pull
+    assert classify_pr(pr).w8_mature              # after the re-pull
     assert classify_pr(pr).merged
 
 

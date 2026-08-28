@@ -61,7 +61,7 @@ self-merge and reviewer profiles in the report.
 ## 5. Volume: output per core contributor (report §§ Fig 3, 12–14)
 - **Merged (w8) kLOC per core (insider) author, CW**: 6.45 → 10.04 →
   10.71 → **19.08** = **×2.96** [Q2 CI 13.19,26.95] (Figure 3). Q2 is
-  w8-deflated for May/June PRs — conservative; finalizes 2026-09.
+  w8-deflated for May/June PRs — conservative; finalizes 2026-08-26.
 - **AI-split (aisplit)**: non-adopting core authors are FLAT
   (6.45 → 5.90 kLOC); AI-using authors reach ~30.7 kLOC (9.68 in
   AI-tracked PRs + 20.99 in their non-AI PRs) — adopters' untracked

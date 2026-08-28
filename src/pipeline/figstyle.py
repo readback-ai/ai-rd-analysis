@@ -168,7 +168,14 @@ def shade_span(ax, lo, hi, label=None):
 
 def shade_q2_partial(axr, label="Q2 partial (w8 windows open)"):
     """Q2-2026 band on a quarter broken_pair right panel — the former
-    magic axvspan(1.6, 2.4) copied into 11 call sites."""
+    magic axvspan(1.6, 2.4) copied into 11 call sites.
+
+    Returns None once Q2's windows have closed under the data stamp: a
+    finalized quarter must stop being shaded and labelled provisional
+    without editing every figure."""
+    from pipeline import detect
+    if detect.w8_closed(detect.CUTOFF):
+        return None
     return shade_span(axr, 1.6, 2.4, label)
 
 

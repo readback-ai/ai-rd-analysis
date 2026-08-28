@@ -15,7 +15,7 @@ The study cutoff is **2026-06-30** (end of Q2-2026).
   per-PR fate outcomes follow the w8 rule (§1d.1), collection lag is not a
   bias: PRs whose 8-week window was still open at the as-of simply carry NO
   fate (None-skip) — less data on the trailing quarter, not skewed data.
-  Q2-2026 fates finalize with the scheduled 2026-09-01 re-pull (§1c).
+  Q2-2026 fates finalize with the scheduled 2026-08-26 re-pull (§1c).
 - **Classification metadata** (repo topics, descriptions, star counts,
   org descriptions) has no historical API — it was observed 2026-07-07..09,
   as close to the cutoff as possible, and applied uniformly to all orgs. Drift
@@ -121,17 +121,57 @@ AI-topic repos. Appendix cuts (org-type public/private/community via
    its rows are provisional (immature PRs carry no fate). Stale
    quarter-shaped cells overlapping a revised month are superseded PR-by-
    PR via the load-order freshness rule (`analyze.group_by_period`).
-2. (manual, per re-pull) BUMP `detect.AS_OF` to the run's start date —
-   maturity is judged against the data-collection stamp, and since mature
-   PRs are immutable, bumping only ever ADDS newly-mature PRs. Concretely
-   for Q2-2026: the update adding 2026-07 (run ~Aug 1) re-collects and
-   finalizes May (windows closed Jul 26); the update adding 2026-08 (run
-   ~Sep 1) finalizes June (windows closed Aug 25) — the monthly cadence
-   IS the Sept-1 Q2 finalization, executed in two steps.
+2. BUMP `detect.AS_OF` to the run's start date — maturity is judged
+   against the data-collection stamp, and since mature PRs are immutable,
+   bumping only ever ADDS newly-mature PRs. The stamp must clear the LAST
+   creation date in the month being finalized: a PR created
+   2026-06-30T23:59Z reaches 56 days only at 2026-08-26T00:00Z, so a
+   stamp of 2026-08-25 leaves June's final day immature. It also records
+   a pull that HAPPENED and is read directly by ~17 modules, so it is
+   never committed ahead of its re-pull — a future stamp makes every
+   reader treat stale cells as final, scoring unobserved events as
+   non-events. `run_monthly_update.sh --bump-as-of` therefore advances it
+   at the instant collection starts (rolling back if the run fails), and
+   the one-line diff is committed with the regenerated artifacts of step
+   5. `test_as_of_never_leads_the_wall_clock` pins the rule. Fixtures
+   never assume the constant's current value — tests that turn on
+   maturity pin their own `AS_OF` (it advances at every re-pull).
+   Concretely for Q2-2026: the update adding 2026-07 (run ~Aug 1)
+   re-collects and finalizes May (windows closed Jul 26); June finalizes
+   on 2026-08-26 (windows closed Aug 25) — the monthly cadence IS the
+   Q2 finalization, executed in two steps.
 3. Collects the new month (precount + census; months are first-class period
-   tokens via `scan_orgs.resolve_period`).
+   tokens via `scan_orgs.resolve_period`). `--revise-only` SKIPS this step
+   and runs the revision window alone, for a finalization that lands
+   mid-month: N-2's windows close 8 weeks after its month end, partway
+   through month N, when N is still partial and not worth collecting. The
+   target month stays uncollected and out of the incremental registry, and
+   keeps its own wipe-log cycle (`{month}:revise-only`) so the later full
+   update still wipes and re-collects its revision window. June's
+   finalization takes this path: `monthly_update.py 2026-08 --revise-only`
+   on 2026-08-26; August itself lands with a later update.
 4. Prints the monthly trend tables (`analyze --granularity month`,
    2-PR/month floor ≈ the 5-PR/quarter threshold per unit time).
+5. REGENERATE the published artifacts. New cells plus a new stamp change
+   published numbers, so a finalization is not complete until
+   `regenerate.py`, the monthly `report.py`, and `plot_all.py` have been
+   rerun and committed alongside the `AS_OF` bump — otherwise figure
+   tables, images and reports keep describing the previous stamp.
+   Provisional annotations are DERIVED from the stamp, never hard-coded
+   (`detect.w8_closed` is the single home of the question;
+   `figstyle.shade_q2_partial` drops the Q2 band and
+   `productivity.q2_provisionality_note` empties its caption once Q2
+   closes), so regeneration alone clears them.
+Step 2 is enforced, not merely documented: `check_finalizable` refuses the
+run — BEFORE any cell is wiped — unless `AS_OF` both reaches the N-2
+month's `finalization_stamp` (its last creation instant + 56d) and does
+not lead the run's own clock. Too early a stamp publishes N-2 as final
+with its last days immature, and N-2 is never re-collected afterwards, so
+that undercount would be permanent; a stamp ahead of the run marks PRs
+mature whose events the census has not observed, reading an unobserved
+merge as never-merged. Because the finalizable instant is a time and not
+a date, `scripts/run_monthly_update.sh --at <ISO-8601-Z> <args>` waits for
+it and logs the run to the gitignored `data/derived/`.
 Population and classification metadata stay FROZEN between deliberate
 revisions so month-over-month movement reflects practice, not population
 churn. Quarterly regeneration (`scripts/regenerate.py`) remains the
@@ -155,7 +195,7 @@ trusted, so brownout-poisoned empty caches self-heal on the next run.
    close at w8, with w26 as appendix sensitivity (`studies.fates`).
    Immature PRs carry no fate (None-skip) — trailing quarters are
    PROVISIONAL and labeled; Q2-2026 finalizes with a re-pull on/after
-   2026-09-01 (8 weeks past quarter end; runbook §1c). Corollary: mature
+   2026-08-26 (8 weeks past quarter end; runbook §1c). Corollary: mature
    PRs are immutable under as-of advances.
 2. **Matched-horizon-only fate comparisons**: "ever resolved" is a
    different quantity per cohort and must never be compared across cohorts.
@@ -167,6 +207,31 @@ trusted, so brownout-poisoned empty caches self-heal on the next run.
 4. **Weighting labeled on every number**: contributor-weighted primary
    (active-window weights), pooled secondary. One canonical marker set
    (`detect.MARKERS`).
+4b. **Outlier policy — bound the unit contribution, or take the median.**
+   Which applies follows from whether ONE unit's contribution to the
+   numerator is bounded:
+   - RATES (AI-usage %, review-mix shares, responded%) need neither: each
+     PR adds exactly 1 to the denominator and at most 1 to the numerator,
+     so no unit can dominate and the mean is already robust.
+   - BOUNDED-DENOMINATOR RATIOS with an unbounded numerator are CAPPED at
+     the unit that generates them: `attention.COMMENT_CAP` = 20 inline
+     comments per (reviewer, PR), the analogue of `frame.CAP` = 20k LOC
+     per PR. One reviewer's exhaustive pass over a single PR is one act
+     of review, not N units of attention; a documentation copy-edit left
+     355 comments on one PR — the maximum of 112k reviewer-PR pairs
+     against a median of 2 — and carried a whole month's fleet series.
+     The cap truncates 0.9% of pairs (3.2% of comments) and does not move
+     the attention decline (−54% at every cap tested).
+   - PER-CONTRIBUTOR VOLUMES are unbounded per unit (one operator merged
+     4.8M lines in a month) and are reported as MEDIANS over cohort
+     members. The growth multiple is robust to the choice (core kLOC
+     ×2.95 mean vs ×2.92 median); the LEVELS are not (19.0 vs 10.0
+     kLOC/author in Q2-2026), so quote levels from the median.
+   Repo-level trimming/winsorization was considered and REJECTED: study-
+   wide the most influential repo-period contributes 6% of comments on 2%
+   of kLOC (3x), winsorizing cell rates at p99 moves the pooled rate by
+   0.1%, and a percentile rule misses the motivating case anyway because
+   the rate tail is dominated by near-zero-denominator cells.
 5. **Layer-C hygiene**: CI-canary false-positive class excluded (pinning
    test); per-prefix provenance precision stated (§2); the ai_involved
    series carries its two-sided weak-prefix bound as a standing report
@@ -285,7 +350,7 @@ classified by its author into exactly one of three reviewer types:
    CREATION (the frame), not events — an event inside a PR's window
    counts even when it lands after CUTOFF (implicitly capped at
    CUTOFF + 56d since created <= CUTOFF), which is exactly what lets the
-   Sept 2026 re-pull finalize Q2 without changing the frame or any rule —
+   2026-08-26 re-pull finalize Q2 without changing the frame or any rule —
    only the AS_OF data stamp advances. Every
    per-PR quantity FINALIZES at w8; re-collection can never change a
    mature PR's classification — fates and review metrics alike. Measured impact of adopting the rule (pooled
@@ -414,7 +479,7 @@ by design, and per-PR dedup is what makes that safe. Combined with the
 w8 event window and the AS_OF maturity stamp, this gives the update
 calendar its meaning: a month's fates become final exactly when a
 re-collection runs after its last 8-week window closed (May at the
-~Aug 1 update, June at ~Sept 1), and nothing already mature can move.
+~Aug 1 update, June at 2026-08-26), and nothing already mature can move.
 
 Per-PR field caps: the census fetches each PR's first 12 commits and 15 reviews
 (no per-PR pagination — one search call per ~45 PRs is what makes a
@@ -584,11 +649,25 @@ content.
 - **Prominence-selected population**; no claim about GitHub at large.
 - **Q2-2026 fate provisionality**: PRs created after ~2026-05-05 are
   w8-immature at the frozen as-of and carry no fate (excluded, not
-  miscounted); Q2 fate cells have less data until the 2026-09-01 re-pull
+  miscounted); Q2 fate cells have less data until the 2026-08-26 re-pull
   finalizes them (§1c).
-- **284 repo-periods (3.3%; 71 repos) permanently inaccessible** — each
-  waived explicitly in `inaccessible_repos.txt` (census manifest:
-  8,284 of 8,568 repo-periods covered).
+- **Repo-periods permanently inaccessible** — each waived explicitly in
+  `inaccessible_repos.txt` (75 repos; the census manifest carries the
+  current repo-period coverage). The list GROWS as repos are deleted or
+  taken private mid-study: the 2026-08-26 June finalization added four
+  (`agno-agi/agent-platform-railway`,
+  `dataelement/shougang-group-knowledge-portal`,
+  `huggingface/transformers-test-ci`, `RunanywhereAI/RunAnywhereAgent`)
+  whose owning orgs are alive but whose repositories now answer NOT_FOUND
+  on both GraphQL and the rename-following REST route. These are a
+  different case from the 422-unsearchable repos, which are RECOVERED via
+  `census_direct` rather than waived (above) — a deleted repository has no
+  object route left. Their pre-deletion cells stay in the store and keep
+  counting; only the re-collection is waived. Between them they held 7
+  June-2026 PRs at last observation, and `huggingface/transformers-test-ci`
+  is left with a June coverage gap (its June sub-window cells were wiped
+  by the revision and cannot be re-pulled), which is why the repo-level
+  waiver — not a period-level one — is the honest treatment.
 - **Branch-PR samples are first-page (created-desc) per org-quarter** — mild
   within-quarter recency bias.
 - **Insider classification** (authorAssociation) misses staff whose org

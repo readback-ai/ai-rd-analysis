@@ -5,8 +5,20 @@ number obeys the frozen rule'."""
 import json
 import re
 
+import pytest
+
 from pipeline import detect
 from pipeline.detect import MARKERS, classify_pr
+
+# The data stamp advances with every re-pull (METHODS §1c), so a fixture's
+# maturity must never ride on the module constant's current value. Pin it
+# for the whole module; tests observing a different stamp re-pin their own.
+PINNED_AS_OF = "2026-08-01T00:00:00Z"
+
+
+@pytest.fixture(autouse=True)
+def pin_as_of(monkeypatch):
+    monkeypatch.setattr(detect, "AS_OF", PINNED_AS_OF)
 
 
 def _pr(created, merged=None, num=1, reviews=(), merged_by="bob"):
@@ -56,6 +68,68 @@ def test_attention_counts_w8_windowed_comments_past_cutoff(monkeypatch):
     pr = _pr("2026-06-20T00:00:00Z", merged="2026-06-28T00:00:00Z",
              reviews=[rev])
     assert attention.human_comment_count(pr) == 4
+
+
+def _rev(login, n, at="2026-06-25T00:00:00Z"):
+    return {"author": {"login": login, "__typename": "User"},
+            "state": "COMMENTED", "comments": {"totalCount": n},
+            "submittedAt": at}
+
+
+def test_comments_capped_per_reviewer_per_pr():
+    """One reviewer's exhaustive pass over a single PR is one act of
+    review, not N units of attention: a documentation copy-edit left 355
+    inline comments on one PR (the maximum of 112k reviewer-PR pairs,
+    against a median of 2) and carried a whole month's fleet series.
+    Cap per (reviewer, PR), mirroring the per-PR LOC cap."""
+    from pipeline.studies import attention
+    pr = _pr("2026-06-01T00:00:00Z", merged="2026-06-10T00:00:00Z",
+             reviews=[_rev("writer", 355)])
+    assert attention.human_comment_count(pr) == attention.COMMENT_CAP
+
+
+def test_comment_cap_is_per_reviewer_not_per_pr():
+    """The cap must not punish BROADLY reviewed PRs: several reviewers
+    under the cap each count in full, so genuine multi-reviewer scrutiny
+    survives while one exhaustive annotator does not."""
+    from pipeline.studies import attention
+    pr = _pr("2026-06-01T00:00:00Z", merged="2026-06-10T00:00:00Z",
+             reviews=[_rev("a", 15), _rev("b", 15), _rev("c", 15)])
+    assert attention.human_comment_count(pr) == 45
+
+
+def test_comment_cap_applies_to_a_reviewers_total_across_reviews():
+    """A reviewer who splits the same pass over several review objects
+    must not evade the cap."""
+    from pipeline.studies import attention
+    pr = _pr("2026-06-01T00:00:00Z", merged="2026-06-10T00:00:00Z",
+             reviews=[_rev("writer", 18), _rev("writer", 18),
+                      _rev("other", 3)])
+    assert attention.human_comment_count(pr) == attention.COMMENT_CAP + 3
+
+
+def test_q2_provisionality_note_clears_on_finalization(monkeypatch):
+    """Codex review P1: report captions asserted Q2 was 'w8-deflated for
+    May/June PRs' unconditionally, so a finalized quarter would keep
+    publishing the caveat. Derive it from the data stamp."""
+    from pipeline.studies import productivity
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-25T00:00:00Z")
+    assert "w8-deflated" in productivity.q2_provisionality_note()
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-26T00:00:00Z")
+    assert productivity.q2_provisionality_note() == ""
+
+
+def test_figure3_caption_drops_the_q2_caveat_on_finalization(monkeypatch):
+    """Codex review P2: paper_tables.core() hard-coded '(Q2 provisional)',
+    so both the quarterly and monthly regenerated reports would keep
+    labelling Q2 provisional after the finalization re-pull."""
+    from pipeline.studies import paper_tables
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-25T00:00:00Z")
+    assert "(Q2 provisional)" in paper_tables.core_caption()
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-26T00:00:00Z")
+    caption = paper_tables.core_caption()
+    assert "provisional" not in caption
+    assert "merged = w8 rule" in caption      # the rest of it survives
 
 
 def test_event_study_mature_max_follows_as_of(monkeypatch):
@@ -1248,3 +1322,81 @@ def test_attention_by_ai_monthly_granularity(monkeypatch):
     rows = attention.attention_by_ai(granularity="month")
     assert ("2026-04", "nonai") in rows
     assert ("Q2-2026", "nonai") not in rows
+
+
+def _fake_authors(monkeypatch, rows_by_login):
+    """Pin _author_months_and_cohorts to a hand-built author table:
+    login -> month -> [ai_mrg, nonai_mrg, ai_prs, prs, mrg_prs,
+    submitted, sub_ai]."""
+    from pipeline.studies import productivity
+    acc = {login: {m: list(v) for m, v in months.items()}
+           for login, (months, _c) in rows_by_login.items()}
+    cohorts = {login: c for login, (_m, c) in rows_by_login.items()}
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: (acc, cohorts, {"2026-06": "Q2-2026"}, set()))
+    return productivity
+
+
+def test_adoption_monthly_median_is_not_dragged_by_one_operator():
+    """The fleet cohort mean tripled Mar->Jun 2026 while its median stayed
+    flat: one operator supplied 54.7% of June's merged LOC. The median
+    variant must describe the typical member, not the sum."""
+    import pytest
+    from pipeline.studies import productivity
+    mp = pytest.MonkeyPatch()
+    try:
+        _fake_authors(mp, {
+            "big":   ({"2026-06": [0.0, 900.0, 0, 10, 10, 900.0, 0.0]}, "fleet"),
+            "small1": ({"2026-06": [0.0, 10.0, 0, 5, 5, 10.0, 0.0]}, "fleet"),
+            "small2": ({"2026-06": [0.0, 20.0, 0, 5, 5, 20.0, 0.0]}, "fleet"),
+        })
+        mean = productivity.adoption_monthly()[("2026-06", "fleet")]
+        med = productivity.adoption_monthly(stat="median")[("2026-06", "fleet")]
+    finally:
+        mp.undo()
+    assert mean["merged"] == pytest.approx(310.0)   # (900+10+20)/3
+    assert med["merged"] == pytest.approx(20.0)     # the middle operator
+    assert med["n"] == 3                            # n is a count either way
+
+
+def test_adoption_monthly_rejects_an_unknown_stat():
+    from pipeline.studies import productivity
+    import pytest
+    with pytest.raises(ValueError):
+        productivity.adoption_monthly(stat="mode")
+
+
+def test_core_rows_median_is_the_typical_core_author(monkeypatch):
+    """METHODS 1d.4b: per-contributor LEVELS are quoted from the median,
+    so the Figure 3 estimator must offer one. Stage 1 is the statistic
+    over a repo's core authors; the CW stage across repos is unchanged."""
+    from pipeline.studies import paper_tables
+
+    # one repo-period, three core authors: 1, 2 and 97 kLOC merged
+    authors = {"a": [0, 0, 1_000, 0, 1_000],
+               "b": [0, 0, 2_000, 0, 2_000],
+               "c": [0, 0, 97_000, 0, 97_000]}
+    monkeypatch.setattr(paper_tables, "per_author",
+                        lambda: {("o/r", "Q1-2024"): authors})
+    monkeypatch.setattr(paper_tables, "weights", lambda: {"o/r": 1.0})
+
+    class F:
+        repo, period, author, insider = "o/r", "Q1-2024", None, True
+    def frames():
+        for login in authors:
+            f = F()
+            f.author = login
+            yield f
+    monkeypatch.setattr(paper_tables, "study_frame", lambda _p: frames())
+    monkeypatch.setattr(paper_tables, "PERIODS", ["Q1-2024"])
+
+    mean = paper_tables.core_rows()[0]["kloc"][0]
+    med = paper_tables.core_rows(stat="median")[0]["kloc"][0]
+    assert mean == pytest.approx((1 + 2 + 97) / 3)     # 33.33, the tail
+    assert med == pytest.approx(2.0)                   # the middle author
+
+
+def test_core_rows_rejects_an_unknown_stat():
+    from pipeline.studies import paper_tables
+    with pytest.raises(ValueError):
+        paper_tables.core_rows(stat="mode")

@@ -24,14 +24,17 @@ from pipeline import figdata, frame                          # noqa: E402
 from pipeline.figstyle import save                           # noqa: E402
 
 import plot_adoption_cohorts as a1                           # noqa: E402
+import plot_adoption_cohorts_median as a1a                    # noqa: E402
 import plot_adoption_event as a2                             # noqa: E402
 import plot_fig2_comp_audits as comp2                        # noqa: E402
 import plot_fig3_comp_audits as comp3                        # noqa: E402
 import plot_fig5_fleet as f5                                 # noqa: E402
+import plot_fig5_fleet_median as f5a                          # noqa: E402
 import plot_fig6_review as f6                                # noqa: E402
 import plot_fig7_attention as f7                             # noqa: E402
 import plot_fig8_responsiveness as f8                        # noqa: E402
 import plot_paper_tables as paper                            # noqa: E402
+import plot_fig3_core_loc_median as paper3a                   # noqa: E402
 
 ROLE, AI = f6.VARIANTS[0], f6.VARIANTS[1]
 
@@ -50,6 +53,12 @@ FIGURES = [
     ("artifacts/fig8_responsiveness_by_ai.png", f8.collect, f8.render),
     ("artifacts/fig_a1_adoption_cohorts.png", a1.collect, a1.render),
     ("artifacts/fig_a2_adoption_event.png", a2.collect, a2.render),
+    # median twins: same panels, typical member instead of cohort mean
+    (f"artifacts/{f5a.NAME}.png", f5a.collect,
+     functools.partial(f5.render, ylabel=f5a.YLABEL)),
+    (f"artifacts/{a1a.NAME}.png", a1a.collect,
+     functools.partial(a1.render, ylabel=a1a.YLABEL)),
+    (f"artifacts/{paper3a.NAME}.png", paper3a.collect, paper.render_core),
     ("artifacts/figure_2_comp_audits.png", comp2.collect, comp2.render),
     ("artifacts/figure_3_comp_audits.png", comp3.collect, comp3.render),
 ]

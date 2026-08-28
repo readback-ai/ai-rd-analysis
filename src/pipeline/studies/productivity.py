@@ -362,12 +362,26 @@ def _author_months_and_cohorts():
     return acc, per_author_cohort, q_of, fleet_all
 
 
-def adoption_monthly() -> dict:
+def adoption_monthly(stat: str = "mean") -> dict:
     """(month, cohort) -> {n, submitted, sub_ai, sub_nonai, merged,
-    mrg_ai, mrg_nonai} — mean kLOC per
+    mrg_ai, mrg_nonai} — kLOC per
     quarter-ACTIVE cohort member per MONTH (the Figure 4 series: submitted
     has no censoring; merged follows the w8 rule and is provisional on
-    months not yet mature — see mature-month cap in the caption)."""
+    months not yet mature — see mature-month cap in the caption).
+
+    stat="mean" is the cohort total per member. stat="median" is the
+    TYPICAL member: cohort output is heavy-tailed (a single fleet operator
+    can supply half a cohort-month), so the mean describes the tail and the
+    median describes membership. `n` is a member count under both.
+
+    Medians are per FIELD and are not additive — median(submitted) is not
+    median(sub_ai) + median(sub_nonai), because different members sit at
+    the middle of each. Read a median panel series-by-series, never as a
+    decomposition."""
+    if stat not in ("mean", "median"):
+        raise ValueError(f"unknown stat: {stat!r} (mean|median)")
+    mid = statistics.median if stat == "median" else \
+        (lambda xs: sum(xs) / len(xs))
     acc, cohort_of_login, q_of, _fleet = _author_months_and_cohorts()
     months = sorted(q_of)
     out = {}
@@ -379,15 +393,14 @@ def adoption_monthly() -> dict:
                     and acc[login][mon][3]]
             if not rows:
                 continue
-            n = len(rows)
             out[(mon, coh)] = {
-                "n": n,
-                "submitted": sum(r[5] for r in rows) / n,
-                "sub_ai": sum(r[6] for r in rows) / n,
-                "sub_nonai": sum(r[5] - r[6] for r in rows) / n,
-                "merged": sum(r[0] + r[1] for r in rows) / n,
-                "mrg_ai": sum(r[0] for r in rows) / n,
-                "mrg_nonai": sum(r[1] for r in rows) / n}
+                "n": len(rows),
+                "submitted": mid([r[5] for r in rows]),
+                "sub_ai": mid([r[6] for r in rows]),
+                "sub_nonai": mid([r[5] - r[6] for r in rows]),
+                "merged": mid([r[0] + r[1] for r in rows]),
+                "mrg_ai": mid([r[0] for r in rows]),
+                "mrg_nonai": mid([r[1] for r in rows])}
     return out
 
 
@@ -396,15 +409,23 @@ WINDOW_MONTHS = ["2025-10", "2025-11", "2025-12", "2026-01", "2026-02",
                  "2026-03", "2026-04", "2026-05", "2026-06"]
 
 
+def q2_provisionality_note() -> str:
+    """The Q2 w8-deflation caveat as a report caption prefix, empty once
+    Q2's windows have closed under the data stamp. Published captions are
+    derived, not hard-coded, so finalization clears them everywhere."""
+    from pipeline import detect
+    if detect.w8_closed(detect.CUTOFF):
+        return ""
+    return "Q2-2026 w8-deflated for May/June PRs; "
+
+
 def month_w8_mature(mon: str) -> bool:
     """Every PR created in `mon` closed its 56-day window by the AS_OF."""
     from calendar import monthrange
-    from datetime import datetime, timedelta
     from pipeline import detect
-    as_of = datetime.fromisoformat(detect.AS_OF.replace("Z", "+00:00"))
     y, m = int(mon[:4]), int(mon[5:7])
-    end = datetime(y, m, monthrange(y, m)[1], 23, 59, tzinfo=as_of.tzinfo)
-    return end + timedelta(days=56) <= as_of
+    last = f"{mon}-{monthrange(y, m)[1]:02d}T23:59:59Z"
+    return detect.w8_closed(last)
 
 
 def adoption_event(max_off: int = 2, balanced: bool = True) -> dict:
@@ -528,8 +549,8 @@ def adoption() -> None:
           "bootstrap 95% CI on total)")
     for coh, desc in ADOPTION_COHORTS:
         print(f"  {coh}: {desc}")
-    print("Q2-2026 w8-deflated for May/June PRs; undetected AI counts "
-          "as nonAI (floors)")
+    print(f"{q2_provisionality_note()}undetected AI counts as nonAI "
+          f"(floors)")
     print(f"\n{'period':9}{'cohort':8}{'authors':>8}{'AI kLOC':>9}"
           f"{'nonAI kLOC':>11}{'total kLOC':>11}{'95% CI':>16}"
           f"{'median':>8}")
