@@ -180,6 +180,18 @@ argument — one section = one module invocation):
     `fig_a1_adoption_cohorts.png`; companions: `figure_2_comp_audits.png`
     (balanced event panels per adoption month), `fig5_fleet_vs_nonadopters.png`,
     `fig_a2_adoption_event.png` (event time net of non-adopters).
+    **Median twins** `fig_a1a_adoption_cohorts_median.png` and
+    `fig5a_fleet_vs_nonadopters_median.png` plot the same panels on the
+    MEDIAN cohort member (`adoption_monthly(stat="median")`). Cite the
+    median: per-contributor volume is heavy-tailed, and in 2026-06 a
+    single fleet operator supplied 54.7% of the cohort's merged LOC, so
+    the mean tracks that operator while the median tracks membership. The
+    mean twins are retained because the GAP between them is the evidence
+    of that concentration (fleet 2026-05→06: mean +50%, median −10%).
+    CAPTION REQUIRED on any median panel: medians are per series and do
+    NOT decompose — the AI and non-AI lines will not sum to their total,
+    because a different member sits at the middle of each. Read the six
+    series individually, never as a breakdown.
 16. **Merged LOC by approval channel** (`--cut channels`) — humanRev /
     botOnly / selfUnrev / otherUnrev shares of merged LOC.
 17. **Figure 6: review mix of merged PRs/LOC** (`productivity --cut

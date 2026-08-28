@@ -207,6 +207,31 @@ trusted, so brownout-poisoned empty caches self-heal on the next run.
 4. **Weighting labeled on every number**: contributor-weighted primary
    (active-window weights), pooled secondary. One canonical marker set
    (`detect.MARKERS`).
+4b. **Outlier policy — bound the unit contribution, or take the median.**
+   Which applies follows from whether ONE unit's contribution to the
+   numerator is bounded:
+   - RATES (AI-usage %, review-mix shares, responded%) need neither: each
+     PR adds exactly 1 to the denominator and at most 1 to the numerator,
+     so no unit can dominate and the mean is already robust.
+   - BOUNDED-DENOMINATOR RATIOS with an unbounded numerator are CAPPED at
+     the unit that generates them: `attention.COMMENT_CAP` = 20 inline
+     comments per (reviewer, PR), the analogue of `frame.CAP` = 20k LOC
+     per PR. One reviewer's exhaustive pass over a single PR is one act
+     of review, not N units of attention; a documentation copy-edit left
+     355 comments on one PR — the maximum of 112k reviewer-PR pairs
+     against a median of 2 — and carried a whole month's fleet series.
+     The cap truncates 0.9% of pairs (3.2% of comments) and does not move
+     the attention decline (−54% at every cap tested).
+   - PER-CONTRIBUTOR VOLUMES are unbounded per unit (one operator merged
+     4.8M lines in a month) and are reported as MEDIANS over cohort
+     members. The growth multiple is robust to the choice (core kLOC
+     ×2.95 mean vs ×2.92 median); the LEVELS are not (19.0 vs 10.0
+     kLOC/author in Q2-2026), so quote levels from the median.
+   Repo-level trimming/winsorization was considered and REJECTED: study-
+   wide the most influential repo-period contributes 6% of comments on 2%
+   of kLOC (3x), winsorizing cell rates at p99 moves the pooled rate by
+   0.1%, and a percentile rule misses the motivating case anyway because
+   the rate tail is dominated by near-zero-denominator cells.
 5. **Layer-C hygiene**: CI-canary false-positive class excluded (pinning
    test); per-prefix provenance precision stated (§2); the ai_involved
    series carries its two-sided weak-prefix bound as a standing report

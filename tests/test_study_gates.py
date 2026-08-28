@@ -70,6 +70,44 @@ def test_attention_counts_w8_windowed_comments_past_cutoff(monkeypatch):
     assert attention.human_comment_count(pr) == 4
 
 
+def _rev(login, n, at="2026-06-25T00:00:00Z"):
+    return {"author": {"login": login, "__typename": "User"},
+            "state": "COMMENTED", "comments": {"totalCount": n},
+            "submittedAt": at}
+
+
+def test_comments_capped_per_reviewer_per_pr():
+    """One reviewer's exhaustive pass over a single PR is one act of
+    review, not N units of attention: a documentation copy-edit left 355
+    inline comments on one PR (the maximum of 112k reviewer-PR pairs,
+    against a median of 2) and carried a whole month's fleet series.
+    Cap per (reviewer, PR), mirroring the per-PR LOC cap."""
+    from pipeline.studies import attention
+    pr = _pr("2026-06-01T00:00:00Z", merged="2026-06-10T00:00:00Z",
+             reviews=[_rev("writer", 355)])
+    assert attention.human_comment_count(pr) == attention.COMMENT_CAP
+
+
+def test_comment_cap_is_per_reviewer_not_per_pr():
+    """The cap must not punish BROADLY reviewed PRs: several reviewers
+    under the cap each count in full, so genuine multi-reviewer scrutiny
+    survives while one exhaustive annotator does not."""
+    from pipeline.studies import attention
+    pr = _pr("2026-06-01T00:00:00Z", merged="2026-06-10T00:00:00Z",
+             reviews=[_rev("a", 15), _rev("b", 15), _rev("c", 15)])
+    assert attention.human_comment_count(pr) == 45
+
+
+def test_comment_cap_applies_to_a_reviewers_total_across_reviews():
+    """A reviewer who splits the same pass over several review objects
+    must not evade the cap."""
+    from pipeline.studies import attention
+    pr = _pr("2026-06-01T00:00:00Z", merged="2026-06-10T00:00:00Z",
+             reviews=[_rev("writer", 18), _rev("writer", 18),
+                      _rev("other", 3)])
+    assert attention.human_comment_count(pr) == attention.COMMENT_CAP + 3
+
+
 def test_q2_provisionality_note_clears_on_finalization(monkeypatch):
     """Codex review P1: report captions asserted Q2 was 'w8-deflated for
     May/June PRs' unconditionally, so a finalized quarter would keep
@@ -1284,3 +1322,45 @@ def test_attention_by_ai_monthly_granularity(monkeypatch):
     rows = attention.attention_by_ai(granularity="month")
     assert ("2026-04", "nonai") in rows
     assert ("Q2-2026", "nonai") not in rows
+
+
+def _fake_authors(monkeypatch, rows_by_login):
+    """Pin _author_months_and_cohorts to a hand-built author table:
+    login -> month -> [ai_mrg, nonai_mrg, ai_prs, prs, mrg_prs,
+    submitted, sub_ai]."""
+    from pipeline.studies import productivity
+    acc = {l: {m: list(v) for m, v in months.items()}
+           for l, (months, _c) in rows_by_login.items()}
+    cohorts = {l: c for l, (_m, c) in rows_by_login.items()}
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: (acc, cohorts, {"2026-06": "Q2-2026"}, set()))
+    return productivity
+
+
+def test_adoption_monthly_median_is_not_dragged_by_one_operator():
+    """The fleet cohort mean tripled Mar->Jun 2026 while its median stayed
+    flat: one operator supplied 54.7% of June's merged LOC. The median
+    variant must describe the typical member, not the sum."""
+    import pytest
+    from pipeline.studies import productivity
+    mp = pytest.MonkeyPatch()
+    try:
+        _fake_authors(mp, {
+            "big":   ({"2026-06": [0.0, 900.0, 0, 10, 10, 900.0, 0.0]}, "fleet"),
+            "small1": ({"2026-06": [0.0, 10.0, 0, 5, 5, 10.0, 0.0]}, "fleet"),
+            "small2": ({"2026-06": [0.0, 20.0, 0, 5, 5, 20.0, 0.0]}, "fleet"),
+        })
+        mean = productivity.adoption_monthly()[("2026-06", "fleet")]
+        med = productivity.adoption_monthly(stat="median")[("2026-06", "fleet")]
+    finally:
+        mp.undo()
+    assert mean["merged"] == pytest.approx(310.0)   # (900+10+20)/3
+    assert med["merged"] == pytest.approx(20.0)     # the middle operator
+    assert med["n"] == 3                            # n is a count either way
+
+
+def test_adoption_monthly_rejects_an_unknown_stat():
+    from pipeline.studies import productivity
+    import pytest
+    with pytest.raises(ValueError):
+        productivity.adoption_monthly(stat="mode")

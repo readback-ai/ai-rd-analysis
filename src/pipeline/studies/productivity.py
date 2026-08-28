@@ -362,12 +362,26 @@ def _author_months_and_cohorts():
     return acc, per_author_cohort, q_of, fleet_all
 
 
-def adoption_monthly() -> dict:
+def adoption_monthly(stat: str = "mean") -> dict:
     """(month, cohort) -> {n, submitted, sub_ai, sub_nonai, merged,
-    mrg_ai, mrg_nonai} — mean kLOC per
+    mrg_ai, mrg_nonai} — kLOC per
     quarter-ACTIVE cohort member per MONTH (the Figure 4 series: submitted
     has no censoring; merged follows the w8 rule and is provisional on
-    months not yet mature — see mature-month cap in the caption)."""
+    months not yet mature — see mature-month cap in the caption).
+
+    stat="mean" is the cohort total per member. stat="median" is the
+    TYPICAL member: cohort output is heavy-tailed (a single fleet operator
+    can supply half a cohort-month), so the mean describes the tail and the
+    median describes membership. `n` is a member count under both.
+
+    Medians are per FIELD and are not additive — median(submitted) is not
+    median(sub_ai) + median(sub_nonai), because different members sit at
+    the middle of each. Read a median panel series-by-series, never as a
+    decomposition."""
+    if stat not in ("mean", "median"):
+        raise ValueError(f"unknown stat: {stat!r} (mean|median)")
+    mid = statistics.median if stat == "median" else \
+        (lambda xs: sum(xs) / len(xs))
     acc, cohort_of_login, q_of, _fleet = _author_months_and_cohorts()
     months = sorted(q_of)
     out = {}
@@ -379,15 +393,14 @@ def adoption_monthly() -> dict:
                     and acc[login][mon][3]]
             if not rows:
                 continue
-            n = len(rows)
             out[(mon, coh)] = {
-                "n": n,
-                "submitted": sum(r[5] for r in rows) / n,
-                "sub_ai": sum(r[6] for r in rows) / n,
-                "sub_nonai": sum(r[5] - r[6] for r in rows) / n,
-                "merged": sum(r[0] + r[1] for r in rows) / n,
-                "mrg_ai": sum(r[0] for r in rows) / n,
-                "mrg_nonai": sum(r[1] for r in rows) / n}
+                "n": len(rows),
+                "submitted": mid([r[5] for r in rows]),
+                "sub_ai": mid([r[6] for r in rows]),
+                "sub_nonai": mid([r[5] - r[6] for r in rows]),
+                "merged": mid([r[0] + r[1] for r in rows]),
+                "mrg_ai": mid([r[0] for r in rows]),
+                "mrg_nonai": mid([r[1] for r in rows])}
     return out
 
 
