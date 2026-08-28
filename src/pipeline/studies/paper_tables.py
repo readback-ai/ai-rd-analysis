@@ -29,6 +29,7 @@ Usage:  python -m pipeline.studies.paper_tables --table {usage,core}
 from __future__ import annotations
 
 import argparse
+import statistics
 from collections import defaultdict
 
 from pipeline.analyze import bootstrap_ci, weighted_mean
@@ -97,11 +98,21 @@ def usage_rows() -> list[dict]:
     return rows
 
 
-def core_rows() -> list[dict]:
-    """Figure 3 rows: per period {period, repos, kloc, sub_kloc (each a
-    (mean, lo, hi) tuple), mult, sub_mult} — merged (w8) and submitted
-    kLOC per core author, CW. Submitted has no censoring; Q2 merged is
-    w8-deflated (provisional until the AS_OF re-pulls)."""
+def core_rows(stat: str = "mean") -> list[dict]:
+    """Figure 3 rows: per period {period, repos, kloc, sub_kloc (each an
+    (estimate, lo, hi) tuple), mult, sub_mult} — merged (w8) and submitted
+    kLOC per core author, CW. Submitted has no censoring.
+
+    `stat` selects the STAGE-1 statistic over a repo's core authors; the
+    contributor-weighted stage across repos is unchanged either way.
+    Per-contributor output is heavy-tailed, so levels are quoted from the
+    median (METHODS §1d.4b) while the growth MULTIPLE is robust to the
+    choice — ×2.95 mean vs ×2.92 median — and the levels are not (19.0 vs
+    10.0 kLOC/author in Q2-2026)."""
+    if stat not in ("mean", "median"):
+        raise ValueError(f"unknown stat: {stat!r} (mean|median)")
+    mid = statistics.median if stat == "median" else \
+        (lambda xs: sum(xs) / len(xs))
     pa = per_author()
     w = weights()
     ins_of = defaultdict(set)
@@ -118,12 +129,11 @@ def core_rows() -> list[dict]:
             core_a = {login: v for login, v in authors.items()
                       if login in ins_of[(repo, p)]}
             if len(core_a) >= 2:
-                n = len(core_a)
                 wt = w.get(repo, 1.0)
-                pairs.append((sum(v[2] for v in core_a.values())
-                              / n / 1000, wt))
-                sub_pairs.append((sum(v[4] for v in core_a.values())
-                                  / n / 1000, wt))
+                pairs.append((mid([v[2] for v in core_a.values()])
+                              / 1000, wt))
+                sub_pairs.append((mid([v[4] for v in core_a.values()])
+                                  / 1000, wt))
         est = _est(pairs, f"core|{per}|kloc")
         sub_est = _est(sub_pairs, f"core|{per}|sub_kloc")
         base = base if base is not None else est[0]

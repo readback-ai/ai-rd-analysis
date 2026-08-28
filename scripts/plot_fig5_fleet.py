@@ -27,16 +27,17 @@ PANELS = [("fleet", "fleet operators (all six metrics)", LOC_SERIES),
            TOTALS)]
 
 
-def table(rows: dict, name: str) -> Table:
+def table(rows: dict, name: str, label_suffix: str = "") -> Table:
     """The two-panel table over whichever per-member statistic `rows`
-    carries — shared with the median variant (fig5a)."""
+    carries — shared with the median variant (fig5a). `label_suffix`
+    names the statistic in the panel label."""
     months = BASELINE + WINDOW
     t = Table(name)
     for coh, title, series in PANELS:
         for key, _color, _ls, label in series:
             t.add_series(coh, key,
                          [rows.get((m, coh), {}).get(key) for m in months],
-                         x_labels=months, panel_label=title,
+                         x_labels=months, panel_label=title + label_suffix,
                          series_label=label)
     return t
 

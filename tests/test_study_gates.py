@@ -1329,9 +1329,9 @@ def _fake_authors(monkeypatch, rows_by_login):
     login -> month -> [ai_mrg, nonai_mrg, ai_prs, prs, mrg_prs,
     submitted, sub_ai]."""
     from pipeline.studies import productivity
-    acc = {l: {m: list(v) for m, v in months.items()}
-           for l, (months, _c) in rows_by_login.items()}
-    cohorts = {l: c for l, (_m, c) in rows_by_login.items()}
+    acc = {login: {m: list(v) for m, v in months.items()}
+           for login, (months, _c) in rows_by_login.items()}
+    cohorts = {login: c for login, (_m, c) in rows_by_login.items()}
     monkeypatch.setattr(productivity, "_author_months_and_cohorts",
                         lambda: (acc, cohorts, {"2026-06": "Q2-2026"}, set()))
     return productivity
@@ -1364,3 +1364,39 @@ def test_adoption_monthly_rejects_an_unknown_stat():
     import pytest
     with pytest.raises(ValueError):
         productivity.adoption_monthly(stat="mode")
+
+
+def test_core_rows_median_is_the_typical_core_author(monkeypatch):
+    """METHODS 1d.4b: per-contributor LEVELS are quoted from the median,
+    so the Figure 3 estimator must offer one. Stage 1 is the statistic
+    over a repo's core authors; the CW stage across repos is unchanged."""
+    from pipeline.studies import paper_tables
+
+    # one repo-period, three core authors: 1, 2 and 97 kLOC merged
+    authors = {"a": [0, 0, 1_000, 0, 1_000],
+               "b": [0, 0, 2_000, 0, 2_000],
+               "c": [0, 0, 97_000, 0, 97_000]}
+    monkeypatch.setattr(paper_tables, "per_author",
+                        lambda: {("o/r", "Q1-2024"): authors})
+    monkeypatch.setattr(paper_tables, "weights", lambda: {"o/r": 1.0})
+
+    class F:
+        repo, period, author, insider = "o/r", "Q1-2024", None, True
+    def frames():
+        for login in authors:
+            f = F()
+            f.author = login
+            yield f
+    monkeypatch.setattr(paper_tables, "study_frame", lambda _p: frames())
+    monkeypatch.setattr(paper_tables, "PERIODS", ["Q1-2024"])
+
+    mean = paper_tables.core_rows()[0]["kloc"][0]
+    med = paper_tables.core_rows(stat="median")[0]["kloc"][0]
+    assert mean == pytest.approx((1 + 2 + 97) / 3)     # 33.33, the tail
+    assert med == pytest.approx(2.0)                   # the middle author
+
+
+def test_core_rows_rejects_an_unknown_stat():
+    from pipeline.studies import paper_tables
+    with pytest.raises(ValueError):
+        paper_tables.core_rows(stat="mode")

@@ -62,9 +62,10 @@ def render_usage(t: Table):
     return fig
 
 
-def collect_core() -> Table:
-    rows = core_rows()
-    t = Table("fig3_core_loc")
+def core_table(rows: list, name: str) -> Table:
+    """Figure 3's table over whichever per-author statistic `rows` carries
+    — shared with the median variant (fig3a)."""
+    t = Table(name)
     for key, mult_key, label, _color, _offset in CORE:
         for i, r in enumerate(rows):
             mean, lo, hi = r[key]
@@ -76,6 +77,10 @@ def collect_core() -> Table:
                   series_label=f"{label} (x baseline)",
                   x_label=r["period"])
     return t
+
+
+def collect_core() -> Table:
+    return core_table(core_rows(), "fig3_core_loc")
 
 
 def render_core(t: Table):

@@ -25,10 +25,14 @@ import plot_fig5_fleet as mean_fig
 
 NAME = "fig5a_fleet_vs_nonadopters_median"
 YLABEL = "median kLOC / contributor / month"
+# Panel labels carry the statistic: figures do not bake in captions
+# (they are supplied in the paper text), so the label is where a
+# reader of the image or the CSV learns which statistic this is.
+SUFFIX = " — MEDIAN member (series do not sum)"
 
 
 def collect() -> Table:
-    return mean_fig.table(adoption_monthly(stat="median"), NAME)
+    return mean_fig.table(adoption_monthly(stat="median"), NAME, SUFFIX)
 
 
 if __name__ == "__main__":

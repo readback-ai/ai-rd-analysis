@@ -25,16 +25,21 @@ from pipeline.studies.productivity import (ADOPTION_COHORTS,
 STYLE = {key: (color, ls, label) for key, color, ls, label in LOC_SERIES}
 
 
-def table(rows: dict, name: str) -> Table:
+def table(rows: dict, name: str, label_suffix: str = "") -> Table:
     """The cohort x series table, over whichever per-member statistic
-    `rows` carries — shared with the median variant (fig_a1a)."""
+    `rows` carries — shared with the median variant (fig_a1a).
+
+    `label_suffix` names the statistic in the panel label, which is where
+    a caption's factual content lives once figures stopped baking in
+    captions (they are supplied in the paper text)."""
     months = BASELINE + WINDOW
     t = Table(name)
     for coh, desc in ADOPTION_COHORTS:
         for key, _color, _ls, label in LOC_SERIES:
             t.add_series(coh, key,
                          [rows.get((m, coh), {}).get(key) for m in months],
-                         x_labels=months, panel_label=desc.split(":")[0],
+                         x_labels=months,
+                         panel_label=desc.split(":")[0] + label_suffix,
                          series_label=label)
     return t
 

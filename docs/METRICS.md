@@ -188,10 +188,15 @@ argument — one section = one module invocation):
     the mean tracks that operator while the median tracks membership. The
     mean twins are retained because the GAP between them is the evidence
     of that concentration (fleet 2026-05→06: mean +50%, median −10%).
-    CAPTION REQUIRED on any median panel: medians are per series and do
-    NOT decompose — the AI and non-AI lines will not sum to their total,
-    because a different member sits at the middle of each. Read the six
-    series individually, never as a breakdown.
+    Medians are per series and do NOT decompose — the AI and non-AI
+    lines will not sum to their total, because a different member sits at
+    the middle of each; in the early-adopter panel the components sum to
+    ~1.8 against a total of 4.4. Figures bake in no captions (they are
+    supplied in the paper text), so that warning rides in the PANEL LABEL
+    — "… — MEDIAN member (series do not sum)" — and the paper text
+    reproducing any median panel must repeat it. Figure 3's median twin
+    is `fig3a_core_loc_median.png` (`core_rows(stat="median")`); it is
+    the source for per-contributor LEVELS.
 16. **Merged LOC by approval channel** (`--cut channels`) — humanRev /
     botOnly / selfUnrev / otherUnrev shares of merged LOC.
 17. **Figure 6: review mix of merged PRs/LOC** (`productivity --cut
