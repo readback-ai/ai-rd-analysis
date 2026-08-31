@@ -18,7 +18,8 @@ sys.path.insert(0, "src")
 from pipeline.analyze import month_window
 from pipeline.figdata import Table, figure_main
 from pipeline.figstyle import (BASELINE, LOC_SERIES, broken_pair,
-                               month_series, plt, shade_provisional)
+                               month_series, plt, shade_provisional,
+                               window_of)
 from pipeline.studies.productivity import (ADOPTION_COHORTS,
                                            adoption_monthly)
 
@@ -53,10 +54,7 @@ def collect(window: list[str] | None = None) -> Table:
 
 
 def render(t: Table, ylabel: str = "kLOC / contributor / month"):
-    # window from the table itself, so --from-table replays a committed
-    # CSV faithfully regardless of the registry at render time
-    window = [r["x_label"] for r in t.points(t.panels()[0], "submitted")
-              if r["x_label"] not in BASELINE]
+    window = window_of(t)
     fig = plt.figure(figsize=(13, 7))
     subfigs = fig.subfigures(2, 3, hspace=0.08, wspace=0.05)
     for sf, coh in zip(subfigs.flat, t.panels()):

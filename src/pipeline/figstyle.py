@@ -197,6 +197,17 @@ def shade_provisional(axr, window,
     return shade_span(axr, prov[0] - 0.5, prov[-1] + 0.5, label)
 
 
+def window_of(table) -> list:
+    """The month window a monthly figdata.Table was built over, from its
+    own x_labels: renders re-derive the window instead of resolving it
+    again, so --from-table replays a committed CSV faithfully regardless
+    of the registry (or --through) at render time."""
+    panel = table.panels()[0]
+    series = table.series_in(panel)[0]
+    return [r["x_label"] for r in table.points(panel, series)
+            if r["x_label"] not in BASELINE]
+
+
 def broken_axes_month(ylabel: str, window):
     """Whole-figure broken-axis variant on a MONTH domain (the monthly
     twins of paper figures 2/3): baseline months on the left, the given

@@ -27,7 +27,8 @@ sys.path.insert(0, "src")
 from pipeline.analyze import month_window
 from pipeline.figdata import Table, figure_main
 from pipeline.figstyle import (BASELINE, PAIR_BLUE, PAIR_ORANGE,
-                               broken_pair, cell, month_series, plt)
+                               broken_pair, cell, month_series, plt,
+                               window_of)
 from pipeline.studies.attention import attention_by_ai
 from pipeline.studies.productivity import month_w8_mature, review_mix
 
@@ -60,8 +61,7 @@ def collect(window: list[str] | None = None) -> Table:
 
 
 def render(t: Table):
-    window = [r["x_label"] for r in t.points("humanrev", "nonai")
-              if r["x_label"] not in BASELINE]
+    window = window_of(t)
     fig = plt.figure(figsize=(11, 4.4))
     subfigs = fig.subfigures(1, 2, wspace=0.05)
     for sf, (panel, _title, _key, _scale) in zip(subfigs.flat, PANELS):
