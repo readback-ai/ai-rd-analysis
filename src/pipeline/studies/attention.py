@@ -52,6 +52,47 @@ def human_comment_count(pr: dict) -> int:
     return sum(min(n, COMMENT_CAP) for n in per_reviewer.values())
 
 
+def has_no_human_commentary(pr: dict) -> bool:
+    """No human left an inline comment on this PR. Deliberately NOT
+    conditioned on the PR having been reviewed at all: an unreviewed PR
+    is the clearest case of no commentary, and the attention panels'
+    human_reviewed gate would define the question away."""
+    return human_comment_count(pr) == 0
+
+
+def no_commentary_share(fleet_slice: bool = True,
+                        granularity: str = "quarter") -> dict:
+    """(period, slice) -> {n, silent, share} — the share of MATURE MERGED
+    PRs in each slice that received no human inline comment at all.
+
+    Companion to `attention_by_ai`, which reports comments per kLOC over
+    reviewed PRs only: a low rate there can mean thin review everywhere or
+    sparse review concentrated on a few PRs, and this separates the two.
+    Denominator is every mature merged PR in the slice (issue #34)."""
+    from pipeline.studies.productivity import (BASELINE_MONTHS,
+                                               WINDOW_MONTHS, fleet_logins)
+    fleet = fleet_logins()
+    frame_kw = {} if granularity == "quarter" else \
+        {"periods": BASELINE_MONTHS + WINDOW_MONTHS, "granularity": "month"}
+    agg = defaultdict(lambda: defaultdict(int))
+    for f in study_frame("all", **frame_kw):
+        if not ai_contrast_eligible(f):
+            continue
+        is_fleet = f.author in fleet
+        if is_fleet and not fleet_slice:
+            continue
+        c = f.cls
+        if not (c.w8_mature and c.merged):
+            continue
+        sl = "fleet" if is_fleet else ("ai" if c.ai_involved else "nonai")
+        d = agg[(f.period, sl)]
+        d["n"] += 1
+        d["silent"] += has_no_human_commentary(f.pr)
+    return {k: {"n": d["n"], "silent": d["silent"],
+                "share": d["silent"] / d["n"]}
+            for k, d in agg.items() if d["n"]}
+
+
 def attention_by_ai(fleet_slice: bool = False,
                     granularity: str = "quarter") -> dict:
     """Figure 7: attention proxies by PR AI involvement (FLEET-OPERATOR

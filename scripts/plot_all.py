@@ -27,6 +27,10 @@ import plot_adoption_cohorts as a1                           # noqa: E402
 import plot_adoption_cohorts_median as a1a                    # noqa: E402
 import plot_adoption_event as a2                             # noqa: E402
 import plot_fig2_comp_audits as comp2                        # noqa: E402
+import plot_fig2_comp_audits_median as comp2a                # noqa: E402
+import plot_productivity_deciles as a3                       # noqa: E402
+import plot_activity_deciles as a4                           # noqa: E402
+import plot_active_insider_deciles as a5                     # noqa: E402
 import plot_fig3_comp_audits as comp3                        # noqa: E402
 import plot_fig5_fleet as f5                                 # noqa: E402
 import plot_fig5_fleet_median as f5a                          # noqa: E402
@@ -55,12 +59,21 @@ FIGURES = [
     ("artifacts/fig_a2_adoption_event.png", a2.collect, a2.render),
     # median twins: same panels, typical member instead of cohort mean
     (f"artifacts/{f5a.NAME}.png", f5a.collect,
-     functools.partial(f5.render, ylabel=f5a.YLABEL)),
+     functools.partial(f5.render, ylabel=f5a.YLABEL,
+                       legend_title=f5a.LEGEND_TITLE)),
     (f"artifacts/{a1a.NAME}.png", a1a.collect,
-     functools.partial(a1.render, ylabel=a1a.YLABEL)),
+     functools.partial(a1.render, ylabel=a1a.YLABEL,
+                       legend_title=a1a.LEGEND_TITLE)),
     (f"artifacts/{paper3a.NAME}.png", paper3a.collect, paper.render_core),
     ("artifacts/figure_2_comp_audits.png", comp2.collect, comp2.render),
+    (f"artifacts/{comp2a.NAME}.png", comp2a.collect,
+     functools.partial(comp2.render, ylabel=comp2a.YLABEL,
+                       legend_title=comp2a.LEGEND_TITLE)),
     ("artifacts/figure_3_comp_audits.png", comp3.collect, comp3.render),
+    (f"artifacts/{a3.NAME}.png", a3.collect, a3.render),
+    (f"artifacts/{a3.QUARTERLY_NAME}.png", a3.collect_quarterly, a3.render),
+    (f"artifacts/{a4.NAME}.png", a4.collect, a4.render),
+    (f"artifacts/{a5.NAME}.png", a5.collect, a5.render),
 ]
 
 
