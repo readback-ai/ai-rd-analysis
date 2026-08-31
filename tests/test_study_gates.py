@@ -1490,3 +1490,125 @@ def test_zero_comment_share_does_not_condition_on_being_reviewed():
     # an unreviewed PR must still land in the denominator
     assert attention.has_no_human_commentary(silent) is True
     assert attention.has_no_human_commentary(talked) is False
+
+
+def test_productivity_deciles_quarterly_basis_averages_three_months():
+    """The single-month endpoints are dominated by month-to-month
+    volatility (p10 0.08x to p90 19.9x on the full panel), so the
+    quarterly basis averages Oct-Dec and Apr-Jun per contributor before
+    taking deciles."""
+    from pipeline.studies import productivity
+    W = productivity.WINDOW_MONTHS
+
+    def row(sub):
+        return [0.0, sub, 0, 1, 1, sub, 0.0]
+
+    # one contributor active every month; submitted 3/6/9 in Oct-Dec
+    # (mean 6) and 10/20/30 in Apr-Jun (mean 20)
+    vals = {W[0]: 3.0, W[1]: 6.0, W[2]: 9.0,
+            W[3]: 1.0, W[4]: 1.0, W[5]: 1.0,
+            W[6]: 10.0, W[7]: 20.0, W[8]: 30.0}
+    acc = {"solo": {m: row(v) for m, v in vals.items()}}
+    mp = pytest.MonkeyPatch()
+    try:
+        mp.setattr(productivity, "_author_months_and_cohorts",
+                   lambda: (acc, {"solo": "early"}, {}, set()))
+        q = productivity.productivity_deciles(basis="quarter")
+        m = productivity.productivity_deciles(basis="month")
+    finally:
+        mp.undo()
+    # quarterly: means of the two 3-month windows
+    assert q[("all", "submitted", "pre")][4] == pytest.approx(6.0)
+    assert q[("all", "submitted", "post")][4] == pytest.approx(20.0)
+    assert q[("all", "submitted", "ratio")][4] == pytest.approx(20.0 / 6.0)
+    # monthly: the single endpoint months, which are noisier by design
+    assert m[("all", "submitted", "pre")][4] == pytest.approx(3.0)
+    assert m[("all", "submitted", "post")][4] == pytest.approx(30.0)
+
+
+def test_activity_deciles_split_by_population_and_group():
+    """The detection-based split is confounded by volume: detection needs
+    a marker in a PR, so contributors submitting ~1 PR/quarter can barely
+    be detected at all. The activity deciles expose that — in the loose
+    population never-AI sits at 0.33 PRs/month, in the balanced panel at
+    ~7 — so the two populations must be reported side by side."""
+    from pipeline.studies import productivity
+
+    W, B = productivity.WINDOW_MONTHS, productivity.BASELINE_MONTHS
+
+    def row(prs, ai, kloc):
+        return [0.0, 0.0, ai, prs, prs, kloc, 0.0]
+
+    # "heavy" trips detection; "light" never does and is absent one month
+    heavy = {m: row(9, 1 if m == W[3] else 0, 5.0) for m in W + B}
+    light = {m: row(1, 0, 0.5) for m in W + B}
+    light[W[4]] = row(0, 0, 0.0)                 # gap -> out of the panel
+    mp = pytest.MonkeyPatch()
+    try:
+        mp.setattr(productivity, "_author_months_and_cohorts",
+                   lambda: ({"heavy": heavy, "light": light},
+                            {"heavy": "early", "light": "never"}, {}, set()))
+        loose = productivity.activity_deciles(balanced=False)
+        panel = productivity.activity_deciles(balanced=True)
+    finally:
+        mp.undo()
+    assert loose[("Q4-2025", "never_ai", "prs", "n")][0] == 1.0
+    assert panel.get(("Q4-2025", "never_ai", "prs", "n"), [0])[0] == 0.0
+    assert panel[("Q4-2025", "ever_ai", "prs", "n")][0] == 1.0
+
+
+def test_decile_studies_are_insider_only(monkeypatch):
+    """Figure 3's "core author" population is INSIDERS
+    (authorAssociation MEMBER/OWNER/COLLABORATOR). Outsiders are
+    drive-by by nature, and _author_months_and_cohorts already keys its
+    cohort map on insiders only — the decile studies must use the same
+    population or they describe a different set of people."""
+    from pipeline.studies import productivity
+    W = productivity.WINDOW_MONTHS
+
+    def row(prs):
+        return [0.0, 0.0, 0, prs, prs, float(prs), 0.0]
+
+    inside = {m: row(9) for m in W + productivity.BASELINE_MONTHS}
+    outside = {m: row(1) for m in W + productivity.BASELINE_MONTHS}
+    # cohort map carries INSIDERS ONLY, exactly as the shared builder does
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({"ins": inside, "out": outside},
+                                 {"ins": "never"}, {}, set()))
+    act = productivity.activity_deciles(balanced=False)
+    dec = productivity.productivity_deciles(basis="quarter")
+    assert act[("Q4-2025", "never_ai", "prs", "n")][0] == 1.0   # not 2
+    assert dec[("all", "submitted", "n")][0] == 1.0             # not 2
+
+
+def test_active_insider_deciles_require_the_floor_in_both_quarters():
+    """The active-insiders panel (>=10 PRs in BOTH endpoint quarters)
+    is what makes "never used AI" a behavioural claim: dozens of chances
+    to trip a marker, none did. A contributor under the floor in either
+    quarter must be excluded, and fleet operators always are."""
+    import pytest as _pt
+    from pipeline.studies import productivity
+    W, B = productivity.WINDOW_MONTHS, productivity.BASELINE_MONTHS
+
+    def row(prs, ai=0, kloc=0.0):
+        return [0.0, kloc, ai, prs, prs, kloc, 0.0]
+
+    active = {m: row(4, 0, 2.0) for m in W + B}      # 12/quarter, never AI
+    active[W[3]] = row(4, 1, 2.0)                    # ...actually ever-AI
+    quiet = {m: row(2, 0, 1.0) for m in W + B}       # 6/quarter: under floor
+    fleeter = {m: row(200, 0, 50.0) for m in W + B}
+    mp = _pt.MonkeyPatch()
+    try:
+        mp.setattr(productivity, "_author_months_and_cohorts",
+                   lambda: ({"a": active, "q": quiet, "f": fleeter},
+                            {"a": "early", "q": "never", "f": "fleet"},
+                            {}, {"f"}))
+        out = productivity.active_insider_deciles(pre="Q4-2025")
+    finally:
+        mp.undo()
+    assert out[("ever_ai", "submitted", "n")][0] == 1.0   # only "a"
+    assert ("never_ai", "submitted", "n") not in out or \
+        out[("never_ai", "submitted", "n")][0] == 0.0
+    # per-quarter ratio: 6 kLOC both quarters -> 1.0x at every decile
+    assert out[("ever_ai", "submitted", "ratio")][4] == _pt.approx(1.0)
+    assert out[("ever_ai", "prs", "ratio")][4] == _pt.approx(1.0)

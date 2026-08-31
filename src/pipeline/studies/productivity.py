@@ -498,6 +498,190 @@ def adoption_event(max_off: int = 2, balanced: bool = True) -> dict:
     return out
 
 
+ACTIVITY_PERIODS = [("Q1-2024", "baseline"), ("Q4-2025", "window start"),
+                    ("Q2-2026", "window end")]
+
+
+def activity_deciles(balanced: bool = True) -> dict:
+    """(period, group, metric, series) -> deciles p10..p90, plus an "n" row.
+
+    How ACTIVE each group is, which is what makes the AI/non-AI split
+    interpretable at all: detection needs a marker inside a PR, so a
+    contributor's chance of ever being detected scales with how many PRs
+    they submit. In the loose population the never-AI median is ~0.33
+    PRs/month — one per quarter — so "never used AI" there mostly means
+    "could not have been detected". In the balanced panel (>=1 PR in
+    every window month) never-AI sits near 7 PRs/month, i.e. ~63 PRs
+    without a marker, which is evidence of non-use. Report both so the
+    difference is visible rather than assumed.
+
+    metric: "prs" (mean PRs/month) and "kloc" (mean submitted kLOC/month).
+    """
+    acc, cohort_of_login, _q, fleet = _author_months_and_cohorts()
+    zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
+    periods = {"Q1-2024": BASELINE_MONTHS, "Q4-2025": WINDOW_MONTHS[:3],
+               "Q2-2026": WINDOW_MONTHS[-3:]}
+    # INSIDERS only, the Figure 3 "core author" population: the shared
+    # builder already keys its cohort map on them, and outsiders are
+    # drive-by by nature, which would swamp the low deciles.
+    insiders = set(cohort_of_login)
+    ever = {w for w in insiders
+            if any((acc[w].get(m) or zero)[2] > 0 for m in WINDOW_MONTHS)}
+    pop = ([w for w in insiders
+            if all((acc[w].get(m) or zero)[3] > 0 for m in WINDOW_MONTHS)]
+           if balanced else list(insiders))
+    pop = [w for w in pop if w not in fleet]
+
+    def amount(who, months, metric):
+        rows = [acc[who].get(m) or zero for m in months]
+        idx = 3 if metric == "prs" else 5
+        return sum(r[idx] for r in rows) / len(rows)
+
+    def deciles(xs):
+        xs = sorted(xs)
+        if not xs:
+            return [float("nan")] * 9
+        return [xs[min(int(len(xs) * q / 100), len(xs) - 1)]
+                for q in range(10, 100, 10)]
+
+    out = {}
+    for pname, months in periods.items():
+        for gname, want in (("ever_ai", True), ("never_ai", False)):
+            members = [w for w in pop if (w in ever) == want
+                       and any((acc[w].get(m) or zero)[3] > 0 for m in months)]
+            for metric in ("prs", "kloc"):
+                vals = [amount(w, months, metric) for w in members]
+                out[(pname, gname, metric, "deciles")] = deciles(vals)
+                out[(pname, gname, metric, "n")] = [float(len(members))] * 9
+    return out
+
+
+ACTIVE_FLOOR = 10   # SUBMITTED PRs per quarter, in BOTH endpoint quarters
+
+
+def active_insider_deciles(pre: str = "Q4-2025") -> dict:
+    """(group, metric, series) -> deciles p10..p90 over ACTIVE INSIDERS:
+    insider authors with >= ACTIVE_FLOOR PRs in BOTH `pre` (Q4-2025 or
+    Q1-2024) and Q2-2026, fleet excluded.
+
+    The floor is what makes "never used AI" a BEHAVIOURAL claim: these
+    contributors had dozens of PRs in which a marker could have appeared
+    and none did — unlike low-activity authors, whose non-detection is
+    mostly lack of opportunity (detection needs a marker inside a PR).
+
+    metric: "submitted"/"merged" (kLOC per QUARTER) and "prs" (SUBMITTED
+    PRs per quarter — authored, regardless of outcome; the floor counts
+    the same quantity). series: "pre", "post", "ratio" — the ratio is each person's
+    own post/pre, decile'd per contributor, never a ratio of deciles."""
+    if pre not in ("Q4-2025", "Q1-2024"):
+        raise ValueError(f"unknown pre quarter: {pre!r}")
+    acc, cohort_of_login, _q, fleet = _author_months_and_cohorts()
+    zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
+    months_of = {"Q1-2024": BASELINE_MONTHS, "Q4-2025": WINDOW_MONTHS[:3],
+                 "Q2-2026": WINDOW_MONTHS[-3:]}
+
+    def q_amount(who, quarter, metric):
+        rows = [acc[who].get(m) or zero for m in months_of[quarter]]
+        if metric == "prs":
+            return float(sum(r[3] for r in rows))
+        return sum(r[5] if metric == "submitted" else r[0] + r[1]
+                   for r in rows)
+
+    insiders = set(cohort_of_login)
+    ever = {w for w in insiders
+            if any((acc[w].get(m) or zero)[2] > 0 for m in WINDOW_MONTHS)}
+    panel = [w for w in insiders if w not in fleet
+             and q_amount(w, pre, "prs") >= ACTIVE_FLOOR
+             and q_amount(w, "Q2-2026", "prs") >= ACTIVE_FLOOR]
+
+    def deciles(xs):
+        xs = sorted(xs)
+        if not xs:
+            return [float("nan")] * 9
+        return [xs[min(int(len(xs) * q / 100), len(xs) - 1)]
+                for q in range(10, 100, 10)]
+
+    out = {}
+    for group, members in (("ever_ai", [w for w in panel if w in ever]),
+                           ("never_ai", [w for w in panel if w not in ever])):
+        for metric in ("submitted", "merged", "prs"):
+            a = [q_amount(w, pre, metric) for w in members]
+            b = [q_amount(w, "Q2-2026", metric) for w in members]
+            out[(group, metric, "pre")] = deciles(a)
+            out[(group, metric, "post")] = deciles(b)
+            out[(group, metric, "ratio")] = deciles(
+                [y / x for x, y in zip(a, b) if x > 0])
+            out[(group, metric, "n")] = [float(len(members))] * 9
+    return out
+
+
+DECILE_GROUPS = [("all", "all contributors (non-fleet)"),
+                 ("ever_ai", "ever used AI (detected)"),
+                 ("never_ai", "never used AI (detected)"),
+                 ("fleet", "fleet operators")]
+
+
+def productivity_deciles(basis: str = "month") -> dict:
+    """(group, metric, series) -> the 9 deciles p10..p90, over the
+    BALANCED PANEL of contributors with >=1 PR in EVERY window month.
+
+    Nobody enters or leaves mid-window, so a shift in these curves is the
+    same people changing rather than the population changing. Groups are
+    split by whether any AI evidence appeared in the window — "never used
+    AI" means never DETECTABLY, and detection is a floor, so that group
+    certainly contains undetected use, which biases against finding a gap.
+
+    basis="month" compares the endpoint months (2025-10 vs 2026-06);
+    basis="quarter" averages Oct-Dec against Apr-Jun per contributor
+    first. Single months are dominated by volatility — the endpoint
+    ratio spans p10 0.08x to p90 19.9x — so the quarterly basis is the
+    one to read for trend.
+
+    series: "pre", "post" (kLOC levels) and "ratio" (post/pre, computed
+    PER CONTRIBUTOR then decile'd, never as a ratio of deciles)."""
+    if basis not in ("month", "quarter"):
+        raise ValueError(f"unknown basis: {basis!r} (month|quarter)")
+    acc, cohort_of_login, _q, fleet = _author_months_and_cohorts()
+    zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
+    insiders = set(cohort_of_login)          # Figure 3 "core author" population
+    pre_months = [WINDOW_MONTHS[0]] if basis == "month" else WINDOW_MONTHS[:3]
+    post_months = [WINDOW_MONTHS[-1]] if basis == "month" else WINDOW_MONTHS[-3:]
+
+    def amount(login, months, metric):
+        rows = [acc[login].get(m) or zero for m in months]
+        vals = [r[5] if metric == "submitted" else r[0] + r[1] for r in rows]
+        return sum(vals) / len(vals)
+
+    panel = [who for who in insiders
+             if all((acc[who].get(m) or zero)[3] > 0 for m in WINDOW_MONTHS)]
+    ever = {who for who in panel
+            if any((acc[who].get(m) or zero)[2] > 0 for m in WINDOW_MONTHS)}
+    members = {
+        "all": [w for w in panel if w not in fleet],
+        "ever_ai": [w for w in panel if w not in fleet and w in ever],
+        "never_ai": [w for w in panel if w not in fleet and w not in ever],
+        "fleet": [w for w in panel if w in fleet]}
+
+    def deciles(xs):
+        xs = sorted(xs)
+        if not xs:
+            return [float("nan")] * 9
+        return [xs[min(int(len(xs) * q / 100), len(xs) - 1)]
+                for q in range(10, 100, 10)]
+
+    out = {}
+    for group, logins in members.items():
+        for metric in ("submitted", "merged"):
+            pre = [amount(w, pre_months, metric) for w in logins]
+            post = [amount(w, post_months, metric) for w in logins]
+            ratio = [b / a for a, b in zip(pre, post) if a > 0]
+            out[(group, metric, "pre")] = deciles(pre)
+            out[(group, metric, "post")] = deciles(post)
+            out[(group, metric, "ratio")] = deciles(ratio)
+            out[(group, metric, "n")] = [float(len(logins))] * 9
+    return out
+
+
 def event_by_adoption_month(max_off: int = 2, stat: str = "mean",
                             require_active: bool = True) -> dict:
     """Figure 4: per-author kLOC (six metrics: submitted/merged x
