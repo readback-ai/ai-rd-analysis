@@ -1612,3 +1612,31 @@ def test_active_insider_deciles_require_the_floor_in_both_quarters():
     # per-quarter ratio: 6 kLOC both quarters -> 1.0x at every decile
     assert out[("ever_ai", "submitted", "ratio")][4] == _pt.approx(1.0)
     assert out[("ever_ai", "prs", "ratio")][4] == _pt.approx(1.0)
+
+
+def test_change_deciles_report_the_ratio_sample_size(monkeypatch):
+    """Codex review P1: members with pre == 0 cannot have a change ratio
+    and are dropped from the ratio deciles, while the figures quoted the
+    FULL membership n — 453/475 on one A3 curve. Both decile studies must
+    expose the metric-specific ratio sample so plots can label what they
+    actually draw."""
+    from pipeline.studies import productivity
+    W = productivity.WINDOW_MONTHS
+
+    def row(prs, merged):
+        return [0.0, merged, 0, prs, prs, merged, 0.0]
+
+    grew = {m: row(4, 2.0) for m in W + productivity.BASELINE_MONTHS}
+    fresh = {m: row(4, 0.0) for m in W + productivity.BASELINE_MONTHS}
+    for m in W[-3:]:
+        fresh[m] = row(4, 3.0)         # active always, merges only at the end
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({"g": grew, "z": fresh},
+                                 {"g": "never", "z": "never"}, {}, set()))
+    dec = productivity.productivity_deciles(basis="quarter")
+    act = productivity.active_insider_deciles(pre="Q4-2025")
+    for out in (dec[("never_ai", "merged", "n_ratio")],
+                act[("never_ai", "merged", "n_ratio")]):
+        assert out[0] == 1.0           # only "g" has a pre > 0
+    assert dec[("never_ai", "merged", "n")][0] == 2.0
+    assert act[("never_ai", "prs", "n_ratio")][0] == 2.0   # prs pre > 0 both

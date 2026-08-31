@@ -5,9 +5,9 @@ being detected scales with how many PRs they submit. That makes the
 ever-AI / never-AI split only as meaningful as the activity behind it.
 
 Two rows, one per population:
-  ALL CONTRIBUTORS       — never-AI sits at ~0.33 PRs/month (one per
-                           quarter) through p50, so "never used AI" there
-                           mostly means "could not have been detected".
+  ALL INSIDERS           — never-AI median ~1.67 PRs/month (~15 PRs over
+                           the window), so the never-AI label rests on
+                           modest detection opportunity.
   BALANCED 9-MONTH PANEL — never-AI sits near 7 PRs/month, i.e. ~63 PRs
                            across the window without a marker, which is
                            evidence of non-use.
@@ -29,16 +29,17 @@ from pipeline.figstyle import PAIR_BLUE, PAIR_ORANGE, plt
 from pipeline.studies.productivity import ACTIVITY_PERIODS, activity_deciles
 
 DECILES = list(range(10, 100, 10))
-POPS = [("all", "all contributors", False),
+POPS = [("all", "all insiders", False),
         ("panel", "balanced 9-month panel", True)]
 GROUPS = [("ever_ai", "ever used AI (detected)", PAIR_ORANGE[0]),
           ("never_ai", "never used AI (detected)", PAIR_BLUE[0])]
 NAME = "figure_a4_activity_deciles"
+KLOC_NAME = f"{NAME}_kloc"
 UNITS = {"prs": "PRs / month", "kloc": "submitted kLOC / month"}
 
 
-def table(metric: str) -> Table:
-    t = Table(NAME)
+def table(metric: str, name: str = NAME) -> Table:
+    t = Table(name)
     for pop, pop_label, balanced in POPS:
         rows = activity_deciles(balanced=balanced)
         for period, _desc in ACTIVITY_PERIODS:
@@ -57,7 +58,8 @@ def collect() -> Table:
 
 
 def collect_kloc() -> Table:
-    return table("kloc")
+    return table("kloc", KLOC_NAME)      # own table: never clobber the
+                                         # canonical PR-count CSV
 
 
 def render(t: Table, unit: str = UNITS["prs"]):
@@ -93,4 +95,4 @@ if __name__ == "__main__":
     argv = [a for a in sys.argv[1:] if a != "--kloc"]
     figure_main(collect_kloc if as_kloc else collect,
                 (lambda t: render(t, UNITS["kloc"])) if as_kloc else render,
-                f"artifacts/{NAME}{'_kloc' if as_kloc else ''}.png", argv=argv)
+                f"artifacts/{KLOC_NAME if as_kloc else NAME}.png", argv=argv)

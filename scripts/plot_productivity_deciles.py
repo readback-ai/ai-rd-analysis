@@ -45,10 +45,13 @@ def table(rows: dict, name: str, pre_label: str, post_label: str) -> Table:
     for group, desc in DECILE_GROUPS:
         n = int(rows[(group, "submitted", "n")][0])
         for metric in ("submitted", "merged"):
+            # pre == 0 members carry no change ratio (codex review P1):
+            # the ratio series is a smaller sample than the membership
+            n_ratio = int(rows[(group, metric, "n_ratio")][0])
             for series in ("pre", "post", "ratio"):
                 label = {"pre": f"{metric} {pre_label}",
                          "post": f"{metric} {post_label}",
-                         "ratio": f"{metric} change"}[series]
+                         "ratio": f"{metric} change (n={n_ratio})"}[series]
                 t.add_series(f"{group}|{metric}", f"{metric}_{series}",
                              rows[(group, metric, series)],
                              x_labels=[f"p{d}" for d in DECILES],
@@ -97,9 +100,13 @@ def render(t: Table):
             color, ls = GROUP_STYLE[group]
             # p50 goes in the legend: four annotations at one x collide
             mid = pts[len(pts) // 2]
+            # panel label carries the full membership n; the series label
+            # carries the ratio sample (pre == 0 members drop out)
+            ratio_n = pts[0]["series_label"].split("(n=")[1].rstrip(")")
+            group_name = t.label_of(panel).split(" (n=")[0]
             ax.plot([p["x"] for p in pts], [p["value"] for p in pts],
                     marker="o", ms=4, ls=ls, color=color,
-                    label=f"{t.label_of(panel)}  —  p50 "
+                    label=f"{group_name} (n={ratio_n})  —  p50 "
                           f"{100 * (mid['value'] - 1):+.0f}%")
             ax.plot([mid["x"]], [mid["value"]], marker="o", ms=9,
                     mfc="none", mec=color, mew=1.6, zorder=5)

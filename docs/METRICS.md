@@ -210,9 +210,10 @@ argument — one section = one module invocation):
     lines will not sum to their total, because a different member sits at
     the middle of each; in the early-adopter panel the components sum to
     ~1.8 against a total of 4.4. Figures bake in no captions (they are
-    supplied in the paper text), so that warning rides in the PANEL LABEL
-    — "… — MEDIAN member (series do not sum)" — and the paper text
-    reproducing any median panel must repeat it. Figure 3's median twin
+    supplied in the paper text); the images identify the statistic via
+    the LEGEND TITLE "median:", and the non-additivity warning lives HERE
+    and in the paper text, which must repeat it wherever a median panel
+    is reproduced. Figure 3's median twin
     is `fig3a_core_loc_median.png` (`core_rows(stat="median")`); it is
     the source for per-contributor LEVELS.
 16. **Merged LOC by approval channel** (`--cut channels`) — humanRev /

@@ -49,7 +49,9 @@ def collect() -> Table:
         rows = active_insider_deciles(pre=pre)
         for metric, mlabel in METRICS:
             for group, glabel, _c in GROUPS:
-                n = int(rows[(group, metric, "n")][0])
+                # the ratio sample: pre == 0 members carry no change
+                # ratio (codex review P1), so quote what is drawn
+                n = int(rows[(group, metric, "n_ratio")][0])
                 t.add_series(f"{pre}|{metric}", group,
                              rows[(group, metric, "ratio")],
                              x_labels=[f"p{d}" for d in DECILES],

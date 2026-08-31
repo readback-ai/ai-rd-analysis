@@ -508,12 +508,13 @@ def activity_deciles(balanced: bool = True) -> dict:
     How ACTIVE each group is, which is what makes the AI/non-AI split
     interpretable at all: detection needs a marker inside a PR, so a
     contributor's chance of ever being detected scales with how many PRs
-    they submit. In the loose population the never-AI median is ~0.33
-    PRs/month — one per quarter — so "never used AI" there mostly means
-    "could not have been detected". In the balanced panel (>=1 PR in
-    every window month) never-AI sits near 7 PRs/month, i.e. ~63 PRs
-    without a marker, which is evidence of non-use. Report both so the
-    difference is visible rather than assumed.
+    they submit. Among ALL insiders the never-AI median is ~1.67
+    PRs/month (~15 PRs over the window) — modest detection opportunity —
+    while the balanced panel's never-AI insiders sit near 7 PRs/month,
+    i.e. ~63 PRs without a marker, which is evidence of non-use. Report
+    both so the difference is visible rather than assumed. (Outsiders,
+    excluded here, median ~0.33 PRs/month — one PR per quarter — which is
+    why they cannot carry an AI/non-AI label at all.)
 
     metric: "prs" (mean PRs/month) and "kloc" (mean submitted kLOC/month).
     """
@@ -609,9 +610,12 @@ def active_insider_deciles(pre: str = "Q4-2025") -> dict:
             b = [q_amount(w, "Q2-2026", metric) for w in members]
             out[(group, metric, "pre")] = deciles(a)
             out[(group, metric, "post")] = deciles(b)
-            out[(group, metric, "ratio")] = deciles(
-                [y / x for x, y in zip(a, b) if x > 0])
+            ratios = [y / x for x, y in zip(a, b) if x > 0]
+            out[(group, metric, "ratio")] = deciles(ratios)
             out[(group, metric, "n")] = [float(len(members))] * 9
+            # pre == 0 members have no change ratio; plots of the ratio
+            # series must quote THIS sample, not the membership
+            out[(group, metric, "n_ratio")] = [float(len(ratios))] * 9
     return out
 
 
@@ -679,6 +683,9 @@ def productivity_deciles(basis: str = "month") -> dict:
             out[(group, metric, "post")] = deciles(post)
             out[(group, metric, "ratio")] = deciles(ratio)
             out[(group, metric, "n")] = [float(len(logins))] * 9
+            # pre == 0 members have no change ratio; plots of the ratio
+            # series must quote THIS sample, not the membership
+            out[(group, metric, "n_ratio")] = [float(len(ratio))] * 9
     return out
 
 
