@@ -162,6 +162,22 @@ AI-topic repos. Appendix cuts (org-type public/private/community via
    `figstyle.shade_q2_partial` drops the Q2 band and
    `productivity.q2_provisionality_note` empties its caption once Q2
    closes), so regeneration alone clears them.
+6. MONTHLY FIGURE VARIANTS (opt-in): `plot_all.py --monthly` additionally
+   renders a monthly twin of each figure under a distinct `*_monthly`
+   stem (PNG and `artifacts/data/*.csv` alike), and
+   `--through YYYY-MM` (implies `--monthly`) extends the monthly x-axis
+   past its default frozen end (2026-06) to any censused registry month
+   — the default, flag-less run stays the frozen quarterly set. Monthly
+   rows use the 2-PR/month repo floor (step 4) and carry no ×-baseline
+   multiples (a single baseline month is not the frozen Q1-2024 baseline
+   estimate). Months with open w8 windows are INCLUDED under the shaded
+   provisional band (`figstyle.shade_provisional`), except the Figure 3
+   companion, which keeps excluding immature months (its per-kLOC rates
+   are undefined on immature merged sets). Figure 8 has no monthly twin —
+   its review-action sample is a frozen quarter-keyed manifest draw — and
+   `--monthly` prints that skip explicitly (`[quarterly]`, the report.py
+   precedent). Cohort and fleet-operator definitions stay frozen with the
+   quarters under any window: extension months extend the series only.
 Step 2 is enforced, not merely documented: `check_finalizable` refuses the
 run — BEFORE any cell is wiped — unless `AS_OF` both reaches the N-2
 month's `finalization_stamp` (its last creation instant + 56d) and does

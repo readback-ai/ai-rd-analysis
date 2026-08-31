@@ -8,6 +8,7 @@ bootstrap 95% CIs from pipeline.studies.paper_tables (CW, seeded).
 
 Data:    artifacts/data/fig2_ai_usage.csv, artifacts/data/fig3_core_loc.csv
 Outputs: artifacts/fig2_ai_usage.png, artifacts/fig3_core_loc.png
+         (+ *_monthly twins via plot_all --monthly)
 
 Usage:  PYTHONPATH=src python scripts/plot_paper_tables.py
 """

@@ -8,6 +8,7 @@ construction. Q2 is partial (w8 windows open at the AS_OF).
 
 Data:   artifacts/data/fig7_attention_by_ai.csv
 Output: artifacts/fig7_attention_by_ai.png
+        (+ the *_monthly twin via plot_all --monthly)
 Usage:  PYTHONPATH=src python scripts/plot_fig7_attention.py
 """
 import sys

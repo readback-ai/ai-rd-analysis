@@ -13,6 +13,7 @@ with AS_OF re-pulls). Broken x-axis: Q1-2024 | Q4-2025..Q2-2026.
 Data:    artifacts/data/fig6_review_mix.csv,
          artifacts/data/fig6_review_mix_by_ai.csv
 Outputs: artifacts/fig6_review_mix.png, artifacts/fig6_review_mix_by_ai.png
+         (+ *_monthly twins via plot_all --monthly)
 Usage:   PYTHONPATH=src python scripts/plot_fig6_review.py
 """
 import sys
