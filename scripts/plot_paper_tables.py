@@ -23,9 +23,9 @@ USAGE = [("sub_pr", "AI% of submitted PRs", "tab:blue"),
          ("sub_loc", "AI-PR share of submitted LOC", "tab:green"),
          ("mrg_loc", "AI-PR share of merged LOC", "tab:red")]
 
-CORE = [("sub_kloc", "sub_mult", "submitted kLOC / core author",
+CORE = [("sub_kloc", "sub_mult", "submitted kLOC / insider contributor",
          "tab:blue", (6, 8)),
-        ("kloc", "mult", "merged kLOC / core author (w8)",
+        ("kloc", "mult", "merged kLOC / insider contributor (w8)",
          "tab:green", (6, -14))]
 
 
@@ -70,10 +70,10 @@ def core_table(rows: list, name: str) -> Table:
         for i, r in enumerate(rows):
             mean, lo, hi = r[key]
             t.add("core_loc", key, i, mean, lo=lo, hi=hi,
-                  panel_label="kLOC per core contributor / quarter",
+                  panel_label="kLOC per insider contributor / quarter",
                   series_label=label, x_label=r["period"])
             t.add("core_loc", mult_key, i, r[mult_key],
-                  panel_label="kLOC per core contributor / quarter",
+                  panel_label="kLOC per insider contributor / quarter",
                   series_label=f"{label} (x baseline)",
                   x_label=r["period"])
     return t
