@@ -508,13 +508,16 @@ def activity_deciles(balanced: bool = True) -> dict:
     How ACTIVE each group is, which is what makes the AI/non-AI split
     interpretable at all: detection needs a marker inside a PR, so a
     contributor's chance of ever being detected scales with how many PRs
-    they submit. Among ALL insiders the never-AI median is ~1.67
-    PRs/month (~15 PRs over the window) — modest detection opportunity —
-    while the balanced panel's never-AI insiders sit near 7 PRs/month,
-    i.e. ~63 PRs without a marker, which is evidence of non-use. Report
-    both so the difference is visible rather than assumed. (Outsiders,
-    excluded here, median ~0.33 PRs/month — one PR per quarter — which is
-    why they cannot carry an AI/non-AI label at all.)
+    they submit. Each period's row covers PERIOD-ACTIVE insiders (>=1 PR
+    in that period), so the columns are different subsets — the never-AI
+    median of ~1.67 PRs/month describes the displayed subset, while over
+    the FIXED set of never-AI insiders the median is only ~6 window PRs
+    (~8 among the window-active): modest detection opportunity for the
+    group as a whole. The balanced panel's never-AI insiders sit near 7
+    PRs/month — ~63 window PRs without a marker, evidence of non-use.
+    Report both so the difference is visible rather than assumed.
+    (Outsiders, excluded here, median ~0.33 PRs/month — one PR per
+    quarter — which is why they cannot carry an AI/non-AI label at all.)
 
     metric: "prs" (mean PRs/month) and "kloc" (mean submitted kLOC/month).
     """

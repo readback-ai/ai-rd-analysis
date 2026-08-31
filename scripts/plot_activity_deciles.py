@@ -5,9 +5,13 @@ being detected scales with how many PRs they submit. That makes the
 ever-AI / never-AI split only as meaningful as the activity behind it.
 
 Two rows, one per population:
-  ALL INSIDERS           — never-AI median ~1.67 PRs/month (~15 PRs over
-                           the window), so the never-AI label rests on
-                           modest detection opportunity.
+  PERIOD-ACTIVE INSIDERS — insiders with >=1 PR in the displayed period
+                           (each column its own population). The never-AI
+                           row's ~1.67 PRs/month describes THAT subset;
+                           over the fixed set of never-AI insiders the
+                           median is only ~6 window PRs (~8 among the
+                           window-active), so detection opportunity for
+                           the group as a whole is modest.
   BALANCED 9-MONTH PANEL — never-AI sits near 7 PRs/month, i.e. ~63 PRs
                            across the window without a marker, which is
                            evidence of non-use.
@@ -29,7 +33,7 @@ from pipeline.figstyle import PAIR_BLUE, PAIR_ORANGE, plt
 from pipeline.studies.productivity import ACTIVITY_PERIODS, activity_deciles
 
 DECILES = list(range(10, 100, 10))
-POPS = [("all", "all insiders", False),
+POPS = [("all", "period-active insiders", False),
         ("panel", "balanced 9-month panel", True)]
 GROUPS = [("ever_ai", "ever used AI (detected)", PAIR_ORANGE[0]),
           ("never_ai", "never used AI (detected)", PAIR_BLUE[0])]
