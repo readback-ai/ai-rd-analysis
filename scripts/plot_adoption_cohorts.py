@@ -15,24 +15,26 @@ Usage:  PYTHONPATH=src python scripts/plot_adoption_cohorts.py
 import sys
 
 sys.path.insert(0, "src")
+from pipeline.analyze import month_window
 from pipeline.figdata import Table, figure_main
-from pipeline.figstyle import (BASELINE, LOC_SERIES, WINDOW, broken_pair,
-                               month_series, plt, shade_span)
+from pipeline.figstyle import (BASELINE, LOC_SERIES, broken_pair,
+                               month_series, plt, shade_provisional)
 from pipeline.studies.productivity import (ADOPTION_COHORTS,
-                                           adoption_monthly,
-                                           month_w8_mature)
+                                           adoption_monthly)
 
 STYLE = {key: (color, ls, label) for key, color, ls, label in LOC_SERIES}
 
 
-def table(rows: dict, name: str, label_suffix: str = "") -> Table:
+def table(rows: dict, name: str, label_suffix: str = "",
+          window: list[str] | None = None) -> Table:
     """The cohort x series table, over whichever per-member statistic
     `rows` carries — shared with the median variant (fig_a1a).
 
     `label_suffix` names the statistic in the panel label, which is where
     a caption's factual content lives once figures stopped baking in
-    captions (they are supplied in the paper text)."""
-    months = BASELINE + WINDOW
+    captions (they are supplied in the paper text). `window` follows the
+    censused registry (analyze.month_window / plot_all --through)."""
+    months = BASELINE + (window or month_window())
     t = Table(name)
     for coh, desc in ADOPTION_COHORTS:
         for key, _color, _ls, label in LOC_SERIES:
@@ -44,24 +46,28 @@ def table(rows: dict, name: str, label_suffix: str = "") -> Table:
     return t
 
 
-def collect() -> Table:
-    return table(adoption_monthly(), "fig_a1_adoption_cohorts")
+def collect(window: list[str] | None = None) -> Table:
+    window = window or month_window()
+    return table(adoption_monthly(window=window),
+                 "fig_a1_adoption_cohorts", window=window)
 
 
 def render(t: Table, ylabel: str = "kLOC / contributor / month"):
+    # window from the table itself, so --from-table replays a committed
+    # CSV faithfully regardless of the registry at render time
+    window = [r["x_label"] for r in t.points(t.panels()[0], "submitted")
+              if r["x_label"] not in BASELINE]
     fig = plt.figure(figsize=(13, 7))
     subfigs = fig.subfigures(2, 3, hspace=0.08, wspace=0.05)
-    prov = [i for i, m in enumerate(WINDOW) if not month_w8_mature(m)]
     for sf, coh in zip(subfigs.flat, t.panels()):
-        axl, axr = broken_pair(sf, t.label_of(coh), span="month")
+        axl, axr = broken_pair(sf, t.label_of(coh), span="month",
+                               window=window)
         for key in t.series_in(coh):
             color, ls, label = STYLE[key]
             vals = t.values(coh, key)
             month_series(axl, axr, vals[:len(BASELINE)],
                          vals[len(BASELINE):], color, ls=ls, label=label)
-        if prov:
-            shade_span(axr, prov[0] - 0.5, prov[-1] + 0.5,
-                       label="w8 windows open (merged provisional)")
+        shade_provisional(axr, window)
         axl.set_ylim(bottom=0)
         axl.set_ylabel(ylabel)
     # legend lives in the unused sixth panel slot

@@ -31,8 +31,9 @@ YLABEL = "median kLOC / contributor / month"
 SUFFIX = " — MEDIAN member (series do not sum)"
 
 
-def collect() -> Table:
-    return mean_fig.table(adoption_monthly(stat="median"), NAME, SUFFIX)
+def collect(window: list[str] | None = None) -> Table:
+    return mean_fig.table(adoption_monthly(stat="median", window=window),
+                          NAME, SUFFIX, window=window)
 
 
 if __name__ == "__main__":
