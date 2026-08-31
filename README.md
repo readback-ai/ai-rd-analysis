@@ -47,7 +47,7 @@ Methodology: [`docs/METHODS.md`](docs/METHODS.md) · **code review guide: [`docs
 
 Generated report: [`artifacts/report_generated.md`](artifacts/report_generated.md)
 (19 sections, quarterly; monthly twin `report_monthly.md`). Figures:
-`artifacts/fig2_ai_usage.png` (traceable AI usage), `fig3_core_loc.png`
+`artifacts/ai_usage.png` (traceable AI usage), `core_loc.png`
 (merged LOC per core contributor), `fig4_adoption_cohorts.png` (adoption
 cohorts incl. fleet).
 

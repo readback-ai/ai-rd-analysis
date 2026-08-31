@@ -10,9 +10,9 @@ construction (no detectable channel existed). Merged outcomes are
 mature-gated (Q2-2026 reflects PRs whose w8 window closed; finalizes
 with AS_OF re-pulls). Broken x-axis: Q1-2024 | Q4-2025..Q2-2026.
 
-Data:    artifacts/data/fig6_review_mix.csv,
-         artifacts/data/fig6_review_mix_by_ai.csv
-Outputs: artifacts/fig6_review_mix.png, artifacts/fig6_review_mix_by_ai.png
+Data:    artifacts/data/review_mix.csv,
+         artifacts/data/review_mix_by_ai.csv
+Outputs: artifacts/review_mix.png, artifacts/review_mix_by_ai.png
 Usage:   PYTHONPATH=src python scripts/plot_fig6_review.py
 """
 import sys
@@ -25,9 +25,9 @@ from pipeline.studies.productivity import PERIODS, review_mix
 
 VARIANTS = [
     ("role", ("ins", "core"), ("ext", "external"),
-     "artifacts/fig6_review_mix.png"),
+     "artifacts/review_mix.png"),
     ("ai", ("ai", "AI-involved"), ("nonai", "non-AI"),
-     "artifacts/fig6_review_mix_by_ai.png"),
+     "artifacts/review_mix_by_ai.png"),
 ]
 
 UNITS = [("pr", "share of merged PRs", "% of merged PRs"),

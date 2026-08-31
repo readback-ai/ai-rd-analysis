@@ -49,8 +49,8 @@ def test_broken_pair_quarter_geometry():
 
 
 def test_broken_pair_month_geometry():
-    """Legacy month variant verbatim (plot_fig5_fleet.py /
-    plot_adoption_cohorts.py): Q1-2024 months on the left, the
+    """Legacy month variant verbatim (plot_adoption_cohorts.py and
+    the median twin): Q1-2024 months on the left, the
     Oct-2025..Jun-2026 window on the right, ticks at [0, 3, 6, 8]."""
     fig = figstyle.plt.figure()
     sf = fig.subfigures(1, 1)
@@ -174,8 +174,8 @@ def test_quarter_series_split():
 
 
 def test_month_series_split():
-    """The monthly split-plot idiom shared by plot_fig5_fleet and
-    plot_adoption_cohorts: ms 2.5, baseline unlabeled, window labeled."""
+    """The monthly split-plot idiom used by plot_adoption_cohorts
+    (fleet_vs_nonadopters moved to quarters): ms 2.5, baseline unlabeled, window labeled."""
     fig = figstyle.plt.figure()
     sf = fig.subfigures(1, 1)
     axl, axr = broken_pair(sf, "t", span="month")

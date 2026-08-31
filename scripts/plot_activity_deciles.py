@@ -20,8 +20,8 @@ Columns are the three periods. Q1-2024 predates the tools entirely, so the
 gap there is pure selection: what future adopters looked like two years
 before adopting.
 
-Data:   artifacts/data/figure_a4_activity_deciles.csv
-Output: artifacts/figure_a4_activity_deciles.png
+Data:   artifacts/data/activity_deciles.csv
+Output: artifacts/activity_deciles.png
 Usage:  PYTHONPATH=src python scripts/plot_activity_deciles.py
         PYTHONPATH=src python scripts/plot_activity_deciles.py --kloc
 """
@@ -37,7 +37,7 @@ POPS = [("all", "period-active insiders", False),
         ("panel", "balanced 9-month panel", True)]
 GROUPS = [("ever_ai", "ever used AI (detected)", PAIR_ORANGE[0]),
           ("never_ai", "never used AI (detected)", PAIR_BLUE[0])]
-NAME = "figure_a4_activity_deciles"
+NAME = "activity_deciles"
 KLOC_NAME = f"{NAME}_kloc"
 UNITS = {"prs": "PRs / month", "kloc": "submitted kLOC / month"}
 

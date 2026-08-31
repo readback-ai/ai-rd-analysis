@@ -6,8 +6,8 @@ the y-axis — a narrow left panel for Q1-2024 and a right panel for the
 window — joined with standard axis-break marks. Shaded bands are the
 bootstrap 95% CIs from pipeline.studies.paper_tables (CW, seeded).
 
-Data:    artifacts/data/fig2_ai_usage.csv, artifacts/data/fig3_core_loc.csv
-Outputs: artifacts/fig2_ai_usage.png, artifacts/fig3_core_loc.png
+Data:    artifacts/data/ai_usage.csv, artifacts/data/core_loc.csv
+Outputs: artifacts/ai_usage.png, artifacts/core_loc.png
 
 Usage:  PYTHONPATH=src python scripts/plot_paper_tables.py
 """
@@ -43,7 +43,7 @@ def series(axl, axr, pts, label, color):
 
 def collect_usage() -> Table:
     rows = usage_rows()
-    t = Table("fig2_ai_usage")
+    t = Table("ai_usage")
     for key, label, _color in USAGE:
         for i, r in enumerate(rows):
             mean, lo, hi = (v * 100 for v in r[key])
@@ -80,7 +80,7 @@ def core_table(rows: list, name: str) -> Table:
 
 
 def collect_core() -> Table:
-    return core_table(core_rows(), "fig3_core_loc")
+    return core_table(core_rows(), "core_loc")
 
 
 def render_core(t: Table):
@@ -103,5 +103,5 @@ def render_core(t: Table):
 
 
 if __name__ == "__main__":
-    figure_main(collect_usage, render_usage, "artifacts/fig2_ai_usage.png")
-    figure_main(collect_core, render_core, "artifacts/fig3_core_loc.png")
+    figure_main(collect_usage, render_usage, "artifacts/ai_usage.png")
+    figure_main(collect_core, render_core, "artifacts/core_loc.png")

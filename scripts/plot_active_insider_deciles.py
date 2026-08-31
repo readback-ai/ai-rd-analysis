@@ -18,8 +18,8 @@ The submitted-PRs/quarter column is the one that dodges the "AI writes verbose
 code" objection: never-AI throughput is ~flat while detected adopters
 ship ~24% more PRs.
 
-Data:   artifacts/data/figure_a5_active_insider_deciles.csv
-Output: artifacts/figure_a5_active_insider_deciles.png
+Data:   artifacts/data/active_insider_deciles.csv
+Output: artifacts/active_insider_deciles.png
 Usage:  PYTHONPATH=src python scripts/plot_active_insider_deciles.py
 """
 import sys
@@ -37,7 +37,7 @@ METRICS = [("submitted", "submitted kLOC / quarter"),
            ("prs", "submitted PRs / quarter")]
 GROUPS = [("ever_ai", "ever used AI (detected)", PAIR_ORANGE[0]),
           ("never_ai", "never used AI (detected)", PAIR_BLUE[0])]
-NAME = "figure_a5_active_insider_deciles"
+NAME = "active_insider_deciles"
 TICKS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 3, 5, 10, 20]
 TICK_LABELS = ["-75%", "-50%", "-25%", "0%", "+25%", "+50%", "+75%",
                "+100%", "+200%", "+400%", "+900%", "+1900%"]

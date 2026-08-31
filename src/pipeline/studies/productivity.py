@@ -362,6 +362,48 @@ def _author_months_and_cohorts():
     return acc, per_author_cohort, q_of, fleet_all
 
 
+def adoption_quarterly(stat: str = "mean") -> dict:
+    """(quarter, cohort) -> {n, submitted, sub_ai, sub_nonai, merged,
+    mrg_ai, mrg_nonai} — kLOC per QUARTER-ACTIVE cohort member per
+    QUARTER (the fleet_vs_nonadopters series: monthly points are noisy,
+    a quarter pools three months per member). A member's quarter value is
+    their TOTAL over its months; membership needs >=1 PR in the quarter.
+
+    stat as in `adoption_monthly`: "mean" is cohort total per member,
+    "median" the typical member — and medians are per FIELD, never a
+    decomposition."""
+    if stat not in ("mean", "median"):
+        raise ValueError(f"unknown stat: {stat!r} (mean|median)")
+    mid = statistics.median if stat == "median" else \
+        (lambda xs: sum(xs) / len(xs))
+    acc, cohort_of_login, _q_of, _fleet = _author_months_and_cohorts()
+    zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
+    quarters = {"Q1-2024": BASELINE_MONTHS, "Q4-2025": WINDOW_MONTHS[:3],
+                "Q1-2026": WINDOW_MONTHS[3:6], "Q2-2026": WINDOW_MONTHS[6:9]}
+    out = {}
+    for quarter, months in quarters.items():
+        for coh, _d in ADOPTION_COHORTS:
+            rows = []
+            for login, coh_ in cohort_of_login.items():
+                if coh_ != coh:
+                    continue
+                mrows = [acc[login].get(m) or zero for m in months]
+                if not any(r[3] > 0 for r in mrows):
+                    continue                     # not quarter-active
+                rows.append([sum(r[i] for r in mrows) for i in range(7)])
+            if not rows:
+                continue
+            out[(quarter, coh)] = {
+                "n": len(rows),
+                "submitted": mid([r[5] for r in rows]),
+                "sub_ai": mid([r[6] for r in rows]),
+                "sub_nonai": mid([r[5] - r[6] for r in rows]),
+                "merged": mid([r[0] + r[1] for r in rows]),
+                "mrg_ai": mid([r[0] for r in rows]),
+                "mrg_nonai": mid([r[1] for r in rows])}
+    return out
+
+
 def adoption_monthly(stat: str = "mean") -> dict:
     """(month, cohort) -> {n, submitted, sub_ai, sub_nonai, merged,
     mrg_ai, mrg_nonai} — kLOC per

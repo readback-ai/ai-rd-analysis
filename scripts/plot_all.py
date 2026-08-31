@@ -38,25 +38,25 @@ import plot_fig6_review as f6                                # noqa: E402
 import plot_fig7_attention as f7                             # noqa: E402
 import plot_fig8_responsiveness as f8                        # noqa: E402
 import plot_paper_tables as paper                            # noqa: E402
-import plot_fig3_core_loc_median as paper3a                   # noqa: E402
+import plot_core_loc_median as paper3a                   # noqa: E402
 
 ROLE, AI = f6.VARIANTS[0], f6.VARIANTS[1]
 
 # (output path, collect, render) for every figure in the paper
 FIGURES = [
-    ("artifacts/fig2_ai_usage.png", paper.collect_usage, paper.render_usage),
-    ("artifacts/fig3_core_loc.png", paper.collect_core, paper.render_core),
-    ("artifacts/fig5_fleet_vs_nonadopters.png", f5.collect, f5.render),
-    ("artifacts/fig6_review_mix.png",
-     lambda: f6.collect("fig6_review_mix", ROLE[0], ROLE[1], ROLE[2]),
+    ("artifacts/ai_usage.png", paper.collect_usage, paper.render_usage),
+    ("artifacts/core_loc.png", paper.collect_core, paper.render_core),
+    ("artifacts/fleet_vs_nonadopters.png", f5.collect, f5.render),
+    ("artifacts/review_mix.png",
+     lambda: f6.collect("review_mix", ROLE[0], ROLE[1], ROLE[2]),
      lambda t: f6.render(t, ROLE[1], ROLE[2])),
-    ("artifacts/fig6_review_mix_by_ai.png",
-     lambda: f6.collect("fig6_review_mix_by_ai", AI[0], AI[1], AI[2]),
+    ("artifacts/review_mix_by_ai.png",
+     lambda: f6.collect("review_mix_by_ai", AI[0], AI[1], AI[2]),
      lambda t: f6.render(t, AI[1], AI[2])),
-    ("artifacts/fig7_attention_by_ai.png", f7.collect, f7.render),
-    ("artifacts/fig8_responsiveness_by_ai.png", f8.collect, f8.render),
-    ("artifacts/fig_a1_adoption_cohorts.png", a1.collect, a1.render),
-    ("artifacts/fig_a2_adoption_event.png", a2.collect, a2.render),
+    ("artifacts/attention_by_ai.png", f7.collect, f7.render),
+    ("artifacts/responsiveness_by_ai.png", f8.collect, f8.render),
+    ("artifacts/adoption_cohorts.png", a1.collect, a1.render),
+    ("artifacts/adoption_event.png", a2.collect, a2.render),
     # median twins: same panels, typical member instead of cohort mean
     (f"artifacts/{f5a.NAME}.png", f5a.collect,
      functools.partial(f5.render, ylabel=f5a.YLABEL,
