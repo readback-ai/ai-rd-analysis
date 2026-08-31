@@ -53,7 +53,8 @@ def collect(window: list[str] | None = None) -> Table:
                  "fig_a1_adoption_cohorts", window=window)
 
 
-def render(t: Table, ylabel: str = "kLOC / contributor / month"):
+def render(t: Table, ylabel: str = "kLOC / contributor / month",
+           legend_title: str | None = None):
     window = window_of(t)
     fig = plt.figure(figsize=(13, 7))
     subfigs = fig.subfigures(2, 3, hspace=0.08, wspace=0.05)
@@ -72,7 +73,8 @@ def render(t: Table, ylabel: str = "kLOC / contributor / month"):
     handles, labels = axr.get_legend_handles_labels()
     ax6 = list(subfigs.flat)[5].subplots()
     ax6.axis("off")
-    ax6.legend(handles, labels, loc="center", fontsize=10, frameon=False)
+    ax6.legend(handles, labels, loc="center", fontsize=10, frameon=False,
+               title=legend_title)
     return fig
 
 

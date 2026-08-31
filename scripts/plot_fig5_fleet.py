@@ -52,7 +52,8 @@ def collect(window: list[str] | None = None) -> Table:
                  "fig5_fleet_vs_nonadopters", window=window)
 
 
-def render(t: Table, ylabel: str = "kLOC / contributor / month"):
+def render(t: Table, ylabel: str = "kLOC / contributor / month",
+           legend_title: str | None = None):
     window = window_of(t)
     fig = plt.figure(figsize=(11, 4.6))
     subfigs = fig.subfigures(1, 2, wspace=0.05)
@@ -67,7 +68,7 @@ def render(t: Table, ylabel: str = "kLOC / contributor / month"):
         shade_provisional(axr, window)
         axl.set_ylim(bottom=0)
         axl.set_ylabel(ylabel)
-        axr.legend(fontsize=7,
+        axr.legend(fontsize=7, title=legend_title,
                    loc="upper left" if coh == "fleet" else "lower right")
     return fig
 

@@ -29,18 +29,16 @@ import plot_adoption_cohorts as mean_fig
 
 NAME = "fig_a1a_adoption_cohorts_median"
 YLABEL = "median kLOC / contributor / month"
-# Panel labels carry the statistic: figures do not bake in captions
-# (they are supplied in the paper text), so the label is where a
-# reader of the image or the CSV learns which statistic this is.
-SUFFIX = " — MEDIAN member (series do not sum)"
+LEGEND_TITLE = "median:"
 
 
 def collect(window: list[str] | None = None) -> Table:
     return mean_fig.table(adoption_monthly(stat="median", window=window),
-                          NAME, SUFFIX, window=window)
+                          NAME, window=window)
 
 
 if __name__ == "__main__":
     figure_main(collect,
-                functools.partial(mean_fig.render, ylabel=YLABEL),
+                functools.partial(mean_fig.render, ylabel=YLABEL,
+                                  legend_title=LEGEND_TITLE),
                 f"artifacts/{NAME}.png")

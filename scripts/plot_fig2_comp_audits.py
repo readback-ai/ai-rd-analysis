@@ -24,10 +24,14 @@ from pipeline.figstyle import LOC_SERIES, plt
 from pipeline.studies.productivity import event_by_adoption_month
 
 
-def collect() -> Table:
-    t = Table("figure_2_comp_audits")
-    for t0_mon, c in sorted(event_by_adoption_month().items()):
-        label = f"first AI use {t0_mon} (n={c['n']})"
+def table(rows: dict, name: str, label_suffix: str = "") -> Table:
+    """The event-panel table over whichever per-member statistic `rows`
+    carries — shared with the median variant (figure_2a). `label_suffix`
+    names the statistic in the panel label, which is where a caption's
+    factual content lives (figures bake in none; 547596e)."""
+    t = Table(name)
+    for t0_mon, c in sorted(rows.items()):
+        label = f"first AI use {t0_mon} (n={c['n']}){label_suffix}"
         offs = sorted(c["offsets"])
         for key, _color, _ls, series_label in LOC_SERIES:
             for e in offs:
@@ -37,7 +41,12 @@ def collect() -> Table:
     return t
 
 
-def render(t: Table):
+def collect() -> Table:
+    return table(event_by_adoption_month(), "figure_2_comp_audits")
+
+
+def render(t: Table, ylabel: str = "kLOC / contributor / month",
+           legend_title: str | None = None):
     panels = t.panels()
     rows = (len(panels) + 1) // 2
     fig, axes = plt.subplots(rows, 2, figsize=(9, 3.75 * rows),
@@ -51,14 +60,14 @@ def render(t: Table):
         ax.set_title(t.label_of(panel), fontsize=10, loc="left")
         ax.set_xticks([p["x"] for p in pts], [p["x_label"] for p in pts])
         ax.set_xlabel("months from first observed AI use")
-        ax.set_ylabel("kLOC / contributor / month")
+        ax.set_ylabel(ylabel)
         ax.set_ylim(bottom=0)
     for ax in list(axes.flat)[len(panels):]:
         ax.axis("off")
     handles, labels = axes.flat[0].get_legend_handles_labels()
     fig.tight_layout()
     # legend to the right of the top-right panel, outside the grid
-    fig.legend(handles, labels, loc="upper left",
+    fig.legend(handles, labels, loc="upper left", title=legend_title,
                bbox_to_anchor=(1.0, 0.97), fontsize=10, frameon=False)
     return fig
 
