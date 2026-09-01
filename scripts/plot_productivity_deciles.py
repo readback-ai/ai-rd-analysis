@@ -15,15 +15,15 @@ group contains undetected use, which biases against finding a gap
 between the groups.
 
 Two variants:
-  figure_a3_productivity_deciles          endpoints 2025-10 vs 2026-06
-  figure_a3a_productivity_deciles_quarterly   Oct-Dec vs Apr-Jun means
+  productivity_deciles_monthly          endpoints 2025-10 vs 2026-06
+  productivity_deciles_quarterly   Oct-Dec vs Apr-Jun means
 
 Read the QUARTERLY one for trend: single months are dominated by
 volatility (the monthly endpoint ratio spans p10 0.08x to p90 19.9x), and
 averaging three months at each end collapses most of that.
 
-Data:   artifacts/data/figure_a3_productivity_deciles.csv
-Output: artifacts/figure_a3_productivity_deciles.png
+Data:   artifacts/data/productivity_deciles_monthly.csv
+Output: artifacts/productivity_deciles_monthly.png
 Usage:  PYTHONPATH=src python scripts/plot_productivity_deciles.py
         PYTHONPATH=src python scripts/plot_productivity_deciles.py --quarterly
 """
@@ -35,8 +35,8 @@ from pipeline.figstyle import PAIR_BLUE, PAIR_ORANGE, plt
 from pipeline.studies.productivity import DECILE_GROUPS, productivity_deciles
 
 DECILES = list(range(10, 100, 10))
-NAME = "figure_a3_productivity_deciles"
-QUARTERLY_NAME = "figure_a3a_productivity_deciles_quarterly"
+NAME = "productivity_deciles_monthly"
+QUARTERLY_NAME = "productivity_deciles_quarterly"
 
 
 def table(rows: dict, name: str, pre_label: str, post_label: str) -> Table:

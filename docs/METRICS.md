@@ -144,10 +144,10 @@ argument — one section = one module invocation):
    merged-conditioned `m_*`; each as `mean [95% CI]`.
 2. **Figure 2: Traceable AI usage** (`paper_tables --table usage`) — AI%
    of submitted/merged PRs and AI-PR share of submitted/merged LOC (CW,
-   CIs). Rendered as `artifacts/fig2_ai_usage.png`.
+   CIs). Rendered as `artifacts/ai_usage.png`.
 3. **Figure 3: Merged LOC per core contributor** (`paper_tables --table
    core`) — CW merged (w8) kLOC per insider author + baseline multiple
-   (×2.96 by Q2-2026). Rendered as `fig3_core_loc.png`.
+   (×2.96 by Q2-2026). Rendered as `core_loc.png`.
 4. **Layered decomposition** (`pipeline.studies.layers`) — pooled
    disjoint shares: B-agent > A-marker > C-branch-only, plus union
    (exact per-PR; replaced `pipeline.integrate`'s sampled blending,
@@ -177,9 +177,9 @@ argument — one section = one module invocation):
 15. **Figure A1: adoption cohorts** (`--cut adoption`) — fixed cohorts
     early/medium/late/never/**fleet** (≥300 merged PRs/quarter, assigned
     first); AI/nonAI/total kLOC per author with CI + median. Rendered as
-    `fig_a1_adoption_cohorts.png`; companions: `figure_2_comp_audits.png`
-    (balanced event panels per adoption month), `fig5_fleet_vs_nonadopters.png`,
-    `fig_a2_adoption_event.png` (event time net of non-adopters).
+    `adoption_cohorts.png`; companions: `figure_2_comp_audits.png`
+    (balanced event panels per adoption month), `fleet_vs_nonadopters.png`,
+    `adoption_event.png` (event time net of non-adopters).
     **Figure 2 membership** (`event_by_adoption_month`): members must have
     submitted >=1 PR in EVERY offset month t-2..t+2 (`require_active`), so
     each has a real pre-adoption baseline. Without it 30-48% of a cohort
@@ -195,8 +195,8 @@ argument — one section = one module invocation):
     4 of 5 cohorts on merged. Quote the t-1 -> t+1 change (+25% to +185%
     across cohorts and both series); the adoption month itself carries a
     selection effect, not only a treatment effect.
-    **Median twins** `fig_a1a_adoption_cohorts_median.png`,
-    `fig5a_fleet_vs_nonadopters_median.png`
+    **Median twins** `adoption_cohorts_median.png`,
+    `fleet_vs_nonadopters_median.png`
     (`adoption_monthly(stat="median")`) and
     `figure_2a_comp_audits_median.png`
     (`event_by_adoption_month(stat="median")`) plot the same panels on the
@@ -214,14 +214,14 @@ argument — one section = one module invocation):
     the LEGEND TITLE "median:", and the non-additivity warning lives HERE
     and in the paper text, which must repeat it wherever a median panel
     is reproduced. Figure 3's median twin
-    is `fig3a_core_loc_median.png` (`core_rows(stat="median")`); it is
+    is `core_loc_median.png` (`core_rows(stat="median")`); it is
     the source for per-contributor LEVELS.
 16. **Merged LOC by approval channel** (`--cut channels`) — humanRev /
     botOnly / selfUnrev / otherUnrev shares of merged LOC.
 17. **Figure 6: review mix of merged PRs/LOC** (`productivity --cut
     reviewmix`) — per quarter × {core, external}: PR and LOC shares of
     humanRev / botOnly / selfUnrev / otherUnrev over mature merged PRs
-    (the substitution hypothesis). Rendered as `fig6_review_mix.png`.
+    (the substitution hypothesis). Rendered as `review_mix.png`.
 18. **Attention per line** (`studies.attention`) — HUMAN comments/kLOC
     (bot-clean) + window h/kLOC, all/ins/ext + size bands.
 19. **PR fates at matched horizons** (`studies.fates`) — w8 primary, w26

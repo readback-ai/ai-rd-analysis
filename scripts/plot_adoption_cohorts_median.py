@@ -13,8 +13,8 @@ lines will not sum to their total, because a different member sits at the
 middle of each. Compare each series against its own mean counterpart; do
 not read a median panel as a breakdown.
 
-Data:   artifacts/data/fig_a1a_adoption_cohorts_median.csv
-Output: artifacts/fig_a1a_adoption_cohorts_median.png
+Data:   artifacts/data/adoption_cohorts_median.csv
+Output: artifacts/adoption_cohorts_median.png
 Usage:  PYTHONPATH=src python scripts/plot_adoption_cohorts_median.py
 """
 import functools
@@ -27,7 +27,7 @@ from pipeline.studies.productivity import adoption_monthly
 
 import plot_adoption_cohorts as mean_fig
 
-NAME = "fig_a1a_adoption_cohorts_median"
+NAME = "adoption_cohorts_median"
 YLABEL = "median kLOC / contributor / month"
 LEGEND_TITLE = "median:"
 

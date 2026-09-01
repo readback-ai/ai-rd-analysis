@@ -8,8 +8,8 @@ mean SUBMITTED kLOC per month-active cohort member (no censoring) and mean
 MERGED (w8) kLOC. Months with open w8 windows are shaded (merged
 provisional there; they finalize with the AS_OF re-pulls).
 
-Data:   artifacts/data/fig_a1_adoption_cohorts.csv
-Output: artifacts/fig_a1_adoption_cohorts.png
+Data:   artifacts/data/adoption_cohorts.csv
+Output: artifacts/adoption_cohorts.png
 Usage:  PYTHONPATH=src python scripts/plot_adoption_cohorts.py
 """
 import sys
@@ -27,7 +27,7 @@ STYLE = {key: (color, ls, label) for key, color, ls, label in LOC_SERIES}
 
 def table(rows: dict, name: str, label_suffix: str = "") -> Table:
     """The cohort x series table, over whichever per-member statistic
-    `rows` carries — shared with the median variant (fig_a1a).
+    `rows` carries — shared with the median variant (adoption_cohorts_median).
 
     `label_suffix` names the statistic in the panel label, which is where
     a caption's factual content lives once figures stopped baking in
@@ -45,7 +45,7 @@ def table(rows: dict, name: str, label_suffix: str = "") -> Table:
 
 
 def collect() -> Table:
-    return table(adoption_monthly(), "fig_a1_adoption_cohorts")
+    return table(adoption_monthly(), "adoption_cohorts")
 
 
 def render(t: Table, ylabel: str = "kLOC / contributor / month",
@@ -75,4 +75,4 @@ def render(t: Table, ylabel: str = "kLOC / contributor / month",
 
 
 if __name__ == "__main__":
-    figure_main(collect, render, "artifacts/fig_a1_adoption_cohorts.png")
+    figure_main(collect, render, "artifacts/adoption_cohorts.png")
