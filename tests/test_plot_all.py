@@ -109,6 +109,28 @@ def test_batch_closes_each_figure_after_saving(tmp_path, monkeypatch):
     assert plt.get_fignums() == []
 
 
+def test_batch_closes_figures_on_failed_saves_too(tmp_path, monkeypatch):
+    """plot_all closed each figure only after save() succeeded, so the
+    keep-going path skipped the close: 21 failed saves left 21 figures
+    open and tripped Matplotlib's more-than-20-figures warning. The
+    close belongs in a finally so a failing figure also releases its
+    canvas."""
+    monkeypatch.setattr(figdata, "DATA_DIR", tmp_path)
+    plt.close("all")
+
+    def boom_save(fig, out, formats):
+        raise OSError("disk full")
+
+    monkeypatch.setattr(plot_all, "save", boom_save)
+    monkeypatch.setattr(plot_all, "FIGURES", [
+        (str(tmp_path / "a.png"), lambda: _table("a"), _fig),
+        (str(tmp_path / "b.png"), lambda: _table("b"), _fig),
+    ])
+    with pytest.raises(SystemExit):
+        plot_all.main([])
+    assert plt.get_fignums() == []
+
+
 def test_keyboard_interrupt_still_stops_the_batch(tmp_path, monkeypatch):
     """Keeping going applies to figure failures, not to the operator
     interrupting the run."""

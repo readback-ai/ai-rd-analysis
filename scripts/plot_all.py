@@ -173,11 +173,7 @@ def main(argv=None) -> None:
             table = figdata.read(name) if a.from_tables else collect()
             if not a.from_tables:
                 figdata.write(table)
-            fig = render(table)
-            save(fig, out, formats=formats)
-            # the canvas is written; keeping it would retain every
-            # figure of the batch until process exit
-            plt.close(fig)
+            save(render(table), out, formats=formats)
         # SystemExit too, not just Exception: a study bails that way when
         # its inputs are stale (review_action on an out-of-date selection
         # manifest), and one such figure must not discard the shared
@@ -186,6 +182,11 @@ def main(argv=None) -> None:
         except (Exception, SystemExit) as exc:
             failed.append((name, exc))
             print(f"FAILED {name}: {exc}", flush=True)
+        finally:
+            # release whatever canvases this figure opened, on the
+            # failure paths too — the keep-going batch would otherwise
+            # retain every one until process exit
+            plt.close("all")
     if failed:
         raise SystemExit(f"{len(failed)} figure(s) failed: "
                          f"{[n for n, _ in failed]}")
