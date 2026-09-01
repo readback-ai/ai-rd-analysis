@@ -6,8 +6,8 @@ the y-axis — a narrow left panel for Q1-2024 and a right panel for the
 window — joined with standard axis-break marks. Shaded bands are the
 bootstrap 95% CIs from pipeline.studies.paper_tables (CW, seeded).
 
-Data:    artifacts/data/fig2_ai_usage.csv, artifacts/data/fig3_core_loc.csv
-Outputs: artifacts/fig2_ai_usage.png, artifacts/fig3_core_loc.png
+Data:    artifacts/data/ai_usage.csv, artifacts/data/core_loc.csv
+Outputs: artifacts/ai_usage.png, artifacts/core_loc.png
          (+ *_monthly twins via plot_all --monthly)
 
 Usage:  PYTHONPATH=src python scripts/plot_paper_tables.py
@@ -27,9 +27,9 @@ USAGE = [("sub_pr", "AI% of submitted PRs", "tab:blue"),
          ("sub_loc", "AI-PR share of submitted LOC", "tab:green"),
          ("mrg_loc", "AI-PR share of merged LOC", "tab:red")]
 
-CORE = [("sub_kloc", "sub_mult", "submitted kLOC / core author",
+CORE = [("sub_kloc", "sub_mult", "submitted kLOC / insider contributor",
          "tab:blue", (6, 8)),
-        ("kloc", "mult", "merged kLOC / core author (w8)",
+        ("kloc", "mult", "merged kLOC / insider contributor (w8)",
          "tab:green", (6, -14))]
 
 
@@ -59,7 +59,7 @@ def usage_table(rows: list, name: str) -> Table:
 
 
 def collect_usage() -> Table:
-    return usage_table(usage_rows(), "fig2_ai_usage")
+    return usage_table(usage_rows(), "ai_usage")
 
 
 def render_usage(t: Table):
@@ -73,11 +73,11 @@ def render_usage(t: Table):
 
 def core_table(rows: list, name: str, unit: str = "quarter") -> Table:
     """Figure 3's table over whichever per-author statistic `rows` carries
-    — shared with the median variant (fig3a) and the monthly twins.
+    — shared with the median variant and the monthly twins.
     Monthly rows carry no baseline multiples (paper_tables.core_rows),
     so their mult series are simply not emitted."""
     t = Table(name)
-    panel_label = f"kLOC per core contributor / {unit}"
+    panel_label = f"kLOC per insider contributor / {unit}"
     for key, mult_key, label, _color, _offset in CORE:
         for i, r in enumerate(rows):
             mean, lo, hi = r[key]
@@ -93,7 +93,7 @@ def core_table(rows: list, name: str, unit: str = "quarter") -> Table:
 
 
 def collect_core() -> Table:
-    return core_table(core_rows(), "fig3_core_loc")
+    return core_table(core_rows(), "core_loc")
 
 
 def render_core(t: Table):
@@ -137,7 +137,7 @@ def collect_usage_monthly(window: list[str] | None = None) -> Table:
     2-PR/month repo floor, provisional months in and shaded at render."""
     window = window or month_window()
     return usage_table(usage_rows(granularity="month", window=window),
-                       "fig2_ai_usage_monthly")
+                       "ai_usage_monthly")
 
 
 def render_usage_monthly(t: Table):
@@ -156,7 +156,7 @@ def collect_core_monthly(window: list[str] | None = None) -> Table:
     and shaded at render."""
     window = window or month_window()
     return core_table(core_rows(granularity="month", window=window),
-                      "fig3_core_loc_monthly", unit="month")
+                      "core_loc_monthly", unit="month")
 
 
 def render_core_monthly(t: Table):
@@ -172,5 +172,5 @@ def render_core_monthly(t: Table):
 
 
 if __name__ == "__main__":
-    figure_main(collect_usage, render_usage, "artifacts/fig2_ai_usage.png")
-    figure_main(collect_core, render_core, "artifacts/fig3_core_loc.png")
+    figure_main(collect_usage, render_usage, "artifacts/ai_usage.png")
+    figure_main(collect_core, render_core, "artifacts/core_loc.png")

@@ -180,9 +180,11 @@ AI-topic repos. Appendix cuts (org-type public/private/community via
    estimate). Months with open w8 windows are INCLUDED under the shaded
    provisional band (`figstyle.shade_provisional`), except the Figure 3
    companion, which keeps excluding immature months (its per-kLOC rates
-   are undefined on immature merged sets). Figure 8 has no monthly twin —
-   its review-action sample is a frozen quarter-keyed manifest draw — and
-   `--monthly` prints that skip explicitly (`[quarterly]`, the report.py
+   are undefined on immature merged sets). Two figures have no monthly
+   twin — responsiveness (its review-action sample is a frozen
+   quarter-keyed manifest draw) and fleet_vs_nonadopters (deliberately
+   quarterly; adoption_cohorts carries the monthly fleet series) — and
+   `--monthly` prints each skip explicitly (`[quarterly]`, the report.py
    precedent). Cohort and fleet-operator definitions stay frozen with the
    quarters under any window: extension months extend the series only.
 Step 2 is enforced, not merely documented: `check_finalizable` refuses the

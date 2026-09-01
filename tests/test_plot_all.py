@@ -62,16 +62,18 @@ def test_monthly_stems_are_unique_and_never_clobber(monkeypatch):
     assert all(s.endswith("_monthly.png") for s, _c, _r in monthly)
 
 
-def test_monthly_prints_the_fig8_quarterly_skip(monkeypatch, capsys):
-    """fig8 has no monthly twin (its review-action sample is a frozen
-    quarter-keyed manifest draw); --monthly must declare the gap instead
-    of leaving it silent — the report.py '[quarterly]' precedent."""
+def test_monthly_prints_the_quarterly_skips(monkeypatch, capsys):
+    """The quarterly-only figures have no monthly twin (responsiveness:
+    frozen quarter-keyed manifest draw; fleet_vs_nonadopters: moved to
+    quarters); --monthly must declare each gap instead of leaving it
+    silent — the report.py '[quarterly]' precedent."""
     monkeypatch.setattr(plot_all, "FIGURES", [])
     monkeypatch.setattr(plot_all, "monthly_figures",
                         lambda through=None: [])
     plot_all.main(["--monthly"])
     out = capsys.readouterr().out
-    assert "skipped fig8_responsiveness_by_ai_monthly [quarterly]" in out
+    assert "skipped responsiveness_by_ai_monthly [quarterly]" in out
+    assert "skipped fleet_vs_nonadopters_monthly [quarterly]" in out
 
 
 def test_through_implies_monthly_and_forwards_the_month(monkeypatch,

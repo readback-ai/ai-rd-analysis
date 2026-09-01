@@ -6,8 +6,8 @@ hours/kLOC (creation -> first human review, per kLOC). Dark = AI-involved
 PRs, light = non-AI; the AI series is absent at the Q1-2024 baseline by
 construction. Q2 is partial (w8 windows open at the AS_OF).
 
-Data:   artifacts/data/fig7_attention_by_ai.csv
-Output: artifacts/fig7_attention_by_ai.png
+Data:   artifacts/data/attention_by_ai.csv
+Output: artifacts/attention_by_ai.png
         (+ the *_monthly twin via plot_all --monthly)
 Usage:  PYTHONPATH=src python scripts/plot_fig7_attention.py
 """
@@ -31,7 +31,7 @@ PANELS = [("comments_per_kloc", "human comments per kLOC"),
 
 def collect() -> Table:
     rows = attention_by_ai()
-    t = Table("fig7_attention_by_ai")
+    t = Table("attention_by_ai")
     for key, title in PANELS:
         for sl, _color, label in SLICES:
             t.add_series(key, sl, [cell(rows, p, sl, key) for p in PERIODS],
@@ -64,7 +64,7 @@ def collect_monthly(window: list[str] | None = None) -> Table:
     window = window or month_window()
     months = BASELINE + window
     rows = attention_by_ai(granularity="month", window=window)
-    t = Table("fig7_attention_by_ai_monthly")
+    t = Table("attention_by_ai_monthly")
     for key, title in PANELS:
         for sl, _color, label in SLICES:
             t.add_series(key, sl, [cell(rows, m, sl, key) for m in months],
@@ -92,4 +92,4 @@ def render_monthly(t: Table):
 
 
 if __name__ == "__main__":
-    figure_main(collect, render, "artifacts/fig7_attention_by_ai.png")
+    figure_main(collect, render, "artifacts/attention_by_ai.png")

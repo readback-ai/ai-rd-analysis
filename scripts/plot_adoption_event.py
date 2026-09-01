@@ -12,8 +12,8 @@ line IS the non-adopter counterfactual). Same encoding as Figure 4:
 blue = submitted, green = merged (w8), solid/dashed/dotted =
 total/non-AI/AI-involved.
 
-Data:   artifacts/data/fig_a2_adoption_event.csv
-Output: artifacts/fig_a2_adoption_event.png
+Data:   artifacts/data/adoption_event.csv
+Output: artifacts/adoption_event.png
 Usage:  PYTHONPATH=src python scripts/plot_adoption_event.py
 """
 import sys
@@ -33,7 +33,7 @@ IMMATURE = "immature_share"
 
 def collect() -> Table:
     rows = adoption_event()
-    t = Table("fig_a2_adoption_event")
+    t = Table("adoption_event")
     for coh, title in PANELS:
         n = rows.get((coh, 0), {}).get("n", 0)   # constant (balanced)
         label = f"{title} (n={n})"
@@ -85,4 +85,4 @@ def render(t: Table):
 
 
 if __name__ == "__main__":
-    figure_main(collect, render, "artifacts/fig_a2_adoption_event.png")
+    figure_main(collect, render, "artifacts/adoption_event.png")

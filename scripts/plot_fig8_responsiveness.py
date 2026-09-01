@@ -11,8 +11,8 @@ below n < 20 in ITS OWN sample (2026-07-25 review: the draws are
 independent, so the AI lane can begin in a different quarter per panel).
 Q2 partial (w8 windows open at the AS_OF).
 
-Data:   artifacts/data/fig8_responsiveness_by_ai.csv
-Output: artifacts/fig8_responsiveness_by_ai.png
+Data:   artifacts/data/responsiveness_by_ai.csv
+Output: artifacts/responsiveness_by_ai.png
 Usage:  PYTHONPATH=src python scripts/plot_fig8_responsiveness.py
 """
 import sys
@@ -47,7 +47,7 @@ def val(lanes, per, lane, kind):
 
 def collect() -> Table:
     _, lanes, _ = lane_rows()   # fleet-excluded domain
-    t = Table("fig8_responsiveness_by_ai")
+    t = Table("responsiveness_by_ai")
     for kind, title in PANELS:
         for lane, _color, label in SLICES:
             t.add_series(kind, lane,
@@ -73,4 +73,4 @@ def render(t: Table):
 
 
 if __name__ == "__main__":
-    figure_main(collect, render, "artifacts/fig8_responsiveness_by_ai.png")
+    figure_main(collect, render, "artifacts/responsiveness_by_ai.png")

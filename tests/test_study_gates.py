@@ -1642,3 +1642,32 @@ def test_change_deciles_report_the_ratio_sample_size(monkeypatch):
         assert out[0] == 1.0           # only "g" has a pre > 0
     assert dec[("never_ai", "merged", "n")][0] == 2.0
     assert act[("never_ai", "prs", "n_ratio")][0] == 2.0   # prs pre > 0 both
+
+
+def test_adoption_quarterly_pools_a_members_quarter(monkeypatch):
+    """fleet_vs_nonadopters moves from months to quarters (monthly points
+    are noisy). A member's quarter value is their TOTAL over its months,
+    and membership is quarter-active (>=1 PR in the quarter), so one
+    active month is enough to enter with their full quarter output."""
+    from pipeline.studies import productivity
+    W = productivity.WINDOW_MONTHS
+
+    def row(prs, merged):
+        return [0.0, merged, 0, prs, prs, merged, 0.0]
+
+    steady = {m: row(1, 2.0) for m in W}          # 6 kLOC every quarter
+    spiky = {W[0]: row(1, 9.0)}                   # Q4-2025 only, one month
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({"s": steady, "k": spiky},
+                                 {"s": "never", "k": "never"},
+                                 {}, set()))
+    mean = productivity.adoption_quarterly()
+    med = productivity.adoption_quarterly(stat="median")
+    assert mean[("Q4-2025", "never")]["n"] == 2
+    assert mean[("Q4-2025", "never")]["merged"] == pytest.approx((6 + 9) / 2)
+    assert med[("Q4-2025", "never")]["merged"] == pytest.approx(7.5)
+    # spiky is NOT quarter-active in Q1-2026: only steady remains
+    assert mean[("Q1-2026", "never")]["n"] == 1
+    assert mean[("Q1-2026", "never")]["merged"] == pytest.approx(6.0)
+    with pytest.raises(ValueError):
+        productivity.adoption_quarterly(stat="mode")

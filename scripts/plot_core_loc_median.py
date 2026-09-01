@@ -11,9 +11,9 @@ growth MULTIPLE is robust to the choice (×2.95 mean vs ×2.92 median) but
 the levels are not (19.0 vs 10.0 kLOC/author in Q2-2026), which is why
 this figure exists rather than a footnote.
 
-Data:   artifacts/data/fig3a_core_loc_median.csv
-Output: artifacts/fig3a_core_loc_median.png
-Usage:  PYTHONPATH=src python scripts/plot_fig3_core_loc_median.py
+Data:   artifacts/data/core_loc_median.csv
+Output: artifacts/core_loc_median.png
+Usage:  PYTHONPATH=src python scripts/plot_core_loc_median.py
 """
 import sys
 
@@ -24,7 +24,7 @@ from pipeline.studies.paper_tables import core_rows
 
 import plot_paper_tables as mean_fig
 
-NAME = "fig3a_core_loc_median"
+NAME = "core_loc_median"
 
 
 def collect() -> Table:
