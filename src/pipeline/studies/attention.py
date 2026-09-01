@@ -94,7 +94,8 @@ def no_commentary_share(fleet_slice: bool = True,
 
 
 def attention_by_ai(fleet_slice: bool = False,
-                    granularity: str = "quarter") -> dict:
+                    granularity: str = "quarter",
+                    window: list[str] | None = None) -> dict:
     """Figure 7: attention proxies by PR AI involvement (FLEET-OPERATOR
     authors excluded) — pooled over
     mature, merged, human-reviewed PRs per quarter x {ai, nonai}:
@@ -104,16 +105,15 @@ def attention_by_ai(fleet_slice: bool = False,
     slice is empty at the Q1-2024 baseline by construction.
     granularity="month": rows keyed by calendar month over the baseline
     + window months (the Figure 3 companion; display-side callers gate
-    to w8-final months).
+    to w8-final months). `window` overrides the frozen WINDOW_MONTHS
+    (productivity.month_frame_kw).
 
     Returns {(period, slice): {n, kloc, comments_per_kloc,
     first_rev_h_per_kloc}}."""
-    from pipeline.studies.productivity import (BASELINE_MONTHS,
-                                               WINDOW_MONTHS, fleet_logins)
+    from pipeline.studies.productivity import fleet_logins, month_frame_kw
     from pipeline.studies.review_action import first_human_review
     fleet = fleet_logins()
-    frame_kw = {} if granularity == "quarter" else \
-        {"periods": BASELINE_MONTHS + WINDOW_MONTHS, "granularity": "month"}
+    frame_kw = {} if granularity == "quarter" else month_frame_kw(window)
     agg = defaultdict(lambda: defaultdict(float))
     # profile "all", NOT "pr": this population never excluded Bot-typed
     # authors, so agent-authored PRs already count in the ai slice here

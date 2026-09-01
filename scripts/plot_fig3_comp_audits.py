@@ -6,7 +6,12 @@ Right: human comments per kLOC on mature merged human-reviewed PRs.
 MONTHLY rates over the Q1-2024 baseline months and the window months
 that have passed w8 finalization at the AS_OF (through 2026-05 at AS_OF
 2026-08-01; still-open months are excluded rather than shaded, so
-nothing plotted is provisional). Slices: AI-involved and non-AI PRs
+nothing plotted is provisional — the deliberate opposite of the other
+monthly figures, which include provisional months under a shaded band:
+per-kLOC attention rates on immature merged sets are undefined under
+this figure's methodology). The window follows the censused registry
+(analyze.month_window; plot_all --through extends it, still
+maturity-gated). Slices: AI-involved and non-AI PRs
 (fleet-operator authors excluded) plus fleet-operator PRs as their own
 series. AI series absent at the Q1-2024 baseline by construction.
 
@@ -19,9 +24,11 @@ Usage:  PYTHONPATH=src python scripts/plot_fig3_comp_audits.py
 import sys
 
 sys.path.insert(0, "src")
+from pipeline.analyze import month_window
 from pipeline.figdata import Table, figure_main
-from pipeline.figstyle import (BASELINE, PAIR_BLUE, PAIR_ORANGE, WINDOW,
-                               broken_pair, cell, month_series, plt)
+from pipeline.figstyle import (BASELINE, PAIR_BLUE, PAIR_ORANGE,
+                               broken_pair, cell, month_series, plt,
+                               window_of)
 from pipeline.studies.attention import attention_by_ai
 from pipeline.studies.productivity import month_w8_mature, review_mix
 
@@ -33,12 +40,14 @@ PANELS = [("humanrev", "% of merged PRs human-reviewed", "humanRev_pr", 100),
           ("comments", "human comments per kLOC", "comments_per_kloc", 1)]
 
 
-def collect() -> Table:
-    window = [m for m in WINDOW if month_w8_mature(m)]
+def collect(window: list[str] | None = None) -> Table:
+    full = window or month_window()
+    window = [m for m in full if month_w8_mature(m)]
     rows_of = {"humanrev": review_mix(by="ai", fleet_slice=True,
-                                      granularity="month"),
+                                      granularity="month", window=window),
                "comments": attention_by_ai(fleet_slice=True,
-                                           granularity="month")}
+                                           granularity="month",
+                                           window=window)}
     months = BASELINE + window
     t = Table("figure_3_comp_audits")
     for panel, title, key, scale in PANELS:
@@ -52,8 +61,7 @@ def collect() -> Table:
 
 
 def render(t: Table):
-    window = [r["x_label"] for r in t.points("humanrev", "nonai")
-              if r["x_label"] not in BASELINE]
+    window = window_of(t)
     fig = plt.figure(figsize=(11, 4.4))
     subfigs = fig.subfigures(1, 2, wspace=0.05)
     for sf, (panel, _title, _key, _scale) in zip(subfigs.flat, PANELS):

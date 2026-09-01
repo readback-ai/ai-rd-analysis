@@ -106,6 +106,43 @@ def censused_months(quarters: dict[str, str]) -> set[str]:
     return out
 
 
+# the monthly figures' continuous right-panel domain: it starts with the
+# frozen Q4-2025..Q2-2026 window and extends month by month as the
+# incremental registry grows (figstyle.WINDOW is the frozen default)
+FIGURE_WINDOW_START = "2025-10"
+FIGURE_WINDOW_END = "2026-06"
+
+
+def month_window(through: str | None = None) -> list[str]:
+    """Contiguous FIGURE_WINDOW_START..`through` month tokens for the
+    monthly figures, restricted to censused months (frozen quarters +
+    the incremental registry). `through` defaults to FIGURE_WINDOW_END —
+    the last month of the frozen quarters — so the default window equals
+    the frozen figstyle.WINDOW list. Raises ValueError on a malformed or
+    un-censused `through` (collect the month with monthly_update first)
+    and on a registry gap: the figures place months positionally, so a
+    hole in the window would silently misalign the x axis."""
+    through = through or FIGURE_WINDOW_END
+    if not re.fullmatch(r"\d{4}-\d{2}", through):
+        raise ValueError(f"malformed month token {through!r} (want YYYY-MM)")
+    if through < FIGURE_WINDOW_START:
+        raise ValueError(f"{through} predates the figure window start "
+                         f"{FIGURE_WINDOW_START}")
+    avail = sorted(m for m in censused_months(extended_quarters())
+                   if m >= FIGURE_WINDOW_START)
+    if through not in avail:
+        raise ValueError(
+            f"{through} is not censused (last censused month: {avail[-1]}); "
+            f"collect it with scripts/monthly_update.py first")
+    window = [m for m in avail if m <= through]
+    for a, b in zip(window, window[1:]):
+        y, m = int(a[:4]), int(a[5:7])
+        if b != (f"{y + 1}-01" if m == 12 else f"{y}-{m + 1:02d}"):
+            raise ValueError(f"censused months have a gap between {a} and "
+                             f"{b}; the month axis needs a contiguous window")
+    return window
+
+
 def month_of(pr: dict) -> str | None:
     m = (pr.get("createdAt") or "")[:7]
     return m or None

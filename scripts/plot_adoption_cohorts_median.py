@@ -32,8 +32,9 @@ YLABEL = "median kLOC / contributor / month"
 LEGEND_TITLE = "median:"
 
 
-def collect() -> Table:
-    return mean_fig.table(adoption_monthly(stat="median"), NAME)
+def collect(window: list[str] | None = None) -> Table:
+    return mean_fig.table(adoption_monthly(stat="median", window=window),
+                          NAME, window=window)
 
 
 if __name__ == "__main__":

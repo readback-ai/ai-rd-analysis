@@ -33,11 +33,14 @@ from pipeline.frame import PERIODS, ai_contrast_eligible, study_frame
 # differs from rate metrics, which are None-gated on maturity.
 
 
-def per_author() -> dict:
+def per_author(granularity: str = "quarter",
+               window: list[str] | None = None) -> dict:
     """(repo, period) -> login -> [prs, merged, merged_lines, ai_prs,
-    submitted_lines]."""
+    submitted_lines]. granularity="month": periods are the baseline +
+    window months (the monthly paper figures; see month_frame_kw)."""
+    frame_kw = {} if granularity == "quarter" else month_frame_kw(window)
     out: dict = defaultdict(lambda: defaultdict(lambda: [0, 0, 0, 0, 0]))
-    for f in study_frame("author"):
+    for f in study_frame("author", **frame_kw):
         row = out[(f.repo, f.period)][f.author]
         row[0] += 1
         row[4] += f.loc                          # submitted: no censoring
@@ -305,12 +308,17 @@ def adoption_rows() -> dict:
     return out
 
 
-def _author_months_and_cohorts():
+def _author_months_and_cohorts(window: list[str] | None = None):
     """Shared builder: per-author monthly activity, the fleet-operator
     set (computed once; the 'fleet' cohort is membership in it), cohort
     assignment, and the month->quarter map. Used by adoption_rows
     (quarterly table), adoption_monthly (Figure 4 series), and
-    fleet_logins."""
+    fleet_logins.
+
+    `window` months beyond the frozen WINDOW_MONTHS extend the observed
+    SERIES only, never the cohort or fleet definitions — membership and
+    first-AI-month assignment are frozen with the quarters, so extending
+    a figure cannot reshuffle who counts as fleet/early/late."""
     q_of = {}
     for m in range(1, 4):
         q_of[f"2024-{m:02d}"] = "Q1-2024"
@@ -323,7 +331,10 @@ def _author_months_and_cohorts():
     acc: dict = defaultdict(
         lambda: defaultdict(lambda: [0.0, 0.0, 0, 0, 0, 0.0, 0.0]))
     insiders = set()
-    for f in study_frame("author", periods=q_of, granularity="month"):
+    extra = [m for m in (window or []) if m not in q_of]
+    frame_kw = {"periods": [*q_of, *extra], "granularity": "month",
+                **({"ranges": _extended_ranges()} if extra else {})}
+    for f in study_frame("author", **frame_kw):
         if f.insider:
             insiders.add(f.author)
         row = acc[f.author][f.period]
@@ -349,8 +360,9 @@ def _author_months_and_cohorts():
     def cohort_of(login: str, months: dict) -> str:
         if login in fleet_all:      # fleet first, by membership — the
             return "fleet"          # FLEET_MIN predicate lives above only
-        first = min((m for m, v in months.items() if v[2] > 0),
-                    default=None)
+        # frozen months only: an extension month never assigns a cohort
+        first = min((m for m, v in months.items()
+                     if m in q_of and v[2] > 0), default=None)
         if first is None:
             return "never"
         if first <= "2026-02":
@@ -404,7 +416,8 @@ def adoption_quarterly(stat: str = "mean") -> dict:
     return out
 
 
-def adoption_monthly(stat: str = "mean") -> dict:
+def adoption_monthly(stat: str = "mean",
+                     window: list[str] | None = None) -> dict:
     """(month, cohort) -> {n, submitted, sub_ai, sub_nonai, merged,
     mrg_ai, mrg_nonai} — kLOC per
     quarter-ACTIVE cohort member per MONTH (the Figure 4 series: submitted
@@ -424,8 +437,8 @@ def adoption_monthly(stat: str = "mean") -> dict:
         raise ValueError(f"unknown stat: {stat!r} (mean|median)")
     mid = statistics.median if stat == "median" else \
         (lambda xs: sum(xs) / len(xs))
-    acc, cohort_of_login, q_of, _fleet = _author_months_and_cohorts()
-    months = sorted(q_of)
+    acc, cohort_of_login, q_of, _fleet = _author_months_and_cohorts(window)
+    months = sorted({*q_of, *(window or [])})
     out = {}
     for mon in months:
         for coh, _d in ADOPTION_COHORTS:
@@ -449,6 +462,26 @@ def adoption_monthly(stat: str = "mean") -> dict:
 BASELINE_MONTHS = ["2024-01", "2024-02", "2024-03"]
 WINDOW_MONTHS = ["2025-10", "2025-11", "2025-12", "2026-01", "2026-02",
                  "2026-03", "2026-04", "2026-05", "2026-06"]
+
+
+def _extended_ranges() -> dict:
+    """Period map covering the incremental-registry months (analyze
+    owns it); a separate seam so tests can observe when it's used."""
+    from pipeline.analyze import extended_quarters
+    return extended_quarters()
+
+
+def month_frame_kw(window: list[str] | None = None) -> dict:
+    """study_frame kwargs for a monthly pass over the baseline + window
+    months. Only a window reaching past the frozen WINDOW_MONTHS gets
+    the extended period map: on the frozen path the default
+    QUARTER_RANGES keeps group iteration order — and with it every
+    seeded bootstrap draw — untouched."""
+    months = BASELINE_MONTHS + (window or WINDOW_MONTHS)
+    kw = {"periods": months, "granularity": "month"}
+    if set(months) - {*BASELINE_MONTHS, *WINDOW_MONTHS}:
+        kw["ranges"] = _extended_ranges()
+    return kw
 
 
 def q2_provisionality_note() -> str:
@@ -844,7 +877,8 @@ def fleet_logins() -> set[str]:
 
 def review_mix(by: str = "role", exclude_fleet: bool = True,
                fleet_slice: bool = False,
-               granularity: str = "quarter") -> dict:
+               granularity: str = "quarter",
+               window: list[str] | None = None) -> dict:
     """Figure 6: review mix of MERGED PRs, insider vs external, per
     quarter — the substitution hypothesis (human review declining, AI/bot
     review rising). For each (period, slice in {ins, ext}): share of
@@ -868,12 +902,12 @@ def review_mix(by: str = "role", exclude_fleet: bool = True,
     instead of being dropped (Figure 3 companion).
     granularity="month": rows are keyed by calendar month over the
     baseline + window months instead of by quarter (the Figure 3
-    companion; display-side callers gate to w8-final months).
+    companion; display-side callers gate to w8-final months). `window`
+    overrides the frozen WINDOW_MONTHS (month_frame_kw).
 
     Returns {(period, slice): {n, loc, <ch>_pr, <ch>_loc ...}}."""
     fleet = fleet_logins() if (exclude_fleet or fleet_slice) else set()
-    frame_kw = {} if granularity == "quarter" else \
-        {"periods": BASELINE_MONTHS + WINDOW_MONTHS, "granularity": "month"}
+    frame_kw = {} if granularity == "quarter" else month_frame_kw(window)
     agg: dict = defaultdict(lambda: defaultdict(float))
     for f in study_frame("all" if by == "ai" else "author", **frame_kw):
         if by == "ai" and not ai_contrast_eligible(f):

@@ -16,7 +16,9 @@ Adds one month of data and refreshes the monthly trend tables. Semantics
   month, for a finalization that has to land mid-month: N-2's w8 windows
   close 8 weeks after its month end, which falls partway through month N.
   The target month stays uncollected and unregistered, and keeps its own
-  wipe-log cycle for the later full update.
+  wipe-log cycle for the later full update — which then wipes N-1 again
+  but KEEPS the N-2 the revise-only cycle finalized (still_provisional):
+  those cells are final, so a re-pull could only lose PRs deleted since.
 
 Usage:
   PYTHONPATH=src python scripts/monthly_update.py 2026-07
@@ -122,6 +124,33 @@ def cycle_key(new: str, revise_only: bool) -> str:
     return f"{new}:revise-only" if revise_only else new
 
 
+def _wipe_log():
+    from pipeline.ghx import data_dir
+    return data_dir() / "raw" / "monthly_wipes.json"
+
+
+def read_wipe_log() -> dict:
+    log = _wipe_log()
+    return json.loads(log.read_text()) if log.is_file() else {}
+
+
+def still_provisional(new: str, revise: list[str]) -> list[str]:
+    """The revision months a FULL update must wipe: N-1 always (creation
+    recency), N-2 only if this target month's own revise-only cycle has
+    not already finalized it. That cycle is gated on N-2's w8 windows
+    being closed, so its re-collection is final data — wiping it again
+    could only lose PRs deleted since, while re-spending a month of
+    census. The finalized month stays in the COLLECTION list either way:
+    its cached cells cost nothing and a partial revise-only census
+    completes through the checkpoint."""
+    n2 = revise[0]
+    if n2 in read_wipe_log().get(f"{new}:revise-only", []):
+        print(f"{n2} already finalized by the {new} revise-only cycle; "
+              f"keeping its cells", flush=True)
+        return [m for m in revise if m != n2]
+    return list(revise)
+
+
 def ensure_wiped(cycle: str, revise: list[str]) -> None:
     """Wipe the revision months exactly ONCE per cycle. The wipe log
     lives beside the store it clears (raw/monthly_wipes.json), so
@@ -129,9 +158,8 @@ def ensure_wiped(cycle: str, revise: list[str]) -> None:
     checkpointed collection instead of discarding it. A different cycle
     wipes its own revision window. To force a re-wipe of the same cycle
     deliberately, delete the log entry."""
-    from pipeline.ghx import data_dir
-    log = data_dir() / "raw" / "monthly_wipes.json"
-    done = json.loads(log.read_text()) if log.is_file() else {}
+    log = _wipe_log()
+    done = read_wipe_log()
     if done.get(cycle) == revise:
         print(f"revision months already wiped this cycle ({cycle}); "
               f"resuming collection", flush=True)
@@ -179,7 +207,8 @@ def main(argv: list[str] | None = None) -> None:
     collect = list(revise) if a.revise_only else [*revise, new]
     repos = DRV / "population_repos.txt"
     coll = collectable(repos)
-    ensure_wiped(cycle_key(new, a.revise_only), revise)
+    wipes = revise if a.revise_only else still_provisional(new, revise)
+    ensure_wiped(cycle_key(new, a.revise_only), wipes)
     run("pipeline.precount", "--repos", str(coll), "--periods", *collect)
     run("pipeline.census", "--repos", str(coll), "--periods", *collect)
     # register the months PERSISTENTLY: later analyses (and later monthly
