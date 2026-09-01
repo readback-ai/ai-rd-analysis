@@ -1334,8 +1334,9 @@ def _fake_authors(monkeypatch, rows_by_login):
     acc = {login: {m: list(v) for m, v in months.items()}
            for login, (months, _c) in rows_by_login.items()}
     cohorts = {login: c for login, (_m, c) in rows_by_login.items()}
-    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
-                        lambda: (acc, cohorts, {"2026-06": "Q2-2026"}, set()))
+    monkeypatch.setattr(
+        productivity, "_author_months_and_cohorts",
+        lambda window=None: (acc, cohorts, {"2026-06": "Q2-2026"}, set()))
     return productivity
 
 
@@ -1379,7 +1380,7 @@ def test_core_rows_median_is_the_typical_core_author(monkeypatch):
                "b": [0, 0, 2_000, 0, 2_000],
                "c": [0, 0, 97_000, 0, 97_000]}
     monkeypatch.setattr(paper_tables, "per_author",
-                        lambda: {("o/r", "Q1-2024"): authors})
+                        lambda *a: {("o/r", "Q1-2024"): authors})
     monkeypatch.setattr(paper_tables, "weights", lambda: {"o/r": 1.0})
 
     class F:
@@ -1389,7 +1390,8 @@ def test_core_rows_median_is_the_typical_core_author(monkeypatch):
             f = F()
             f.author = login
             yield f
-    monkeypatch.setattr(paper_tables, "study_frame", lambda _p: frames())
+    monkeypatch.setattr(paper_tables, "study_frame",
+                        lambda _p, **_kw: frames())
     monkeypatch.setattr(paper_tables, "PERIODS", ["Q1-2024"])
 
     mean = paper_tables.core_rows()[0]["kloc"][0]

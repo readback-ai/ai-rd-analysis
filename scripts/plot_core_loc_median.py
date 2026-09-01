@@ -31,5 +31,15 @@ def collect() -> Table:
     return mean_fig.core_table(core_rows(stat="median"), NAME)
 
 
+def collect_monthly(window: list[str] | None = None) -> Table:
+    """Monthly twin (plot_all --monthly); rendered by
+    mean_fig.render_core_monthly, like the mean variant."""
+    from pipeline.analyze import month_window
+    window = window or month_window()
+    return mean_fig.core_table(
+        core_rows(stat="median", granularity="month", window=window),
+        f"{NAME}_monthly", unit="month")
+
+
 if __name__ == "__main__":
     figure_main(collect, mean_fig.render_core, f"artifacts/{NAME}.png")
