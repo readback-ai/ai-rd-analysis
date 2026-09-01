@@ -3,8 +3,9 @@
 Two broken-axis panels over mature merged human-reviewed PRs (pooled):
 comments/kLOC (bot-clean human inline comments) and first-review latency
 hours/kLOC (creation -> first human review, per kLOC). Dark = AI-involved
-PRs, light = non-AI; the AI series is absent at the Q1-2024 baseline by
-construction. Q2 is partial (w8 windows open at the AS_OF).
+PRs, light = non-AI, orange = fleet-operator PRs (their own slice, as in
+figure_3_comp_audits; the ai/nonai slices exclude fleet authors). The AI
+series is absent at the Q1-2024 baseline by construction.
 
 Data:   artifacts/data/attention_by_ai.csv
 Output: artifacts/attention_by_ai.png
@@ -14,19 +15,20 @@ import sys
 
 sys.path.insert(0, "src")
 from pipeline.figdata import Table, figure_main
-from pipeline.figstyle import (PAIR_BLUE, broken_pair, cell, plt,
-                               quarter_series, shade_q2_partial)
+from pipeline.figstyle import (PAIR_BLUE, PAIR_ORANGE, broken_pair, cell,
+                               plt, quarter_series, shade_q2_partial)
 from pipeline.studies.attention import PERIODS, attention_by_ai
 
 SLICES = [("ai", PAIR_BLUE[0], "AI-involved PRs"),
-          ("nonai", PAIR_BLUE[1], "non-AI PRs")]
+          ("nonai", PAIR_BLUE[1], "non-AI PRs"),
+          ("fleet", PAIR_ORANGE[0], "fleet-operator PRs")]
 
 PANELS = [("comments_per_kloc", "human comments per kLOC"),
           ("first_rev_h_per_kloc", "hours to first human review per kLOC")]
 
 
 def collect() -> Table:
-    rows = attention_by_ai()
+    rows = attention_by_ai(fleet_slice=True)
     t = Table("attention_by_ai")
     for key, title in PANELS:
         for sl, _color, label in SLICES:
