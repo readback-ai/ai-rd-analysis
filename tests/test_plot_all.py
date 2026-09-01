@@ -94,6 +94,21 @@ def test_through_implies_monthly_and_forwards_the_month(monkeypatch,
     assert "[quarterly]" in capsys.readouterr().out
 
 
+def test_batch_closes_each_figure_after_saving(tmp_path, monkeypatch):
+    """plot_all discarded each rendered figure without closing it, so
+    pyplot retained every canvas — the 25-figure run tripped Matplotlib's
+    'More than 20 figures have been opened' warning and held them all
+    until process exit."""
+    monkeypatch.setattr(figdata, "DATA_DIR", tmp_path)
+    plt.close("all")
+    monkeypatch.setattr(plot_all, "FIGURES", [
+        (str(tmp_path / "a.png"), lambda: _table("a"), _fig),
+        (str(tmp_path / "b.png"), lambda: _table("b"), _fig),
+    ])
+    plot_all.main([])
+    assert plt.get_fignums() == []
+
+
 def test_keyboard_interrupt_still_stops_the_batch(tmp_path, monkeypatch):
     """Keeping going applies to figure failures, not to the operator
     interrupting the run."""

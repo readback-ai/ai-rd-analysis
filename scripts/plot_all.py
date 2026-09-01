@@ -33,7 +33,7 @@ sys.path.insert(0, "src")
 sys.path.insert(0, "scripts")
 from pipeline import figdata, frame                          # noqa: E402
 from pipeline.analyze import month_window                    # noqa: E402
-from pipeline.figstyle import save                           # noqa: E402
+from pipeline.figstyle import plt, save                      # noqa: E402
 
 import plot_adoption_cohorts as a1                           # noqa: E402
 import plot_adoption_cohorts_median as a1a                    # noqa: E402
@@ -173,7 +173,11 @@ def main(argv=None) -> None:
             table = figdata.read(name) if a.from_tables else collect()
             if not a.from_tables:
                 figdata.write(table)
-            save(render(table), out, formats=formats)
+            fig = render(table)
+            save(fig, out, formats=formats)
+            # the canvas is written; keeping it would retain every
+            # figure of the batch until process exit
+            plt.close(fig)
         # SystemExit too, not just Exception: a study bails that way when
         # its inputs are stale (review_action on an out-of-date selection
         # manifest), and one such figure must not discard the shared

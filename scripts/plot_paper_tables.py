@@ -124,7 +124,7 @@ def series_month(axl, axr, pts, label, color):
     hi = [p["hi"] for p in pts]
     nb = len(BASELINE)
     axl.errorbar(range(nb), m[:nb],
-                 yerr=[[v - l for v, l in zip(m[:nb], lo[:nb])],
+                 yerr=[[v - low for v, low in zip(m[:nb], lo[:nb])],
                        [h - v for v, h in zip(m[:nb], hi[:nb])]],
                  marker="o", ms=3, capsize=2, color=color)
     x = range(len(m) - nb)
