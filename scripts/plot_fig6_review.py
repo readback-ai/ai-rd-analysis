@@ -79,9 +79,11 @@ def render(t: Table, dark, light, fleet=False):
         axl.set_ylim(0, 100)
         axl.set_ylabel(ylabel)
     handles, labels = axr.get_legend_handles_labels()
+    # -0.08 is the committed role-cut layout; only the nine-series
+    # fleet variant needs the lower anchor for its extra legend row
     fig.legend(handles, labels, loc="lower center",
-               ncol=3 if fleet else 4, fontsize=8,
-               frameon=False, bbox_to_anchor=(0.5, -0.1))
+               ncol=3 if fleet else 4, fontsize=8, frameon=False,
+               bbox_to_anchor=(0.5, -0.1 if fleet else -0.08))
     return fig
 
 

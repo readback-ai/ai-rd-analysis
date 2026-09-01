@@ -409,8 +409,11 @@ channel shares — a bot is not a productivity unit and its NONE
 association is not an "external contributor"); `all` = no author filter
 (population-level usage tables, where layer-B agent output must count).
 The AI-contrast review-behavior outputs — Figure 6 by-AI, Figure 7,
-Figure 8, and fates' AI/nonAI cohorts — share `all` with fleet-operator
-exclusion (issue #2, resolved 2026-07-23): human attention and
+Figure 8, and fates' AI/nonAI cohorts — share `all`, with fleet-operator
+PRs excluded from the ai/nonai arms (issue #2, resolved 2026-07-23);
+Figures 6-by-AI and 7 additionally plot fleet PRs as their own mutually
+exclusive third slice, while Figure 8 and fates drop them entirely:
+human attention and
 responsiveness to a PR are defined regardless of its author, so
 agent-authored PRs count in the AI series; for them, responsiveness
 means the agent/operator pushes commits after a human ask. Those sites
