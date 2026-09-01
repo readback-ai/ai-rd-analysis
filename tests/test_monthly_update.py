@@ -111,6 +111,26 @@ def test_revise_only_wipe_log_does_not_shadow_the_full_update(stub_run):
     assert not jun.exists()
 
 
+def test_full_update_keeps_the_month_its_revise_only_cycle_finalized(
+        stub_run):
+    """The 2026-08 full update re-wiped and re-collected June-2026 even
+    though the 2026-08 revise-only cycle had already finalized it — that
+    run is gated on June's w8 windows being closed, so its cells are
+    final, and a second wipe can only lose PRs deleted since while
+    re-spending a month of census. N-1 must still be wiped (creation
+    recency), and the finalized month stays in the collection list so a
+    partial revise-only census completes through the checkpoint."""
+    monthly_update.main(["2026-08", "--revise-only"])
+    jun = _cell("o/r", "2026-06-01..2026-06-30", [{"number": 6}])
+    jul = _cell("o/r", "2026-07-01..2026-07-31", [{"number": 7}])
+    monthly_update.main(["2026-08"])
+    assert jun.exists()                   # finalized N-2 stays frozen
+    assert not jul.exists()               # N-1 revision still wipes
+    census = [a for m, a in stub_run if m == "pipeline.census"][-1]
+    assert list(census[census.index("--periods") + 1:]) == \
+        ["2026-06", "2026-07", "2026-08"]
+
+
 def test_full_update_still_collects_the_target_month(stub_run):
     monthly_update.main(["2026-08"])
     assert _periods(stub_run, "pipeline.census") == ["2026-06", "2026-07",
