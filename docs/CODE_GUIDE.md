@@ -172,8 +172,10 @@ Studies contain only their accumulation logic; the guards live here once.
   attributable human authors (adds `is_bot_login` hygiene — author-level
   studies, Figure 6 role cut, channels); `all` = no author filter
   (population tables; AND the AI-contrast review-behavior outputs —
-  Figures 6-by-AI/7/8 and fates' AI cohorts, with fleet exclusion —
-  issue #2 resolution: agent-authored PRs count in the AI series).
+  Figures 6-by-AI/7/8 and fates' AI cohorts — issue #2 resolution:
+  agent-authored PRs count in the AI series. Fleet-operator PRs are
+  excluded from the ai/nonai arms; Figures 6-by-AI and 7 plot them as
+  their own third slice, Figure 8 and fates drop them entirely).
 - `ai_contrast_eligible(fact)` — MANDATORY on top of `all` at every
   AI-contrast site (2026-07-25 review): AI-involved PRs bypass author
   hygiene, everything else must clear `author`, so non-AI bots and
