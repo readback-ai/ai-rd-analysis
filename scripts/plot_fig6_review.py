@@ -91,17 +91,21 @@ def render(t: Table, dark, light, fleet=False):
     return fig
 
 
-def collect_monthly(name, by, dark, light,
+def collect_monthly(name, by, dark, light, fleet=False,
                     window: list[str] | None = None) -> Table:
     """Monthly twin (plot_all --monthly): month-keyed rates over the
     baseline + window months; provisional months stay in, shaded at
-    render."""
+    render. `fleet` matches the quarterly variant, so the twins share
+    one population."""
     window = window or month_window()
     months = BASELINE + window
-    rows = review_mix(by, granularity="month", window=window)
+    rows = (review_mix(by, fleet_slice=True, granularity="month",
+                       window=window)
+            if fleet else review_mix(by, granularity="month",
+                                     window=window))
     t = Table(name)
     for unit, title, _ylabel in UNITS:
-        for ch, sl, _color, label in paired_series6(dark, light):
+        for ch, sl, _color, _ls, label in series_for(dark, light, fleet):
             t.add_series(unit, f"{ch}_{sl}",
                          [cell(rows, m, sl, f"{ch}_{unit}", scale=100)
                           for m in months],
@@ -110,23 +114,24 @@ def collect_monthly(name, by, dark, light,
     return t
 
 
-def render_monthly(t: Table, dark, light):
+def render_monthly(t: Table, dark, light, fleet=False):
     window = window_of(t)
     fig = plt.figure(figsize=(11, 4.6))
     subfigs = fig.subfigures(1, 2, wspace=0.05)
     for sf, (unit, _title, ylabel) in zip(subfigs.flat, UNITS):
         axl, axr = broken_pair(sf, t.label_of(unit), span="month",
                                window=window)
-        for ch, sl, color, label in paired_series6(dark, light):
+        for ch, sl, color, ls, label in series_for(dark, light, fleet):
             vals = t.values(unit, f"{ch}_{sl}")
             month_series(axl, axr, vals[:len(BASELINE)],
-                         vals[len(BASELINE):], color, label=label)
+                         vals[len(BASELINE):], color, ls=ls, label=label)
         shade_provisional(axr, window)
         axl.set_ylim(0, 100)
         axl.set_ylabel(ylabel)
     handles, labels = axr.get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower center", ncol=4, fontsize=8,
-               frameon=False, bbox_to_anchor=(0.5, -0.08))
+    fig.legend(handles, labels, loc="lower center",
+               ncol=3 if fleet else 4, fontsize=8, frameon=False,
+               bbox_to_anchor=(0.5, -0.1 if fleet else -0.08))
     return fig
 
 
