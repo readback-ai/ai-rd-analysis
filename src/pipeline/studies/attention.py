@@ -27,16 +27,75 @@ def _hours(a, b):
             - datetime.fromisoformat(a.replace("Z", "+00:00"))).total_seconds() / 3600
 
 
+# Per-(reviewer, PR) inline-comment cap, the attention analogue of the
+# per-PR LOC cap (frame.CAP): one reviewer's exhaustive pass over a single
+# PR is one act of review, not N units of attention, and an uncapped count
+# lets a line-by-line copy-edit carry a whole series. Set at the tail, not
+# the shoulder — across 112k reviewer-PR pairs the median is 2 and this
+# truncates 0.9% of pairs (3.2% of comments).
+COMMENT_CAP = 20
+
+
 def human_comment_count(pr: dict) -> int:
     """Inline comments on reviewer!=author human reviews; split_reviews is
-    bot-clean AND w8-windowed — no extra time filter belongs here."""
+    bot-clean AND w8-windowed — no extra time filter belongs here.
+
+    Each REVIEWER's comments are totalled across their reviews on the PR
+    and capped at COMMENT_CAP, so splitting one pass over several review
+    objects cannot evade the cap while a broadly reviewed PR still counts
+    every reviewer in full."""
     human_other, _, _ = split_reviews(pr)
-    return sum((r.get("comments") or {}).get("totalCount", 0)
-               for r in human_other)
+    per_reviewer: dict[str, int] = defaultdict(int)
+    for r in human_other:
+        login = (r.get("author") or {}).get("login") or ""
+        per_reviewer[login] += (r.get("comments") or {}).get("totalCount", 0)
+    return sum(min(n, COMMENT_CAP) for n in per_reviewer.values())
+
+
+def has_no_human_commentary(pr: dict) -> bool:
+    """No human left an inline comment on this PR. Deliberately NOT
+    conditioned on the PR having been reviewed at all: an unreviewed PR
+    is the clearest case of no commentary, and the attention panels'
+    human_reviewed gate would define the question away."""
+    return human_comment_count(pr) == 0
+
+
+def no_commentary_share(fleet_slice: bool = True,
+                        granularity: str = "quarter") -> dict:
+    """(period, slice) -> {n, silent, share} — the share of MATURE MERGED
+    PRs in each slice that received no human inline comment at all.
+
+    Companion to `attention_by_ai`, which reports comments per kLOC over
+    reviewed PRs only: a low rate there can mean thin review everywhere or
+    sparse review concentrated on a few PRs, and this separates the two.
+    Denominator is every mature merged PR in the slice (issue #34)."""
+    from pipeline.studies.productivity import (BASELINE_MONTHS,
+                                               WINDOW_MONTHS, fleet_logins)
+    fleet = fleet_logins()
+    frame_kw = {} if granularity == "quarter" else \
+        {"periods": BASELINE_MONTHS + WINDOW_MONTHS, "granularity": "month"}
+    agg = defaultdict(lambda: defaultdict(int))
+    for f in study_frame("all", **frame_kw):
+        if not ai_contrast_eligible(f):
+            continue
+        is_fleet = f.author in fleet
+        if is_fleet and not fleet_slice:
+            continue
+        c = f.cls
+        if not (c.w8_mature and c.merged):
+            continue
+        sl = "fleet" if is_fleet else ("ai" if c.ai_involved else "nonai")
+        d = agg[(f.period, sl)]
+        d["n"] += 1
+        d["silent"] += has_no_human_commentary(f.pr)
+    return {k: {"n": d["n"], "silent": d["silent"],
+                "share": d["silent"] / d["n"]}
+            for k, d in agg.items() if d["n"]}
 
 
 def attention_by_ai(fleet_slice: bool = False,
-                    granularity: str = "quarter") -> dict:
+                    granularity: str = "quarter",
+                    window: list[str] | None = None) -> dict:
     """Figure 7: attention proxies by PR AI involvement (FLEET-OPERATOR
     authors excluded) — pooled over
     mature, merged, human-reviewed PRs per quarter x {ai, nonai}:
@@ -46,16 +105,15 @@ def attention_by_ai(fleet_slice: bool = False,
     slice is empty at the Q1-2024 baseline by construction.
     granularity="month": rows keyed by calendar month over the baseline
     + window months (the Figure 3 companion; display-side callers gate
-    to w8-final months).
+    to w8-final months). `window` overrides the frozen WINDOW_MONTHS
+    (productivity.month_frame_kw).
 
     Returns {(period, slice): {n, kloc, comments_per_kloc,
     first_rev_h_per_kloc}}."""
-    from pipeline.studies.productivity import (BASELINE_MONTHS,
-                                               WINDOW_MONTHS, fleet_logins)
+    from pipeline.studies.productivity import fleet_logins, month_frame_kw
     from pipeline.studies.review_action import first_human_review
     fleet = fleet_logins()
-    frame_kw = {} if granularity == "quarter" else \
-        {"periods": BASELINE_MONTHS + WINDOW_MONTHS, "granularity": "month"}
+    frame_kw = {} if granularity == "quarter" else month_frame_kw(window)
     agg = defaultdict(lambda: defaultdict(float))
     # profile "all", NOT "pr": this population never excluded Bot-typed
     # authors, so agent-authored PRs already count in the ai slice here

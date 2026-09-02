@@ -33,7 +33,7 @@ authors — non-adopters stayed flat — with event-time analysis showing a
 discontinuity at each author's first AI evidence on a flat pre-trend,
 in both their AI-marked AND unmarked output (the undetected-usage
 signature). A new production mode emerged: ~43 "fleet operator" accounts
-merging 300–4,400 PRs/quarter (~531 kLOC/author-month cohort mean by
+merging 300–4,400 PRs/quarter (~531 kLOC/author-quarter cohort mean by
 Q2-2026), roughly half unmarked, isolated as their own cohort. Review:
 human attention per merged line fell ~53% (insiders −61%) while
 human-review coverage of merged PRs held (~69–75%) and responsiveness to
@@ -47,9 +47,9 @@ Methodology: [`docs/METHODS.md`](docs/METHODS.md) · **code review guide: [`docs
 
 Generated report: [`artifacts/report_generated.md`](artifacts/report_generated.md)
 (19 sections, quarterly; monthly twin `report_monthly.md`). Figures:
-`artifacts/fig2_ai_usage.png` (traceable AI usage), `fig3_core_loc.png`
-(merged LOC per core contributor), `fig4_adoption_cohorts.png` (adoption
-cohorts incl. fleet).
+`artifacts/ai_usage.png` (traceable AI usage), `artifacts/core_loc.png`
+(merged LOC per insider contributor), `artifacts/adoption_cohorts.png`
+(adoption cohorts incl. fleet).
 
 ## How to verify the three claims that matter
 
@@ -76,7 +76,8 @@ cohorts incl. fleet).
 | 5 | `pipeline.studies.layers` | exact per-PR layered decomposition (B > A > C disjoint; union = ai_involved) |
 | studies | `pipeline.studies.*` | one analysis = one module: paper figures, productivity/adoption cohorts, attention, fates, event study, responsiveness (HT-weighted), slices, layer-C precision |
 | figures | `scripts/plot_all.py` (all), `scripts/plot_*.py` (one each) | each figure's plotted points -> `artifacts/data/<figure>.csv`, then the image is rendered from that table |
-| monthly | `scripts/monthly_update.py` | incremental month ingestion (provisional-month revision + persistent month registry) |
+| monthly | `scripts/monthly_update.py` | incremental month ingestion (provisional-month revision + persistent month registry; `--revise-only` finalizes the revision window without collecting a partial target month) |
+| monthly (scheduled) | `scripts/run_monthly_update.sh` | waits for a w8 finalization instant (`--at`), runs the update, logs to `data/derived/` |
 
 ## Reproduction
 

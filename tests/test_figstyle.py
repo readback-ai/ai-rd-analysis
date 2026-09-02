@@ -49,8 +49,8 @@ def test_broken_pair_quarter_geometry():
 
 
 def test_broken_pair_month_geometry():
-    """Legacy month variant verbatim (plot_fig5_fleet.py /
-    plot_adoption_cohorts.py): Q1-2024 months on the left, the
+    """Legacy month variant verbatim (plot_adoption_cohorts.py and
+    the median twin): Q1-2024 months on the left, the
     Oct-2025..Jun-2026 window on the right, ticks at [0, 3, 6, 8]."""
     fig = figstyle.plt.figure()
     sf = fig.subfigures(1, 1)
@@ -97,6 +97,20 @@ def test_broken_pair_month_marks_every_month():
     figstyle.plt.close(fig)
 
 
+def test_broken_pair_month_short_window_ticks():
+    """broken_pair month ticks crash on windows shorter than 7 months:
+    the sparse tick set [0, 3, 6, last] indexes past the end of a short
+    window (reachable via fig3-comp's maturity filter and month_window
+    truncation). Short windows keep the in-range sparse ticks plus the
+    last month."""
+    fig = figstyle.plt.figure()
+    sf = fig.subfigures(1, 1)
+    axl, axr = broken_pair(sf, "t", span="month", window=WINDOW[:5])
+    assert list(axr.get_xticks()) == [0, 3, 4]
+    assert _labels(axr) == [WINDOW[0][2:7], WINDOW[3][2:7], WINDOW[4][2:7]]
+    figstyle.plt.close(fig)
+
+
 def test_broken_axes_paper_variant():
     """Legacy plot_paper_tables.broken_axes: its own figure, full-length
     quarter labels, ylabel on the left panel."""
@@ -127,9 +141,24 @@ def test_no_plot_script_sets_a_caption():
     assert offenders == []
 
 
-def test_shade_q2_partial_params():
+def test_q2_band_disappears_once_the_quarter_finalizes(monkeypatch):
+    """Codex review P1: the Q2 band was unconditional, so every quarter
+    figure would keep shading and labelling Q2 'provisional' after the
+    finalization re-pull. Derive it from the data stamp instead."""
+    from pipeline import detect
+    fig, ax = figstyle.plt.subplots()
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-25T00:00:00Z")
+    assert shade_q2_partial(ax) is not None      # windows still open
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-26T00:00:00Z")
+    assert shade_q2_partial(ax) is None          # finalized: no band
+    figstyle.plt.close(fig)
+
+
+def test_shade_q2_partial_params(monkeypatch):
     """The magic band verbatim: axvspan(1.6, 2.4, color="0.85", alpha=0.5,
     zorder=0) — previously copied into 11 call sites."""
+    from pipeline import detect
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-01T00:00:00Z")
     fig, ax = figstyle.plt.subplots()
     span = shade_q2_partial(ax)
     assert (span.get_x(), span.get_x() + span.get_width()) == (1.6, 2.4)
@@ -139,6 +168,40 @@ def test_shade_q2_partial_params():
     assert (generic.get_x(),
             generic.get_x() + generic.get_width()) == (-0.5, 0.5)
     assert generic.get_alpha() == 0.5 and generic.get_zorder() == 0
+    figstyle.plt.close(fig)
+
+
+def test_shade_provisional_bands_the_open_month_suffix(monkeypatch):
+    """The monthly analogue of shade_q2_partial: one span over the
+    trailing window months whose w8 windows are still open, gone once
+    every month matures (same auto-finalization rule)."""
+    from pipeline import detect
+    fig, ax = figstyle.plt.subplots()
+    # 2026-05 matures at 2026-07-26; 2026-06 at 2026-08-26
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-01T00:00:00Z")
+    span = figstyle.shade_provisional(ax, WINDOW)
+    assert (span.get_x(), span.get_x() + span.get_width()) == (7.5, 8.5)
+    assert span.get_label() == "w8 windows open (merged provisional)"
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-26T00:00:00Z")
+    assert figstyle.shade_provisional(ax, WINDOW) is None
+    figstyle.plt.close(fig)
+
+
+def test_broken_axes_month_geometry():
+    """Month-domain twin of broken_axes (monthly paper figures 2/3):
+    every baseline and window month labeled, width scaling with the
+    window."""
+    window = WINDOW + ["2026-07"]
+    fig, axl, axr = figstyle.broken_axes_month("share (%)", window)
+    assert axl.get_xlim() == (-0.5, len(BASELINE) - 0.5)
+    assert _labels(axl) == [m[2:7] for m in BASELINE]
+    assert axr.get_xlim() == (-0.5, len(window) - 0.5)
+    assert _labels(axr) == [m[2:7] for m in window]
+    assert axl.get_ylabel() == "share (%)"
+    assert not axl.spines.right.get_visible()
+    assert not axr.spines.left.get_visible()
+    assert fig.get_size_inches()[0] == max(8.0, 0.75 * len(window) + 3)
+    assert fig._suptitle is None
     figstyle.plt.close(fig)
 
 
@@ -159,8 +222,8 @@ def test_quarter_series_split():
 
 
 def test_month_series_split():
-    """The monthly split-plot idiom shared by plot_fig5_fleet and
-    plot_adoption_cohorts: ms 2.5, baseline unlabeled, window labeled."""
+    """The monthly split-plot idiom used by plot_adoption_cohorts
+    (fleet_vs_nonadopters moved to quarters): ms 2.5, baseline unlabeled, window labeled."""
     fig = figstyle.plt.figure()
     sf = fig.subfigures(1, 1)
     axl, axr = broken_pair(sf, "t", span="month")

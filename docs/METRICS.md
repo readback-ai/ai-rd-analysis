@@ -33,11 +33,12 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
   past the frame end counts) — so mature PRs are immutable and re-pulls
   only fill in immature ones. PRs
   created after ~2026-05-05 have open w8 windows at the current as-of, so
-  Q2-2026 fate cells are PROVISIONAL until the scheduled **Sept 1, 2026
-  re-pull** (re-collect trailing months, bump `detect.AS_OF` — the
-  data-collection stamp; CUTOFF itself never changes), after which every
-  Q2 window is complete — the pipeline is built for this update
-  (monthly_update re-collection; nothing else changes). Residual: per-commit
+  Q2-2026 fate cells are PROVISIONAL until the scheduled **2026-08-26
+  re-pull** (June's last window closes 2026-08-25T23:59:59Z; re-collect
+  trailing months, bump `detect.AS_OF` — the data-collection stamp;
+  CUTOFF itself never changes), after which every Q2 window is complete —
+  the pipeline is built for this update (`monthly_update --revise-only`,
+  since August is still partial; nothing else changes). Residual: per-commit
   timestamps are not collected, so a marker-bearing commit pushed after the
   as-of to a still-open in-window PR is not filterable (layer A only;
   exposure grows with re-collection lag).
@@ -143,10 +144,10 @@ argument — one section = one module invocation):
    merged-conditioned `m_*`; each as `mean [95% CI]`.
 2. **Figure 2: Traceable AI usage** (`paper_tables --table usage`) — AI%
    of submitted/merged PRs and AI-PR share of submitted/merged LOC (CW,
-   CIs). Rendered as `artifacts/fig2_ai_usage.png`.
+   CIs). Rendered as `artifacts/ai_usage.png`.
 3. **Figure 3: Merged LOC per core contributor** (`paper_tables --table
    core`) — CW merged (w8) kLOC per insider author + baseline multiple
-   (×2.96 by Q2-2026). Rendered as `fig3_core_loc.png`.
+   (×2.96 by Q2-2026). Rendered as `core_loc.png`.
 4. **Layered decomposition** (`pipeline.studies.layers`) — pooled
    disjoint shares: B-agent > A-marker > C-branch-only, plus union
    (exact per-PR; replaced `pipeline.integrate`'s sampled blending,
@@ -176,15 +177,51 @@ argument — one section = one module invocation):
 15. **Figure A1: adoption cohorts** (`--cut adoption`) — fixed cohorts
     early/medium/late/never/**fleet** (≥300 merged PRs/quarter, assigned
     first); AI/nonAI/total kLOC per author with CI + median. Rendered as
-    `fig_a1_adoption_cohorts.png`; companions: `figure_2_comp_audits.png`
-    (balanced event panels per adoption month), `fig5_fleet_vs_nonadopters.png`,
-    `fig_a2_adoption_event.png` (event time net of non-adopters).
+    `adoption_cohorts.png`; companions: `figure_2_comp_audits.png`
+    (balanced event panels per adoption month), `fleet_vs_nonadopters.png`,
+    `adoption_event.png` (event time net of non-adopters).
+    **Figure 2 membership** (`event_by_adoption_month`): members must have
+    submitted >=1 PR in EVERY offset month t-2..t+2 (`require_active`), so
+    each has a real pre-adoption baseline. Without it 30-48% of a cohort
+    had no activity at t-2/t-1 while 0% can be inactive at t0 (AI evidence
+    requires a PR), and zero-filled inactive months made the step at
+    adoption partly composition — authors appearing in the data rather
+    than producing more. The rule roughly halves cohort sizes and cuts the
+    median step from 2.3-11.5x to 1.3-2.5x.
+    **Read t-1 -> t+1, not t0.** t0 is inflated BY CONSTRUCTION: a month
+    in which an author submits more PRs has more chances to contain their
+    first AI-marked one, so unusually productive months are
+    disproportionately selected as the adoption month. t0 exceeds t+1 in
+    4 of 5 cohorts on merged. Quote the t-1 -> t+1 change (+25% to +185%
+    across cohorts and both series); the adoption month itself carries a
+    selection effect, not only a treatment effect.
+    **Median twins** `adoption_cohorts_median.png`,
+    `fleet_vs_nonadopters_median.png`
+    (`adoption_monthly(stat="median")`) and
+    `figure_2a_comp_audits_median.png`
+    (`event_by_adoption_month(stat="median")`) plot the same panels on the
+    MEDIAN cohort member. Cite the
+    median: per-contributor volume is heavy-tailed, and in 2026-06 a
+    single fleet operator supplied 54.7% of the cohort's merged LOC, so
+    the mean tracks that operator while the median tracks membership. The
+    mean twins are retained because the GAP between them is the evidence
+    of that concentration (fleet 2026-05→06: mean +50%, median −10%).
+    Medians are per series and do NOT decompose — the AI and non-AI
+    lines will not sum to their total, because a different member sits at
+    the middle of each; in the early-adopter panel the components sum to
+    ~1.8 against a total of 4.4. Figures bake in no captions (they are
+    supplied in the paper text); the images identify the statistic via
+    the LEGEND TITLE "median:", and the non-additivity warning lives HERE
+    and in the paper text, which must repeat it wherever a median panel
+    is reproduced. Figure 3's median twin
+    is `core_loc_median.png` (`core_rows(stat="median")`); it is
+    the source for per-contributor LEVELS.
 16. **Merged LOC by approval channel** (`--cut channels`) — humanRev /
     botOnly / selfUnrev / otherUnrev shares of merged LOC.
 17. **Figure 6: review mix of merged PRs/LOC** (`productivity --cut
     reviewmix`) — per quarter × {core, external}: PR and LOC shares of
     humanRev / botOnly / selfUnrev / otherUnrev over mature merged PRs
-    (the substitution hypothesis). Rendered as `fig6_review_mix.png`.
+    (the substitution hypothesis). Rendered as `review_mix.png`.
 18. **Attention per line** (`studies.attention`) — HUMAN comments/kLOC
     (bot-clean) + window h/kLOC, all/ins/ext + size bands.
 19. **PR fates at matched horizons** (`studies.fates`) — w8 primary, w26

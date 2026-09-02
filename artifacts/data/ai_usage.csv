@@ -1,0 +1,17 @@
+panel,panel_label,series,series_label,x,x_label,value,lo,hi
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,0.0,Q1-2024,0.0038986949542411872,0.0,0.01317979005014257
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,1.0,Q4-2025,2.9806473241044675,2.3276830911688524,3.700776924004625
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,2.0,Q1-2026,10.30445193834391,9.016309665443181,11.768796918421202
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,3.0,Q2-2026,16.834682186480457,14.914511741045885,18.697202029476305
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,0.0,Q1-2024,0.0,0.0,0.0
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,1.0,Q4-2025,2.200177716382637,1.6368137002923362,2.914791582679736
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,2.0,Q1-2026,8.831335676720498,7.497757089926075,10.288376396541537
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,3.0,Q2-2026,16.37826566160138,14.235442450117603,18.41029709160356
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,0.0,Q1-2024,6.223559537735396e-05,0.0,0.00022118254594869028
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,1.0,Q4-2025,4.307544068333664,3.3601954892522157,5.359096498631018
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,2.0,Q1-2026,13.559222872861906,11.688399136326284,15.372591464353908
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,3.0,Q2-2026,22.473484517713626,19.71862804193719,25.113086472334018
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,0.0,Q1-2024,0.0,0.0,0.0
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,1.0,Q4-2025,2.7042335326104805,1.9196916176614893,3.600683689137357
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,2.0,Q1-2026,11.078582106909032,9.312305136615668,12.874078645880644
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,3.0,Q2-2026,20.568469784083852,17.742043600159267,23.243228260486944

@@ -107,7 +107,8 @@ def broken_pair(subfig, title, span="quarter", window=None,
                            [m[2:7] for m in window], fontsize=8)
         else:
             axl.set_xticks([1], ["Q1-24"])
-            ticks = [0, 3, 6, len(window) - 1]
+            ticks = sorted({t for t in (0, 3, 6)
+                            if t < len(window)} | {len(window) - 1})
             axr.set_xticks(ticks, [window[i][2:7] for i in ticks],
                            fontsize=8)
     else:
@@ -168,8 +169,66 @@ def shade_span(ax, lo, hi, label=None):
 
 def shade_q2_partial(axr, label="Q2 partial (w8 windows open)"):
     """Q2-2026 band on a quarter broken_pair right panel — the former
-    magic axvspan(1.6, 2.4) copied into 11 call sites."""
+    magic axvspan(1.6, 2.4) copied into 11 call sites.
+
+    Returns None once Q2's windows have closed under the data stamp: a
+    finalized quarter must stop being shaded and labelled provisional
+    without editing every figure."""
+    from pipeline import detect
+    if detect.w8_closed(detect.CUTOFF):
+        return None
     return shade_span(axr, 1.6, 2.4, label)
+
+
+def shade_provisional(axr, window,
+                      label="w8 windows open (merged provisional)"):
+    """Band over the trailing `window` months whose w8 windows are still
+    open at the AS_OF — the monthly analogue of shade_q2_partial.
+    Provisional months are a suffix of the window (maturity is monotone
+    in time), so one span covers them.
+
+    Returns None once every month has finalized under the data stamp: a
+    matured month must stop being shaded and labelled provisional
+    without editing every figure."""
+    from pipeline.studies.productivity import month_w8_mature
+    prov = [i for i, m in enumerate(window) if not month_w8_mature(m)]
+    if not prov:
+        return None
+    return shade_span(axr, prov[0] - 0.5, prov[-1] + 0.5, label)
+
+
+def window_of(table) -> list:
+    """The month window a monthly figdata.Table was built over, from its
+    own x_labels: renders re-derive the window instead of resolving it
+    again, so --from-table replays a committed CSV faithfully regardless
+    of the registry (or --through) at render time."""
+    panel = table.panels()[0]
+    series = table.series_in(panel)[0]
+    return [r["x_label"] for r in table.points(panel, series)
+            if r["x_label"] not in BASELINE]
+
+
+def broken_axes_month(ylabel: str, window):
+    """Whole-figure broken-axis variant on a MONTH domain (the monthly
+    twins of paper figures 2/3): baseline months on the left, the given
+    window months on the right, every month labeled. Width scales with
+    the window so an extended axis doesn't crush the labels. Figures
+    carry no caption — the paper supplies it in text."""
+    width = max(8.0, 0.75 * len(window) + 3)
+    fig, (axl, axr) = plt.subplots(
+        1, 2, sharey=True, figsize=(width, 4.5),
+        gridspec_kw={"width_ratios": [1, 4], "wspace": 0.06})
+    axl.set_xlim(-0.5, len(BASELINE) - 0.5)
+    axl.set_xticks(range(len(BASELINE)), [m[2:7] for m in BASELINE],
+                   fontsize=8)
+    axr.set_xlim(-0.5, len(window) - 0.5)
+    axr.set_xticks(range(len(window)), [m[2:7] for m in window], fontsize=8)
+    axl.spines.right.set_visible(False)
+    axr.spines.left.set_visible(False)
+    axr.tick_params(left=False)
+    _break_marks(axl, axr, markersize=12)
+    axl.set_ylabel(ylabel)
+    return fig, axl, axr
 
 
 def cell(rows, per, sl, key, scale=1):

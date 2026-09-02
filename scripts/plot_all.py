@@ -9,9 +9,20 @@ from its own table.
   PYTHONPATH=src python scripts/plot_all.py --format png,svg
   PYTHONPATH=src python scripts/plot_all.py --from-tables   # render only,
                                                             # no census read
+  PYTHONPATH=src python scripts/plot_all.py --monthly       # + monthly set
+  PYTHONPATH=src python scripts/plot_all.py --through 2026-08
+
+--monthly additionally renders the monthly variant of each figure
+(distinct *_monthly stems; the quarterly-only figures are declared in
+MONTHLY_SKIPS). --through YYYY-MM extends the monthly window past its
+default frozen end (2026-06) to a censused registry month, implies
+--monthly, and re-windows the monthly-axis figures of the default set
+(adoption_cohorts family, Figure 3 companion) to match.
 
 Usage: PYTHONPATH=src python scripts/plot_all.py [--from-tables]
                                                  [--format png,svg]
+                                                 [--monthly]
+                                                 [--through YYYY-MM]
 """
 import argparse
 import functools
@@ -21,38 +32,105 @@ from pathlib import Path
 sys.path.insert(0, "src")
 sys.path.insert(0, "scripts")
 from pipeline import figdata, frame                          # noqa: E402
-from pipeline.figstyle import save                           # noqa: E402
+from pipeline.analyze import month_window                    # noqa: E402
+from pipeline.figstyle import plt, save                      # noqa: E402
 
 import plot_adoption_cohorts as a1                           # noqa: E402
+import plot_adoption_cohorts_median as a1a                    # noqa: E402
 import plot_adoption_event as a2                             # noqa: E402
 import plot_fig2_comp_audits as comp2                        # noqa: E402
+import plot_fig2_comp_audits_median as comp2a                # noqa: E402
+import plot_productivity_deciles as a3                       # noqa: E402
+import plot_activity_deciles as a4                           # noqa: E402
+import plot_active_insider_deciles as a5                     # noqa: E402
 import plot_fig3_comp_audits as comp3                        # noqa: E402
 import plot_fig5_fleet as f5                                 # noqa: E402
+import plot_fig5_fleet_median as f5a                          # noqa: E402
 import plot_fig6_review as f6                                # noqa: E402
 import plot_fig7_attention as f7                             # noqa: E402
 import plot_fig8_responsiveness as f8                        # noqa: E402
 import plot_paper_tables as paper                            # noqa: E402
+import plot_core_loc_median as paper3a                   # noqa: E402
 
 ROLE, AI = f6.VARIANTS[0], f6.VARIANTS[1]
 
 # (output path, collect, render) for every figure in the paper
 FIGURES = [
-    ("artifacts/fig2_ai_usage.png", paper.collect_usage, paper.render_usage),
-    ("artifacts/fig3_core_loc.png", paper.collect_core, paper.render_core),
-    ("artifacts/fig5_fleet_vs_nonadopters.png", f5.collect, f5.render),
-    ("artifacts/fig6_review_mix.png",
-     lambda: f6.collect("fig6_review_mix", ROLE[0], ROLE[1], ROLE[2]),
-     lambda t: f6.render(t, ROLE[1], ROLE[2])),
-    ("artifacts/fig6_review_mix_by_ai.png",
-     lambda: f6.collect("fig6_review_mix_by_ai", AI[0], AI[1], AI[2]),
-     lambda t: f6.render(t, AI[1], AI[2])),
-    ("artifacts/fig7_attention_by_ai.png", f7.collect, f7.render),
-    ("artifacts/fig8_responsiveness_by_ai.png", f8.collect, f8.render),
-    ("artifacts/fig_a1_adoption_cohorts.png", a1.collect, a1.render),
-    ("artifacts/fig_a2_adoption_event.png", a2.collect, a2.render),
+    ("artifacts/ai_usage.png", paper.collect_usage, paper.render_usage),
+    ("artifacts/core_loc.png", paper.collect_core, paper.render_core),
+    ("artifacts/fleet_vs_nonadopters.png", f5.collect, f5.render),
+    ("artifacts/review_mix.png",
+     lambda: f6.collect("review_mix", ROLE[0], ROLE[1], ROLE[2], ROLE[4]),
+     lambda t: f6.render(t, ROLE[1], ROLE[2], ROLE[4])),
+    ("artifacts/review_mix_by_ai.png",
+     lambda: f6.collect("review_mix_by_ai", AI[0], AI[1], AI[2], AI[4]),
+     lambda t: f6.render(t, AI[1], AI[2], AI[4])),
+    ("artifacts/attention_by_ai.png", f7.collect, f7.render),
+    ("artifacts/responsiveness_by_ai.png", f8.collect, f8.render),
+    ("artifacts/adoption_cohorts.png", a1.collect, a1.render),
+    ("artifacts/adoption_event.png", a2.collect, a2.render),
+    # median twins: same panels, typical member instead of cohort mean
+    (f"artifacts/{f5a.NAME}.png", f5a.collect,
+     functools.partial(f5.render, ylabel=f5a.YLABEL,
+                       legend_title=f5a.LEGEND_TITLE)),
+    (f"artifacts/{a1a.NAME}.png", a1a.collect,
+     functools.partial(a1.render, ylabel=a1a.YLABEL,
+                       legend_title=a1a.LEGEND_TITLE)),
+    (f"artifacts/{paper3a.NAME}.png", paper3a.collect, paper.render_core),
     ("artifacts/figure_2_comp_audits.png", comp2.collect, comp2.render),
+    (f"artifacts/{comp2a.NAME}.png", comp2a.collect,
+     functools.partial(comp2.render, ylabel=comp2a.YLABEL,
+                       legend_title=comp2a.LEGEND_TITLE)),
     ("artifacts/figure_3_comp_audits.png", comp3.collect, comp3.render),
+    (f"artifacts/{a3.NAME}.png", a3.collect, a3.render),
+    (f"artifacts/{a3.QUARTERLY_NAME}.png", a3.collect_quarterly, a3.render),
+    (f"artifacts/{a4.NAME}.png", a4.collect, a4.render),
+    (f"artifacts/{a5.NAME}.png", a5.collect, a5.render),
 ]
+
+# default-set collects that take a window= (the monthly-axis figures);
+# --through re-windows exactly these
+WINDOWED = {"adoption_cohorts", a1a.NAME, "figure_3_comp_audits"}
+
+# monthly variants that do not exist, and why — printed with --monthly so
+# the gap is declared, not silent (the report.py "[quarterly]" precedent)
+MONTHLY_SKIPS = [
+    ("responsiveness_by_ai",
+     "frozen quarter-keyed sampling manifests (review_action lane draws)"),
+    ("fleet_vs_nonadopters",
+     "moved to quarters — monthly points were noise-dominated; "
+     "adoption_cohorts carries the monthly fleet series"),
+]
+
+
+def monthly_figures(through: str | None = None) -> list[tuple]:
+    """The --monthly variant set: one shared window resolution, distinct
+    *_monthly stems so nothing clobbers the quarterly outputs. Event-time
+    figures (adoption_event, Figure 2 companion) are granularity-agnostic
+    and have no twin; the quarterly-only figures are in MONTHLY_SKIPS."""
+    w = month_window(through)
+    return [
+        ("artifacts/ai_usage_monthly.png",
+         functools.partial(paper.collect_usage_monthly, window=w),
+         paper.render_usage_monthly),
+        ("artifacts/core_loc_monthly.png",
+         functools.partial(paper.collect_core_monthly, window=w),
+         paper.render_core_monthly),
+        (f"artifacts/{paper3a.NAME}_monthly.png",
+         functools.partial(paper3a.collect_monthly, window=w),
+         paper.render_core_monthly),
+        ("artifacts/review_mix_monthly.png",
+         functools.partial(f6.collect_monthly, "review_mix_monthly",
+                           ROLE[0], ROLE[1], ROLE[2], ROLE[4], window=w),
+         lambda t: f6.render_monthly(t, ROLE[1], ROLE[2], ROLE[4])),
+        ("artifacts/review_mix_by_ai_monthly.png",
+         functools.partial(f6.collect_monthly, "review_mix_by_ai_monthly",
+                           AI[0], AI[1], AI[2], AI[4], window=w),
+         lambda t: f6.render_monthly(t, AI[1], AI[2], AI[4])),
+        ("artifacts/attention_by_ai_monthly.png",
+         functools.partial(f7.collect_monthly, window=w),
+         f7.render_monthly),
+    ]
 
 
 def main(argv=None) -> None:
@@ -62,6 +140,12 @@ def main(argv=None) -> None:
                          "reading the census store")
     ap.add_argument("--format", default="png",
                     help="comma-separated image formats (png,svg)")
+    ap.add_argument("--monthly", action="store_true",
+                    help="also render the monthly variant of each figure")
+    ap.add_argument("--through", metavar="YYYY-MM",
+                    help="extend the monthly window to this censused "
+                         "month (default: the frozen 2026-06 end); "
+                         "implies --monthly")
     a = ap.parse_args(argv)
     formats = a.format.split(",")
 
@@ -70,8 +154,20 @@ def main(argv=None) -> None:
         # the store through this loader
         frame.load_cells = functools.cache(frame.load_cells)
 
+    entries = list(FIGURES)
+    if a.through:
+        w = month_window(a.through)
+        entries = [(out,
+                    functools.partial(collect, window=w)
+                    if Path(out).stem in WINDOWED else collect,
+                    render) for out, collect, render in entries]
+    if a.monthly or a.through:
+        entries += monthly_figures(a.through)
+        for stem, why in MONTHLY_SKIPS:
+            print(f"skipped {stem}_monthly [quarterly]: {why}", flush=True)
+
     failed = []
-    for out, collect, render in FIGURES:
+    for out, collect, render in entries:
         name = Path(out).stem
         try:
             table = figdata.read(name) if a.from_tables else collect()
@@ -86,6 +182,11 @@ def main(argv=None) -> None:
         except (Exception, SystemExit) as exc:
             failed.append((name, exc))
             print(f"FAILED {name}: {exc}", flush=True)
+        finally:
+            # release whatever canvases this figure opened, on the
+            # failure paths too — the keep-going batch would otherwise
+            # retain every one until process exit
+            plt.close("all")
     if failed:
         raise SystemExit(f"{len(failed)} figure(s) failed: "
                          f"{[n for n, _ in failed]}")
