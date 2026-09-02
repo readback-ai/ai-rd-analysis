@@ -5,21 +5,25 @@ core_loc,kLOC per insider contributor / month,sub_kloc,submitted kLOC / insider 
 core_loc,kLOC per insider contributor / month,sub_kloc,submitted kLOC / insider contributor,3.0,2025-10,5.842107587314331,2.4293543243133637,11.751088101437766
 core_loc,kLOC per insider contributor / month,sub_kloc,submitted kLOC / insider contributor,4.0,2025-11,4.502124750631728,1.9930734801211105,9.404821949709769
 core_loc,kLOC per insider contributor / month,sub_kloc,submitted kLOC / insider contributor,5.0,2025-12,2.535151038178164,1.9388884314289825,3.250658062515177
-core_loc,kLOC per insider contributor / month,sub_kloc,submitted kLOC / insider contributor,6.0,2026-01,3.4280832680250803,2.684194707896664,4.36426296354745
+core_loc,kLOC per insider contributor / month,sub_kloc,submitted kLOC / insider contributor,6.0,2026-01,3.4280832680250803,2.6676948844507953,4.310531759893313
 core_loc,kLOC per insider contributor / month,sub_kloc,submitted kLOC / insider contributor,7.0,2026-02,4.469539237951046,3.0688618043831672,6.389009530571743
 core_loc,kLOC per insider contributor / month,sub_kloc,submitted kLOC / insider contributor,8.0,2026-03,4.948451554045552,3.6115503308830563,6.732003272535879
 core_loc,kLOC per insider contributor / month,sub_kloc,submitted kLOC / insider contributor,9.0,2026-04,5.724083743531489,4.21705986041159,7.50015698309316
 core_loc,kLOC per insider contributor / month,sub_kloc,submitted kLOC / insider contributor,10.0,2026-05,6.169360435174455,4.490274645935505,8.07548195296538
 core_loc,kLOC per insider contributor / month,sub_kloc,submitted kLOC / insider contributor,11.0,2026-06,5.532307168363974,4.015187293185781,7.636389054665243
+core_loc,kLOC per insider contributor / month,sub_kloc,submitted kLOC / insider contributor,12.0,2026-07,6.764775336733356,5.0937122486295365,8.87247663944827
+core_loc,kLOC per insider contributor / month,sub_kloc,submitted kLOC / insider contributor,13.0,2026-08,6.755082938388631,4.993517254106011,8.921599322341393
 core_loc,kLOC per insider contributor / month,kloc,merged kLOC / insider contributor (w8),0.0,2024-01,1.4118266378244744,0.9173017091269892,2.071715783031739
 core_loc,kLOC per insider contributor / month,kloc,merged kLOC / insider contributor (w8),1.0,2024-02,1.6082711817168338,0.957865813847844,2.3750145091890325
 core_loc,kLOC per insider contributor / month,kloc,merged kLOC / insider contributor (w8),2.0,2024-03,2.8190204055441486,1.1918712844417862,5.067433570466055
 core_loc,kLOC per insider contributor / month,kloc,merged kLOC / insider contributor (w8),3.0,2025-10,3.691000066907535,1.5022482577166827,7.98338751687914
 core_loc,kLOC per insider contributor / month,kloc,merged kLOC / insider contributor (w8),4.0,2025-11,3.5146330629072975,1.2224879756318427,7.8822279025282
 core_loc,kLOC per insider contributor / month,kloc,merged kLOC / insider contributor (w8),5.0,2025-12,1.626119825853984,1.2241285553659056,2.137949221954789
-core_loc,kLOC per insider contributor / month,kloc,merged kLOC / insider contributor (w8),6.0,2026-01,2.185068443051203,1.6623595176883739,2.8562479171980413
+core_loc,kLOC per insider contributor / month,kloc,merged kLOC / insider contributor (w8),6.0,2026-01,2.1850684430512035,1.6794229732461727,2.8626780908321545
 core_loc,kLOC per insider contributor / month,kloc,merged kLOC / insider contributor (w8),7.0,2026-02,2.669759588695431,1.7784986036053885,3.9544982812188842
 core_loc,kLOC per insider contributor / month,kloc,merged kLOC / insider contributor (w8),8.0,2026-03,3.293032653831635,2.160703043604412,4.758395141208478
 core_loc,kLOC per insider contributor / month,kloc,merged kLOC / insider contributor (w8),9.0,2026-04,3.7434365139467394,2.6911729099857,4.968728133896993
 core_loc,kLOC per insider contributor / month,kloc,merged kLOC / insider contributor (w8),10.0,2026-05,3.86075563280546,2.668723920029944,5.241950818207979
 core_loc,kLOC per insider contributor / month,kloc,merged kLOC / insider contributor (w8),11.0,2026-06,3.6861110302869995,2.569397976848972,5.042038149052855
+core_loc,kLOC per insider contributor / month,kloc,merged kLOC / insider contributor (w8),12.0,2026-07,4.573373675951357,3.179530903422103,6.314826055867365
+core_loc,kLOC per insider contributor / month,kloc,merged kLOC / insider contributor (w8),13.0,2026-08,4.086147051079516,2.769626009239313,5.882233944793685
