@@ -4,8 +4,8 @@
  "repos": 2135,
  "coverage": {
   "repo_periods": 8540,
-  "covered": 8256,
-  "waived": 284,
-  "documented_inaccessible_repos": 71
+  "covered": 8240,
+  "waived": 300,
+  "documented_inaccessible_repos": 75
  }
 }
