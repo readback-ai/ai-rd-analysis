@@ -335,7 +335,9 @@ def _author_months_and_cohorts(window: list[str] | None = None):
     frame_kw = {"periods": [*q_of, *extra], "granularity": "month",
                 **({"ranges": _extended_ranges()} if extra else {})}
     for f in study_frame("author", **frame_kw):
-        if f.insider:
+        # insider status is frozen with the quarters, like cohort and
+        # fleet membership: an extension month never admits a new insider
+        if f.insider and f.period in q_of:
             insiders.add(f.author)
         row = acc[f.author][f.period]
         row[3] += 1

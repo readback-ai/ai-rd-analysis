@@ -125,6 +125,29 @@ def test_extension_extends_series_never_cohorts(july_cells):
     assert {k: v for k, v in ext.items() if k[0] != "2026-07"} == base
 
 
+def test_extension_months_never_admit_new_insiders(registry, monkeypatch):
+    """adoption_cohorts June rows moved under --through 2026-08 with
+    June cells byte-identical: the insider set was built from every
+    fact, so an author whose only insider PR falls in an extension month
+    entered the cohort table and their frozen-month activity shifted
+    the frozen months' means. Insider status, like cohort and fleet
+    membership, is frozen with the quarters."""
+    registry.write_text("2026-07\n")
+    cells = {
+        ("o/r", "2026-04-01..2026-06-30"): [
+            _pr(1, "2026-06-10T00:00:00Z", author="late", assoc="NONE"),
+            _pr(2, "2026-06-12T00:00:00Z", author="core")],
+        ("o/r", "2026-07-01..2026-07-31"): [
+            _pr(3, "2026-07-10T00:00:00Z", author="late")],   # MEMBER now
+    }
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    base = productivity.adoption_monthly()
+    ext = productivity.adoption_monthly(window=WINDOW_MONTHS + ["2026-07"])
+    assert base[("2026-06", "never")]["n"] == 1        # only 'core'
+    assert ext[("2026-06", "never")] == base[("2026-06", "never")]
+
+
 def test_usage_rows_monthly_applies_the_per_month_floor(july_cells,
                                                         monkeypatch):
     """Monthly fig2 rows use the 2-PR/month floor (the 5-PR/quarter
