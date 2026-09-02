@@ -1007,6 +1007,7 @@ def print_exposure(granularity: str = "quarter",
     excluded = len({r["repo"] for r in rows}) - len(users)
     rows = [r for r in rows if r["repo"] in users]
     unit = "month" if granularity == "month" else "quarter"
+    monthly = granularity == "month"
     print("BUG-REPORT PROXY, PER-PR RISK WINDOW (bug-labeled GH issues — "
           "NOT production incidents). Every merged PR opens a "
           f"{RISK_DAYS}-day window at its MERGE day; a {unit}'s rate is the "
@@ -1014,15 +1015,16 @@ def print_exposure(granularity: str = "quarter",
           f"days, so no issue is double counted and no window is a "
           f"function of the calendar {unit}. Both denominators are "
           "reported: PR-risk-windows and kLOC-risk-windows (capped "
-          f"{CAP:,}/PR). The first {RISK_DAYS} days of each {unit} are "
-          "burn-in (their lookback reaches outside the censused window). "
-          "Rates are INCIDENCE over overlapping risk sets, not attribution "
-          "of an issue to a PR.")
+          f"{CAP:,}/PR). Exposure looks back across contiguous {unit}s; "
+          f"the first {RISK_DAYS - 1} days of each censused block are "
+          "burn-in (their lookback reaches merges the census did not "
+          "collect). Rates are INCIDENCE over overlapping risk sets, not "
+          "attribution of an issue to a PR.")
     print(f"frozen dated cells: {mani['held']}/{mani['selected']} "
           f"(as_of {mani['as_of']}); {excluded} repos with zero "
           "bug-labeled issues in every period EXCLUDED as probable "
           "non-users of the label"
-          + (f"; {mani['held'] - mani['selected']:+d} cells UNPULLED "
+          + (f"; {mani['selected'] - mani['held']} cells UNPULLED "
              "(their repo-periods are not rated)"
              if mani["held"] < mani["selected"] else "")
           + (f"; {mani['stale_windows']} cells pulled under a DIFFERENT "
@@ -1030,21 +1032,43 @@ def print_exposure(granularity: str = "quarter",
              if mani.get("stale_windows") else ""))
     if live_fp is not None:
         print(_drift_line(mani, live_fp))
-    print(f"{'period':9}{'repos':>6}{'bugs':>7}{'PRwin':>10}{'kLOCwin':>10}"
-          f"{'pooled/PR':>11}{'med/PR':>9}{'pooled/kLOC':>13}"
-          f"{'med/kLOC':>10}")
+
+    # cuts: every label-using repo; the balanced panel (rated in every
+    # period, so a trend cannot be composition); and the counted table's
+    # low/high-AI repo halves
+    repos = {r["repo"] for r in rows}
+    balanced = {r for r in repos
+                if all(any(x["repo"] == r and x["per"] == p for x in rows)
+                       for p in periods)}
+    v1_rows, _v1m = _verify(*((BUGS_MONTHLY, BUGS_MONTHLY_MANIFEST)
+                              if monthly else (BUGS, BUGS_MANIFEST)))
+    _b, _m, ai_share = bug_stats(v1_rows)
+    lo, hi, _unranked = rank_groups(repos, ai_share)
+    groups = (("all", repos), ("balanced", balanced), ("low-AI", lo),
+              ("high-AI", hi))
+    print(f"{'period':9}{'group':10}{'repos':>6}{'bugs':>7}{'PRwin':>10}"
+          f"{'kLOCwin':>10}{'pooled/PR':>11}{'med/PR':>9}"
+          f"{'pooled/kLOC':>13}{'med/kLOC':>10}")
     for per in periods:
-        rs = [r for r in rows if r["per"] == per]
-        if not rs:
-            continue
-        b = sum(r["bugs"] for r in rs)
-        pw = sum(r["pr_windows"] for r in rs)
-        kw = sum(r["kloc_windows"] for r in rs)
-        per_kloc = [r["per_kloc"] for r in rs if r["per_kloc"] is not None]
-        print(f"{per:9}{len(rs):>6}{b:>7}{pw:>10.0f}{kw:>10.0f}"
-              f"{b / pw:>11.3f}{median([r['per_pr'] for r in rs]):>9.3f}"
-              + (f"{b / kw:>13.3f}{median(per_kloc):>10.3f}" if kw > 0
-                 else f"{'n/a':>13}{'n/a':>10}"))
+        for label, grp in groups:
+            rs = [r for r in rows if r["per"] == per and r["repo"] in grp]
+            if not rs:
+                continue
+            b = sum(r["bugs"] for r in rs)
+            pw = sum(r["pr_windows"] for r in rs)
+            kw = sum(r["kloc_windows"] for r in rs)
+            per_kloc = [r["per_kloc"] for r in rs
+                        if r["per_kloc"] is not None]
+            print(f"{per:9}{label:10}{len(rs):>6}{b:>7}{pw:>10.0f}"
+                  f"{kw:>10.0f}{b / pw:>11.3f}"
+                  f"{median([r['per_pr'] for r in rs]):>9.3f}"
+                  + (f"{b / kw:>13.3f}{median(per_kloc):>10.3f}" if kw > 0
+                     else f"{'n/a':>13}{'n/a':>10}"))
+    print(f"balanced = rated in every {unit}; low/high-AI = halves of the "
+          "label-using repos by the counted table's grouping-window "
+          "AI-involvement share; pooled rates can be dominated by single "
+          "large repos — the pilot is a PR-level draw, so repos enter "
+          "probability-proportional-to-size")
 
 
 def group_periods(periods: list[str]) -> list[str]:

@@ -219,6 +219,57 @@ def test_empty_cell_fetches_no_page(monkeypatch):
     assert churn.search_issue_days("o/r", "2024-01-01..2024-01-31") == []
 
 
+def test_print_exposure_counts_unpulled_cells_positively(monkeypatch,
+                                                        capsys):
+    """The unpulled-cell count printed as a negative number (held minus
+    selected); it is selected minus held."""
+    monkeypatch.setattr(churn, "exposure_rows", lambda g="quarter": (
+        [{"repo": "o/r", "per": "Q1-2024", "bugs": 1, "pr_windows": 1.0,
+          "kloc_windows": 1.0, "per_pr": 1.0, "per_kloc": 1.0}],
+        (["Q1-2024"], {"held": 764, "selected": 768,
+                       "as_of": churn.AS_OF})))
+    churn.print_exposure("quarter")
+    out = capsys.readouterr().out
+    assert "4 cells UNPULLED" in out and "-4" not in out
+
+
+def test_print_exposure_header_states_the_block_burn_in(monkeypatch,
+                                                        capsys):
+    """Lookback crosses contiguous periods, so burn-in is RISK_DAYS-1
+    days at the start of a censused block — not the first RISK_DAYS of
+    every period, which the header still claimed."""
+    monkeypatch.setattr(churn, "exposure_rows", lambda g="quarter": (
+        [], (["Q1-2024"], {"held": 1, "selected": 1, "as_of": churn.AS_OF})))
+    churn.print_exposure("quarter")
+    out = capsys.readouterr().out
+    assert f"first {RISK_DAYS} days of each quarter" not in out
+    assert "censused block" in out
+
+
+def test_print_exposure_cuts_balanced_and_ai_halves(monkeypatch, capsys):
+    """The table carries the appendix cuts: the balanced panel (repos
+    rated in every period) and the low/high-AI halves, beside all."""
+    rows = [{"repo": r, "per": p, "bugs": 1, "pr_windows": 1.0,
+             "kloc_windows": 1.0, "per_pr": 1.0, "per_kloc": 1.0}
+            for r, ps in (("o/a", ["Q1-2024", "Q4-2025"]),
+                          ("o/b", ["Q4-2025"]))
+            for p in ps]
+    monkeypatch.setattr(churn, "exposure_rows", lambda g="quarter": (
+        rows, (["Q1-2024", "Q4-2025"],
+               {"held": 1, "selected": 1, "as_of": churn.AS_OF})))
+    monkeypatch.setattr(churn, "_verify", lambda *_a: (
+        [{"repo": "o/a", "per": "Q2-2026", "bugs": 1, "merged": 1,
+          "q2": [1, 10]},
+         {"repo": "o/b", "per": "Q2-2026", "bugs": 1, "merged": 1,
+          "q2": [9, 10]}], {}))
+    churn.print_exposure("quarter")
+    out = capsys.readouterr().out
+    q4 = [ln for ln in out.splitlines() if ln.startswith("Q4-2025")]
+    assert [ln.split()[1] for ln in q4] == ["all", "balanced", "low-AI",
+                                           "high-AI"]
+    assert q4[0].split()[2] == "2" and q4[1].split()[2] == "1"
+
+
 def test_print_exposure_reports_frame_drift(monkeypatch, capsys):
     """Review finding 4: the numerator is frozen while the denominator is
     read live, so the table must say when the live frame no longer
