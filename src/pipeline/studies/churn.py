@@ -728,8 +728,8 @@ def search_issue_days(repo: str, rng: str, pace: float = 2.0,
     over-full range is bisected until each part fits. None = a query gave
     up; the caller must not record that as an empty cell."""
     q = f"repo:{repo} is:issue label:{BUG_LABEL} created:{rng}"
-    total = rest_count(q, endpoint="search/issues")
-    if total is None:
+    total = _search_count(q)
+    if total is None:          # no count, or a count search that timed out
         return None
     if total > SEARCH_CAP:
         parts = _split_range(rng)
@@ -760,25 +760,52 @@ def search_issue_days(repo: str, rng: str, pace: float = 2.0,
     return rows if len(rows) == total else None
 
 
+def _search_json(args: list[str], retries: int, backoff: float):
+    """A search response's jq-shaped JSON, retried like rest_count. A
+    search that timed out server-side answers SUCCESSFULLY with partial
+    matches and incomplete_results true — that is a failure here, since
+    a frozen cell must be the whole count, so it is retried and finally
+    refused."""
+    for _ in range(retries):
+        out = _gh(args)
+        if out is not None and out.strip():
+            try:
+                data = json.loads(out.strip())
+            except json.JSONDecodeError:
+                data = None
+            if data is not None and not data.get("inc"):
+                return data
+        time.sleep(backoff)
+    return None
+
+
+def _search_count(query: str, retries: int = 4, backoff: float = 25.0,
+                  ) -> int | None:
+    """A search's total_count, or None — including when the count search
+    itself timed out, since a partial count would let a truncated page
+    set look complete."""
+    data = _search_json(
+        ["api", "-X", "GET", "search/issues", "-f", f"q={query}", "-f",
+         "per_page=1", "--jq",
+         '{inc: .incomplete_results, n: .total_count} | tojson'],
+        retries, backoff)
+    return None if data is None else int(data["n"])
+
+
 def _gh_search_page(query: str, page: int, retries: int = 4,
                     backoff: float = 25.0) -> list[list] | None:
     """One page of issue (number, creation day) pairs, in creation order
     so paging is stable across requests (best-match order can reshuffle
     between pages and skip an issue). Retries like rest_count: one
     transient failure must not discard a multi-page cell."""
-    args = ["api", "-X", "GET", "search/issues", "-f", f"q={query}",
-            "-f", "sort=created", "-f", "order=asc", "-f", "per_page=100",
-            "-f", f"page={page}", "--jq",
-            '[.items[] | [.number, (.created_at[0:10])]] | tojson']
-    for _ in range(retries):
-        out = _gh(args)
-        if out is not None and out.strip():
-            try:
-                return json.loads(out.strip())
-            except json.JSONDecodeError:
-                pass
-        time.sleep(backoff)
-    return None
+    data = _search_json(
+        ["api", "-X", "GET", "search/issues", "-f", f"q={query}", "-f",
+         "sort=created", "-f", "order=asc", "-f", "per_page=100", "-f",
+         f"page={page}", "--jq",
+         '{inc: .incomplete_results, items: [.items[] | [.number, '
+         '(.created_at[0:10])]]} | tojson'],
+        retries, backoff)
+    return None if data is None else data["items"]
 
 
 def migrate_bug_rows(rows: list[dict]) -> list[dict]:
@@ -840,9 +867,13 @@ def pull_bug_dates(trimmed: dict[str, list], created: dict[str, list],
                                   ("repo", "per", "rng"), "days")
     print(f"pulling {len(todo)} of {len(cells)} dated bug cells "
           f"({len(kept)} reused, {stale} stale dropped)", flush=True)
+    gp = tuple(group_periods(periods or list(PERIODS)))
     fp = bugs_fingerprint(trimmed, created, sample_digest)
 
     def flush() -> None:
+        # grouping inputs travel with the dated cells, so the low/high-AI
+        # halves are read from the same freeze as the rates
+        _stamp_denominators(kept, created, gp)
         _freeze(data, mani,
                 sorted(kept.values(), key=lambda d: (d["repo"], d["per"])),
                 fp, len(cells))
@@ -950,6 +981,10 @@ def exposure_rows(granularity: str = "quarter") -> tuple[list[dict], list]:
     held = {(d["repo"], d["per"]) for d in rows}
     stale_windows = sum(1 for d in rows
                         if d.get("rng") != bug_date_window(d["per"]))
+    # label use and grouping inputs are properties of the frozen cells,
+    # decided before any day is burnt in or any period dropped
+    users = label_users(rows)
+    ai_share = {d["repo"]: tuple(d["q2"]) for d in rows if d.get("q2")}
     exposure, periods = merged_exposure(granularity)
     censused: set[str] = set()
     for per in periods:
@@ -984,17 +1019,18 @@ def exposure_rows(granularity: str = "quarter") -> tuple[list[dict], list]:
                         "per_pr": bugs / (pr_exp / RISK_DAYS),
                         "per_kloc": (bugs / (kloc_exp / RISK_DAYS)
                                      if kloc_exp > 0 else None)})
-    return out, (periods, {**mani, "stale_windows": stale_windows})
+    return out, (periods, {**mani, "stale_windows": stale_windows,
+                           "label_users": users, "ai_share": ai_share})
 
 
-def label_users(rows: list[dict]) -> set[str]:
-    """Repos that use the bug label at all — a repo with zero labeled
-    issues in every period is a probable non-user of the taxonomy, not a
-    repo without defects (the counted table's exclusion)."""
-    total: dict = defaultdict(int)
-    for r in rows:
-        total[r["repo"]] += r["bugs"]
-    return {repo for repo, n in total.items() if n}
+def label_users(cells: list[dict]) -> set[str]:
+    """Repos that use the bug label at all, judged on their frozen dated
+    cells: a repo with no labeled issue in any window is a probable
+    non-user of the taxonomy, not a repo without defects (the counted
+    table's exclusion). An issue counts wherever it falls — in burn-in,
+    in a period with no exposure — because label use is a property of
+    the repo, not of the days the rate happens to cover."""
+    return {d["repo"] for d in cells if d.get("days")}
 
 
 def print_exposure(granularity: str = "quarter",
@@ -1003,11 +1039,11 @@ def print_exposure(granularity: str = "quarter",
     from; the numerator is frozen, so the table says when the two have
     parted (the counted table's drift line)."""
     rows, (periods, mani) = exposure_rows(granularity)
-    users = label_users(rows)
-    excluded = len({r["repo"] for r in rows}) - len(users)
+    users = mani["label_users"]
+    rated = {r["repo"] for r in rows}
+    excluded = len(rated - users)
     rows = [r for r in rows if r["repo"] in users]
     unit = "month" if granularity == "month" else "quarter"
-    monthly = granularity == "month"
     print("BUG-REPORT PROXY, PER-PR RISK WINDOW (bug-labeled GH issues — "
           "NOT production incidents). Every merged PR opens a "
           f"{RISK_DAYS}-day window at its MERGE day; a {unit}'s rate is the "
@@ -1040,10 +1076,7 @@ def print_exposure(granularity: str = "quarter",
     balanced = {r for r in repos
                 if all(any(x["repo"] == r and x["per"] == p for x in rows)
                        for p in periods)}
-    v1_rows, _v1m = _verify(*((BUGS_MONTHLY, BUGS_MONTHLY_MANIFEST)
-                              if monthly else (BUGS, BUGS_MANIFEST)))
-    _b, _m, ai_share = bug_stats(v1_rows)
-    lo, hi, _unranked = rank_groups(repos, ai_share)
+    lo, hi, _unranked = rank_groups(repos, mani["ai_share"])
     groups = (("all", repos), ("balanced", balanced), ("low-AI", lo),
               ("high-AI", hi))
     print(f"{'period':9}{'group':10}{'repos':>6}{'bugs':>7}{'PRwin':>10}"

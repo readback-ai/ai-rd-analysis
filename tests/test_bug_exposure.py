@@ -109,12 +109,32 @@ def test_repos_outside_the_bug_pull_are_not_rated(monkeypatch):
     assert [r["repo"] for r in rows] == ["o/pilot"]
 
 
-def test_label_users_drops_repos_with_no_labeled_issues_ever():
-    """A repo with zero bug-labeled issues in every period is read as not
-    using the label, not as defect-free."""
-    rows = [{"repo": "o/uses", "bugs": 0}, {"repo": "o/uses", "bugs": 3},
-            {"repo": "o/never", "bugs": 0}, {"repo": "o/never", "bugs": 0}]
-    assert churn.label_users(rows) == {"o/uses"}
+def test_label_users_come_from_the_frozen_cells():
+    """Second review, finding 2: label use is a property of the repo's
+    frozen issues, not of the rated days — a repo whose only labeled
+    issue fell in burn-in still uses the label, and its zero-bug rated
+    rows are real observations."""
+    cells = [{"repo": "o/burn", "per": "Q1-2024", "rng": "r",
+              "days": [[1, "2024-01-05"]]},
+             {"repo": "o/never", "per": "Q1-2024", "rng": "r", "days": []}]
+    assert churn.label_users(cells) == {"o/burn"}
+
+
+def test_burn_in_issue_keeps_the_repo_in_the_table(monkeypatch, capsys):
+    """Second review, finding 2, end to end: a repo with a labeled issue
+    in burn-in and exposure on rated days is rated (bugs 0), not dropped
+    as a label non-user."""
+    monkeypatch.setattr(churn, "_verify", lambda *_a: (
+        [{"repo": "o/burn", "per": "Q1-2024", "rng": "r",
+          "days": [[1, "2024-01-05"]]}],
+        {"held": 1, "selected": 1, "as_of": churn.AS_OF}))
+    monkeypatch.setattr(churn, "merged_exposure", lambda g="quarter": (
+        {("o/burn", "Q1-2024"): [("2024-02-01", 1.0)]}, ["Q1-2024"]))
+    churn.print_exposure("quarter")
+    out = capsys.readouterr().out
+    assert "0 repos with zero bug-labeled issues" in out
+    assert any(ln.startswith("Q1-2024") and ln.split()[1] == "all"
+               and ln.split()[2] == "1" for ln in out.splitlines())
 
 
 def test_unfrozen_cell_is_not_rated_as_zero_bugs(monkeypatch):
@@ -176,7 +196,7 @@ def test_short_page_does_not_freeze_a_truncated_cell(monkeypatch):
     """Review finding 3: a page that comes back short of the reported
     total (search timeout, incomplete_results) must not be frozen as the
     cell's issues — reconcile would reuse the understated count forever."""
-    monkeypatch.setattr(churn, "rest_count", lambda *_a, **_k: 150)
+    monkeypatch.setattr(churn, "_search_count", lambda *_a: 150)
     pages = iter([[[i, "2024-01-01"] for i in range(100)],
                   [[i, "2024-01-02"] for i in range(30)]])
     monkeypatch.setattr(churn, "_gh_search_page",
@@ -193,7 +213,7 @@ def test_search_pages_in_a_stable_order(monkeypatch):
 
     def fake_gh(args, **_k):
         seen.append(args)
-        return "[]"
+        return '{"inc": false, "items": []}'
     monkeypatch.setattr(churn, "_gh", fake_gh)
     churn._gh_search_page("q", 1)
     assert any(a.startswith("sort=created") for a in seen[0])
@@ -203,15 +223,44 @@ def test_search_page_retries_a_transient_failure(monkeypatch):
     """Review finding 6: one failed request on one page threw away every
     page already fetched and marked the whole cell MISSING; rest_count
     retries with backoff, so must the page fetch."""
-    calls = iter([None, "[[1, \"2024-01-01\"]]"])
+    calls = iter([None, '{"inc": false, "items": [[1, "2024-01-01"]]}'])
     monkeypatch.setattr(churn, "_gh", lambda *_a, **_k: next(calls))
     monkeypatch.setattr(churn.time, "sleep", lambda _s: None)
     assert churn._gh_search_page("q", 1) == [[1, "2024-01-01"]]
 
 
+def test_incomplete_page_is_refused(monkeypatch):
+    """Second review, finding 1: a search that times out returns a
+    SUCCESSFUL response with partial matches and incomplete_results
+    true; treating it as a page freezes an understated cell."""
+    monkeypatch.setattr(churn, "_gh", lambda *_a, **_k:
+                        '{"inc": true, "items": [[1, "2024-01-01"]]}')
+    monkeypatch.setattr(churn.time, "sleep", lambda _s: None)
+    assert churn._gh_search_page("q", 1) is None
+
+
+def test_incomplete_count_is_not_trusted(monkeypatch):
+    """Second review, finding 1: if the count query itself was
+    incomplete, `len(rows) == total` is false assurance — the count is
+    refused and the cell stays missing."""
+    monkeypatch.setattr(churn, "_gh", lambda *_a, **_k:
+                        '{"inc": true, "n": 1}')
+    monkeypatch.setattr(churn, "_gh_search_page",
+                        lambda _q, _p: [[1, "2024-01-01"]])
+    monkeypatch.setattr(churn.time, "sleep", lambda _s: None)
+    assert churn._search_count("q") is None
+    assert churn.search_issue_days("o/r", "2024-01-01..2024-01-31") is None
+
+
+def test_complete_count_is_read(monkeypatch):
+    monkeypatch.setattr(churn, "_gh", lambda *_a, **_k:
+                        '{"inc": false, "n": 7}')
+    assert churn._search_count("q") == 7
+
+
 def test_empty_cell_fetches_no_page(monkeypatch):
     """Review finding 6: a zero-count cell needs no page request."""
-    monkeypatch.setattr(churn, "rest_count", lambda *_a, **_k: 0)
+    monkeypatch.setattr(churn, "_search_count", lambda *_a: 0)
 
     def no_page(*_a):
         raise AssertionError("page fetched for an empty cell")
@@ -219,15 +268,21 @@ def test_empty_cell_fetches_no_page(monkeypatch):
     assert churn.search_issue_days("o/r", "2024-01-01..2024-01-31") == []
 
 
+_ONE = [{"repo": "o/r", "per": "Q1-2024", "bugs": 1, "pr_windows": 1.0,
+         "kloc_windows": 1.0, "per_pr": 1.0, "per_kloc": 1.0}]
+
+
+def _meta(**extra):
+    return {"held": 1, "selected": 1, "as_of": churn.AS_OF,
+            "label_users": {"o/r"}, "ai_share": {}, **extra}
+
+
 def test_print_exposure_counts_unpulled_cells_positively(monkeypatch,
                                                         capsys):
     """The unpulled-cell count printed as a negative number (held minus
     selected); it is selected minus held."""
     monkeypatch.setattr(churn, "exposure_rows", lambda g="quarter": (
-        [{"repo": "o/r", "per": "Q1-2024", "bugs": 1, "pr_windows": 1.0,
-          "kloc_windows": 1.0, "per_pr": 1.0, "per_kloc": 1.0}],
-        (["Q1-2024"], {"held": 764, "selected": 768,
-                       "as_of": churn.AS_OF})))
+        _ONE, (["Q1-2024"], _meta(held=764, selected=768))))
     churn.print_exposure("quarter")
     out = capsys.readouterr().out
     assert "4 cells UNPULLED" in out and "-4" not in out
@@ -239,7 +294,7 @@ def test_print_exposure_header_states_the_block_burn_in(monkeypatch,
     days at the start of a censused block — not the first RISK_DAYS of
     every period, which the header still claimed."""
     monkeypatch.setattr(churn, "exposure_rows", lambda g="quarter": (
-        [], (["Q1-2024"], {"held": 1, "selected": 1, "as_of": churn.AS_OF})))
+        [], (["Q1-2024"], _meta(label_users=set()))))
     churn.print_exposure("quarter")
     out = capsys.readouterr().out
     assert f"first {RISK_DAYS} days of each quarter" not in out
@@ -248,7 +303,10 @@ def test_print_exposure_header_states_the_block_burn_in(monkeypatch,
 
 def test_print_exposure_cuts_balanced_and_ai_halves(monkeypatch, capsys):
     """The table carries the appendix cuts: the balanced panel (repos
-    rated in every period) and the low/high-AI halves, beside all."""
+    rated in every period) and the low/high-AI halves, beside all. The
+    halves come from grouping inputs frozen WITH the dated cells (second
+    review, finding 3): the counted artifact is never read, so the two
+    freezes cannot silently disagree."""
     rows = [{"repo": r, "per": p, "bugs": 1, "pr_windows": 1.0,
              "kloc_windows": 1.0, "per_pr": 1.0, "per_kloc": 1.0}
             for r, ps in (("o/a", ["Q1-2024", "Q4-2025"]),
@@ -256,12 +314,12 @@ def test_print_exposure_cuts_balanced_and_ai_halves(monkeypatch, capsys):
             for p in ps]
     monkeypatch.setattr(churn, "exposure_rows", lambda g="quarter": (
         rows, (["Q1-2024", "Q4-2025"],
-               {"held": 1, "selected": 1, "as_of": churn.AS_OF})))
-    monkeypatch.setattr(churn, "_verify", lambda *_a: (
-        [{"repo": "o/a", "per": "Q2-2026", "bugs": 1, "merged": 1,
-          "q2": [1, 10]},
-         {"repo": "o/b", "per": "Q2-2026", "bugs": 1, "merged": 1,
-          "q2": [9, 10]}], {}))
+               _meta(label_users={"o/a", "o/b"},
+                     ai_share={"o/a": (1, 10), "o/b": (9, 10)}))))
+
+    def no_v1(*_a):
+        raise AssertionError("counted artifact read for grouping")
+    monkeypatch.setattr(churn, "_verify", no_v1)
     churn.print_exposure("quarter")
     out = capsys.readouterr().out
     q4 = [ln for ln in out.splitlines() if ln.startswith("Q4-2025")]
@@ -275,12 +333,29 @@ def test_print_exposure_reports_frame_drift(monkeypatch, capsys):
     read live, so the table must say when the live frame no longer
     matches the frozen selection, as the counted table does."""
     monkeypatch.setattr(churn, "exposure_rows", lambda g="quarter": (
-        [{"repo": "o/r", "per": "Q1-2024", "bugs": 1, "pr_windows": 1.0,
-          "kloc_windows": 1.0, "per_pr": 1.0, "per_kloc": 1.0}],
-        (["Q1-2024"], {"held": 1, "selected": 1, "as_of": churn.AS_OF,
-                       "frame": "frozen-fp"})))
+        _ONE, (["Q1-2024"], _meta(frame="frozen-fp"))))
     churn.print_exposure("quarter", live_fp="moved-fp")
     assert "MOVED" in capsys.readouterr().out
+
+
+def test_dated_freeze_stamps_grouping_inputs(monkeypatch):
+    """Second review, finding 3: the dated freeze carries each repo's
+    grouping-window AI share (`q2`) the way the counted freeze does, so
+    the low/high-AI halves are read from the same artifact as the rates."""
+    frozen = {}
+    monkeypatch.setattr(churn, "bug_date_cells", lambda *_a, **_k: [
+        {"repo": "o/r", "per": "Q2-2026", "rng": "r"}])
+    monkeypatch.setattr(churn, "_load_jsonl", lambda _p: [])
+    monkeypatch.setattr(churn, "bugs_fingerprint", lambda *_a: "fp")
+    monkeypatch.setattr(churn, "_freeze",
+                        lambda _p, _m, recs, *_a: frozen.update(
+                            {r["repo"]: r for r in recs}))
+    monkeypatch.setattr(churn, "search_issue_days", lambda *_a: [])
+    monkeypatch.setattr(churn.time, "sleep", lambda _s: None)
+    created = {"Q2-2026": [("o/r", 1, True, 10, 0),
+                           ("o/r", 2, False, 10, 0)]}
+    churn.pull_bug_dates({}, created, None)
+    assert frozen["o/r"]["q2"] == [1, 2]
 
 
 def test_pull_bug_dates_reports_the_shortfall(monkeypatch, capsys):
