@@ -293,8 +293,10 @@ prefixes of the population files, repo count, and cell-coverage numbers
   denominators, one numerator; incidence over overlapping risk sets, not
   attribution). Exposure looks back across contiguous quarters; the first
   27 days of each censused block are burn-in. Frozen at as_of with the
-  frame fingerprint; the table reports the frozen numerator and flags a
-  moved live frame.
+  frame fingerprint and each repo's grouping-window AI share; the table
+  reports the frozen numerator and flags a moved live frame. Every cell
+  carries the version of the collector that fetched it and is reused
+  only under that version, so a fix to the fetch re-pulls the artifact.
 
 ## 6b. Complete census vs. sampled studies
 

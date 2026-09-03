@@ -117,6 +117,12 @@ BUG_DATES_MONTHLY_MANIFEST = \
     Path("data/derived/churn_bug_dates_monthly_manifest_v2.json")
 RISK_DAYS = 28               # per-PR risk window: bugs arrive fast
 SEARCH_CAP = 1000            # GitHub search cannot page past this
+# The dated collector's version, stamped on every cell it writes. A cell
+# is reused only under the collector that produced it: a fix to how
+# issues are fetched (completeness, ordering, retries) must reach every
+# frozen cell, and reuse by key alone would keep the old payloads
+# forever. Bump when the fetch changes in a way that can alter a cell.
+COLLECTOR = 2
 
 # Generated-content path patterns (the METHODS 5b hygiene classes:
 # lockfiles, vendored trees, minified/compiled outputs, protobuf,
@@ -863,10 +869,14 @@ def pull_bug_dates(trimmed: dict[str, list], created: dict[str, list],
     else:
         data, mani = BUG_DATES, BUG_DATES_MANIFEST
         cells = bug_date_cells(trimmed, periods)
-    kept, todo, stale = reconcile(cells, _load_jsonl(data),
+    existing = _load_jsonl(data)
+    current = [d for d in existing if d.get("collector") == COLLECTOR]
+    kept, todo, stale = reconcile(cells, current,
                                   ("repo", "per", "rng"), "days")
     print(f"pulling {len(todo)} of {len(cells)} dated bug cells "
-          f"({len(kept)} reused, {stale} stale dropped)", flush=True)
+          f"({len(kept)} reused, {stale} stale dropped, "
+          f"{len(existing) - len(current)} from an older collector "
+          "re-pulled)", flush=True)
     gp = tuple(group_periods(periods or list(PERIODS)))
     fp = bugs_fingerprint(trimmed, created, sample_digest)
 
@@ -884,7 +894,8 @@ def pull_bug_dates(trimmed: dict[str, list], created: dict[str, list],
         if days is None:
             print(f"  MISSING {s['repo']} {s['per']}", flush=True)
             continue
-        kept[(s["repo"], s["per"], s["rng"])] = {**s, "days": days}
+        kept[(s["repo"], s["per"], s["rng"])] = {**s, "days": days,
+                                                 "collector": COLLECTOR}
         if (i + 1) % 25 == 0:
             flush()
             print(f"  {i + 1}/{len(todo)}", flush=True)

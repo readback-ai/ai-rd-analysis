@@ -358,6 +358,45 @@ def test_dated_freeze_stamps_grouping_inputs(monkeypatch):
     assert frozen["o/r"]["q2"] == [1, 2]
 
 
+def _pull_fixture(monkeypatch, existing, frozen, pulled):
+    monkeypatch.setattr(churn, "bug_date_cells", lambda *_a, **_k: [
+        {"repo": "o/r", "per": "Q1-2024", "rng": "r"}])
+    monkeypatch.setattr(churn, "_load_jsonl", lambda _p: existing)
+    monkeypatch.setattr(churn, "bugs_fingerprint", lambda *_a: "fp")
+    monkeypatch.setattr(churn, "_freeze",
+                        lambda _p, _m, recs, *_a: frozen.update(
+                            {r["repo"]: r for r in recs}))
+    monkeypatch.setattr(churn, "search_issue_days",
+                        lambda *_a: pulled.append(1) or [[1, "2024-02-10"]])
+    monkeypatch.setattr(churn.time, "sleep", lambda _s: None)
+
+
+def test_cells_from_an_older_collector_are_repulled(monkeypatch):
+    """Third review: reuse by (repo, per, rng) alone kept cells collected
+    before the completeness and ordering fixes, so a corrected collector
+    never reached the frozen artifact. A cell carries the collector that
+    produced it and is stale under any other."""
+    frozen, pulled = {}, []
+    _pull_fixture(monkeypatch, [{"repo": "o/r", "per": "Q1-2024",
+                                 "rng": "r", "days": [[9, "2024-01-01"]]}],
+                  frozen, pulled)
+    churn.pull_bug_dates({}, {}, None)
+    assert pulled, "cell from an unstamped collector was reused"
+    assert frozen["o/r"]["days"] == [[1, "2024-02-10"]]
+    assert frozen["o/r"]["collector"] == churn.COLLECTOR
+
+
+def test_cells_from_the_current_collector_are_reused(monkeypatch):
+    frozen, pulled = {}, []
+    _pull_fixture(monkeypatch, [{"repo": "o/r", "per": "Q1-2024",
+                                 "rng": "r", "days": [[9, "2024-01-01"]],
+                                 "collector": churn.COLLECTOR}],
+                  frozen, pulled)
+    churn.pull_bug_dates({}, {}, None)
+    assert not pulled
+    assert frozen["o/r"]["days"] == [[9, "2024-01-01"]]
+
+
 def test_pull_bug_dates_reports_the_shortfall(monkeypatch, capsys):
     """Review finding 10: a partial pull must end by saying how many
     cells are still unpulled, as the counted pull does — the read side
