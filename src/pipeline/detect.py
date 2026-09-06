@@ -43,7 +43,7 @@ CUTOFF = "2026-06-30T23:59:59Z"
 # must clear the last creation date of the month being finalized, and it
 # records a collection that HAPPENED: never set it ahead of the re-pull it
 # stands for, or every reader treats stale cells as final (METHODS §1c).
-AS_OF = "2026-08-27T17:40:17Z"
+AS_OF = "2026-09-01T21:03:34Z"
 
 # FROZEN CENSORING RULE (METHODS conventions): all per-PR outcomes are
 # measured at 8 WEEKS after PR creation. The maturity curves show merges
