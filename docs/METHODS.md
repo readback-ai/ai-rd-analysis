@@ -20,7 +20,8 @@ date of the frozen quarterly frame.
   outcomes follow the w8 rule (§1d.1), collection lag is not a bias: PRs
   whose 8-week window was still open at the as-of are simply skipped by
   the fate metrics — less data on the trailing period, not skewed data.
-  Q2-2026 fates finalized with the 2026-08-26 re-pull (§1c).
+  Q2-2026 fates finalized with the 2026-08-27 re-pull (stamp
+  2026-08-27T17:40:17Z; §1c).
 - **Classification metadata** (repo topics, descriptions, star counts,
   org descriptions) has no historical API — it was observed 2026-07-07..09,
   as close to the cutoff as possible, and applied uniformly to all orgs. Drift
@@ -142,9 +143,10 @@ AI-topic repos. Appendix cuts (org-type public/private/community via
    never assume the constant's current value — tests that turn on
    maturity pin their own `AS_OF` (it advances at every re-pull).
    Concretely for Q2-2026: the update adding 2026-07 (run ~Aug 1)
-   re-collects and finalizes May (windows closed Jul 26); June finalizes
-   on 2026-08-26 (windows closed Aug 25) — the monthly cadence IS the
-   Q2 finalization, executed in two steps.
+   re-collects and finalizes May (windows closed Jul 26); June finalized
+   with the 2026-08-27 re-pull (windows closed Aug 25; stamp
+   2026-08-27T17:40:17Z) — the monthly cadence IS the Q2 finalization,
+   executed in two steps.
 3. Collects the new month (precount + census; months are first-class period
    tokens via `scan_orgs.resolve_period`). `--revise-only` SKIPS this step
    and runs the revision window alone, for a finalization that lands
@@ -159,9 +161,9 @@ AI-topic repos. Appendix cuts (org-type public/private/community via
    could only lose PRs deleted since and re-spends a month of census.
    The month stays in the collection list (cached cells are free; a
    partial revise-only census completes through the checkpoint). June's
-   finalization takes this path: `monthly_update.py 2026-08 --revise-only`
-   on 2026-08-26; August itself lands with a later update that keeps
-   June's cells frozen.
+   finalization took this path: `monthly_update.py 2026-08 --revise-only`,
+   run 2026-08-27 (stamp 2026-08-27T17:40:17Z); August itself landed with
+   the 2026-09-01 update, which kept June's cells frozen.
 4. Prints the monthly trend tables (`analyze --granularity month`,
    2-PR/month floor ≈ the 5-PR/quarter threshold per unit time).
 5. REGENERATE the published artifacts. New cells plus a new stamp change
@@ -225,7 +227,7 @@ trusted, so brownout-poisoned empty caches self-heal on the next run.
    close at w8, with w26 as appendix sensitivity (`studies.fates`).
    Immature PRs are skipped by the fate metrics (their `PRClass` flags
    are ordinary booleans; `w8_mature` gates reporting) — trailing periods
-   are PROVISIONAL and labeled; Q2-2026 finalized with the 2026-08-26
+   are PROVISIONAL and labeled; Q2-2026 finalized with the 2026-08-27
    re-pull (8 weeks past quarter end; runbook §1c), and under the
    current stamp only the incremental months are provisional. Corollary: mature
    PRs are immutable under as-of advances.
@@ -382,7 +384,7 @@ classified by its author into exactly one of three reviewer types:
    CREATION (the frame), not events — an event inside a PR's window
    counts even when it lands after CUTOFF (implicitly capped at
    CUTOFF + 56d since created <= CUTOFF), which is exactly what lets the
-   2026-08-26 re-pull finalize Q2 without changing the frame or any rule —
+   2026-08-27 re-pull finalize Q2 without changing the frame or any rule —
    only the AS_OF data stamp advances. Every
    per-PR quantity FINALIZES at w8; re-collection can never change a
    mature PR's classification — fates and review metrics alike. Measured impact of adopting the rule (pooled
@@ -514,7 +516,8 @@ by design, and per-PR dedup is what makes that safe. Combined with the
 w8 event window and the AS_OF maturity stamp, this gives the update
 calendar its meaning: a month's fates become final exactly when a
 re-collection runs after its last 8-week window closed (May at the
-~Aug 1 update, June at 2026-08-26), and nothing already mature can move.
+2026-08-01 update, June at the 2026-08-27 re-pull), and nothing already
+mature can move.
 
 Per-PR field caps: the census fetches each PR's first 12 commits and 15 reviews
 (no per-PR pagination — one search call per ~45 PRs is what makes a
@@ -682,14 +685,16 @@ content.
 - **Floors, asymmetric across tools** (§2). The Codex marker floor (0.15% of
   PRs) vs its branch-level rate (3.6%) shows the gap can be ~24×.
 - **Prominence-selected population**; no claim about GitHub at large.
-- **Q2-2026 fate provisionality**: PRs created after ~2026-05-05 are
-  w8-immature at the frozen as-of and carry no fate (excluded, not
-  miscounted); Q2 fate cells have less data until the 2026-08-26 re-pull
-  finalizes them (§1c).
+- **Q2-2026 fate provisionality (historical)**: at the initial stamp
+  (`AS_OF` = CUTOFF) PRs created after ~2026-05-05 were w8-immature and
+  skipped by the fate metrics (excluded, not miscounted); the 2026-08-01
+  update moved the frontier to 2026-06-06 and the 2026-08-27 re-pull
+  finalized every Q2 window (§1c). Under the current stamp only the
+  incremental months are provisional.
 - **Repo-periods permanently inaccessible** — each waived explicitly in
   `inaccessible_repos.txt` (75 repos; the census manifest carries the
   current repo-period coverage). The list GROWS as repos are deleted or
-  taken private mid-study: the 2026-08-26 June finalization added four
+  taken private mid-study: the 2026-08-27 June finalization added four
   (`agno-agi/agent-platform-railway`,
   `dataelement/shougang-group-knowledge-portal`,
   `huggingface/transformers-test-ci`, `RunanywhereAI/RunAnywhereAgent`)

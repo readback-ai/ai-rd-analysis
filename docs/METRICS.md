@@ -34,13 +34,16 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
   the SAME w8 rule (adopted 2026-07-20): a review counts iff submitted
   within 56 days of PR creation; CUTOFF bounds PR creation, not events
   (an in-window event past the frame end counts) — so mature PRs are
-  immutable and re-pulls only fill in immature ones. History: at the
-  initial collection (`AS_OF` 2026-08-01) PRs created after ~2026-05-05
-  had open windows, so Q2-2026 fate cells were provisional until the
-  2026-08-26 re-pull (June's last window closed 2026-08-25T23:59:59Z;
-  `monthly_update 2026-08 --revise-only`, §1c) finalized every Q2
-  window. Under the current stamp all frozen-quarter PRs are mature;
-  only the registered incremental months carry provisional cells.
+  immutable and re-pulls only fill in immature ones. History: the
+  initial collection was stamped at CUTOFF (`AS_OF` 2026-06-30), so PRs
+  created after ~2026-05-05 had open windows and Q2-2026 fate cells were
+  provisional; the 2026-08-01 monthly update (May's finalization) moved
+  the maturity frontier to 2026-06-06; June's last window closed
+  2026-08-25T23:59:59Z and the finalization re-pull ran on 2026-08-27
+  (`AS_OF` 2026-08-27T17:40:17Z; `monthly_update 2026-08 --revise-only`,
+  §1c), closing every Q2 window. Under the current stamp all
+  frozen-quarter PRs are mature; only the registered incremental months
+  carry provisional cells.
   Residual: per-commit
   timestamps are not collected, so a marker-bearing commit pushed after the
   as-of to a still-open in-window PR is not filterable (layer A only;
@@ -256,7 +259,7 @@ argument — one section = one module invocation):
     per-cell CIs; pooled ratio; per-PR medians over nonzero-addition
     PRs). **Monthly granularity** (`--granularity month`, added
     2026-08-03) uses w8-FINALIZED months only — a month reports once
-    month_end + 56d ≤ AS_OF (June 2026 reported from the 2026-08-26
+    month_end + 56d ≤ AS_OF (June 2026 reported from the 2026-08-27
     re-pull; at the current stamp the series runs through June) — with
     per-unit-time floors (≥2 PRs/repo, ≥7 PRs/org-month)
     and the last three finalized era months as the grouping window;
