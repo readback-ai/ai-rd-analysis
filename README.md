@@ -1,11 +1,13 @@
 # AI-Assisted Development Practices at Leading AI Organizations
 
 An empirical study of how the organizations building AI use AI to build
-software — measured from public GitHub metadata over 229 leading AI
-organizations (182 full-org + 47 repo-scoped; 2,142 repositories) across
-four quarters: Q1-2024 baseline, Q4-2025, Q1-2026, Q2-2026. **Study cutoff: 2026-06-30** — all activity data is windowed to the
-cutoff; classification metadata is pinned as close to it as the API allows
-(see METHODS §0).
+software — measured from public GitHub metadata over 224 leading AI
+organizations (179 full-org + 45 repo-scoped; 2,135 repositories) across
+four quarters: Q1-2024 baseline, Q4-2025, Q1-2026, Q2-2026. **Study cutoff: 2026-06-30** — the frozen quarterly frame's last
+PR-creation date. Outcome events inside a PR's 8-week window count even
+when they fall after the cutoff, and the monthly extensions (METHODS
+§1c) collect PRs created in later months; classification metadata is
+pinned as close to the cutoff as the API allows (see METHODS §0).
 
 ## Abstract
 
@@ -37,8 +39,9 @@ merging 300–4,400 PRs/quarter (~531 kLOC/author-quarter cohort mean by
 Q2-2026), roughly half unmarked, isolated as their own cohort. Review:
 human attention per merged line fell ~53% (insiders −61%) while
 human-review coverage of merged PRs held (~69–75%) and responsiveness to
-explicit human review asks stayed roughly stable (81.5% → 74.5%
-provisional, HT-weighted) with post-ask LOC share rising 46% → 63%.
+explicit human review asks stayed flat (79.7% → 80.9%; the unweighted
+share of an equal-probability sample, fleet-excluded, clean lane) with
+post-ask LOC share rising 44% → 51% (HT-weighted, PPS-by-LOC sample).
 All rates are floors: squash-merge strips markers, and default local CLI
 usage is structurally undetectable.
 
@@ -74,7 +77,7 @@ Generated report: [`artifacts/report_generated.md`](artifacts/report_generated.m
 | — | `pipeline.pull_prs` | targeted hydration (mergedBy, comment authors, commit dates) + branch-PR sampling |
 | 4 | `pipeline.analyze` | per-repo rates → contributor-weighted means + bootstrap CIs |
 | 5 | `pipeline.studies.layers` | exact per-PR layered decomposition (B > A > C disjoint; union = ai_involved) |
-| studies | `pipeline.studies.*` | one analysis = one module: paper figures, productivity/adoption cohorts, attention, fates, event study, responsiveness (HT-weighted), slices, layer-C precision |
+| studies | `pipeline.studies.*` | one analysis = one module: paper figures, productivity/adoption cohorts, attention, fates, event study, responsiveness (equal-probability sample for rates, HT-weighted PPS sample for LOC share), slices, layer-C precision |
 | figures | `scripts/plot_all.py` (all), `scripts/plot_*.py` (one each) | each figure's plotted points -> `artifacts/data/<figure>.csv`, then the image is rendered from that table |
 | monthly | `scripts/monthly_update.py` | incremental month ingestion (provisional-month revision + persistent month registry; `--revise-only` finalizes the revision window without collecting a partial target month) |
 | monthly (scheduled) | `scripts/run_monthly_update.sh` | waits for a w8 finalization instant (`--at`), runs the update, logs to `data/derived/` |

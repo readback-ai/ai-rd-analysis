@@ -9,13 +9,18 @@ organizations; this document is canonical. Results live in
 
 ## 0. Study cutoff and as-of policy
 
-The study cutoff is **2026-06-30** (end of Q2-2026).
-- **Activity data** (PRs, commits, reviews, branch-prefix counts) is strictly
-  windowed: every query carries `created:<=2026-06-30` bounds. Because all
-  per-PR fate outcomes follow the w8 rule (§1d.1), collection lag is not a
-  bias: PRs whose 8-week window was still open at the as-of simply carry NO
-  fate (None-skip) — less data on the trailing quarter, not skewed data.
-  Q2-2026 fates finalize with the scheduled 2026-08-26 re-pull (§1c).
+The study cutoff is **2026-06-30** (end of Q2-2026): the last PR-creation
+date of the frozen quarterly frame.
+- **Activity data** (PRs, commits, reviews, branch-prefix counts) is
+  windowed by PR CREATION: every frozen-quarter query carries
+  `created:<=2026-06-30` bounds. The cutoff bounds creation, not events —
+  a merge or review inside a PR's 8-week window counts even when it falls
+  after the cutoff — and the incremental monthly updates (§1c) collect
+  PRs created in the registered months after it. Because all per-PR fate
+  outcomes follow the w8 rule (§1d.1), collection lag is not a bias: PRs
+  whose 8-week window was still open at the as-of are simply skipped by
+  the fate metrics — less data on the trailing period, not skewed data.
+  Q2-2026 fates finalized with the 2026-08-26 re-pull (§1c).
 - **Classification metadata** (repo topics, descriptions, star counts,
   org descriptions) has no historical API — it was observed 2026-07-07..09,
   as close to the cutoff as possible, and applied uniformly to all orgs. Drift
@@ -218,9 +223,11 @@ trusted, so brownout-poisoned empty caches self-heal on the next run.
    (`detect.W8_DAYS`; review events adopted into the rule 2026-07-20;
    maturity curves show merges quiesce at w8, 98-99% of eventual). Fates
    close at w8, with w26 as appendix sensitivity (`studies.fates`).
-   Immature PRs carry no fate (None-skip) — trailing quarters are
-   PROVISIONAL and labeled; Q2-2026 finalizes with a re-pull on/after
-   2026-08-26 (8 weeks past quarter end; runbook §1c). Corollary: mature
+   Immature PRs are skipped by the fate metrics (their `PRClass` flags
+   are ordinary booleans; `w8_mature` gates reporting) — trailing periods
+   are PROVISIONAL and labeled; Q2-2026 finalized with the 2026-08-26
+   re-pull (8 weeks past quarter end; runbook §1c), and under the
+   current stamp only the incremental months are provisional. Corollary: mature
    PRs are immutable under as-of advances.
 2. **Matched-horizon-only fate comparisons**: "ever resolved" is a
    different quantity per cohort and must never be compared across cohorts.
@@ -539,7 +546,7 @@ and are reported only as reconciliation views.
 **Bootstrap CIs — what is being resampled, and why a complete census has
 CIs at all** (`analyze.bootstrap_ci`). The census is complete: every PR
 of every qualifying repo-period is observed, so for THE FRAME ITSELF (the
-2,142 repos in these quarters) any reported mean is an exact population
+2,135 repos in these quarters) any reported mean is an exact population
 quantity with zero sampling error. The CIs answer the superpopulation
 question a reader actually asks — "how much does this mean depend on the
 particular repos that happen to make up the frame?" — by treating REPOS

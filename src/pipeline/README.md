@@ -18,7 +18,9 @@ uv run python -m pipeline.precount --repos data/derived/population_repos.txt
 uv run python -m pipeline.census   --repos data/derived/population_repos.txt
 uv run python -m pipeline.branch_scan               # layer-C org counts (evidence)
 uv run python -m pipeline.analyze  --repos data/derived/population_repos.txt \
-    --contributors data/derived/repo_contributors_v2.csv --bootstrap 2000
+    --contributors data/derived/repo_contributors_window.csv --bootstrap 2000
+# (window-scoped weights, as scripts/report.py passes them; the all-time
+#  repo_contributors_v2.csv is retained only as a sensitivity file)
 uv run python -m pipeline.studies.layers            # exact layer decomposition
 ```
 
