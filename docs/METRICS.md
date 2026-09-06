@@ -261,7 +261,9 @@ argument — one section = one module invocation):
     (creation-bucketed mature-merged denominator, bug windows truncated
     at the maturity frontier; monthly twin in
     `churn_incidents_monthly_v1.jsonl`) stay auxiliary
-    (`churn --pull/--table sample/--pull-bugs/--table bugs`; §6).
+    (`churn --pull/--table sample/--pull-bugs/--table bugs`; §6), as
+    does the per-PR risk-window variant of the proxy
+    (`--pull-bug-dates/--table exposure`; §6).
 
 Alongside the report, `data/derived/census_manifest.json` records SHA-256
 prefixes of the population files, repo count, and cell-coverage numbers
@@ -281,6 +283,20 @@ prefixes of the population files, repo count, and cell-coverage numbers
   repo-quarter (bug-report PROXY pilot, label:bug only, windows
   truncated at the maturity frontier). Both files always hold exactly
   the current seeded selection (atomic rewrite; stale draws dropped).
+- `data/derived/churn_bug_dates_v2.jsonl` — the same pilot's bug-labeled
+  issues with their numbers and creation days (windows extended 28d past
+  each quarter; overlapping cells dedupe by issue number), so any bug
+  window is a local computation rather than a re-pull. Feeds
+  `churn --table exposure`: every merged PR opens a 28-day risk window at
+  its merge day, and a quarter's rate is the issues filed on its days over
+  the PR-risk-windows and kLOC-risk-windows carried on those days (two
+  denominators, one numerator; incidence over overlapping risk sets, not
+  attribution). Exposure looks back across contiguous quarters; the first
+  27 days of each censused block are burn-in. Frozen at as_of with the
+  frame fingerprint and each repo's grouping-window AI share; the table
+  reports the frozen numerator and flags a moved live frame. Every cell
+  carries the version of the collector that fetched it and is reused
+  only under that version, so a fix to the fetch re-pulls the artifact.
 
 ## 6b. Complete census vs. sampled studies
 

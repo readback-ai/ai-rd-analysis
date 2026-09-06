@@ -84,7 +84,7 @@ from statistics import median
 from pipeline.analyze import bootstrap_ci, weighted_mean
 from pipeline.detect import AS_OF, _iso
 from pipeline.frame import ai_contrast_eligible, study_frame
-from pipeline.ghx import graphql_nodes, rest_count
+from pipeline.ghx import _gh, graphql_nodes, rest_count
 from pipeline.scan_orgs import QUARTER_RANGES, resolve_period
 
 PERIODS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
@@ -106,6 +106,23 @@ BUGS_MONTHLY = Path("data/derived/churn_incidents_monthly_v1.jsonl")
 BUGS_MONTHLY_MANIFEST = \
     Path("data/derived/churn_incidents_monthly_manifest_v1.json")
 BUG_LABEL = "bug"
+# Dated bug issues: the v1 artifacts hold a COUNT per window, so every
+# window question costs a re-pull. These hold each issue's number and
+# creation day instead, so any window — same-period, lagged, or the
+# per-PR risk window below — is a local computation over one freeze.
+BUG_DATES = Path("data/derived/churn_bug_dates_v2.jsonl")
+BUG_DATES_MANIFEST = Path("data/derived/churn_bug_dates_manifest_v2.json")
+BUG_DATES_MONTHLY = Path("data/derived/churn_bug_dates_monthly_v2.jsonl")
+BUG_DATES_MONTHLY_MANIFEST = \
+    Path("data/derived/churn_bug_dates_monthly_manifest_v2.json")
+RISK_DAYS = 28               # per-PR risk window: bugs arrive fast
+SEARCH_CAP = 1000            # GitHub search cannot page past this
+# The dated collector's version, stamped on every cell it writes. A cell
+# is reused only under the collector that produced it: a fix to how
+# issues are fetched (completeness, ordering, retries) must reach every
+# frozen cell, and reuse by key alone would keep the old payloads
+# forever. Bump when the fetch changes in a way that can alter a cell.
+COLLECTOR = 2
 
 # Generated-content path patterns (the METHODS 5b hygiene classes:
 # lockfiles, vendored trees, minified/compiled outputs, protobuf,
@@ -677,6 +694,126 @@ def bug_window(per: str, as_of: str = AS_OF) -> str | None:
     return f"{start}..{end}" if start <= end else None
 
 
+def observable_end(as_of: str = AS_OF) -> str:
+    """Last day an issue can be observed in the freeze."""
+    return _iso(as_of).date().isoformat()
+
+
+def bug_date_window(per: str, as_of: str = AS_OF) -> str | None:
+    """The dated pull's window for a period: the period itself plus
+    RISK_DAYS past its end, bounded by what the freeze can observe. The
+    tail makes each cell self-contained for any reader window reaching up
+    to RISK_DAYS beyond the period (a lagged calendar design, the last
+    period of a censused block); exposure_rows itself rates only the
+    period's own days. Windows of adjacent periods OVERLAP by design —
+    issues carry their number, so readers dedupe rather than
+    double-count."""
+    start, end = resolve_period(per).split("..")
+    end = min((_iso(f"{end}T00:00:00Z") + timedelta(days=RISK_DAYS))
+              .date().isoformat(), observable_end(as_of))
+    return f"{start}..{end}" if start <= end else None
+
+
+def _split_range(rng: str) -> list[str]:
+    """Halve a date range — the escape hatch when a cell holds more
+    issues than search will page through."""
+    start, end = rng.split("..")
+    a, b = _iso(f"{start}T00:00:00Z"), _iso(f"{end}T00:00:00Z")
+    if a >= b:
+        return [rng]
+    mid = a + (b - a) / 2
+    ms = mid.date().isoformat()
+    nxt = (mid + timedelta(days=1)).date().isoformat()
+    return [f"{start}..{ms}", f"{nxt}..{end}"]
+
+
+def search_issue_days(repo: str, rng: str, pace: float = 2.0,
+                      ) -> list[list] | None:
+    """[[issue_number, 'YYYY-MM-DD'], ...] for bug-labeled issues created
+    in `rng`. Search cannot page past SEARCH_CAP results, so an
+    over-full range is bisected until each part fits. None = a query gave
+    up; the caller must not record that as an empty cell."""
+    q = f"repo:{repo} is:issue label:{BUG_LABEL} created:{rng}"
+    total = _search_count(q)
+    if total is None:          # no count, or a count search that timed out
+        return None
+    if total > SEARCH_CAP:
+        parts = _split_range(rng)
+        if len(parts) == 1:                  # single day over the cap
+            return None
+        out: list[list] = []
+        for p in parts:
+            time.sleep(pace)
+            got = search_issue_days(repo, p, pace)
+            if got is None:
+                return None
+            out += got
+        return out
+    if total == 0:
+        return []
+    rows: list[list] = []
+    for page in range(1, (total // 100) + 2):
+        out = _gh_search_page(q, page)
+        if out is None:
+            return None
+        rows += out
+        if len(rows) >= total:
+            break
+        time.sleep(pace)
+    # a page that came back short of the count (search timed out, index
+    # moved) would freeze an understated cell that reconcile then reuses
+    # forever — refuse it, so the cell stays missing and is re-pulled
+    return rows if len(rows) == total else None
+
+
+def _search_json(args: list[str], retries: int, backoff: float):
+    """A search response's jq-shaped JSON, retried like rest_count. A
+    search that timed out server-side answers SUCCESSFULLY with partial
+    matches and incomplete_results true — that is a failure here, since
+    a frozen cell must be the whole count, so it is retried and finally
+    refused."""
+    for _ in range(retries):
+        out = _gh(args)
+        if out is not None and out.strip():
+            try:
+                data = json.loads(out.strip())
+            except json.JSONDecodeError:
+                data = None
+            if data is not None and not data.get("inc"):
+                return data
+        time.sleep(backoff)
+    return None
+
+
+def _search_count(query: str, retries: int = 4, backoff: float = 25.0,
+                  ) -> int | None:
+    """A search's total_count, or None — including when the count search
+    itself timed out, since a partial count would let a truncated page
+    set look complete."""
+    data = _search_json(
+        ["api", "-X", "GET", "search/issues", "-f", f"q={query}", "-f",
+         "per_page=1", "--jq",
+         '{inc: .incomplete_results, n: .total_count} | tojson'],
+        retries, backoff)
+    return None if data is None else int(data["n"])
+
+
+def _gh_search_page(query: str, page: int, retries: int = 4,
+                    backoff: float = 25.0) -> list[list] | None:
+    """One page of issue (number, creation day) pairs, in creation order
+    so paging is stable across requests (best-match order can reshuffle
+    between pages and skip an issue). Retries like rest_count: one
+    transient failure must not discard a multi-page cell."""
+    data = _search_json(
+        ["api", "-X", "GET", "search/issues", "-f", f"q={query}", "-f",
+         "sort=created", "-f", "order=asc", "-f", "per_page=100", "-f",
+         f"page={page}", "--jq",
+         '{inc: .incomplete_results, items: [.items[] | [.number, '
+         '(.created_at[0:10])]]} | tojson'],
+        retries, backoff)
+    return None if data is None else data["items"]
+
+
 def migrate_bug_rows(rows: list[dict]) -> list[dict]:
     """Rows written before range-stamping were queried with the FULL
     quarter range — stamp them with it, so reconciliation keeps them
@@ -701,6 +838,281 @@ def bug_cells(pool: dict[str, list], periods: list[str] | None = None,
     return [{"repo": r, "per": per, "rng": bug_window(per)}
             for r in repos for per in (periods or PERIODS)
             if bug_window(per) is not None]
+
+
+def bug_date_cells(pool: dict[str, list], periods: list[str] | None = None,
+                   repos: list[str] | None = None) -> list[dict]:
+    """The dated pull's (repo, per, rng) selection — same repo universe as
+    the counted cells, over the risk-extended windows."""
+    if repos is None:
+        repos = sorted({d["repo"] for d in draw(pool)})
+    return [{"repo": r, "per": per, "rng": bug_date_window(per)}
+            for r in repos for per in (periods or PERIODS)
+            if bug_date_window(per) is not None]
+
+
+def pull_bug_dates(trimmed: dict[str, list], created: dict[str, list],
+                   periods: list[str] | None = None,
+                   pace: float = 2.0) -> None:
+    """Hydrate each cell with its bug issues' numbers and creation days.
+    Same reconciliation and crash-consistent freeze as the counted pull;
+    failures stay missing rather than being recorded as empty."""
+    monthly = periods is not None and bool(periods) \
+        and not periods[0].startswith("Q")
+    sample_digest = None
+    if monthly:
+        data, mani = BUG_DATES_MONTHLY, BUG_DATES_MONTHLY_MANIFEST
+        sample_rows, sm = _verify(SAMPLE, SAMPLE_MANIFEST)
+        sample_digest = sm["digest"]
+        repos = sorted({d["repo"] for d in sample_rows})
+        cells = bug_date_cells(trimmed, periods, repos)
+    else:
+        data, mani = BUG_DATES, BUG_DATES_MANIFEST
+        cells = bug_date_cells(trimmed, periods)
+    existing = _load_jsonl(data)
+    current = [d for d in existing if d.get("collector") == COLLECTOR]
+    kept, todo, stale = reconcile(cells, current,
+                                  ("repo", "per", "rng"), "days")
+    print(f"pulling {len(todo)} of {len(cells)} dated bug cells "
+          f"({len(kept)} reused, {stale} stale dropped, "
+          f"{len(existing) - len(current)} from an older collector "
+          "re-pulled)", flush=True)
+    gp = tuple(group_periods(periods or list(PERIODS)))
+    fp = bugs_fingerprint(trimmed, created, sample_digest)
+
+    def flush() -> None:
+        # grouping inputs travel with the dated cells, so the low/high-AI
+        # halves are read from the same freeze as the rates
+        _stamp_denominators(kept, created, gp)
+        _freeze(data, mani,
+                sorted(kept.values(), key=lambda d: (d["repo"], d["per"])),
+                fp, len(cells))
+
+    for i, s in enumerate(todo):
+        days = search_issue_days(s["repo"], s["rng"], pace)
+        time.sleep(pace)
+        if days is None:
+            print(f"  MISSING {s['repo']} {s['per']}", flush=True)
+            continue
+        kept[(s["repo"], s["per"], s["rng"])] = {**s, "days": days,
+                                                 "collector": COLLECTOR}
+        if (i + 1) % 25 == 0:
+            flush()
+            print(f"  {i + 1}/{len(todo)}", flush=True)
+    flush()
+    print(f"froze {len(kept)} dated cells -> {data}", flush=True)
+    missing = len(cells) - len(kept)
+    if missing:
+        print(f"{missing} cells still unpulled (re-run --pull-bug-dates)",
+              flush=True)
+
+
+def bug_days_by_repo(rows: list[dict]) -> dict[str, dict[str, int]]:
+    """repo -> {day: issues created that day}, deduped by issue number
+    across the deliberately overlapping cell windows."""
+    seen: dict[str, dict[int, str]] = defaultdict(dict)
+    for d in rows:
+        for num, day in d.get("days", []):
+            seen[d["repo"]][num] = day
+    out: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
+    for repo, issues in seen.items():
+        for day in issues.values():
+            out[repo][day] += 1
+    return out
+
+
+def merged_exposure(granularity: str = "quarter",
+                    ) -> tuple[dict, list[str]]:
+    """(repo, per) -> [(merge_day, capped_added_kloc)] for PRs created AND
+    merged in the period — the churn frame's identically-observable
+    trimming, carrying merge dates so each PR can open its own risk
+    window. Also returns the ordered period list."""
+    if granularity == "month":
+        from pipeline.analyze import extended_quarters
+        periods = finalized_months()
+        pset = set(periods)
+        frame = study_frame("all", periods=pset,
+                            ranges=extended_quarters(),
+                            granularity="month")
+
+        def merge_per(merged_at):
+            tok = (merged_at or "")[:7]
+            return tok if tok in pset else None
+    else:
+        periods = list(PERIODS)
+        frame = study_frame("all")
+        merge_per = merge_quarter
+    out: dict = defaultdict(list)
+    for f in frame:
+        if not ai_contrast_eligible(f) or not f.cls.merged_ever:
+            continue
+        merged_at = f.pr.get("mergedAt")
+        if merge_per(merged_at) != f.period:      # same-period trimming
+            continue
+        out[(f.repo, f.period)].append(
+            (merged_at[:10], min(int(f.pr.get("additions") or 0), CAP) / 1000))
+    return out, periods
+
+
+def _days(rng: str) -> list[str]:
+    start, end = (_iso(f"{x}T00:00:00Z") for x in rng.split(".."))
+    n = (end - start).days
+    return [(start + timedelta(days=i)).date().isoformat()
+            for i in range(n + 1)]
+
+
+def _lookback_start(day: str) -> str:
+    return (_iso(f"{day}T00:00:00Z")
+            - timedelta(days=RISK_DAYS - 1)).date().isoformat()
+
+
+def exposure_rows(granularity: str = "quarter") -> tuple[list[dict], list]:
+    """Per (repo, period) incidence rates over the per-PR risk window.
+
+    Every PR opens a RISK_DAYS window at its merge day; on each day of the
+    period the repo is carrying some number of open windows (and some
+    volume of recently merged kLOC). Summing bugs filed on those days over
+    that exposure gives bugs per PR-risk-window and per kLOC-risk-window —
+    the same numerator, two denominators, neither bucketed by month.
+
+    Exposure looks back across period boundaries: a PR merged late in
+    one period is still at risk in the next. A day is rated only when its
+    whole lookback lies in censused days, so exposure is never understated
+    by merges the census did not collect — that burn-in falls at the start
+    of each contiguous censused block (Q1-2024; Q4-2025), not on every
+    period. Only (repo, period) cells the dated pull froze are rated: an
+    unpulled cell has no numerator, not a zero one. A period with merged
+    PRs but no added lines keeps its per-PR rate and reports per-kLOC as
+    undefined.
+    """
+    monthly = granularity == "month"
+    rows, mani = _verify(*((BUG_DATES_MONTHLY, BUG_DATES_MONTHLY_MANIFEST)
+                           if monthly else (BUG_DATES, BUG_DATES_MANIFEST)))
+    bugs_by_day = bug_days_by_repo(rows)
+    held = {(d["repo"], d["per"]) for d in rows}
+    stale_windows = sum(1 for d in rows
+                        if d.get("rng") != bug_date_window(d["per"]))
+    # label use and grouping inputs are properties of the frozen cells,
+    # decided before any day is burnt in or any period dropped
+    users = label_users(rows)
+    ai_share = {d["repo"]: tuple(d["q2"]) for d in rows if d.get("q2")}
+    exposure, periods = merged_exposure(granularity)
+    censused: set[str] = set()
+    for per in periods:
+        censused.update(_days(resolve_period(per)))
+    merges_by_repo: dict = defaultdict(lambda: defaultdict(lambda: [0, 0.0]))
+    for (repo, _p), merges in exposure.items():
+        for day, kloc in merges:
+            merges_by_repo[repo][day][0] += 1
+            merges_by_repo[repo][day][1] += kloc
+    out = []
+    for per in periods:
+        days = [d for d in _days(resolve_period(per))
+                if all(x in censused for x in _days(f"{_lookback_start(d)}..{d}"))]
+        for repo in sorted(merges_by_repo):
+            if (repo, per) not in held or not days:
+                continue
+            by_day = merges_by_repo[repo]
+            pr_exp = kloc_exp = 0.0
+            bugs = 0
+            for d in days:
+                lo = _lookback_start(d)
+                for m, (n, k) in by_day.items():
+                    if lo <= m <= d:
+                        pr_exp += n
+                        kloc_exp += k
+                bugs += bugs_by_day.get(repo, {}).get(d, 0)
+            if pr_exp <= 0:
+                continue
+            out.append({"repo": repo, "per": per, "bugs": bugs,
+                        "pr_windows": pr_exp / RISK_DAYS,
+                        "kloc_windows": kloc_exp / RISK_DAYS,
+                        "per_pr": bugs / (pr_exp / RISK_DAYS),
+                        "per_kloc": (bugs / (kloc_exp / RISK_DAYS)
+                                     if kloc_exp > 0 else None)})
+    return out, (periods, {**mani, "stale_windows": stale_windows,
+                           "label_users": users, "ai_share": ai_share})
+
+
+def label_users(cells: list[dict]) -> set[str]:
+    """Repos that use the bug label at all, judged on their frozen dated
+    cells: a repo with no labeled issue in any window is a probable
+    non-user of the taxonomy, not a repo without defects (the counted
+    table's exclusion). An issue counts wherever it falls — in burn-in,
+    in a period with no exposure — because label use is a property of
+    the repo, not of the days the rate happens to cover."""
+    return {d["repo"] for d in cells if d.get("days")}
+
+
+def print_exposure(granularity: str = "quarter",
+                   live_fp: str | None = None) -> None:
+    """`live_fp` is the fingerprint of the frame the denominators are read
+    from; the numerator is frozen, so the table says when the two have
+    parted (the counted table's drift line)."""
+    rows, (periods, mani) = exposure_rows(granularity)
+    users = mani["label_users"]
+    rated = {r["repo"] for r in rows}
+    excluded = len(rated - users)
+    rows = [r for r in rows if r["repo"] in users]
+    unit = "month" if granularity == "month" else "quarter"
+    print("BUG-REPORT PROXY, PER-PR RISK WINDOW (bug-labeled GH issues — "
+          "NOT production incidents). Every merged PR opens a "
+          f"{RISK_DAYS}-day window at its MERGE day; a {unit}'s rate is the "
+          "issues filed on its days over the exposure carried on those "
+          f"days, so no issue is double counted and no window is a "
+          f"function of the calendar {unit}. Both denominators are "
+          "reported: PR-risk-windows and kLOC-risk-windows (capped "
+          f"{CAP:,}/PR). Exposure looks back across contiguous {unit}s; "
+          f"the first {RISK_DAYS - 1} days of each censused block are "
+          "burn-in (their lookback reaches merges the census did not "
+          "collect). Rates are INCIDENCE over overlapping risk sets, not "
+          "attribution of an issue to a PR.")
+    print(f"frozen dated cells: {mani['held']}/{mani['selected']} "
+          f"(as_of {mani['as_of']}); {excluded} repos with zero "
+          "bug-labeled issues in every period EXCLUDED as probable "
+          "non-users of the label"
+          + (f"; {mani['selected'] - mani['held']} cells UNPULLED "
+             "(their repo-periods are not rated)"
+             if mani["held"] < mani["selected"] else "")
+          + (f"; {mani['stale_windows']} cells pulled under a DIFFERENT "
+             "window than the current RISK_DAYS — re-pull"
+             if mani.get("stale_windows") else ""))
+    if live_fp is not None:
+        print(_drift_line(mani, live_fp))
+
+    # cuts: every label-using repo; the balanced panel (rated in every
+    # period, so a trend cannot be composition); and the counted table's
+    # low/high-AI repo halves
+    repos = {r["repo"] for r in rows}
+    balanced = {r for r in repos
+                if all(any(x["repo"] == r and x["per"] == p for x in rows)
+                       for p in periods)}
+    lo, hi, _unranked = rank_groups(repos, mani["ai_share"])
+    groups = (("all", repos), ("balanced", balanced), ("low-AI", lo),
+              ("high-AI", hi))
+    print(f"{'period':9}{'group':10}{'repos':>6}{'bugs':>7}{'PRwin':>10}"
+          f"{'kLOCwin':>10}{'pooled/PR':>11}{'med/PR':>9}"
+          f"{'pooled/kLOC':>13}{'med/kLOC':>10}")
+    for per in periods:
+        for label, grp in groups:
+            rs = [r for r in rows if r["per"] == per and r["repo"] in grp]
+            if not rs:
+                continue
+            b = sum(r["bugs"] for r in rs)
+            pw = sum(r["pr_windows"] for r in rs)
+            kw = sum(r["kloc_windows"] for r in rs)
+            per_kloc = [r["per_kloc"] for r in rs
+                        if r["per_kloc"] is not None]
+            print(f"{per:9}{label:10}{len(rs):>6}{b:>7}{pw:>10.0f}"
+                  f"{kw:>10.0f}{b / pw:>11.3f}"
+                  f"{median([r['per_pr'] for r in rs]):>9.3f}"
+                  + (f"{b / kw:>13.3f}{median(per_kloc):>10.3f}" if kw > 0
+                     else f"{'n/a':>13}{'n/a':>10}"))
+    print(f"balanced = rated in every {unit}; low/high-AI = halves of the "
+          "label-using repos by the counted table's grouping-window "
+          "AI-involvement share; pooled rates can be dominated by single "
+          "large repos — the pilot is a PR-level draw, so repos enter "
+          "probability-proportional-to-size")
 
 
 def group_periods(periods: list[str]) -> list[str]:
@@ -879,20 +1291,24 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--table",
                     choices=["report", "adoption", "census", "sample",
-                             "bugs"])
+                             "bugs", "exposure"])
     ap.add_argument("--draw", action="store_true",
                     help="print the balanced 0.1% selection")
     ap.add_argument("--pull", action="store_true",
                     help="hydrate per-file splits for the current draw")
     ap.add_argument("--pull-bugs", action="store_true",
                     help="pull bug-label counts for the pilot's repos")
+    ap.add_argument("--pull-bug-dates", action="store_true",
+                    help="pull bug issues WITH creation days, so any "
+                         "window is computable without another pull")
     ap.add_argument("--granularity", choices=["quarter", "month"],
                     default="quarter",
                     help="month = w8-FINALIZED months only (a month "
                          "reports once month_end + 56d <= AS_OF)")
     a = ap.parse_args()
-    if not (a.table or a.draw or a.pull or a.pull_bugs):
-        ap.error("pick --table/--draw/--pull/--pull-bugs")
+    if not (a.table or a.draw or a.pull or a.pull_bugs
+            or a.pull_bug_dates):
+        ap.error("pick --table/--draw/--pull/--pull-bugs/--pull-bug-dates")
     if a.granularity == "month" and (a.pull or a.table == "sample"
                                      or a.draw):
         ap.error("the 0.1% file-level sample is quarterly-only "
@@ -911,6 +1327,8 @@ def main() -> None:
         pull(trimmed)
     if a.pull_bugs:
         pull_bugs(trimmed, created, periods)
+    if a.pull_bug_dates:
+        pull_bug_dates(trimmed, created, periods)
     org_min = ORG_MIN_PRS_MONTH if month else ORG_MIN_PRS
     min_prs = MIN_PRS_MONTH if month else MIN_PRS
     if a.table in ("report", "adoption"):
@@ -923,6 +1341,14 @@ def main() -> None:
         print_sample(trimmed)
     elif a.table == "bugs":
         print_bugs(trimmed, created, periods)
+    elif a.table == "exposure":
+        sample_digest = None
+        if month:
+            _srows, sm = _verify(SAMPLE, SAMPLE_MANIFEST)
+            sample_digest = sm["digest"]
+        print_exposure(a.granularity,
+                       live_fp=bugs_fingerprint(trimmed, created,
+                                                sample_digest))
 
 
 if __name__ == "__main__":
