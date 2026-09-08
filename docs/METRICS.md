@@ -279,6 +279,22 @@ prefixes of the population files, repo count, and cell-coverage numbers
 
 ## 6. Auxiliary analyses (not in the generated report)
 
+- **Median insider kLOC/quarter, person-level** (`productivity.
+  insider_medians`; `artifacts/insider_medians.png`, Figure 3b). The
+  companion to Figure 3 with no repo weighting and no two-stage
+  aggregation: each insider's submitted (uncensored) and merged (w8)
+  kLOC per quarter, pooled across every repo they author in, then the
+  MEDIAN across people — so "median" means the middle insider. Three
+  populations, fleet operators excluded from all: **period-active**
+  (>=1 PR in the quarter; membership varies), **productive**
+  (>=`ACTIVE_FLOOR` = 10 submitted PRs in the quarter — the Figure A5
+  floor that makes never-AI a behavioural claim; membership varies), and
+  the **balanced panel** (>=1 PR in every study quarter — the same
+  people throughout, hence survivor-selected toward long-tenured
+  maintainers; balanced minus period-active isolates composition).
+  Slices: all, ever-AI, never-AI (any AI-involved PR in the Q4-2025..
+  Q2-2026 window, as in the decile studies). Bands are seeded percentile
+  bootstraps of the median over persons; `n` per quarter is in the CSV.
 - `pipeline.studies.accountability`, `review_modes`, `corpus` — the
   behavioral studies behind the working log (sampled, seeded); re-derive on
   the final population before citing.

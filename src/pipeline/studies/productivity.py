@@ -699,6 +699,106 @@ def active_insider_deciles(pre: str = "Q4-2025") -> dict:
     return out
 
 
+QUARTER_MONTHS = {"Q1-2024": BASELINE_MONTHS, "Q4-2025": WINDOW_MONTHS[:3],
+                  "Q1-2026": WINDOW_MONTHS[3:6], "Q2-2026": WINDOW_MONTHS[6:9]}
+
+INSIDER_POPULATIONS = [
+    ("any", "period-active insiders (>=1 PR in the quarter)"),
+    ("productive",
+     f"productive insiders (>={ACTIVE_FLOOR} submitted PRs in the quarter)"),
+    ("panel", "balanced panel (>=1 PR in all four quarters)"),
+]
+INSIDER_SLICES = [("all", "all"),
+                  ("ever_ai", "ever used AI (detected)"),
+                  ("never_ai", "never used AI (detected)")]
+INSIDER_METRICS = [("submitted", "submitted kLOC / insider / quarter"),
+                   ("merged", "merged (w8) kLOC / insider / quarter")]
+
+
+def _median_ci(vals: list[float], draws: int, key: str) -> dict:
+    """{n, median, lo, hi}: the median of `vals` with a seeded percentile
+    bootstrap over persons (one stream per cell, like analyze.bootstrap_ci);
+    CIs are NaN below two members."""
+    import numpy as np
+    from pipeline.analyze import _stream
+    nan = float("nan")
+    n = len(vals)
+    if n == 0:
+        return {"n": 0, "median": nan, "lo": nan, "hi": nan}
+    arr = np.asarray(vals, dtype=float)
+    med = float(np.median(arr))
+    if n < 2:
+        return {"n": n, "median": med, "lo": nan, "hi": nan}
+    rng = np.random.default_rng(_stream(key).getrandbits(63))
+    meds = np.empty(draws)
+    for i in range(0, draws, 250):          # chunked: draws x n indices
+        k = min(250, draws - i)
+        meds[i:i + k] = np.median(arr[rng.integers(0, n, size=(k, n))],
+                                  axis=1)
+    lo, hi = np.percentile(meds, [2.5, 97.5])
+    return {"n": n, "median": med, "lo": float(lo), "hi": float(hi)}
+
+
+def insider_medians(draws: int = 2000) -> dict:
+    """(population, slice, metric, quarter) -> {n, median, lo, hi}: the
+    MEDIAN insider author's kLOC per quarter. One number per PERSON,
+    pooled across every repo they author in — no repo weighting and no
+    two-stage aggregation, so "median" means the middle insider.
+
+    Populations (fleet operators excluded from all three):
+      any        — insiders with >=1 PR in the quarter (membership varies
+                   by quarter: the typical active insider that quarter)
+      productive — insiders with >=ACTIVE_FLOOR submitted PRs in the
+                   quarter (the floor that makes never-AI a behavioural
+                   claim; membership varies by quarter)
+      panel      — insiders with >=1 PR in EVERY study quarter (a fixed
+                   set: the same people throughout, hence survivor-
+                   selected toward long-tenured maintainers)
+    Slices: all; ever_ai / never_ai by whether any AI-involved PR appeared
+    in the window (Q4-2025..Q2-2026 — the baseline has no detectable
+    channel), the split the decile studies use.
+    Metrics: submitted kLOC (no censoring) and merged kLOC (w8 rule).
+    Insider = the Figure 3 core-author population (an insider-association
+    PR in the frozen months)."""
+    acc, cohort_of_login, _q, fleet = _author_months_and_cohorts()
+    zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
+    insiders = [w for w in cohort_of_login if w not in fleet]
+    ever = {w for w in insiders
+            if any((acc[w].get(m) or zero)[2] > 0 for m in WINDOW_MONTHS)}
+
+    def rows(who, quarter):
+        return [acc[who].get(m) or zero for m in QUARTER_MONTHS[quarter]]
+
+    def prs(who, quarter):
+        return sum(r[3] for r in rows(who, quarter))
+
+    def kloc(who, quarter, metric):
+        return sum(r[5] if metric == "submitted" else r[0] + r[1]
+                   for r in rows(who, quarter))
+
+    panel = [w for w in insiders if all(prs(w, q) > 0 for q in QUARTER_MONTHS)]
+
+    def members(pop, quarter):
+        if pop == "any":
+            return [w for w in insiders if prs(w, quarter) > 0]
+        if pop == "productive":
+            return [w for w in insiders if prs(w, quarter) >= ACTIVE_FLOOR]
+        return panel
+
+    out = {}
+    for pop, _plabel in INSIDER_POPULATIONS:
+        for quarter in QUARTER_MONTHS:
+            base = members(pop, quarter)
+            for sl, _slabel in INSIDER_SLICES:
+                who = [w for w in base
+                       if sl == "all" or (w in ever) == (sl == "ever_ai")]
+                for metric, _mlabel in INSIDER_METRICS:
+                    out[(pop, sl, metric, quarter)] = _median_ci(
+                        [kloc(w, quarter, metric) for w in who], draws,
+                        key=f"insider_medians|{pop}|{sl}|{metric}|{quarter}")
+    return out
+
+
 DECILE_GROUPS = [("all", "all contributors (non-fleet)"),
                  ("ever_ai", "ever used AI (detected)"),
                  ("never_ai", "never used AI (detected)"),

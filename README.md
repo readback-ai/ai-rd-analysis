@@ -51,8 +51,10 @@ Methodology: [`docs/METHODS.md`](docs/METHODS.md) · **code review guide: [`docs
 Generated report: [`artifacts/report_generated.md`](artifacts/report_generated.md)
 (19 sections, quarterly; monthly twin `report_monthly.md`). Figures:
 `artifacts/ai_usage.png` (traceable AI usage), `artifacts/core_loc.png`
-(merged LOC per insider contributor), `artifacts/adoption_cohorts.png`
-(adoption cohorts incl. fleet).
+(merged LOC per insider contributor), `artifacts/insider_medians.png`
+(the median insider's kLOC per quarter, person-level: period-active /
+productive / balanced-panel populations x all / ever-AI / never-AI),
+`artifacts/adoption_cohorts.png` (adoption cohorts incl. fleet).
 
 ## How to verify the three claims that matter
 
