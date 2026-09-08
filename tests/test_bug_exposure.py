@@ -27,6 +27,34 @@ def test_dated_cells_cover_every_repo_with_eligible_prs(monkeypatch):
     assert len(cells) == 6
 
 
+def test_dated_fingerprint_names_the_selection_policy(monkeypatch):
+    """PR #43 review: the dated artifact's fingerprint hashed only the
+    frame, so a pilot-scoped freeze and a population-scoped one on the
+    same frame were indistinguishable — the drift line said MATCHES
+    before the population pull had run. The selection policy is part of
+    the fingerprint; the frame alone is not enough."""
+    pools = ({"Q1-2024": [("o/r", 1, False, 1, 0)]},
+             {"Q1-2024": [("o/r", 1, False, 1, 0)]})
+    dated = churn.dated_fingerprint(*pools)
+    assert dated != churn.bugs_fingerprint(*pools)
+    monkeypatch.setattr(churn, "DATED_SELECTION", "pilot-draw")
+    assert churn.dated_fingerprint(*pools) != dated
+
+
+def test_dated_freeze_is_stamped_with_the_selection_fingerprint(
+        monkeypatch):
+    seen = {}
+    monkeypatch.setattr(churn, "bug_date_cells", lambda *_a, **_k: [
+        {"repo": "o/r", "per": "Q1-2024", "rng": "r"}])
+    monkeypatch.setattr(churn, "_load_jsonl", lambda _p: [])
+    monkeypatch.setattr(churn, "_freeze",
+                        lambda _p, _m, _r, fp, *_a: seen.update(fp=fp))
+    monkeypatch.setattr(churn, "search_issue_days", lambda *_a: [])
+    monkeypatch.setattr(churn.time, "sleep", lambda _s: None)
+    churn.pull_bug_dates({}, {}, None)
+    assert seen["fp"] == churn.dated_fingerprint({}, {})
+
+
 def test_bug_date_window_extends_by_the_risk_window():
     """A period's dated pull must cover every risk window a PR merged on
     its last day opens, or that PR's exposure is unobservable."""
@@ -342,6 +370,18 @@ def test_print_exposure_cuts_balanced_and_ai_halves(monkeypatch, capsys):
     assert [ln.split()[1] for ln in q4] == ["all", "balanced", "low-AI",
                                            "high-AI"]
     assert q4[0].split()[2] == "2" and q4[1].split()[2] == "1"
+
+
+def test_footer_states_the_population_selection(monkeypatch, capsys):
+    """PR #43 review: the footer still described the pilot's PR-level
+    draw (repos entering probability-proportional-to-size) after the
+    selection became every repo with an eligible PR."""
+    monkeypatch.setattr(churn, "exposure_rows", lambda g="quarter": (
+        _ONE, (["Q1-2024"], _meta())))
+    churn.print_exposure("quarter")
+    out = capsys.readouterr().out
+    assert "probability-proportional" not in out
+    assert "every repo with an eligible merged PR" in out
 
 
 def test_print_exposure_reports_frame_drift(monkeypatch, capsys):

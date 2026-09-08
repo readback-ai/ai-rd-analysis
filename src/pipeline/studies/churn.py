@@ -123,6 +123,10 @@ SEARCH_CAP = 1000            # GitHub search cannot page past this
 # frozen cell, and reuse by key alone would keep the old payloads
 # forever. Bump when the fetch changes in a way that can alter a cell.
 COLLECTOR = 2
+# Which repos the dated pull selects. Part of the artifact's fingerprint:
+# the frame alone cannot tell a pilot-scoped freeze from a population one
+# built on the same pools, and the drift line must say MOVED between them.
+DATED_SELECTION = "population-v1"   # every repo with an eligible merged PR
 
 # Generated-content path patterns (the METHODS 5b hygiene classes:
 # lockfiles, vendored trees, minified/compiled outputs, protobuf,
@@ -840,6 +844,15 @@ def bug_cells(pool: dict[str, list], periods: list[str] | None = None,
             if bug_window(per) is not None]
 
 
+def dated_fingerprint(trimmed: dict[str, list], created: dict[str, list],
+                      ) -> str:
+    """The dated artifact's frame stamp: the pools plus the selection
+    policy that chose the repos, so a change of policy on an unchanged
+    frame reads as a moved selection."""
+    return frame_fingerprint(trimmed, created,
+                             extra=f"selection={DATED_SELECTION}")
+
+
 def bug_date_cells(pool: dict[str, list], periods: list[str] | None = None,
                    ) -> list[dict]:
     """The dated pull's (repo, per, rng) selection: EVERY repo with an
@@ -874,7 +887,7 @@ def pull_bug_dates(trimmed: dict[str, list], created: dict[str, list],
           f"{len(existing) - len(current)} from an older collector "
           "re-pulled)", flush=True)
     gp = tuple(group_periods(periods or list(PERIODS)))
-    fp = bugs_fingerprint(trimmed, created)
+    fp = dated_fingerprint(trimmed, created)
 
     def flush() -> None:
         # grouping inputs travel with the dated cells, so the low/high-AI
@@ -1104,11 +1117,13 @@ def print_exposure(granularity: str = "quarter",
                   f"{median([r['per_pr'] for r in rs]):>9.3f}"
                   + (f"{b / kw:>13.3f}{median(per_kloc):>10.3f}" if kw > 0
                      else f"{'n/a':>13}{'n/a':>10}"))
-    print(f"balanced = rated in every {unit}; low/high-AI = halves of the "
-          "label-using repos by the counted table's grouping-window "
-          "AI-involvement share; pooled rates can be dominated by single "
-          "large repos — the pilot is a PR-level draw, so repos enter "
-          "probability-proportional-to-size")
+    print(f"selection {DATED_SELECTION}: every repo with an eligible merged "
+          f"PR in any {unit} (a census on both sides of the rate, no "
+          f"design weights). balanced = rated in every {unit}; low/high-AI "
+          "= halves of the label-using repos by the grouping-window "
+          "AI-involvement share stamped in the freeze; pooled rates can "
+          "still be dominated by single large repos — read the medians "
+          "beside them")
 
 
 def group_periods(periods: list[str]) -> list[str]:
@@ -1339,7 +1354,7 @@ def main() -> None:
         print_bugs(trimmed, created, periods)
     elif a.table == "exposure":
         print_exposure(a.granularity,
-                       live_fp=bugs_fingerprint(trimmed, created))
+                       live_fp=dated_fingerprint(trimmed, created))
 
 
 if __name__ == "__main__":
