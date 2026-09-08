@@ -841,11 +841,14 @@ def bug_cells(pool: dict[str, list], periods: list[str] | None = None,
 
 
 def bug_date_cells(pool: dict[str, list], periods: list[str] | None = None,
-                   repos: list[str] | None = None) -> list[dict]:
-    """The dated pull's (repo, per, rng) selection — same repo universe as
-    the counted cells, over the risk-extended windows."""
-    if repos is None:
-        repos = sorted({d["repo"] for d in draw(pool)})
+                   ) -> list[dict]:
+    """The dated pull's (repo, per, rng) selection: EVERY repo with an
+    eligible merged PR in any period, over the risk-extended windows. The
+    PR side of the rate is a census, so the bug side surveys the
+    population too — the counted pilot's PR-level draw would enter repos
+    probability-proportional-to-size and describe the largest ones.
+    (Quarterly: ~1.5k repos x 4 periods; monthly is ~11x that.)"""
+    repos = sorted({item[0] for items in pool.values() for item in items})
     return [{"repo": r, "per": per, "rng": bug_date_window(per)}
             for r in repos for per in (periods or PERIODS)
             if bug_date_window(per) is not None]
@@ -859,16 +862,9 @@ def pull_bug_dates(trimmed: dict[str, list], created: dict[str, list],
     failures stay missing rather than being recorded as empty."""
     monthly = periods is not None and bool(periods) \
         and not periods[0].startswith("Q")
-    sample_digest = None
-    if monthly:
-        data, mani = BUG_DATES_MONTHLY, BUG_DATES_MONTHLY_MANIFEST
-        sample_rows, sm = _verify(SAMPLE, SAMPLE_MANIFEST)
-        sample_digest = sm["digest"]
-        repos = sorted({d["repo"] for d in sample_rows})
-        cells = bug_date_cells(trimmed, periods, repos)
-    else:
-        data, mani = BUG_DATES, BUG_DATES_MANIFEST
-        cells = bug_date_cells(trimmed, periods)
+    data, mani = ((BUG_DATES_MONTHLY, BUG_DATES_MONTHLY_MANIFEST) if monthly
+                  else (BUG_DATES, BUG_DATES_MANIFEST))
+    cells = bug_date_cells(trimmed, periods)
     existing = _load_jsonl(data)
     current = [d for d in existing if d.get("collector") == COLLECTOR]
     kept, todo, stale = reconcile(cells, current,
@@ -878,7 +874,7 @@ def pull_bug_dates(trimmed: dict[str, list], created: dict[str, list],
           f"{len(existing) - len(current)} from an older collector "
           "re-pulled)", flush=True)
     gp = tuple(group_periods(periods or list(PERIODS)))
-    fp = bugs_fingerprint(trimmed, created, sample_digest)
+    fp = bugs_fingerprint(trimmed, created)
 
     def flush() -> None:
         # grouping inputs travel with the dated cells, so the low/high-AI
@@ -1342,13 +1338,8 @@ def main() -> None:
     elif a.table == "bugs":
         print_bugs(trimmed, created, periods)
     elif a.table == "exposure":
-        sample_digest = None
-        if month:
-            _srows, sm = _verify(SAMPLE, SAMPLE_MANIFEST)
-            sample_digest = sm["digest"]
         print_exposure(a.granularity,
-                       live_fp=bugs_fingerprint(trimmed, created,
-                                                sample_digest))
+                       live_fp=bugs_fingerprint(trimmed, created))
 
 
 if __name__ == "__main__":

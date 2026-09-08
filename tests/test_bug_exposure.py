@@ -11,6 +11,22 @@ from pipeline.studies.churn import (RISK_DAYS, _days, _split_range,
                                     bug_date_window, bug_days_by_repo)
 
 
+def test_dated_cells_cover_every_repo_with_eligible_prs(monkeypatch):
+    """The dated pull surveys the population, not the pilot: every repo
+    with an eligible merged PR in any period gets its cells, whether or
+    not the seeded PR draw happened to land on it. The PR side is a
+    census, so the bug side must be one too for the rate to describe the
+    study rather than the largest repos."""
+    monkeypatch.setattr(churn, "draw", lambda _pool: [
+        {"repo": "o/big", "per": "Q1-2024", "num": 1}])
+    pool = {"Q1-2024": [("o/big", 1, False, 1, 0),
+                        ("o/small", 2, False, 1, 0)],
+            "Q4-2025": [("o/other", 3, True, 1, 0)]}
+    cells = churn.bug_date_cells(pool, ["Q1-2024", "Q4-2025"])
+    assert {c["repo"] for c in cells} == {"o/big", "o/small", "o/other"}
+    assert len(cells) == 6
+
+
 def test_bug_date_window_extends_by_the_risk_window():
     """A period's dated pull must cover every risk window a PR merged on
     its last day opens, or that PR's exposure is unobservable."""
