@@ -22,23 +22,29 @@ The unit is the PULL REQUEST, censused per (repo, quarter):
   Q4-2025, Q1-2026, Q2-2026.
 - **Frame, as-of, and the w8 rule**: `detect.CUTOFF = 2026-06-30` is the
   FRAME end — the last PR-creation date in the study; it never changes.
-  `detect.AS_OF` is the DATA-COLLECTION stamp (== the initial collection
-  for now; bumped at each re-pull) and governs w8 maturity only. Per-PR outcomes
-  are measured at **8 weeks from PR creation** (`PRClass.merged/rejected`,
-  frozen convention §1d): a merge counts iff it happened within 56 days of
-  creation AND on or before the as-of; fate metrics are None (skipped) on
-  w8-immature PRs. Review events follow the SAME w8 rule (adopted
-  2026-07-20): a review counts iff submitted within 56 days of PR
-  creation; CUTOFF bounds PR creation, not events (an in-window event
-  past the frame end counts) — so mature PRs are immutable and re-pulls
-  only fill in immature ones. PRs
-  created after ~2026-05-05 have open w8 windows at the current as-of, so
-  Q2-2026 fate cells are PROVISIONAL until the scheduled **2026-08-26
-  re-pull** (June's last window closes 2026-08-25T23:59:59Z; re-collect
-  trailing months, bump `detect.AS_OF` — the data-collection stamp;
-  CUTOFF itself never changes), after which every Q2 window is complete —
-  the pipeline is built for this update (`monthly_update --revise-only`,
-  since August is still partial; nothing else changes). Residual: per-commit
+  `detect.AS_OF` is the DATA-COLLECTION stamp — the instant the census
+  was last pulled, bumped at each re-pull (currently
+  `2026-09-01T21:03:34Z`, the 2026-08 monthly update) — and governs w8
+  maturity only. Per-PR outcomes are measured at **8 weeks from PR
+  creation** (`PRClass.merged/rejected`, frozen convention §1d): a merge
+  counts iff it happened within 56 days of creation. `classify_pr` puts
+  no as-of bound on the event itself — the fate flags are booleans on
+  every PR — and `w8_mature` (creation + 56 days ≤ `AS_OF`) is what the
+  metrics gate on: fate metrics skip w8-immature PRs. Review events follow
+  the SAME w8 rule (adopted 2026-07-20): a review counts iff submitted
+  within 56 days of PR creation; CUTOFF bounds PR creation, not events
+  (an in-window event past the frame end counts) — so mature PRs are
+  immutable and re-pulls only fill in immature ones. History: the
+  initial collection was stamped at CUTOFF (`AS_OF` 2026-06-30), so PRs
+  created after ~2026-05-05 had open windows and Q2-2026 fate cells were
+  provisional; the 2026-08-01 monthly update (May's finalization) moved
+  the maturity frontier to 2026-06-06; June's last window closed
+  2026-08-25T23:59:59Z and the finalization re-pull ran on 2026-08-27
+  (`AS_OF` 2026-08-27T17:40:17Z; `monthly_update 2026-08 --revise-only`,
+  §1c), closing every Q2 window. Under the current stamp all
+  frozen-quarter PRs are mature; only the registered incremental months
+  carry provisional cells.
+  Residual: per-commit
   timestamps are not collected, so a marker-bearing commit pushed after the
   as-of to a still-open in-window PR is not filterable (layer A only;
   exposure grows with re-collection lag).
@@ -253,8 +259,9 @@ argument — one section = one module invocation):
     per-cell CIs; pooled ratio; per-PR medians over nonzero-addition
     PRs). **Monthly granularity** (`--granularity month`, added
     2026-08-03) uses w8-FINALIZED months only — a month reports once
-    month_end + 56d ≤ AS_OF (June 2026 has no data until the ~Aug 25
-    re-pull) — with per-unit-time floors (≥2 PRs/repo, ≥7 PRs/org-month)
+    month_end + 56d ≤ AS_OF (June 2026 reported from the 2026-08-27
+    re-pull; at the current stamp the series runs through June) — with
+    per-unit-time floors (≥2 PRs/repo, ≥7 PRs/org-month)
     and the last three finalized era months as the grouping window;
     quarters remain the precision unit, months the trend unit. The 0.1%
     balanced file-level sample (quarterly-only) and the bug-report proxy

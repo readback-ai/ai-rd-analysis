@@ -134,8 +134,12 @@ a bot list, or a review rule.
   registered as User accounts (suffix-anchored so "talbot" is human).
 - **`classify_pr()` → `PRClass`** — one frozen dataclass per PR;
   `ai_involved` = A ∪ B ∪ C. `merged` is the **w8 rule** (merged within
-  56 days of creation, ≤ cutoff); `merged_ever` is the secondary; fate
-  fields are None when the PR is not `w8_mature`.
+  56 days of creation — no cutoff or as-of bound on the event itself);
+  `merged_ever` is the secondary. Fate fields are plain booleans on
+  every PR, including immature ones; `w8_mature` (creation + 56 days ≤
+  `AS_OF`) is a separate flag, and it is the DOWNSTREAM metrics that
+  skip immature PRs — an immature PR's `merged=True` is a real observed
+  merge, just not yet reportable.
 
 Review invariant worth checking: an unlisted AI review product falls into
 "other bot", never "human" — the human-attention numerator cannot be
