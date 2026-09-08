@@ -423,6 +423,31 @@ def test_footer_states_the_population_selection(monkeypatch, capsys):
     assert "every repo with an eligible merged PR" in out
 
 
+def test_exposure_cuts_aggregate_each_group_per_period():
+    """One definition of the cuts for the table and the figure: pooled
+    sums, per-repo medians, the balanced panel as the repos rated in
+    every period, and per-kLOC undefined (None) where no repo in the
+    group has added lines."""
+    rows = [{"repo": "o/a", "per": "Q1-2024", "bugs": 2, "pr_windows": 1.0,
+             "kloc_windows": 0.0, "per_pr": 2.0, "per_kloc": None},
+            {"repo": "o/a", "per": "Q4-2025", "bugs": 1, "pr_windows": 1.0,
+             "kloc_windows": 2.0, "per_pr": 1.0, "per_kloc": 0.5},
+            {"repo": "o/b", "per": "Q4-2025", "bugs": 3, "pr_windows": 3.0,
+             "kloc_windows": 1.0, "per_pr": 1.0, "per_kloc": 3.0}]
+    cuts = churn.exposure_cuts(rows, ["Q1-2024", "Q4-2025"],
+                               {"ai_share": {}})
+    q4_all = cuts[("Q4-2025", "all")]
+    assert q4_all["repos"] == 2 and q4_all["bugs"] == 4
+    assert q4_all["pooled_per_pr"] == 1.0
+    assert q4_all["median_per_pr"] == 1.0
+    assert q4_all["pooled_per_kloc"] == 4 / 3
+    assert q4_all["median_per_kloc"] == 1.75
+    assert cuts[("Q4-2025", "balanced")]["repos"] == 1     # only o/a
+    assert cuts[("Q1-2024", "all")]["pooled_per_kloc"] is None
+    assert cuts[("Q1-2024", "all")]["median_per_kloc"] is None
+    assert ("Q1-2024", "balanced") in cuts
+
+
 def test_print_exposure_reports_frame_drift(monkeypatch, capsys):
     """Review finding 4: the numerator is frozen while the denominator is
     read live, so the table must say when the live frame no longer
