@@ -702,11 +702,13 @@ def active_insider_deciles(pre: str = "Q4-2025") -> dict:
 QUARTER_MONTHS = {"Q1-2024": BASELINE_MONTHS, "Q4-2025": WINDOW_MONTHS[:3],
                   "Q1-2026": WINDOW_MONTHS[3:6], "Q2-2026": WINDOW_MONTHS[6:9]}
 
+PRODUCTIVE_MIN_QUARTER = 5   # submitted PRs in EVERY study quarter, and
+#                              a mean of >=ACTIVE_FLOOR over all four
 INSIDER_POPULATIONS = [
     ("any", "period-active insiders (>=1 PR in the quarter)"),
     ("productive",
-     f"productive panel (active every quarter; >={ACTIVE_FLOOR} submitted "
-     f"PRs/quarter averaged over the window)"),
+     f"productive panel (>={PRODUCTIVE_MIN_QUARTER} submitted PRs in every "
+     f"quarter and a mean of >={ACTIVE_FLOOR}/quarter over all four)"),
     ("panel", "balanced panel (>=1 PR in all four quarters)"),
 ]
 INSIDER_SLICES = [("all", "all"),
@@ -780,15 +782,17 @@ def _insider_cells() -> dict[tuple, list[float]]:
       panel      — insiders with >=1 PR in EVERY study quarter (a fixed
                    set: the same people throughout, hence survivor-
                    selected toward long-tenured maintainers)
-      productive — the panel members whose submitted PRs AVERAGE
-                   >=ACTIVE_FLOOR per quarter over the window quarters.
-                   Membership is decided once: a per-quarter floor would
-                   re-select people on a quantity correlated with the
-                   outcome every quarter and churn those near the line
-                   (8, 12, 9 PRs), so the floor is applied to the window
-                   mean. The floor is what makes never-AI a behavioural
-                   claim — dozens of PRs in which a marker could have
-                   appeared, none did.
+      productive — panel members with >=PRODUCTIVE_MIN_QUARTER submitted
+                   PRs in EVERY study quarter and a mean of >=ACTIVE_FLOOR
+                   per quarter over ALL FOUR. Membership is decided once
+                   and the baseline quarter counts like any other: a
+                   per-quarter floor would re-select people on a quantity
+                   correlated with the outcome each quarter and churn
+                   those near the line (8, 12, 9 PRs), and a window-only
+                   mean would admit people who ramped up during the
+                   window and so overstate growth. The floor is what makes
+                   never-AI a behavioural claim — dozens of PRs in which
+                   a marker could have appeared, none did.
     Slices: all; ever_ai / never_ai by whether any AI-involved PR appeared
     in the window (Q4-2025..Q2-2026 — the baseline has no detectable
     channel), the split the decile studies use.
@@ -813,10 +817,11 @@ def _insider_cells() -> dict[tuple, list[float]]:
                    for r in rows(who, quarter))
 
     panel = [w for w in insiders if all(prs(w, q) > 0 for q in QUARTER_MONTHS)]
-    window_q = [q for q in QUARTER_MONTHS if q != "Q1-2024"]
     productive = [w for w in panel
-                  if sum(prs(w, q) for q in window_q) / len(window_q)
-                  >= ACTIVE_FLOOR]
+                  if all(prs(w, q) >= PRODUCTIVE_MIN_QUARTER
+                         for q in QUARTER_MONTHS)
+                  and sum(prs(w, q) for q in QUARTER_MONTHS)
+                  / len(QUARTER_MONTHS) >= ACTIVE_FLOOR]
 
     def members(pop, quarter):
         if pop == "any":

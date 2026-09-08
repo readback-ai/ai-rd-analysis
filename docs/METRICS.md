@@ -292,14 +292,17 @@ prefixes of the population files, repo count, and cell-coverage numbers
   minus the panel, it isolates composition), the **balanced panel**
   (>=1 PR in every study quarter — the same people throughout, hence
   survivor-selected toward long-tenured maintainers), and the
-  **productive panel** (panel members whose submitted PRs average
-  >=`ACTIVE_FLOOR` = 10 per quarter over the window quarters).
-  Membership is decided ONCE: a per-quarter floor re-selects people each
-  quarter on a quantity correlated with the outcome and churns those
-  near the line — under such a rule 68% of the insiders who ever cleared
-  10 PRs in a window quarter crossed the line at least once — so the
-  floor applies to the window mean. It is the Figure A5 floor that
-  makes never-AI a behavioural claim (>=30 window PRs with no marker).
+  **productive panel** (panel members with >=`PRODUCTIVE_MIN_QUARTER` =
+  5 submitted PRs in EVERY study quarter and a mean of >=`ACTIVE_FLOOR`
+  = 10 per quarter over all four). Membership is decided ONCE and the
+  baseline quarter counts like any other: a per-quarter floor re-selects
+  people each quarter on a quantity correlated with the outcome and
+  churns those near the line — under such a rule 68% of the insiders
+  who ever cleared 10 PRs in a window quarter crossed the line at least
+  once — and a window-only mean admits people who ramped up during the
+  window, overstating growth. The 10/quarter mean is the Figure A5
+  floor that makes never-AI a behavioural claim (>=40 study-quarter PRs
+  with no marker).
   Slices: all, ever-AI, never-AI (any AI-involved PR in the Q4-2025..
   Q2-2026 window, as in the decile studies). Bands are seeded percentile
   bootstraps of the median over persons; `n` per quarter is in the CSV.

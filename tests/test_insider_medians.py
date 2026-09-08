@@ -45,10 +45,14 @@ def authors(monkeypatch):
     a: 12 PRs, 30 submitted / 18 merged kLOC, ever-AI, active always
     b:  3 PRs,  6 / 3, never-AI, active always
     c: 15 PRs, 60 / 30, never-AI, active in Q2-2026 only
-    d: 1 PR at baseline then 9, 9, 12 PRs (window mean 10.0) — active
-       always, submitted 3 then 15 kLOC/quarter, never-AI
-    e: 1 PR at baseline then 8, 12, 9 PRs (window mean 9.67) — active
-       always, never-AI: clears the floor in one quarter, misses in two
+    d: 1 PR at baseline then 9, 9, 12 (window mean 10.0, overall 7.75)
+       — a window ramp-up; submitted 3 then 15 kLOC/quarter, never-AI
+    e: 1 PR at baseline then 8, 12, 9 — never-AI; clears 10 in one
+       quarter, misses in two
+    g: 6, 10, 12, 12 PRs (min 6, mean 10.0) — submitted 6 then 12
+       kLOC/quarter, never-AI: the productive rule's boundary member
+    h: 4, 20, 20, 20 PRs (mean 16 but a 4-PR baseline) — 20 kLOC/quarter,
+       never-AI
     f: fleet operator, active always, must never count"""
     acc = {
         "a": _months(4, 10.0, 6.0, ai=True),
@@ -61,6 +65,13 @@ def authors(monkeypatch):
         "e": _by_quarter({"Q1-2024": 1, "Q4-2025": 8, "Q1-2026": 12,
                           "Q2-2026": 9},
                          {q: 9.0 for q in QUARTER_MONTHS}),
+        "g": _by_quarter({"Q1-2024": 6, "Q4-2025": 10, "Q1-2026": 12,
+                          "Q2-2026": 12},
+                         {"Q1-2024": 6.0, "Q4-2025": 12.0, "Q1-2026": 12.0,
+                          "Q2-2026": 12.0}),
+        "h": _by_quarter({"Q1-2024": 4, "Q4-2025": 20, "Q1-2026": 20,
+                          "Q2-2026": 20},
+                         {q: 20.0 for q in QUARTER_MONTHS}),
         "f": _months(200, 500.0, 400.0, ai=True),
     }
     cohorts = {w: "never" for w in acc}
@@ -72,36 +83,36 @@ def authors(monkeypatch):
 def test_any_population_is_the_quarter_active_insiders(authors):
     out = insider_medians(draws=50)
     q2 = out[("any", "all", "submitted", "Q2-2026")]
-    # a, b, c, d, e -> 30, 6, 60, 15, 9
-    assert q2["n"] == 5 and q2["median"] == 15.0
+    # a, b, c, d, e, g, h -> 30, 6, 60, 15, 9, 12, 20
+    assert q2["n"] == 7 and q2["median"] == 15.0
     q1 = out[("any", "all", "submitted", "Q1-2024")]
-    assert q1["n"] == 4 and q1["median"] == 7.5        # a, b, d, e -> 30, 6, 3, 9
+    # a, b, d, e, g, h -> 30, 6, 3, 9, 6, 20
+    assert q1["n"] == 6 and q1["median"] == 7.5
 
 
-def test_productive_panel_is_fixed_on_the_window_mean(authors):
-    """Membership is decided once from the window-mean PR count, so a
-    contributor at 9, 9, 12 (mean 10.0) is in for every quarter and one
-    at 8, 12, 9 (mean 9.67) is out for every quarter — never popping in
-    and out around the floor."""
+def test_productive_panel_is_symmetric_across_quarters(authors):
+    """Membership is decided once from >=5 PRs in EVERY quarter and a
+    mean of >=10 over all four, the baseline weighted like any other
+    quarter: g (6, 10, 12, 12) is in everywhere; d (1, 9, 9, 12 — a
+    window ramp-up with window mean 10) and h (4, 20, 20, 20 — mean 16
+    but a 4-PR baseline) are out everywhere, as is e (1, 8, 12, 9), which
+    a per-quarter floor would admit in one quarter only."""
     out = insider_medians(draws=50)
-    assert ACTIVE_FLOOR == 10
+    assert (ACTIVE_FLOOR, productivity.PRODUCTIVE_MIN_QUARTER) == (10, 5)
     for q in QUARTER_MONTHS:
         cell = out[("productive", "all", "submitted", q)]
-        assert cell["n"] == 2, q                       # a and d, every quarter
-    assert out[("productive", "all", "submitted", "Q2-2026")]["median"] == 22.5
-    assert out[("productive", "all", "submitted", "Q1-2024")]["median"] == 16.5
-    # e clears 10 in Q1-2026 alone; under a per-quarter floor it would
-    # appear there and vanish elsewhere — it appears nowhere
-    assert out[("productive", "all", "merged", "Q1-2026")]["n"] == 2
+        assert cell["n"] == 2, q                       # a and g, every quarter
+    assert out[("productive", "all", "submitted", "Q1-2024")]["median"] == 18.0
+    assert out[("productive", "all", "submitted", "Q2-2026")]["median"] == 21.0
 
 
 def test_panel_is_the_same_people_in_every_quarter(authors):
     out = insider_medians(draws=50)
     for q in QUARTER_MONTHS:
         cell = out[("panel", "all", "submitted", q)]
-        assert cell["n"] == 4, q                       # a, b, d, e (not c)
+        assert cell["n"] == 6, q                       # a, b, d, e, g, h (not c)
     # c is quarter-active only in Q2-2026, so never in the panel
-    assert out[("panel", "all", "submitted", "Q2-2026")]["median"] == 12.0
+    assert out[("panel", "all", "submitted", "Q2-2026")]["median"] == 13.5
 
 
 def test_ai_slices_split_on_window_evidence_and_fleet_is_excluded(authors):
@@ -109,7 +120,7 @@ def test_ai_slices_split_on_window_evidence_and_fleet_is_excluded(authors):
     ever = out[("any", "ever_ai", "submitted", "Q2-2026")]
     never = out[("any", "never_ai", "submitted", "Q2-2026")]
     assert ever["n"] == 1 and ever["median"] == 30.0       # a only; f excluded
-    assert never["n"] == 4 and never["median"] == 12.0     # b, c, d, e
+    assert never["n"] == 6 and never["median"] == 13.5     # b, c, d, e, g, h
     assert math.isnan(ever["lo"]) and math.isnan(ever["hi"])   # n < 2: no CI
 
 
@@ -123,9 +134,9 @@ def test_growth_normalizes_each_series_to_its_own_baseline(authors):
     assert out[("any", "all", "submitted", "Q2-2026")]["mult"] == \
         pytest.approx(15.0 / 7.5)
     assert out[("productive", "all", "submitted", "Q2-2026")]["mult"] == \
-        pytest.approx(22.5 / 16.5)
+        pytest.approx(21.0 / 18.0)
     q2 = out[("any", "all", "submitted", "Q2-2026")]
-    assert q2["n"] == 5 and q2["n_base"] == 4
+    assert q2["n"] == 7 and q2["n_base"] == 6
 
 
 def test_growth_ratio_ci_brackets_the_multiple_or_is_nan(authors):

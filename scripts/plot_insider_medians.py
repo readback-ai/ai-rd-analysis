@@ -8,10 +8,12 @@ population (fleet operators excluded from all), two panels (submitted
 kLOC, no censoring | merged kLOC, w8 rule), three series (all insiders,
 ever-AI, never-AI — any AI-involved PR in the window):
 
-  productive — insider_medians_productive: panel members averaging >=10
-               submitted PRs/quarter over the window (membership decided
-               once, so nobody near the floor pops in and out) — the
-               headline population
+  productive — insider_medians_productive: panel members with >=5
+               submitted PRs in every study quarter and a mean of >=10
+               per quarter over all four (membership decided once, the
+               baseline weighted like any other quarter, so nobody near
+               the floor pops in and out and window ramp-ups are not
+               selected for) — the headline population
   active     — insider_medians_active: period-active insiders (>=1 PR in
                the quarter; the only population whose membership changes)
   panel      — insider_medians_panel: insiders active in all four study
@@ -49,7 +51,7 @@ STEMS = {"any": "active", "productive": "productive", "panel": "panel"}
 # in the CSV's panel_label
 POP_TITLES = {
     "any": "period-active insiders (≥1 PR in the quarter)",
-    "productive": "productive panel (≥10 PRs/quarter avg over the window)",
+    "productive": "productive panel (≥5 PRs every quarter, mean ≥10)",
     "panel": "balanced panel (≥1 PR in all four quarters)",
 }
 _ROWS: dict = {}
