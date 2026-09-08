@@ -32,6 +32,13 @@ from pipeline.studies.productivity import (INSIDER_METRICS,
 
 NAME = "insider_medians"
 COLORS = {"all": "0.25", "ever_ai": PAIR_ORANGE[0], "never_ai": PAIR_BLUE[0]}
+# column titles: short and wrapped so adjacent panels never collide; the
+# full population definition stays in the CSV's panel_label
+COLUMN_TITLES = {
+    "any": "period-active insiders\n(≥1 PR in the quarter)",
+    "productive": "productive insiders\n(≥10 submitted PRs in the quarter)",
+    "panel": "balanced panel\n(≥1 PR in all four quarters)",
+}
 
 
 def collect() -> Table:
@@ -66,13 +73,16 @@ def _series(axl, axr, pts, label, color):
 
 
 def render(t: Table):
-    fig = plt.figure(figsize=(13, 7.5))
+    fig = plt.figure(figsize=(13, 8))
     subfigs = fig.subfigures(len(INSIDER_METRICS), len(INSIDER_POPULATIONS),
-                             hspace=0.08, wspace=0.05)
+                             hspace=0.1, wspace=0.05)
     for r, (metric, mlabel) in enumerate(INSIDER_METRICS):
         for c, (pop, _plabel) in enumerate(INSIDER_POPULATIONS):
             panel = f"{metric}|{pop}"
-            axl, axr = broken_pair(subfigs[r][c], t.label_of(panel))
+            # column title on the top row only; the row's y-label names
+            # the metric, so lower panels need no title
+            title = COLUMN_TITLES[pop] if r == 0 else ""
+            axl, axr = broken_pair(subfigs[r][c], title)
             for sl, slabel in INSIDER_SLICES:
                 pts = t.points(panel, sl)
                 n = [int(p["value"]) for p in t.points(panel, f"n_{sl}")]
