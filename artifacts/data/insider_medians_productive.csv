@@ -1,49 +1,49 @@
 panel,panel_label,series,series_label,x,x_label,value,lo,hi
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),all,all,0.0,Q1-2024,3.305,2.863,4.179649999999997
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_all,"n, all",0.0,Q1-2024,499,,
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),all,all,1.0,Q4-2025,9.54,7.829,11.912999999999998
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_all,"n, all",1.0,Q4-2025,499,,
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),all,all,2.0,Q1-2026,12.504999999999999,10.761,14.868
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_all,"n, all",2.0,Q1-2026,499,,
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),all,all,3.0,Q2-2026,15.444,12.602,19.038000000000004
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_all,"n, all",3.0,Q2-2026,499,,
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),ever_ai,ever used AI (detected),0.0,Q1-2024,4.819000000000001,3.65,6.341524999999996
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_ever_ai,"n, ever used AI (detected)",0.0,Q1-2024,296,,
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),ever_ai,ever used AI (detected),1.0,Q4-2025,13.470999999999997,10.2665,15.706999999999997
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_ever_ai,"n, ever used AI (detected)",1.0,Q4-2025,296,,
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),ever_ai,ever used AI (detected),2.0,Q1-2026,18.409999999999997,15.085,22.806
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_ever_ai,"n, ever used AI (detected)",2.0,Q1-2026,296,,
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),ever_ai,ever used AI (detected),3.0,Q2-2026,23.516,20.400575,30.3825
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_ever_ai,"n, ever used AI (detected)",3.0,Q2-2026,296,,
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),never_ai,never used AI (detected),0.0,Q1-2024,2.183,1.763,2.864
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_never_ai,"n, never used AI (detected)",0.0,Q1-2024,203,,
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),never_ai,never used AI (detected),1.0,Q4-2025,6.654999999999999,5.082,8.019
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_never_ai,"n, never used AI (detected)",1.0,Q4-2025,203,,
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),never_ai,never used AI (detected),2.0,Q1-2026,7.383,5.683999999999999,8.899474999999997
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_never_ai,"n, never used AI (detected)",2.0,Q1-2026,203,,
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),never_ai,never used AI (detected),3.0,Q2-2026,8.189,6.023,10.139
-submitted,submitted kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_never_ai,"n, never used AI (detected)",3.0,Q2-2026,203,,
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),all,all,0.0,Q1-2024,2.07,1.578,2.548
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_all,"n, all",0.0,Q1-2024,499,,
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),all,all,1.0,Q4-2025,6.65,5.644,7.857
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_all,"n, all",1.0,Q4-2025,499,,
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),all,all,2.0,Q1-2026,7.816,6.147,9.247
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_all,"n, all",2.0,Q1-2026,499,,
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),all,all,3.0,Q2-2026,9.112,7.728999999999999,11.039000000000001
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_all,"n, all",3.0,Q2-2026,499,,
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),ever_ai,ever used AI (detected),0.0,Q1-2024,3.0599999999999996,2.271,4.010487499999996
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_ever_ai,"n, ever used AI (detected)",0.0,Q1-2024,296,,
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),ever_ai,ever used AI (detected),1.0,Q4-2025,8.8485,7.1775,11.074
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_ever_ai,"n, ever used AI (detected)",1.0,Q4-2025,296,,
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),ever_ai,ever used AI (detected),2.0,Q1-2026,11.158999999999999,9.2785,14.482574999999986
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_ever_ai,"n, ever used AI (detected)",2.0,Q1-2026,296,,
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),ever_ai,ever used AI (detected),3.0,Q2-2026,14.177,12.111,19.16346249999999
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_ever_ai,"n, ever used AI (detected)",3.0,Q2-2026,296,,
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),never_ai,never used AI (detected),0.0,Q1-2024,1.121,0.687,1.6949999999999998
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_never_ai,"n, never used AI (detected)",0.0,Q1-2024,203,,
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),never_ai,never used AI (detected),1.0,Q4-2025,4.6129999999999995,3.027,5.695
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_never_ai,"n, never used AI (detected)",1.0,Q4-2025,203,,
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),never_ai,never used AI (detected),2.0,Q1-2026,4.158999999999999,3.07755,5.718999999999999
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_never_ai,"n, never used AI (detected)",2.0,Q1-2026,203,,
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),never_ai,never used AI (detected),3.0,Q2-2026,4.399000000000001,2.755,6.5329999999999995
-merged,merged (w8) kLOC / insider / quarter — productive panel (active every quarter; >=10 submitted PRs/quarter averaged over the window),n_never_ai,"n, never used AI (detected)",3.0,Q2-2026,203,,
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),all,all,0.0,Q1-2024,6.26,4.911,7.3987499999999695
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_all,"n, all",0.0,Q1-2024,337,,
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),all,all,1.0,Q4-2025,10.445,8.388000000000002,13.602
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_all,"n, all",1.0,Q4-2025,337,,
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),all,all,2.0,Q1-2026,14.349999999999998,11.195999999999998,18.367
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_all,"n, all",2.0,Q1-2026,337,,
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),all,all,3.0,Q2-2026,17.720999999999997,12.848999999999998,20.961999999999996
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_all,"n, all",3.0,Q2-2026,337,,
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),ever_ai,ever used AI (detected),0.0,Q1-2024,8.195,6.539999999999999,9.828999999999999
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_ever_ai,"n, ever used AI (detected)",0.0,Q1-2024,202,,
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),ever_ai,ever used AI (detected),1.0,Q4-2025,16.0965,13.377,19.819049999999994
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_ever_ai,"n, ever used AI (detected)",1.0,Q4-2025,202,,
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),ever_ai,ever used AI (detected),2.0,Q1-2026,22.332,18.311499999999995,29.249
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_ever_ai,"n, ever used AI (detected)",2.0,Q1-2026,202,,
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),ever_ai,ever used AI (detected),3.0,Q2-2026,24.731499999999997,21.164500000000004,33.202074999999994
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_ever_ai,"n, ever used AI (detected)",3.0,Q2-2026,202,,
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),never_ai,never used AI (detected),0.0,Q1-2024,3.5710000000000006,2.5603000000000002,5.3629999999999995
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_never_ai,"n, never used AI (detected)",0.0,Q1-2024,135,,
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),never_ai,never used AI (detected),1.0,Q4-2025,6.087000000000001,4.5649999999999995,7.298
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_never_ai,"n, never used AI (detected)",1.0,Q4-2025,135,,
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),never_ai,never used AI (detected),2.0,Q1-2026,7.044999999999999,5.539,8.968
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_never_ai,"n, never used AI (detected)",2.0,Q1-2026,135,,
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),never_ai,never used AI (detected),3.0,Q2-2026,8.268999999999998,6.023,11.022149999999982
+submitted,submitted kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_never_ai,"n, never used AI (detected)",3.0,Q2-2026,135,,
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),all,all,0.0,Q1-2024,3.943,3.1010000000000004,4.529999999999999
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_all,"n, all",0.0,Q1-2024,337,,
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),all,all,1.0,Q4-2025,7.298,5.995,9.619
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_all,"n, all",1.0,Q4-2025,337,,
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),all,all,2.0,Q1-2026,8.464,6.874,10.643
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_all,"n, all",2.0,Q1-2026,337,,
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),all,all,3.0,Q2-2026,10.777999999999995,8.81,13.155999999999999
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_all,"n, all",3.0,Q2-2026,337,,
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),ever_ai,ever used AI (detected),0.0,Q1-2024,5.1645,4.20295,6.6899999999999995
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_ever_ai,"n, ever used AI (detected)",0.0,Q1-2024,202,,
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),ever_ai,ever used AI (detected),1.0,Q4-2025,11.1405,9.266187500000001,14.752999999999993
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_ever_ai,"n, ever used AI (detected)",1.0,Q4-2025,202,,
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),ever_ai,ever used AI (detected),2.0,Q1-2026,15.4985,10.559999999999999,19.576737499999986
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_ever_ai,"n, ever used AI (detected)",2.0,Q1-2026,202,,
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),ever_ai,ever used AI (detected),3.0,Q2-2026,16.7825,13.4725,20.665
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_ever_ai,"n, ever used AI (detected)",3.0,Q2-2026,202,,
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),never_ai,never used AI (detected),0.0,Q1-2024,2.133,1.5270000000000001,3.0749999999999997
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_never_ai,"n, never used AI (detected)",0.0,Q1-2024,135,,
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),never_ai,never used AI (detected),1.0,Q4-2025,4.071,2.491,5.302
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_never_ai,"n, never used AI (detected)",1.0,Q4-2025,135,,
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),never_ai,never used AI (detected),2.0,Q1-2026,4.158999999999999,2.774,5.718999999999999
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_never_ai,"n, never used AI (detected)",2.0,Q1-2026,135,,
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),never_ai,never used AI (detected),3.0,Q2-2026,5.528999999999999,2.755,7.8180000000000005
+merged,merged (w8) kLOC / insider / quarter — productive panel (>=5 submitted PRs in every quarter and a mean of >=10/quarter over all four),n_never_ai,"n, never used AI (detected)",3.0,Q2-2026,135,,
