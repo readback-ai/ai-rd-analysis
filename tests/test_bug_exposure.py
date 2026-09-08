@@ -283,6 +283,45 @@ def test_incomplete_page_is_refused(monkeypatch):
     assert churn._gh_search_page("q", 1) is None
 
 
+def test_search_follows_a_renamed_repo(monkeypatch):
+    """Population survey: 23 repos were unpullable because search refuses
+    a repo's former name, while the census still knows them by it. A
+    renamed repo keeps its issues and the API redirects the old name, so
+    a refused count is retried under the resolved name — the cell stays
+    keyed by the census name."""
+    queries = []
+
+    def count(q, *_a):
+        queries.append(q)
+        return None if "repo:old/name" in q else 1
+    monkeypatch.setattr(churn, "_search_count", count)
+    monkeypatch.setattr(churn, "_resolve_repo", lambda _r: "new/name")
+    monkeypatch.setattr(churn, "_gh_search_page",
+                        lambda _q, _p: [[1, "2024-01-01"]])
+    monkeypatch.setattr(churn.time, "sleep", lambda _s: None)
+    assert churn.search_issue_days("old/name", "2024-01-01..2024-01-31") \
+        == [[1, "2024-01-01"]]
+    assert any("repo:new/name" in q for q in queries)
+
+
+def test_unresolvable_repo_stays_missing(monkeypatch):
+    """A deleted repo resolves to nothing; the cell stays missing rather
+    than being recorded as empty."""
+    monkeypatch.setattr(churn, "_search_count", lambda *_a: None)
+    monkeypatch.setattr(churn, "_resolve_repo", lambda _r: None)
+    monkeypatch.setattr(churn.time, "sleep", lambda _s: None)
+    assert churn.search_issue_days("gone/repo", "2024-01-01..2024-01-31") \
+        is None
+
+
+def test_resolve_repo_reads_the_canonical_name(monkeypatch):
+    monkeypatch.setattr(churn, "_gh", lambda *_a, **_k: "hydra-ecosystem/hydra\n")
+    assert churn._resolve_repo("facebookresearch/hydra") == \
+        "hydra-ecosystem/hydra"
+    monkeypatch.setattr(churn, "_gh", lambda *_a, **_k: None)
+    assert churn._resolve_repo("gone/repo") is None
+
+
 def test_incomplete_count_is_not_trusted(monkeypatch):
     """Second review, finding 1: if the count query itself was
     incomplete, `len(rows) == total` is false assurance — the count is

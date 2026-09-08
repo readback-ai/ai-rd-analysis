@@ -122,6 +122,8 @@ SEARCH_CAP = 1000            # GitHub search cannot page past this
 # issues are fetched (completeness, ordering, retries) must reach every
 # frozen cell, and reuse by key alone would keep the old payloads
 # forever. Bump when the fetch changes in a way that can alter a cell.
+# Following a rename does not: a cell that froze under its census name
+# would issue the identical query today, so only failed cells can change.
 COLLECTOR = 2
 # Which repos the dated pull selects. Part of the artifact's fingerprint:
 # the frame alone cannot tell a pilot-scoped freeze from a population one
@@ -737,10 +739,24 @@ def search_issue_days(repo: str, rng: str, pace: float = 2.0,
     in `rng`. Search cannot page past SEARCH_CAP results, so an
     over-full range is bisected until each part fits. None = a query gave
     up; the caller must not record that as an empty cell."""
-    q = f"repo:{repo} is:issue label:{BUG_LABEL} created:{rng}"
+    def query(name: str) -> str:
+        return f"repo:{name} is:issue label:{BUG_LABEL} created:{rng}"
+
+    q = query(repo)
     total = _search_count(q)
-    if total is None:          # no count, or a count search that timed out
-        return None
+    if total is None:
+        # search refuses a repo's former name while the census still
+        # uses it; the API redirects the old name, and a renamed repo
+        # keeps its issues, so retry once under the canonical name (the
+        # cell stays keyed by the census name). A deleted repo resolves
+        # to nothing and the cell stays missing.
+        resolved = _resolve_repo(repo)
+        if not resolved or resolved == repo:
+            return None
+        q = query(resolved)
+        total = _search_count(q)
+        if total is None:
+            return None
     if total > SEARCH_CAP:
         parts = _split_range(rng)
         if len(parts) == 1:                  # single day over the cap
@@ -768,6 +784,18 @@ def search_issue_days(repo: str, rng: str, pace: float = 2.0,
     # moved) would freeze an understated cell that reconcile then reuses
     # forever — refuse it, so the cell stays missing and is re-pulled
     return rows if len(rows) == total else None
+
+
+_RESOLVED: dict[str, str | None] = {}
+
+
+def _resolve_repo(repo: str) -> str | None:
+    """The repo's current full name (the API follows renames), or None
+    when it no longer resolves. Memoized per process."""
+    if repo not in _RESOLVED:
+        out = _gh(["api", f"repos/{repo}", "--jq", ".full_name"])
+        _RESOLVED[repo] = out.strip() if out and out.strip() else None
+    return _RESOLVED[repo]
 
 
 def _search_json(args: list[str], retries: int, backoff: float):
