@@ -309,8 +309,10 @@ prefixes of the population files, repo count, and cell-coverage numbers
   The growth twins (`productivity.insider_growth`;
   `artifacts/insider_medians_growth_*.png`) divide every series by its
   own Q1-2024 median, so each population and slice starts at 1.0 and
-  the panels compare growth rather than levels; its bands resample the
-  two quarters independently (conservative for the fixed panel).
+  the panels compare growth rather than levels; their bands resample
+  person indices JOINTLY for the two fixed panels (the same people in
+  both quarters — a panel in which everyone doubles reads exactly 2x)
+  and the two quarters independently for the period-active population.
 - `pipeline.studies.accountability`, `review_modes`, `corpus` — the
   behavioral studies behind the working log (sampled, seeded); re-derive on
   the final population before citing.

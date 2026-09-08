@@ -139,6 +139,27 @@ def test_growth_normalizes_each_series_to_its_own_baseline(authors):
     assert q2["n"] == 7 and q2["n_base"] == 6
 
 
+def test_growth_ci_is_paired_for_fixed_panels(monkeypatch):
+    """The growth bootstrap resampled the baseline and later quarters
+    independently even for the fixed panels, whose members are the same
+    people in every quarter: with every member exactly doubling, the
+    interval spanned 0.25x-16x instead of collapsing to 2x. Fixed panels
+    resample person indices jointly."""
+    subs = {"p1": 1.0, "p2": 2.0, "p3": 3.0, "p4": 4.0}
+    acc = {w: _by_quarter({q: 12 for q in QUARTER_MONTHS},
+                          {"Q1-2024": s, "Q4-2025": 2 * s, "Q1-2026": 2 * s,
+                           "Q2-2026": 2 * s})
+           for w, s in subs.items()}
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda window=None: (acc, {w: "never" for w in acc},
+                                             {}, set()))
+    out = productivity.insider_growth(draws=100)
+    for pop in ("panel", "productive"):           # 12 PRs/q clears both
+        cell = out[(pop, "all", "submitted", "Q2-2026")]
+        assert cell["n"] == 4
+        assert (cell["mult"], cell["lo"], cell["hi"]) == (2.0, 2.0, 2.0), pop
+
+
 def test_growth_ratio_ci_brackets_the_multiple_or_is_nan(authors):
     out = productivity.insider_growth(draws=200)
     cell = out[("any", "all", "submitted", "Q2-2026")]

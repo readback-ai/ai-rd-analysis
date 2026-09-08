@@ -743,16 +743,21 @@ def _median_ci(vals: list[float], draws: int, key: str) -> dict:
 
 
 def _ratio_ci(vals: list[float], base: list[float], draws: int,
-              key: str) -> dict:
+              key: str, paired: bool) -> dict:
     """{n, n_base, mult, lo, hi}: median(vals) / median(base) with a
-    seeded percentile bootstrap resampling the two quarters independently
-    (conservative for the fixed panel, whose members are the same people
-    in both). NaN where either median is undefined or the base is zero;
-    CIs NaN below two members on either side."""
+    seeded percentile bootstrap. `paired`: `vals[i]` and `base[i]` are the
+    same person (a fixed panel), so each draw resamples person indices
+    ONCE and applies them to both quarters — a panel in which everyone
+    doubles yields exactly 2x. Unpaired (membership differs between the
+    quarters) resamples the two quarters independently. NaN where either
+    median is undefined or the base is zero; CIs NaN below two members on
+    either side."""
     import numpy as np
     from pipeline.analyze import _stream
     nan = float("nan")
     n, nb = len(vals), len(base)
+    if paired and n != nb:
+        raise ValueError(f"paired ratio needs aligned members: {n} vs {nb}")
     if n == 0 or nb == 0 or float(np.median(base)) == 0.0:
         return {"n": n, "n_base": nb, "mult": nan, "lo": nan, "hi": nan}
     v, b = np.asarray(vals, dtype=float), np.asarray(base, dtype=float)
@@ -763,9 +768,9 @@ def _ratio_ci(vals: list[float], base: list[float], draws: int,
     ratios = np.empty(draws)
     for i in range(0, draws, 250):
         k = min(250, draws - i)
-        mv = np.median(v[rng.integers(0, n, size=(k, n))], axis=1)
-        mb = np.median(b[rng.integers(0, nb, size=(k, nb))], axis=1)
-        ratios[i:i + k] = mv / mb
+        iv = rng.integers(0, n, size=(k, n))
+        ib = iv if paired else rng.integers(0, nb, size=(k, nb))
+        ratios[i:i + k] = np.median(v[iv], axis=1) / np.median(b[ib], axis=1)
     lo, hi = np.percentile(ratios, [2.5, 97.5])
     return {"n": n, "n_base": nb, "mult": mult, "lo": float(lo),
             "hi": float(hi)}
@@ -858,7 +863,10 @@ def insider_growth(draws: int = 2000, cells: dict | None = None) -> dict:
     each series' median divided by ITS OWN Q1-2024 median, so every
     population and slice starts at 1.0 and the chart compares growth
     rather than levels. The baseline cell is 1.0 by construction (no
-    interval); other cells carry the _ratio_ci bootstrap."""
+    interval); other cells carry the _ratio_ci bootstrap — PAIRED for the
+    fixed panels (productive, panel: the same people in every quarter,
+    in the same order in every cell) and independent for the
+    period-active population, whose membership differs by quarter."""
     cells = _insider_cells() if cells is None else cells
     out = {}
     for (pop, sl, metric, quarter), vals in cells.items():
@@ -870,7 +878,8 @@ def insider_growth(draws: int = 2000, cells: dict | None = None) -> dict:
             continue
         out[(pop, sl, metric, quarter)] = _ratio_ci(
             vals, base, draws,
-            key="insider_growth|" + "|".join((pop, sl, metric, quarter)))
+            key="insider_growth|" + "|".join((pop, sl, metric, quarter)),
+            paired=pop != "any")
     return out
 
 
