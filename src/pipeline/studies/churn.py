@@ -1053,6 +1053,48 @@ def label_users(cells: list[dict]) -> set[str]:
     return {d["repo"] for d in cells if d.get("days")}
 
 
+CUT_GROUPS = ("all", "balanced", "low-AI", "high-AI")
+
+
+def exposure_cuts(rows: list[dict], periods: list[str], meta: dict,
+                  ) -> dict[tuple[str, str], dict]:
+    """The appendix cuts of the exposure rows, one definition for the
+    table and the figure: per (period, group) the repo count, pooled
+    numerator and exposures, pooled rates and per-repo medians.
+
+    Groups: every rated repo; the balanced panel (repos rated in every
+    period, so a trend there cannot be composition); and the low/high-AI
+    halves by the grouping-window AI share stamped in the freeze.
+    Per-kLOC rates are None where the group has no added lines (pooled)
+    or no repo with a defined rate (median). Groups with no rows in a
+    period are absent."""
+    repos = {r["repo"] for r in rows}
+    balanced = {r for r in repos
+                if all(any(x["repo"] == r and x["per"] == p for x in rows)
+                       for p in periods)}
+    lo, hi, _unranked = rank_groups(repos, meta["ai_share"])
+    members = dict(zip(CUT_GROUPS, (repos, balanced, lo, hi)))
+    out: dict[tuple[str, str], dict] = {}
+    for per in periods:
+        for label in CUT_GROUPS:
+            rs = [r for r in rows
+                  if r["per"] == per and r["repo"] in members[label]]
+            if not rs:
+                continue
+            b = sum(r["bugs"] for r in rs)
+            pw = sum(r["pr_windows"] for r in rs)
+            kw = sum(r["kloc_windows"] for r in rs)
+            defined = [r["per_kloc"] for r in rs if r["per_kloc"] is not None]
+            out[(per, label)] = {
+                "repos": len(rs), "bugs": b, "pr_windows": pw,
+                "kloc_windows": kw,
+                "pooled_per_pr": b / pw,
+                "median_per_pr": median([r["per_pr"] for r in rs]),
+                "pooled_per_kloc": b / kw if kw > 0 else None,
+                "median_per_kloc": median(defined) if defined else None}
+    return out
+
+
 def print_exposure(granularity: str = "quarter",
                    live_fp: str | None = None) -> None:
     """`live_fp` is the fingerprint of the frame the denominators are read
@@ -1089,34 +1131,24 @@ def print_exposure(granularity: str = "quarter",
     if live_fp is not None:
         print(_drift_line(mani, live_fp))
 
-    # cuts: every label-using repo; the balanced panel (rated in every
-    # period, so a trend cannot be composition); and the counted table's
-    # low/high-AI repo halves
-    repos = {r["repo"] for r in rows}
-    balanced = {r for r in repos
-                if all(any(x["repo"] == r and x["per"] == p for x in rows)
-                       for p in periods)}
-    lo, hi, _unranked = rank_groups(repos, mani["ai_share"])
-    groups = (("all", repos), ("balanced", balanced), ("low-AI", lo),
-              ("high-AI", hi))
+    cuts = exposure_cuts(rows, periods, mani)
     print(f"{'period':9}{'group':10}{'repos':>6}{'bugs':>7}{'PRwin':>10}"
           f"{'kLOCwin':>10}{'pooled/PR':>11}{'med/PR':>9}"
           f"{'pooled/kLOC':>13}{'med/kLOC':>10}")
+
+    def cell3(v):
+        return f"{v:.3f}" if v is not None else "n/a"
+
     for per in periods:
-        for label, grp in groups:
-            rs = [r for r in rows if r["per"] == per and r["repo"] in grp]
-            if not rs:
+        for label in CUT_GROUPS:
+            c = cuts.get((per, label))
+            if c is None:
                 continue
-            b = sum(r["bugs"] for r in rs)
-            pw = sum(r["pr_windows"] for r in rs)
-            kw = sum(r["kloc_windows"] for r in rs)
-            per_kloc = [r["per_kloc"] for r in rs
-                        if r["per_kloc"] is not None]
-            print(f"{per:9}{label:10}{len(rs):>6}{b:>7}{pw:>10.0f}"
-                  f"{kw:>10.0f}{b / pw:>11.3f}"
-                  f"{median([r['per_pr'] for r in rs]):>9.3f}"
-                  + (f"{b / kw:>13.3f}{median(per_kloc):>10.3f}" if kw > 0
-                     else f"{'n/a':>13}{'n/a':>10}"))
+            print(f"{per:9}{label:10}{c['repos']:>6}{c['bugs']:>7}"
+                  f"{c['pr_windows']:>10.0f}{c['kloc_windows']:>10.0f}"
+                  f"{c['pooled_per_pr']:>11.3f}{c['median_per_pr']:>9.3f}"
+                  f"{cell3(c['pooled_per_kloc']):>13}"
+                  f"{cell3(c['median_per_kloc']):>10}")
     print(f"selection {DATED_SELECTION}: every repo with an eligible merged "
           f"PR in any {unit} (a census on both sides of the rate, no "
           f"design weights). balanced = rated in every {unit}; low/high-AI "

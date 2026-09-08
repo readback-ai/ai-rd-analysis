@@ -40,6 +40,7 @@ import plot_adoption_cohorts_median as a1a                    # noqa: E402
 import plot_adoption_event as a2                             # noqa: E402
 import plot_fig2_comp_audits as comp2                        # noqa: E402
 import plot_fig2_comp_audits_median as comp2a                # noqa: E402
+import plot_bug_rates as bugs                                # noqa: E402
 import plot_productivity_deciles as a3                       # noqa: E402
 import plot_activity_deciles as a4                           # noqa: E402
 import plot_active_insider_deciles as a5                     # noqa: E402
@@ -84,6 +85,7 @@ FIGURES = [
     ("artifacts/figure_3_comp_audits.png", comp3.collect, comp3.render),
     (f"artifacts/{a3.NAME}.png", a3.collect, a3.render),
     (f"artifacts/{a3.QUARTERLY_NAME}.png", a3.collect_quarterly, a3.render),
+    (f"artifacts/{bugs.NAME}.png", bugs.collect, bugs.render),
     (f"artifacts/{a4.NAME}.png", a4.collect, a4.render),
     (f"artifacts/{a5.NAME}.png", a5.collect, a5.render),
 ]
@@ -95,6 +97,8 @@ WINDOWED = {"adoption_cohorts", a1a.NAME, "figure_3_comp_audits"}
 # monthly variants that do not exist, and why — printed with --monthly so
 # the gap is declared, not silent (the report.py "[quarterly]" precedent)
 MONTHLY_SKIPS = [
+    (bugs.NAME,
+     "the dated bug survey is quarterly (monthly is ~11x the cells)"),
     ("responsiveness_by_ai",
      "frozen quarter-keyed sampling manifests (review_action lane draws)"),
     ("fleet_vs_nonadopters",
