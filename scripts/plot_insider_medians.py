@@ -5,10 +5,13 @@ then the median across people: no repo weighting, no two-stage
 aggregation, so "median" means the middle insider. Three populations
 (columns), all excluding fleet operators:
 
-  any        — period-active insiders (>=1 PR in the quarter)
-  productive — insiders with >=10 submitted PRs in the quarter
+  any        — period-active insiders (>=1 PR in the quarter; the only
+               series whose membership changes)
   panel      — insiders active in all four study quarters (same people
                throughout; survivor-selected)
+  productive — the panel members averaging >=10 submitted PRs/quarter
+               over the window (membership decided once, so nobody near
+               the floor pops in and out)
 
 Rows: submitted kLOC (no censoring) and merged kLOC (w8 rule). Series:
 all insiders, ever-AI, never-AI (any AI-involved PR in the window). Bands
@@ -43,7 +46,7 @@ COLORS = {"all": "0.25", "ever_ai": PAIR_ORANGE[0], "never_ai": PAIR_BLUE[0]}
 # full population definition stays in the CSV's panel_label
 COLUMN_TITLES = {
     "any": "period-active insiders\n(≥1 PR in the quarter)",
-    "productive": "productive insiders\n(≥10 submitted PRs in the quarter)",
+    "productive": "productive panel\n(≥10 PRs/quarter avg over window)",
     "panel": "balanced panel\n(≥1 PR in all four quarters)",
 }
 

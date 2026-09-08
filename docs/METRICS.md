@@ -286,12 +286,18 @@ prefixes of the population files, repo count, and cell-coverage numbers
   kLOC per quarter, pooled across every repo they author in, then the
   MEDIAN across people — so "median" means the middle insider. Three
   populations, fleet operators excluded from all: **period-active**
-  (>=1 PR in the quarter; membership varies), **productive**
-  (>=`ACTIVE_FLOOR` = 10 submitted PRs in the quarter — the Figure A5
-  floor that makes never-AI a behavioural claim; membership varies), and
-  the **balanced panel** (>=1 PR in every study quarter — the same
-  people throughout, hence survivor-selected toward long-tenured
-  maintainers; balanced minus period-active isolates composition).
+  (>=1 PR in the quarter; the only series whose membership varies —
+  minus the panel, it isolates composition), the **balanced panel**
+  (>=1 PR in every study quarter — the same people throughout, hence
+  survivor-selected toward long-tenured maintainers), and the
+  **productive panel** (panel members whose submitted PRs average
+  >=`ACTIVE_FLOOR` = 10 per quarter over the window quarters).
+  Membership is decided ONCE: a per-quarter floor re-selects people each
+  quarter on a quantity correlated with the outcome and churns those
+  near the line — under such a rule 68% of the insiders who ever cleared
+  10 PRs in a window quarter crossed the line at least once — so the
+  floor applies to the window mean. It is the Figure A5 floor that
+  makes never-AI a behavioural claim (>=30 window PRs with no marker).
   Slices: all, ever-AI, never-AI (any AI-involved PR in the Q4-2025..
   Q2-2026 window, as in the decile studies). Bands are seeded percentile
   bootstraps of the median over persons; `n` per quarter is in the CSV.
