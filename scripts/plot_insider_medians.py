@@ -16,9 +16,15 @@ are seeded percentile bootstraps of the median over persons; n per
 quarter is in the CSV (n_<slice> series) and the legend quotes the
 Q1-2024 -> Q2-2026 membership. Broken x-axis: Q1-2024 | Q4-2025..Q2-2026.
 
-Data:   artifacts/data/insider_medians.csv
-Output: artifacts/insider_medians.png
-Usage:  PYTHONPATH=src python scripts/plot_insider_medians.py
+Growth variant (insider_medians_growth): the same grid with every series
+divided by its own Q1-2024 median, so each population and slice starts
+at 1.0 and the panels compare growth rather than levels; the
+all-insiders multiples are annotated, the AI/non-AI curves are not.
+
+Data:    artifacts/data/insider_medians.csv,
+         artifacts/data/insider_medians_growth.csv
+Outputs: artifacts/insider_medians.png, artifacts/insider_medians_growth.png
+Usage:   PYTHONPATH=src python scripts/plot_insider_medians.py
 """
 import sys
 
@@ -28,7 +34,8 @@ from pipeline.figstyle import PAIR_BLUE, PAIR_ORANGE, broken_pair, plt
 from pipeline.frame import PERIODS
 from pipeline.studies.productivity import (INSIDER_METRICS,
                                            INSIDER_POPULATIONS,
-                                           INSIDER_SLICES, insider_medians)
+                                           INSIDER_SLICES, insider_growth,
+                                           insider_medians)
 
 NAME = "insider_medians"
 COLORS = {"all": "0.25", "ever_ai": PAIR_ORANGE[0], "never_ai": PAIR_BLUE[0]}
@@ -95,5 +102,60 @@ def render(t: Table):
     return fig
 
 
+GROWTH_NAME = "insider_medians_growth"
+
+
+def collect_growth() -> Table:
+    """Growth variant: every series divided by its own Q1-2024 median, so
+    each population and slice starts at 1.0 and the panels compare growth
+    rather than levels (insider_growth)."""
+    rows = insider_growth()
+    t = Table(GROWTH_NAME)
+    for metric, mlabel in INSIDER_METRICS:
+        for pop, plabel in INSIDER_POPULATIONS:
+            panel = f"{metric}|{pop}"
+            for sl, slabel in INSIDER_SLICES:
+                for i, q in enumerate(PERIODS):
+                    c = rows[(pop, sl, metric, q)]
+                    t.add(panel, sl, i, c["mult"], lo=c["lo"], hi=c["hi"],
+                          panel_label=f"{mlabel} — {plabel}",
+                          series_label=slabel, x_label=q)
+                    t.add(panel, f"n_{sl}", i, c["n"],
+                          panel_label=f"{mlabel} — {plabel}",
+                          series_label=f"n, {slabel}", x_label=q)
+    return t
+
+
+def render_growth(t: Table):
+    """Same grid as render(); y is the multiple of each series' own
+    Q1-2024 median. Only the all-insiders series is annotated with its
+    multiples (the AI/non-AI curves stay unlabelled), like Figure 2."""
+    fig = plt.figure(figsize=(13, 8))
+    subfigs = fig.subfigures(len(INSIDER_METRICS), len(INSIDER_POPULATIONS),
+                             hspace=0.1, wspace=0.05)
+    for r, (metric, mlabel) in enumerate(INSIDER_METRICS):
+        for c, (pop, _plabel) in enumerate(INSIDER_POPULATIONS):
+            panel = f"{metric}|{pop}"
+            title = COLUMN_TITLES[pop] if r == 0 else ""
+            axl, axr = broken_pair(subfigs[r][c], title)
+            for sl, slabel in INSIDER_SLICES:
+                pts = t.points(panel, sl)
+                n = [int(p["value"]) for p in t.points(panel, f"n_{sl}")]
+                _series(axl, axr, pts, f"{slabel} (n {n[0]}→{n[-1]})",
+                        COLORS[sl])
+            for i, p in enumerate(t.points(panel, "all")):
+                ax, x = (axl, 0) if i == 0 else (axr, i - 1)
+                ax.annotate(f"{p['value']:.2f}x", (x, p["value"]),
+                            textcoords="offset points", xytext=(6, 6),
+                            fontsize=8, color=COLORS["all"])
+            axr.axhline(1.0, color="0.7", lw=0.8, zorder=0)
+            axl.set_ylim(bottom=0)
+            if c == 0:
+                axl.set_ylabel(f"× own Q1-2024 median — {mlabel}")
+            axr.legend(fontsize=7, loc="upper left")
+    return fig
+
+
 if __name__ == "__main__":
     figure_main(collect, render, f"artifacts/{NAME}.png")
+    figure_main(collect_growth, render_growth, f"artifacts/{GROWTH_NAME}.png")

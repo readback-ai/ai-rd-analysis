@@ -79,6 +79,33 @@ def test_ai_slices_split_on_window_evidence_and_fleet_is_excluded(authors):
     assert math.isnan(ever["lo"]) and math.isnan(ever["hi"])   # n < 2: no CI
 
 
+def test_growth_normalizes_each_series_to_its_own_baseline(authors):
+    """Every population x slice starts at 1.0 and later quarters are the
+    ratio of that series' median to its own Q1-2024 median."""
+    out = productivity.insider_growth(draws=50)
+    for pop in ("any", "productive", "panel"):
+        base = out[(pop, "all", "submitted", "Q1-2024")]
+        assert (base["mult"], base["lo"], base["hi"]) == (1.0, 1.0, 1.0)
+    # any: Q2 median 30 (a,b,c) over Q1 median 18 (a,b)
+    assert out[("any", "all", "submitted", "Q2-2026")]["mult"] == \
+        pytest.approx(30.0 / 18.0)
+    # productive: Q2 median 45 (a,c) over Q1 median 30 (a alone)
+    assert out[("productive", "all", "submitted", "Q2-2026")]["mult"] == \
+        pytest.approx(45.0 / 30.0)
+    # panel: the same two people every quarter -> flat at 1.0
+    assert out[("panel", "all", "merged", "Q2-2026")]["mult"] == 1.0
+    q2 = out[("any", "all", "submitted", "Q2-2026")]
+    assert q2["n"] == 3 and q2["n_base"] == 2
+
+
+def test_growth_ratio_ci_brackets_the_multiple_or_is_nan(authors):
+    out = productivity.insider_growth(draws=200)
+    cell = out[("any", "all", "submitted", "Q2-2026")]
+    assert cell["lo"] <= cell["mult"] <= cell["hi"]
+    single = out[("any", "ever_ai", "submitted", "Q2-2026")]   # a alone
+    assert single["mult"] == 1.0 and math.isnan(single["lo"])
+
+
 def test_bootstrap_ci_brackets_the_median_and_is_seeded(authors):
     a = insider_medians(draws=200)[("any", "all", "submitted", "Q2-2026")]
     b = insider_medians(draws=200)[("any", "all", "submitted", "Q2-2026")]

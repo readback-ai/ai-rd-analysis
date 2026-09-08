@@ -53,7 +53,8 @@ Generated report: [`artifacts/report_generated.md`](artifacts/report_generated.m
 `artifacts/ai_usage.png` (traceable AI usage), `artifacts/core_loc.png`
 (merged LOC per insider contributor), `artifacts/insider_medians.png`
 (the median insider's kLOC per quarter, person-level: period-active /
-productive / balanced-panel populations x all / ever-AI / never-AI),
+productive / balanced-panel populations x all / ever-AI / never-AI; the
+`_growth` twin normalizes each series to its own Q1-2024 median),
 `artifacts/adoption_cohorts.png` (adoption cohorts incl. fleet).
 
 ## How to verify the three claims that matter

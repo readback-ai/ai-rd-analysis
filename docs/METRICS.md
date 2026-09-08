@@ -295,6 +295,11 @@ prefixes of the population files, repo count, and cell-coverage numbers
   Slices: all, ever-AI, never-AI (any AI-involved PR in the Q4-2025..
   Q2-2026 window, as in the decile studies). Bands are seeded percentile
   bootstraps of the median over persons; `n` per quarter is in the CSV.
+  The growth twin (`productivity.insider_growth`;
+  `artifacts/insider_medians_growth.png`) divides every series by its
+  own Q1-2024 median, so each population and slice starts at 1.0 and
+  the panels compare growth rather than levels; its bands resample the
+  two quarters independently (conservative for the fixed panel).
 - `pipeline.studies.accountability`, `review_modes`, `corpus` — the
   behavioral studies behind the working log (sampled, seeded); re-derive on
   the final population before citing.

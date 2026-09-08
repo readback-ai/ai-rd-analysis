@@ -739,11 +739,38 @@ def _median_ci(vals: list[float], draws: int, key: str) -> dict:
     return {"n": n, "median": med, "lo": float(lo), "hi": float(hi)}
 
 
-def insider_medians(draws: int = 2000) -> dict:
-    """(population, slice, metric, quarter) -> {n, median, lo, hi}: the
-    MEDIAN insider author's kLOC per quarter. One number per PERSON,
-    pooled across every repo they author in — no repo weighting and no
-    two-stage aggregation, so "median" means the middle insider.
+def _ratio_ci(vals: list[float], base: list[float], draws: int,
+              key: str) -> dict:
+    """{n, n_base, mult, lo, hi}: median(vals) / median(base) with a
+    seeded percentile bootstrap resampling the two quarters independently
+    (conservative for the fixed panel, whose members are the same people
+    in both). NaN where either median is undefined or the base is zero;
+    CIs NaN below two members on either side."""
+    import numpy as np
+    from pipeline.analyze import _stream
+    nan = float("nan")
+    n, nb = len(vals), len(base)
+    if n == 0 or nb == 0 or float(np.median(base)) == 0.0:
+        return {"n": n, "n_base": nb, "mult": nan, "lo": nan, "hi": nan}
+    v, b = np.asarray(vals, dtype=float), np.asarray(base, dtype=float)
+    mult = float(np.median(v) / np.median(b))
+    if n < 2 or nb < 2:
+        return {"n": n, "n_base": nb, "mult": mult, "lo": nan, "hi": nan}
+    rng = np.random.default_rng(_stream(key).getrandbits(63))
+    ratios = np.empty(draws)
+    for i in range(0, draws, 250):
+        k = min(250, draws - i)
+        mv = np.median(v[rng.integers(0, n, size=(k, n))], axis=1)
+        mb = np.median(b[rng.integers(0, nb, size=(k, nb))], axis=1)
+        ratios[i:i + k] = mv / mb
+    lo, hi = np.percentile(ratios, [2.5, 97.5])
+    return {"n": n, "n_base": nb, "mult": mult, "lo": float(lo),
+            "hi": float(hi)}
+
+
+def _insider_cells() -> dict[tuple, list[float]]:
+    """(population, slice, metric, quarter) -> each member's kLOC that
+    quarter — the per-PERSON values both insider figures summarize.
 
     Populations (fleet operators excluded from all three):
       any        — insiders with >=1 PR in the quarter (membership varies
@@ -757,7 +784,8 @@ def insider_medians(draws: int = 2000) -> dict:
     Slices: all; ever_ai / never_ai by whether any AI-involved PR appeared
     in the window (Q4-2025..Q2-2026 — the baseline has no detectable
     channel), the split the decile studies use.
-    Metrics: submitted kLOC (no censoring) and merged kLOC (w8 rule).
+    Metrics: submitted kLOC (no censoring) and merged kLOC (w8 rule),
+    pooled across every repo the person authors in.
     Insider = the Figure 3 core-author population (an insider-association
     PR in the frozen months)."""
     acc, cohort_of_login, _q, fleet = _author_months_and_cohorts()
@@ -793,9 +821,38 @@ def insider_medians(draws: int = 2000) -> dict:
                 who = [w for w in base
                        if sl == "all" or (w in ever) == (sl == "ever_ai")]
                 for metric, _mlabel in INSIDER_METRICS:
-                    out[(pop, sl, metric, quarter)] = _median_ci(
-                        [kloc(w, quarter, metric) for w in who], draws,
-                        key=f"insider_medians|{pop}|{sl}|{metric}|{quarter}")
+                    out[(pop, sl, metric, quarter)] = [
+                        kloc(w, quarter, metric) for w in who]
+    return out
+
+
+def insider_medians(draws: int = 2000) -> dict:
+    """(population, slice, metric, quarter) -> {n, median, lo, hi}: the
+    MEDIAN insider author's kLOC per quarter over the _insider_cells
+    populations — one number per person, no repo weighting and no
+    two-stage aggregation, so "median" means the middle insider."""
+    return {k: _median_ci(v, draws, key="insider_medians|" + "|".join(k))
+            for k, v in _insider_cells().items()}
+
+
+def insider_growth(draws: int = 2000) -> dict:
+    """(population, slice, metric, quarter) -> {n, n_base, mult, lo, hi}:
+    each series' median divided by ITS OWN Q1-2024 median, so every
+    population and slice starts at 1.0 and the chart compares growth
+    rather than levels. The baseline cell is 1.0 by construction (no
+    interval); other cells carry the _ratio_ci bootstrap."""
+    cells = _insider_cells()
+    out = {}
+    for (pop, sl, metric, quarter), vals in cells.items():
+        base = cells[(pop, sl, metric, "Q1-2024")]
+        if quarter == "Q1-2024":
+            out[(pop, sl, metric, quarter)] = {
+                "n": len(vals), "n_base": len(base),
+                "mult": 1.0 if vals else float("nan"), "lo": 1.0, "hi": 1.0}
+            continue
+        out[(pop, sl, metric, quarter)] = _ratio_ci(
+            vals, base, draws,
+            key="insider_growth|" + "|".join((pop, sl, metric, quarter)))
     return out
 
 
