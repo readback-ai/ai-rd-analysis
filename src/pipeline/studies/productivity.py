@@ -836,22 +836,25 @@ def _insider_cells() -> dict[tuple, list[float]]:
     return out
 
 
-def insider_medians(draws: int = 2000) -> dict:
+def insider_medians(draws: int = 2000, cells: dict | None = None) -> dict:
     """(population, slice, metric, quarter) -> {n, median, lo, hi}: the
     MEDIAN insider author's kLOC per quarter over the _insider_cells
     populations — one number per person, no repo weighting and no
-    two-stage aggregation, so "median" means the middle insider."""
+    two-stage aggregation, so "median" means the middle insider. `cells`
+    lets a caller rendering several figures share one _insider_cells
+    pass."""
+    cells = _insider_cells() if cells is None else cells
     return {k: _median_ci(v, draws, key="insider_medians|" + "|".join(k))
-            for k, v in _insider_cells().items()}
+            for k, v in cells.items()}
 
 
-def insider_growth(draws: int = 2000) -> dict:
+def insider_growth(draws: int = 2000, cells: dict | None = None) -> dict:
     """(population, slice, metric, quarter) -> {n, n_base, mult, lo, hi}:
     each series' median divided by ITS OWN Q1-2024 median, so every
     population and slice starts at 1.0 and the chart compares growth
     rather than levels. The baseline cell is 1.0 by construction (no
     interval); other cells carry the _ratio_ci bootstrap."""
-    cells = _insider_cells()
+    cells = _insider_cells() if cells is None else cells
     out = {}
     for (pop, sl, metric, quarter), vals in cells.items():
         base = cells[(pop, sl, metric, "Q1-2024")]

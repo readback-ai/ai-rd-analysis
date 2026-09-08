@@ -87,8 +87,8 @@ FIGURES = [
     (f"artifacts/{a3.QUARTERLY_NAME}.png", a3.collect_quarterly, a3.render),
     (f"artifacts/{a4.NAME}.png", a4.collect, a4.render),
     (f"artifacts/{a5.NAME}.png", a5.collect, a5.render),
-    (f"artifacts/{im.NAME}.png", im.collect, im.render),
-    (f"artifacts/{im.GROWTH_NAME}.png", im.collect_growth, im.render_growth),
+    # Figure 3b: one medians figure and one growth twin per population
+    *im.figures(),
 ]
 
 # default-set collects that take a window= (the monthly-axis figures);

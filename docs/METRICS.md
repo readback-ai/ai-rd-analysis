@@ -280,7 +280,9 @@ prefixes of the population files, repo count, and cell-coverage numbers
 ## 6. Auxiliary analyses (not in the generated report)
 
 - **Median insider kLOC/quarter, person-level** (`productivity.
-  insider_medians`; `artifacts/insider_medians.png`, Figure 3b). The
+  insider_medians`; `artifacts/insider_medians_{productive,active,
+  panel}.png`, Figure 3b — one figure per population, the productive
+  panel being the headline). The
   companion to Figure 3 with no repo weighting and no two-stage
   aggregation: each insider's submitted (uncensored) and merged (w8)
   kLOC per quarter, pooled across every repo they author in, then the
@@ -301,8 +303,8 @@ prefixes of the population files, repo count, and cell-coverage numbers
   Slices: all, ever-AI, never-AI (any AI-involved PR in the Q4-2025..
   Q2-2026 window, as in the decile studies). Bands are seeded percentile
   bootstraps of the median over persons; `n` per quarter is in the CSV.
-  The growth twin (`productivity.insider_growth`;
-  `artifacts/insider_medians_growth.png`) divides every series by its
+  The growth twins (`productivity.insider_growth`;
+  `artifacts/insider_medians_growth_*.png`) divide every series by its
   own Q1-2024 median, so each population and slice starts at 1.0 and
   the panels compare growth rather than levels; its bands resample the
   two quarters independently (conservative for the fixed panel).

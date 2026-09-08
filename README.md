@@ -51,11 +51,13 @@ Methodology: [`docs/METHODS.md`](docs/METHODS.md) · **code review guide: [`docs
 Generated report: [`artifacts/report_generated.md`](artifacts/report_generated.md)
 (19 sections, quarterly; monthly twin `report_monthly.md`). Figures:
 `artifacts/ai_usage.png` (traceable AI usage), `artifacts/core_loc.png`
-(merged LOC per insider contributor), `artifacts/insider_medians.png`
-(the median insider's kLOC per quarter, person-level: period-active /
-productive / balanced-panel populations x all / ever-AI / never-AI; the
-`_growth` twin normalizes each series to its own Q1-2024 median),
-`artifacts/adoption_cohorts.png` (adoption cohorts incl. fleet).
+(merged LOC per insider contributor),
+`artifacts/insider_medians_productive.png` (the median insider's kLOC per
+quarter, person-level, over the productive panel; `_active` and `_panel`
+siblings for the period-active and balanced-panel populations, and
+`insider_medians_growth_*` twins normalizing each series to its own
+Q1-2024 median), `artifacts/adoption_cohorts.png` (adoption cohorts incl.
+fleet).
 
 ## How to verify the three claims that matter
 
