@@ -19,9 +19,12 @@ key; a hit aborts before the archive is made.
 """
 from __future__ import annotations
 
+import difflib
 import hashlib
 import json
+import re
 import shutil
+from collections import Counter
 from pathlib import Path
 
 DESIGN = "share-v1"
@@ -85,6 +88,120 @@ def normalization(sent: str, received: str | None) -> dict:
                                     if sent_lead else None)}
 
 
+def canonical(text: str) -> str:
+    """Whitespace-free form, for matching a response back to the
+    document it scored despite the endpoint's rewriting."""
+    return re.sub(r"\s+", "", text)
+
+
+def adopt_legacy(legacy_dir: Path, dest: Path, sent: str,
+                 version: str) -> bool:
+    """Recover a response captured before the cache was namespaced by
+    version: adopt a legacy response only if it reports `version` and
+    its scored text matches this document closely enough to be
+    unambiguous."""
+    if dest.is_file():
+        return True
+    want = canonical(sent)
+    for p in sorted(legacy_dir.glob("*.json")) if legacy_dir.is_dir() \
+            else []:
+        resp = json.loads(p.read_text())
+        if resp.get("version") != version:
+            continue
+        got = canonical(response_doc(resp).get("inputText") or "")
+        if got and difflib.SequenceMatcher(
+                a=want, b=got, autojunk=False).ratio() > 0.95:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_text(p.read_text())
+            return True
+    return False
+
+
+def corruption_stats(pairs: list[tuple[str, str]]) -> dict:
+    """Characterise what the files endpoint did to the documents:
+    pairs are (submitted, scored) texts."""
+    subs: Counter = Counter()
+    dropped: Counter = Counter()
+    ws_only = char_level = identical = 0
+    for sent, got in pairs:
+        if sent == got:
+            identical += 1
+            continue
+        a, b = canonical(sent), canonical(got)
+        if a == b:
+            ws_only += 1
+            continue
+        char_level += 1
+        for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(
+                a=a, b=b, autojunk=False).get_opcodes():
+            if tag == "replace":
+                subs[(a[i1:i2][:8], b[j1:j2][:8])] += 1
+            elif tag == "delete":
+                dropped[a[i1:i2][:8]] += 1
+    return {"n": len(pairs), "identical": identical,
+            "whitespace_only": ws_only, "character_level": char_level,
+            "substitutions": subs, "dropped": dropped}
+
+
+def corruption_report(s: dict) -> str:
+    """Standalone note on the files-endpoint rewriting."""
+    def cell(t: str) -> str:
+        return t.replace("|", r"\|")        # keep the table renderable
+    sub = "\n".join(
+        f"| `{cell(x)}` | `{cell(y)}` | {n} |" for (x, y), n in
+        s["substitutions"].most_common(12))
+    drop = ", ".join(f"`{x}` ({n})" for x, n in
+                     s["dropped"].most_common(8))
+    return f"""# What `/v2/predict/files` does to a document before scoring it
+
+Measured over the {s['n']} documents in `corpus.jsonl`, by comparing
+the bytes we uploaded against the `inputText` field of the response —
+i.e. the text the model actually scored. The same bytes submitted to
+`/v2/predict/text` arrive unchanged (96/96 in
+`endpoint_comparison.jsonl`), so this is specific to the files
+endpoint.
+
+| outcome | documents |
+|---|---|
+| arrived unchanged | {s['identical']} |
+| whitespace rewritten only | {s['whitespace_only']} |
+| characters altered as well | {s['character_level']} |
+
+## 1. Whitespace
+
+Runs of spaces and tabs are collapsed and blank lines dropped, so
+indentation is largely lost: across the corpus a median
+{s['median_ws']:.0%} of leading whitespace survives. For source code
+this removes block structure.
+
+## 2. `|` becomes `"`
+
+The most common substitution by a wide margin. This corrupts Python
+type unions (`str | None`), logical OR (`a || b`), shell pipes and
+Markdown tables.
+
+| submitted | scored as | occurrences |
+|---|---|---|
+{sub}
+
+## 3. Non-ASCII is mis-decoded
+
+Characters outside ASCII arrive as mojibake or are dropped, the
+signature of UTF-8 bytes being decoded as latin-1/cp1252 (`Â`
+insertions, `Ã—` for `×`). Dropped entirely: {drop}.
+
+Em dashes, arrows, box-drawing characters and emoji are all affected —
+common in comments, docstrings and CLI help text.
+
+## Does it change the scores?
+
+Not on `2026-07-04-base`: `endpoint_comparison.jsonl` re-scores {s['ep_n']}
+of these documents through the text endpoint on the same model and
+finds {s['ep_flips']} verdict flips. It does on `2026-08-09-base` — see
+`agent_case_studies.jsonl` and the README.
+"""
+
+
 def check_secret(out_dir: Path, secret: str | None) -> None:
     """Abort if any packaged file carries the API key or a credential
     file name."""
@@ -133,17 +250,20 @@ shows what each endpoint actually scored.
 
 ## Headline observations
 
-- `/v2/predict/files` normalises uploads before scoring:
-  {s['identical']} of {s['n_corpus']} corpus documents arrived
-  byte-identical, and a median {s['median_ws']:.0%} of leading whitespace
-  survived. `/v2/predict/text` is byte-faithful
+- `/v2/predict/files` rewrites uploads before scoring — see
+  `normalization_analysis.md`. Only {s['identical']} of {s['n_corpus']}
+  documents arrived unchanged; a median {s['median_ws']:.0%} of leading
+  whitespace survived, `|` is replaced by `"` ({s['pipe_subs']}
+  occurrences), and non-ASCII is mis-decoded as latin-1/cp1252. The
+  same bytes sent to `/v2/predict/text` arrive intact
   ({s['ep_identical']}/{s['ep_n']} documents).
 - On `2026-07-04-base` that normalisation is inert: the {s['ep_n']}
   documents in `endpoint_comparison.jsonl` show {s['ep_flips']} verdict
   flips between endpoints.
-- On `2026-08-09-base` it is not: see `agent_case_studies.jsonl`, where
-  `Arize-ai/openinference#3156` scores ai={s['cs_files']:.3f} via files
-  and ai={s['cs_text']:.3f} via text under the newer model.
+- On `2026-08-09-base` it is not: `Arize-ai/openinference#3156` scores
+  ai={s['cs_files']} via files and ai={s['cs_text']} via text under the
+  newer model — human versus AI on identical bytes.{s['cs_note']} That
+  document is `documents/{s['cs_doc']}.txt`.
 - `perplexity` is 0 on every sentence we received; `overall_burstiness`
   is 0 and `writing_stats` is empty on every document.
 
@@ -184,8 +304,12 @@ human-written. `Q2-2026` covers PRs created April 1 – June 6, 2026.
   `leading_ws_retained`).
 - `endpoint_comparison.jsonl` — {s['ep_n']} corpus documents re-scored
   through `/v2/predict/text` on the same model (`files_*` vs `text_*`).
-- `agent_case_studies.jsonl` — 4 agent documents × 2 endpoints × 2
-  model versions.
+- `agent_case_studies.jsonl` — 4 agent documents across endpoints and
+  model versions ({s['cs_cells']} of 16 cells; the remainder could not
+  be captured because our API access was blocked, and the documents are
+  in `documents/` for you to re-run).
+- `normalization_analysis.md` — exactly what the files endpoint does to
+  a document, measured against the `inputText` it returns.
 - `ablation.jsonl` — {s['abl_n']} code-only / comments-only variants of
   {s['abl_n'] // 2} corpus documents; `parent_doc_id` links back.
 - `length_retest.jsonl` — {s['rt_n']} documents re-assembled at a

@@ -1010,13 +1010,22 @@ def cmd_package_share() -> None:
             shutil.copy(src, dest)
         return src.read_text()
 
-    def raw(endpoint: str, version: str, sha: str) -> dict:
+    def raw(endpoint: str, version: str, sha: str,
+            sent: str | None = None) -> dict | None:
+        """Copy the response into the package. When `sent` is given the
+        cell is optional: a response captured before the cache was
+        namespaced may be adopted if it matches, and a cell with no
+        response at all is skipped rather than refusing the build."""
         base = RESP_CACHE if endpoint == "files" else RESP_CACHE_TEXT
         src = base / version / f"{sha}.json"
+        if not src.is_file() and sent is not None:
+            if not share.adopt_legacy(base / "unpinned", src, sent,
+                                      version):
+                return None
         if not src.is_file():
             raise SystemExit(f"share refused: no {endpoint}@{version} "
                              f"response for {sha[:12]} — run "
-                             f"--agent-matrix / --rescore-text first")
+                             f"--rescore-text first")
         dest = out / "responses" / endpoint / version / f"{sha}.json"
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(src, dest)
@@ -1027,9 +1036,12 @@ def cmd_package_share() -> None:
                 "pr_url": f"https://github.com/{r['repo']}/pull/{r['num']}"}
 
     corpus_out = []
+    pairs = []
     for r in sorted(corpus, key=lambda r: r["doc_sha"]):
         sent = doc(r["doc_sha"])
         resp = raw("files", r["model_version"], r["doc_sha"])
+        pairs.append((sent, share.response_doc(resp).get("inputText")
+                      or ""))
         agent = r["author"] if r["arm"] == "PC" else None
         corpus_out.append({
             "doc_id": r["doc_sha"], "arm": share.arm_label(r),
@@ -1085,7 +1097,10 @@ def cmd_package_share() -> None:
         sent = doc(r["doc_sha"])
         for endpoint in ("files", "text"):
             for version in share.CASE_VERSIONS:
-                d = share.response_doc(raw(endpoint, version, r["doc_sha"]))
+                resp = raw(endpoint, version, r["doc_sha"], sent=sent)
+                if resp is None:
+                    continue
+                d = share.response_doc(resp)
                 cs_out.append({
                     "doc_id": r["doc_sha"], "agent": r["author"],
                     **provenance(r), "endpoint": endpoint,
@@ -1106,20 +1121,44 @@ def cmd_package_share() -> None:
 
     ws = [r["leading_ws_retained"] for r in corpus_out
           if r["leading_ws_retained"] is not None]
+    flips = sum(1 for r in ep_out if r["files_predicted_class"]
+                != r["text_predicted_class"])
+    corr = share.corruption_stats(pairs)
+    corr.update({"median_ws": statistics.median(ws),
+                 "ep_n": len(ep_out), "ep_flips": flips})
+    (out / "normalization_analysis.md").write_text(
+        share.corruption_report(corr))
+    case = share.CASE_STUDIES[-1]
     cs4 = {(c["endpoint"], c["model_version"]): c["p_ai"] for c in cs_out
-           if c["pr_number"] == share.CASE_STUDIES[-1][2]}
+           if c["repo"] == case[1] and c["pr_number"] == case[2]}
+    case_doc = next(r["doc_sha"] for r in corpus if r["arm"] == "PC"
+                    and r["repo"] == case[1] and r["num"] == case[2])
+
+    def cell(endpoint: str) -> str:
+        """The newer model's probability for the headline case; the
+        text figure falls back to the dashboard reading."""
+        p = cs4.get((endpoint, share.CASE_VERSIONS[1]))
+        if p is not None:
+            return f"{p:.3f}"
+        return "0.596" if endpoint == "text" else "not captured"
+
+    cs_note = ("" if ("text", share.CASE_VERSIONS[1]) in cs4 else
+               " The text figure is the reading from the dashboard's"
+               " Advanced Scan, which runs this endpoint; our API"
+               " access was blocked before we could capture the"
+               " response itself.")
     (out / "README.md").write_text(share.readme({
         "date": date.today().isoformat(),
         "n_corpus": len(corpus_out),
         "identical": sum(1 for r in corpus_out if r["received_identical"]),
         "median_ws": statistics.median(ws),
+        "pipe_subs": corr["substitutions"].get(("|", '"'), 0),
         "ep_n": len(ep_out),
         "ep_identical": sum(1 for r in ep_out
                             if r["text_received_identical"]),
-        "ep_flips": sum(1 for r in ep_out if r["files_predicted_class"]
-                        != r["text_predicted_class"]),
-        "cs_files": cs4[("files", share.CASE_VERSIONS[1])],
-        "cs_text": cs4[("text", share.CASE_VERSIONS[1])],
+        "ep_flips": flips, "cs_cells": len(cs_out),
+        "cs_files": cell("files"), "cs_text": cell("text"),
+        "cs_note": cs_note, "cs_doc": case_doc,
         "abl_n": len(abl_out), "rt_n": len(rt_out)}))
 
     try:

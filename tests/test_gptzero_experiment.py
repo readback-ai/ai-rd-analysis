@@ -1445,8 +1445,16 @@ def test_package_share_end_to_end_leaks_no_login(tmp_path, monkeypatch):
     assert len(json.loads((pkg / "agent_case_studies.jsonl")
                           .read_text().splitlines()[0])) > 0
     assert (tmp_path / "share" / f"{pkg.name}.zip").is_file()
+    assert (pkg / "normalization_analysis.md").is_file()
+    cells = len((pkg / "agent_case_studies.jsonl").read_text().split("\n"))
+    # a case-study cell with no captured response is skipped, not fatal
     (rt / v_new / "d3.json").unlink()
-    with pytest.raises(SystemExit, match="no text@"):
+    gz.cmd_package_share()
+    assert len((pkg / "agent_case_studies.jsonl").read_text()
+               .split("\n")) < cells
+    # a missing CORPUS response still refuses the build
+    (rf / v_old / "d1.json").unlink()
+    with pytest.raises(SystemExit, match="no files@"):
         gz.cmd_package_share()
 
 
