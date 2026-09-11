@@ -19,6 +19,7 @@ import newfile          # noqa: E402
 import pc               # noqa: E402
 import sampling         # noqa: E402
 import sem13c           # noqa: E402
+import share            # noqa: E402
 
 CLAUDE_MARK = "x\n\nCo-Authored-By: Claude <noreply@anthropic.com>"
 
@@ -1291,6 +1292,118 @@ def f(x):
 // another comment line here
 const y = 2;
 """
+
+
+def test_share_pseudonyms_hide_logins_and_keep_pairing():
+    """Human authors map to sequential ids in doc-id order (no login
+    leaks, numbering carries no login information); one developer keeps
+    one id across rows; agent bots are not pseudonymised."""
+    rows = [{"doc_sha": "c", "arm": "P", "author": "alice"},
+            {"doc_sha": "a", "arm": "B1", "author": "alice"},
+            {"doc_sha": "b", "arm": "P", "author": "bob"},
+            {"doc_sha": "d", "arm": "PC", "author": "copilot-swe-agent"}]
+    ids = share.pseudonyms(rows)
+    assert ids == {"alice": "h0001", "bob": "h0002"}
+    assert "copilot-swe-agent" not in ids
+
+
+def test_share_normalization_measures_what_the_endpoint_scored():
+    sent = "def f():\n    return 1\n"
+    assert share.normalization(sent, sent) == {
+        "received_bytes": len(sent), "received_identical": True,
+        "leading_ws_retained": 1.0}
+    got = share.normalization(sent, "def f():\n return 1\n")
+    assert got["received_identical"] is False
+    assert got["leading_ws_retained"] == 0.25
+
+
+def test_share_check_secret_refuses_key_and_credential_files(tmp_path):
+    """The package must never carry the API key or a credential file,
+    whatever else goes wrong upstream."""
+    (tmp_path / "ok.txt").write_text("harmless")
+    share.check_secret(tmp_path, "sk-SECRET")          # clean: passes
+    (tmp_path / "leak.json").write_text('{"x": "sk-SECRET"}')
+    with pytest.raises(SystemExit, match="API key"):
+        share.check_secret(tmp_path, "sk-SECRET")
+    (tmp_path / "leak.json").unlink()
+    (tmp_path / ".env").write_text("nothing")
+    with pytest.raises(SystemExit, match="forbidden"):
+        share.check_secret(tmp_path, None)
+
+
+def test_package_share_end_to_end_leaks_no_login(tmp_path, monkeypatch):
+    """Built from a frozen set with every input present, the package
+    contains the documents, tables, raw responses, README and manifest,
+    and no GitHub login appears anywhere in it; a missing raw response
+    refuses the build."""
+    import gz
+    frozen = tmp_path / "frozen"
+    frozen.mkdir()
+    docs, rf, rt = (tmp_path / "docs", tmp_path / "resp",
+                    tmp_path / "resp_text")
+    monkeypatch.setattr(gz, "FROZEN", frozen)
+    monkeypatch.setattr(gz, "DOC_CACHE", docs)
+    monkeypatch.setattr(gz, "RESP_CACHE", rf)
+    monkeypatch.setattr(gz, "RESP_CACHE_TEXT", rt)
+    monkeypatch.setattr(gz, "SHARE_ROOT", tmp_path / "share")
+    monkeypatch.setattr(gptzero_client, "_api_key", lambda: "sk-SECRET")
+    monkeypatch.setattr(share, "CASE_STUDIES",
+                        (("devin-ai-integration", "o/agent", 7),))
+    docs.mkdir()
+    v_old, v_new = share.CASE_VERSIONS
+
+    def resp(version, text, p):
+        return {"version": version, "documents": [{
+            "inputText": text, "predicted_class": "human",
+            "class_probabilities": {"ai": p, "human": 1 - p, "mixed": 0},
+            "completely_generated_prob": p}]}
+
+    corpus = []
+    for sha, arm, author, repo in (
+            ("d1", "P", "secretlogin", "o/r"),
+            ("d2", "B3", "otherlogin", "o/old"),
+            ("d3", "PC", "devin-ai-integration", "o/agent")):
+        text = f"// file: a.py\ndef {sha}():\n    return 1\n"
+        (docs / f"{sha}.txt").write_text(text)
+        for base, ver in ((rf, v_old), (rf, v_new), (rt, v_old),
+                          (rt, v_new)):
+            (base / ver).mkdir(parents=True, exist_ok=True)
+            (base / ver / f"{sha}.json").write_text(
+                json.dumps(resp(ver, text, 0.1)))
+        corpus.append({
+            "slot": f"X:{author}", "doc_sha": sha, "arm": arm,
+            "author": author, "period": "Q2-2026", "ai": arm != "B3",
+            "repo": repo, "num": 7, "words": 5, "truncated": False,
+            "model_version": v_old, "predicted_class": "human",
+            "class_probabilities": {"ai": 0.1, "human": 0.9,
+                                    "mixed": 0},
+            "completely_generated_prob": 0.1})
+    share.write_jsonl(frozen / gz.RESULTS.name, corpus)
+    share.write_jsonl(frozen / gz.RESULTS_EP.name, [
+        {**corpus[0], "stratum": "Q2-2026-AI"}])
+    for name in (gz.RESULTS_ABL.name, gz.RESULTS_RETEST.name):
+        share.write_jsonl(frozen / name, [])
+    gz.cmd_package_share()
+    pkg = next(p for p in (tmp_path / "share").glob(
+        "gptzero-code-calibration-*") if p.is_dir())
+    for part in ("README.md", "MANIFEST.sha256", "corpus.jsonl",
+                 "corpus.csv", "endpoint_comparison.jsonl",
+                 "agent_case_studies.jsonl", "documents/d1.txt",
+                 f"responses/text/{v_new}/d3.json"):
+        assert (pkg / part).is_file(), part
+    blob = b"".join(p.read_bytes() for p in pkg.rglob("*") if p.is_file())
+    assert b"secretlogin" not in blob and b"otherlogin" not in blob
+    assert b"sk-SECRET" not in blob
+    rows = [json.loads(ln) for ln in
+            (pkg / "corpus.jsonl").read_text().splitlines()]
+    assert {r["author_id"] for r in rows} == {
+        "h0001", "h0002", "devin-ai-integration"}
+    assert len(json.loads((pkg / "agent_case_studies.jsonl")
+                          .read_text().splitlines()[0])) > 0
+    assert (tmp_path / "share" / f"{pkg.name}.zip").is_file()
+    (rt / v_new / "d3.json").unlink()
+    with pytest.raises(SystemExit, match="no text@"):
+        gz.cmd_package_share()
 
 
 def _ep_score(slot, arm, period, ai, sha, words=300):

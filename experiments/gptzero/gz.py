@@ -926,6 +926,205 @@ def ledger_total() -> int:
     return gzc.ledger(RESERVATIONS)
 
 
+SHARE_ROOT = LOCAL / "share"
+
+
+def _case_rows(rows: list[dict]) -> list[dict]:
+    import share
+    out = []
+    for agent, repo, num in share.CASE_STUDIES:
+        hit = [r for r in rows if r["arm"] == "PC" and r["author"] == agent
+               and r["repo"] == repo and r["num"] == num]
+        if len(hit) != 1:
+            raise SystemExit(f"case study {repo}#{num} is not uniquely "
+                             f"in the corpus ({len(hit)} rows)")
+        out.append(hit[0])
+    return out
+
+
+def cmd_agent_matrix() -> None:
+    """Fill the case-study matrix: each case document through both
+    endpoints under both model versions, with every raw response cached
+    per (endpoint, version, doc). Cached cells are never re-billed;
+    each call is pinned explicitly, so a response reporting any other
+    version is refused rather than cached."""
+    import gptzero_client as gzc
+    import share
+    pinned = gzc.PINNED_VERSION
+    try:
+        for r in _case_rows(_load_rows(FROZEN / RESULTS.name)):
+            path = DOC_CACHE / f"{r['doc_sha']}.txt"
+            text = path.read_text()
+            for version in share.CASE_VERSIONS:
+                gzc.PINNED_VERSION = version
+                (resp, billed), = gzc.score_batch(
+                    [(r["doc_sha"], path)], RESP_CACHE, RESERVATIONS)
+                print(f"files@{version} {r['repo']}#{r['num']}: "
+                      f"{gzc.doc_fields(resp)['predicted_class']} "
+                      f"({billed}w)", flush=True)
+                resp, billed = gzc.score(r["doc_sha"], text,
+                                         RESP_CACHE_TEXT, RESERVATIONS)
+                print(f"text@{version}  {r['repo']}#{r['num']}: "
+                      f"{gzc.doc_fields(resp)['predicted_class']} "
+                      f"({billed}w)", flush=True)
+    finally:
+        gzc.PINNED_VERSION = pinned
+    print(f"reserved: {ledger_total()}/{gzc.BUDGET_WORDS} words")
+
+
+def cmd_package_share() -> None:
+    """Build the GPTZero share package from the FROZEN audit set (the
+    validated source of the reported numbers), the document cache, and
+    the raw response caches — then scan for the API key, checksum, and
+    zip. Every missing input refuses rather than silently shrinking the
+    package."""
+    import csv
+    import shutil
+    import statistics
+    from datetime import date
+
+    import gptzero_client as gzc
+    import share
+    corpus = _load_rows(FROZEN / RESULTS.name)
+    if not corpus:
+        raise SystemExit("share needs the frozen audit set — run --freeze")
+    names = share.pseudonyms(corpus)
+    out = SHARE_ROOT / f"gptzero-code-calibration-{date.today()}"
+    if out.exists():
+        shutil.rmtree(out)
+    (out / "documents").mkdir(parents=True)
+
+    def doc(sha: str) -> str:
+        src = DOC_CACHE / f"{sha}.txt"
+        dest = out / "documents" / f"{sha}.txt"
+        if not dest.is_file():
+            shutil.copy(src, dest)
+        return src.read_text()
+
+    def raw(endpoint: str, version: str, sha: str) -> dict:
+        base = RESP_CACHE if endpoint == "files" else RESP_CACHE_TEXT
+        src = base / version / f"{sha}.json"
+        if not src.is_file():
+            raise SystemExit(f"share refused: no {endpoint}@{version} "
+                             f"response for {sha[:12]} — run "
+                             f"--agent-matrix / --rescore-text first")
+        dest = out / "responses" / endpoint / version / f"{sha}.json"
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(src, dest)
+        return json.loads(src.read_text())
+
+    def provenance(r: dict) -> dict:
+        return {"repo": r["repo"], "pr_number": r["num"],
+                "pr_url": f"https://github.com/{r['repo']}/pull/{r['num']}"}
+
+    corpus_out = []
+    for r in sorted(corpus, key=lambda r: r["doc_sha"]):
+        sent = doc(r["doc_sha"])
+        resp = raw("files", r["model_version"], r["doc_sha"])
+        agent = r["author"] if r["arm"] == "PC" else None
+        corpus_out.append({
+            "doc_id": r["doc_sha"], "arm": share.arm_label(r),
+            "period": r["period"], "ai_attributed": bool(r["ai"]),
+            "agent": agent, "author_id": agent or names.get(r["author"]),
+            **provenance(r), "words": r.get("words"),
+            "truncated_at_600_words": bool(r.get("truncated")),
+            "model_version": r["model_version"], "endpoint": "files",
+            **share.scores(r), "sent_bytes": len(sent.encode()),
+            **share.normalization(
+                sent, share.response_doc(resp).get("inputText"))})
+
+    by_sha = {r["doc_sha"]: r for r in corpus}
+    ep_out = []
+    for t in sorted(_load_rows(FROZEN / RESULTS_EP.name),
+                    key=lambda r: r["doc_sha"]):
+        sent = doc(t["doc_sha"])
+        tresp = raw("text", t["model_version"], t["doc_sha"])
+        f = by_sha[t["doc_sha"]]
+        ep_out.append({
+            "doc_id": t["doc_sha"], "stratum": t["stratum"],
+            "model_version": t["model_version"],
+            **{f"files_{k}": v for k, v in share.scores(f).items()},
+            **{f"text_{k}": v for k, v in share.scores(t).items()},
+            "text_received_identical":
+                share.response_doc(tresp).get("inputText") == sent})
+
+    abl_out = []
+    for a in sorted(_load_rows(FROZEN / RESULTS_ABL.name),
+                    key=lambda r: (r["parent_doc_sha"], r["variant"])):
+        doc(a["doc_sha"])
+        raw("files", a["model_version"], a["doc_sha"])
+        abl_out.append({
+            "doc_id": a["doc_sha"], "parent_doc_id": a["parent_doc_sha"],
+            "variant": a["variant"], "group": a["group"],
+            "words": a["words"], "model_version": a["model_version"],
+            "endpoint": "files", **share.scores(a)})
+
+    rt_out = []
+    for t in sorted(_load_rows(FROZEN / RESULTS_RETEST.name),
+                    key=lambda r: r["doc_sha"]):
+        doc(t["doc_sha"])
+        raw("files", t["model_version"], t["doc_sha"])
+        rt_out.append({
+            "doc_id": t["doc_sha"], "parent_doc_id": t["sha600"],
+            "word_cap": t["word_cap"], "words": t.get("words"),
+            "truncated": bool(t.get("truncated")),
+            "model_version": t["model_version"], "endpoint": "files",
+            **share.scores(t)})
+
+    cs_out = []
+    for r in _case_rows(corpus):
+        sent = doc(r["doc_sha"])
+        for endpoint in ("files", "text"):
+            for version in share.CASE_VERSIONS:
+                d = share.response_doc(raw(endpoint, version, r["doc_sha"]))
+                cs_out.append({
+                    "doc_id": r["doc_sha"], "agent": r["author"],
+                    **provenance(r), "endpoint": endpoint,
+                    "model_version": version,
+                    "neat_version": d.get("neatVersion"),
+                    **share.scores(d),
+                    **share.normalization(sent, d.get("inputText"))})
+
+    share.write_jsonl(out / "corpus.jsonl", corpus_out)
+    with (out / "corpus.csv").open("w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=list(corpus_out[0]))
+        w.writeheader()
+        w.writerows(corpus_out)
+    share.write_jsonl(out / "endpoint_comparison.jsonl", ep_out)
+    share.write_jsonl(out / "ablation.jsonl", abl_out)
+    share.write_jsonl(out / "length_retest.jsonl", rt_out)
+    share.write_jsonl(out / "agent_case_studies.jsonl", cs_out)
+
+    ws = [r["leading_ws_retained"] for r in corpus_out
+          if r["leading_ws_retained"] is not None]
+    cs4 = {(c["endpoint"], c["model_version"]): c["p_ai"] for c in cs_out
+           if c["pr_number"] == share.CASE_STUDIES[-1][2]}
+    (out / "README.md").write_text(share.readme({
+        "date": date.today().isoformat(),
+        "n_corpus": len(corpus_out),
+        "identical": sum(1 for r in corpus_out if r["received_identical"]),
+        "median_ws": statistics.median(ws),
+        "ep_n": len(ep_out),
+        "ep_identical": sum(1 for r in ep_out
+                            if r["text_received_identical"]),
+        "ep_flips": sum(1 for r in ep_out if r["files_predicted_class"]
+                        != r["text_predicted_class"]),
+        "cs_files": cs4[("files", share.CASE_VERSIONS[1])],
+        "cs_text": cs4[("text", share.CASE_VERSIONS[1])],
+        "abl_n": len(abl_out), "rt_n": len(rt_out)}))
+
+    try:
+        secret = gzc._api_key()
+    except SystemExit:
+        secret = None
+    share.check_secret(out, secret)
+    share.write_manifest(out)
+    zipped = share.archive(out)
+    print(f"package: {out} ({len(list((out / 'documents').iterdir()))} "
+          f"documents)\narchive: {zipped} "
+          f"({zipped.stat().st_size / 1e6:.1f} MB)")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--sample", action="store_true")
@@ -941,6 +1140,8 @@ def main() -> None:
     ap.add_argument("--report-newfile", action="store_true")
     ap.add_argument("--ablate", action="store_true")
     ap.add_argument("--rescore-text", action="store_true")
+    ap.add_argument("--agent-matrix", action="store_true")
+    ap.add_argument("--package-share", action="store_true")
     ap.add_argument("--report-endpoint", action="store_true")
     ap.add_argument("--report-ablation", action="store_true")
     ap.add_argument("--freeze", action="store_true")
@@ -970,6 +1171,10 @@ def main() -> None:
         cmd_ablate()
     elif a.rescore_text:
         cmd_rescore_text(a.limit)
+    elif a.agent_matrix:
+        cmd_agent_matrix()
+    elif a.package_share:
+        cmd_package_share()
     elif a.report_endpoint:
         import analyze
         analyze.report_endpoint(_load_rows(RESULTS),
