@@ -947,10 +947,17 @@ def cmd_agent_matrix() -> None:
     endpoints under both model versions, with every raw response cached
     per (endpoint, version, doc). Cached cells are never re-billed;
     each call is pinned explicitly, so a response reporting any other
-    version is refused rather than cached."""
+    version is refused rather than cached. Every call that reaches the
+    network is followed by SCORE_PACE before the next — back-to-back
+    requests trip the API edge's bot rules."""
     import gptzero_client as gzc
     import share
     pinned = gzc.PINNED_VERSION
+
+    def paced(billed: int) -> None:
+        if billed:
+            time.sleep(SCORE_PACE)
+
     try:
         for r in _case_rows(_load_rows(FROZEN / RESULTS.name)):
             path = DOC_CACHE / f"{r['doc_sha']}.txt"
@@ -962,11 +969,13 @@ def cmd_agent_matrix() -> None:
                 print(f"files@{version} {r['repo']}#{r['num']}: "
                       f"{gzc.doc_fields(resp)['predicted_class']} "
                       f"({billed}w)", flush=True)
+                paced(billed)
                 resp, billed = gzc.score(r["doc_sha"], text,
                                          RESP_CACHE_TEXT, RESERVATIONS)
                 print(f"text@{version}  {r['repo']}#{r['num']}: "
                       f"{gzc.doc_fields(resp)['predicted_class']} "
                       f"({billed}w)", flush=True)
+                paced(billed)
     finally:
         gzc.PINNED_VERSION = pinned
     print(f"reserved: {ledger_total()}/{gzc.BUDGET_WORDS} words")

@@ -1331,6 +1331,50 @@ def test_share_check_secret_refuses_key_and_credential_files(tmp_path):
         share.check_secret(tmp_path, None)
 
 
+def test_agent_matrix_paces_network_calls(tmp_path, monkeypatch):
+    """Live finding 2026-09-11: --agent-matrix fired its API calls back
+    to back and GPTZero's edge answered with a Cloudflare 403 after six
+    of them. Every call that reaches the network must be followed by
+    the SCORE_PACE pause before the next one; cache hits need none."""
+    import gz
+    frozen, docs = tmp_path / "frozen", tmp_path / "docs"
+    frozen.mkdir()
+    docs.mkdir()
+    monkeypatch.setattr(gz, "FROZEN", frozen)
+    monkeypatch.setattr(gz, "DOC_CACHE", docs)
+    monkeypatch.setattr(gz, "RESERVATIONS", tmp_path / "resv.jsonl")
+    monkeypatch.setattr(share, "CASE_STUDIES",
+                        (("devin-ai-integration", "o/a", 1),
+                         ("cursor", "o/b", 2)))
+    rows = []
+    for agent, repo, num in share.CASE_STUDIES:
+        (docs / f"s{num}.txt").write_text("x y z")
+        rows.append({"arm": "PC", "author": agent, "repo": repo,
+                     "num": num, "doc_sha": f"s{num}"})
+    share.write_jsonl(frozen / gz.RESULTS.name, rows)
+    fake = {"version": "v", "documents": [{"predicted_class": "human"}]}
+    events = []
+
+    def fake_batch(items, cache, resv):
+        billed = 0 if items[0][0] == "s1" else 3   # s1 files: cache hit
+        events.append("net" if billed else "hit")
+        return [(fake, billed)]
+
+    def fake_score(sha, text, cache, resv):
+        events.append("net")
+        return fake, 3
+
+    monkeypatch.setattr(gptzero_client, "score_batch", fake_batch)
+    monkeypatch.setattr(gptzero_client, "score", fake_score)
+    monkeypatch.setattr(gz.time, "sleep",
+                        lambda s: events.append(f"sleep{s}"))
+    gz.cmd_agent_matrix()
+    net = [e for e in events if e != "hit"]
+    for a, b in zip(net, net[1:]):
+        assert not (a == "net" and b == "net"), events
+    assert f"sleep{gz.SCORE_PACE}" in events
+
+
 def test_package_share_end_to_end_leaks_no_login(tmp_path, monkeypatch):
     """Built from a frozen set with every input present, the package
     contains the documents, tables, raw responses, README and manifest,
