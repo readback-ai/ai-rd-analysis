@@ -13,7 +13,13 @@ import analyze          # noqa: E402
 import diffs            # noqa: E402
 import eras             # noqa: E402
 import gptzero_client   # noqa: E402
+import ablation         # noqa: E402
+import endpoint         # noqa: E402
+import newfile          # noqa: E402
+import pc               # noqa: E402
 import sampling         # noqa: E402
+import sem13c           # noqa: E402
+import share            # noqa: E402
 
 CLAUDE_MARK = "x\n\nCo-Authored-By: Claude <noreply@anthropic.com>"
 
@@ -641,10 +647,11 @@ def test_b3_node_hygiene_mirrors_frame_rules():
     assert b3.eligible_nodes(nodes) == [("dev", 1, 100)]
 
 
-def test_b3_draw_is_deterministic_and_one_doc_per_author():
+def test_b3_draw_is_deterministic_and_one_doc_per_author(monkeypatch):
     """The repo draw is seeded PPS; slots take one document per author
     across the whole arm."""
     import b3
+    monkeypatch.setitem(b3.B3_PARAMS, "n_docs", 20)
     pool = {f"o/r{i}": 50 + i for i in range(30)}
     assert b3.draw_repos(pool) == b3.draw_repos(pool)
     pages = {r: [_b3_node(1, login="samedev"), _b3_node(2, login=f"u{r}")]
@@ -918,6 +925,47 @@ def test_analysis_breaks_out_all_predicted_classes():
     assert s["flag_mixed"] == pytest.approx(1 / 4)
 
 
+def test_paired_metric_secondary_outcomes():
+    """The pre-specified secondary outcomes run the same within-author
+    contrast on paragraph metrics; rows without the metric or an
+    author never pair."""
+    def prow(author, ai, share):
+        return {"arm": "P", "period": "Q2-2026", "author": author,
+                "ai": ai, "share_paragraphs_gt50": share}
+    rows = [prow("a", True, 0.6), prow("a", False, 0.2),
+            prow("b", True, 0.1), prow("b", False, 0.5),
+            prow("c", True, 0.9), prow("c", False, 0.3),
+            {"arm": "P", "period": "Q2-2026", "author": "d", "ai": True,
+             "share_paragraphs_gt50": None}]
+    pr = analyze.paired_metric(rows, "Q2-2026", "share_paragraphs_gt50")
+    assert (pr["pairs"], pr["wins"], pr["losses"]) == (3, 2, 1)
+    assert analyze.paired_metric(rows, "Q4-2025",
+                                 "share_paragraphs_gt50") is None
+
+
+def test_mixture_prevalence_anchors_and_clamp():
+    """Method-of-moments prevalence: pi = (mean - human)/(anchor -
+    human) per paired arm, clamped to [0, 1]; None when anchors are
+    missing or inverted."""
+    def row(arm, period, ai, p):
+        return {"arm": arm, "period": period, "ai": ai,
+                "class_probabilities": {"ai": p}}
+    rows = ([row("P", "Q4-2025", True, 0.5)] * 4
+            + [row("B3", "Q3-2022", False, 0.1)] * 4
+            + [row("P", "Q2-2026", False, 0.3)] * 4
+            + [row("P", "Q2-2026", True, 0.9)] * 4)
+    s = analyze.mixture_stats(rows)
+    assert s["anchor"] == pytest.approx(0.5)
+    assert s["human"] == pytest.approx(0.1)
+    by = {a["arm"]: a["pi"] for a in s["arms"]}
+    assert by["Q4-2025 AI"] == pytest.approx(1.0)
+    assert by["Q2-2026 nonAI"] == pytest.approx(0.5)
+    assert by["Q2-2026 AI"] == pytest.approx(1.0)   # clamped
+    assert analyze.mixture_stats(
+        [row("P", "Q4-2025", True, 0.1),
+         row("B3", "Q3-2022", False, 0.5)]) is None  # inverted anchors
+
+
 def test_analysis_pairs_within_one_quarter_only():
     """A same-named author scored in two quarters must never be paired
     across them: paired() contrasts within one quarter's arm P."""
@@ -1112,26 +1160,42 @@ def test_retest_command_targets_truncated_scored_docs_only(
 
 def _freeze_env(tmp_path, monkeypatch):
     """Minimal coherent corpus for cmd_freeze: one filled+scored doc
-    with its cached response, all manifests present."""
+    with its cached response and document text, all manifests
+    present."""
+    import b3
     import gz
     for name in ("LOCAL", "MANIFEST", "MANIFEST_B3", "MANIFEST_ERAS",
-                 "DOCS", "DOCS_RETEST", "RESULTS", "RESULTS_RETEST",
-                 "RESERVATIONS", "RESP_CACHE"):
+                 "MANIFEST_PC", "DOCS", "DOCS_RETEST", "RESULTS",
+                 "RESULTS_RETEST", "RESULTS_SEM", "DOCS_NEWFILE",
+                 "RESULTS_SEM_NF", "RESULTS_SEM_NF_FULL", "RESULTS_NF",
+                 "DOCS_ABL", "RESULTS_ABL", "DOCS_EP",
+                 "RESULTS_EP", "RESERVATIONS", "RESP_CACHE",
+                 "DOC_CACHE"):
         monkeypatch.setattr(gz, name, tmp_path / getattr(gz, name).name)
     monkeypatch.setattr(gz, "FROZEN", tmp_path / "frozen")
     monkeypatch.setattr(gptzero_client, "PINNED_VERSION", "pinver")
-    gz.MANIFEST_B3.write_text(json.dumps({"slots": [{"slot": "B3:o/r"}]}))
-    for m in (gz.MANIFEST, gz.MANIFEST_ERAS):
-        m.write_text(json.dumps({"slots": []}))
+    gz.MANIFEST_B3.write_text(json.dumps(
+        {"slots": [{"slot": "B3:o/r"}],
+         "params": {**b3.B3_PARAMS, "word_cap": 600,
+                    "word_floor": 100}}))
+    for m, params in ((gz.MANIFEST, sampling.PARAMS),
+                      (gz.MANIFEST_ERAS, eras.PARAMS),
+                      (gz.MANIFEST_PC, pc.PARAMS)):
+        m.write_text(json.dumps({"slots": [], "params": params}))
     gz.DOCS.write_text(json.dumps(
         {"slot": "B3:o/r", "arm": "B3", "ai": False, "period": "Q3-2022",
          "doc_sha": "s", "words": 200, "truncated": True}) + "\n")
     gz.RESULTS.write_text(json.dumps(
         {"slot": "B3:o/r", "arm": "B3", "ai": False, "period": "Q3-2022",
-         "doc_sha": "s", "words": 200, "truncated": True,
+         "author": "dev", "doc_sha": "s", "words": 200,
+         "truncated": True,
          "class_probabilities": {"ai": 0.1, "mixed": 0.02},
          "predicted_class": "human",
          "model_version": "pinver"}) + "\n")
+    gz.DOC_CACHE.mkdir(parents=True)
+    (gz.DOC_CACHE / "s.txt").write_text(
+        "// file: src/a.py\ncode\n// file: b.rs\ncode\n"
+        "// file: c.py\ncode\n")
     resp = tmp_path / gz.RESP_CACHE.name / "pinver" / "s.json"
     resp.parent.mkdir(parents=True)
     resp.write_text(json.dumps({"version": "pinver", "documents": [
@@ -1140,6 +1204,616 @@ def _freeze_env(tmp_path, monkeypatch):
          "paragraphs": [{"completely_generated_prob": 0.8},
                         {"completely_generated_prob": 0.1}]}]}))
     return gz
+
+
+NEWFILE_DIFF = """\
+diff --git a/src/old.py b/src/old.py
++++ b/src/old.py
+@@ -1,2 +1,3 @@
++modified_existing_file = True
+diff --git a/src/created.py b/src/created.py
+new file mode 100644
++++ b/src/created.py
+@@ -0,0 +1,3 @@
++def whole():
++    return "file"
++CREATED = True
+diff --git a/vendor/lib.js b/vendor/lib.js
+new file mode 100644
++++ b/vendor/lib.js
+@@ -0,0 +1 @@
++vendored = 1
+diff --git a/docs/readme.md b/docs/readme.md
+new file mode 100644
++++ b/docs/readme.md
+@@ -0,0 +1 @@
++prose, not code
+"""
+
+
+def test_created_files_are_new_code_files_only():
+    """Only `new file mode` blocks count (edits to existing files are
+    not whole files), and the allowlist/vendored filters apply."""
+    got = newfile.created_files(NEWFILE_DIFF)
+    assert [p for p, _t in got] == ["src/created.py"]
+    assert got[0][1] == 'def whole():\n    return "file"\nCREATED = True\n'
+
+
+def test_newfile_rows_pick_largest_eligible_and_cap(tmp_path,
+                                                    monkeypatch):
+    """One row per slot: the LARGEST created code file above the
+    floor, with capped and full variants cached; slots whose PRs
+    created no eligible file yield nothing."""
+    monkeypatch.setattr(newfile, "WORD_FLOOR", 3)
+    monkeypatch.setattr(newfile, "WORD_CAP", 5)
+    diff_cache = tmp_path / "diffs"
+    diff_cache.mkdir()
+    (diff_cache / "o~r@1.diff").write_text(NEWFILE_DIFF)
+    (diff_cache / "o~r@2.diff").write_text(
+        "diff --git a/a.py b/a.py\n+++ b/a.py\n+edit_only = 1\n")
+    docs = [{"slot": "P:a:ai", "arm": "P", "author": "a",
+             "period": "Q2-2026", "ai": True, "repo": "o/r", "num": 1},
+            {"slot": "P:b:ai", "arm": "P", "author": "b",
+             "period": "Q2-2026", "ai": True, "repo": "o/r", "num": 2}]
+    rows = newfile.build_rows(docs, diff_cache, tmp_path / "cache")
+    assert [r["slot"] for r in rows] == ["P:a:ai"]
+    r = rows[0]
+    assert r["path"] == "src/created.py"
+    assert r["truncated"] and r["words"] == 5
+    assert r["words_full"] == 10   # 3-word header + 7-word file
+    capped = (tmp_path / "cache" / f"{r['doc_sha']}.txt").read_text()
+    full = (tmp_path / "cache" / f"{r['doc_sha_full']}.txt").read_text()
+    assert full.startswith("// file: src/created.py\n")
+    assert capped == " ".join(full.split()[:5])
+
+
+def test_report_newfile_renders_without_gptzero_rows(capsys):
+    """Live finding 2026-08-05: --report-newfile crashed formatting the
+    absent GPTZero mean (None) before the billed pass ran. Unscored
+    detector columns render as dashes, never TypeError."""
+    nf = [{"slot": "P:a:ai", "arm": "P", "period": "Q2-2026",
+           "author": "a", "ai": True, "doc_sha": "s", "words": 100,
+           "truncated": False}]
+    sem = [{"slot": "P:a:ai", "sem_pred": "ai",
+            "sem_probs": {"human": 0.1, "ai": 0.7, "hybrid": 0.1,
+                          "adversarial": 0.1}}]
+    analyze.report_newfile(nf, sem, sem, [])
+    out = capsys.readouterr().out
+    assert "Q2-26-AI" in out and "TypeError" not in out
+    assert "—" in out
+
+
+ABL_DOC = """\
+// file: src/a.py
+# a real comment explaining the thing
+def f(x):
+    return x + 1
+// file: src/b.js
+// another comment line here
+const y = 2;
+"""
+
+
+def test_share_pseudonyms_hide_logins_and_keep_pairing():
+    """Human authors map to sequential ids in doc-id order (no login
+    leaks, numbering carries no login information); one developer keeps
+    one id across rows; agent bots are not pseudonymised."""
+    rows = [{"doc_sha": "c", "arm": "P", "author": "alice"},
+            {"doc_sha": "a", "arm": "B1", "author": "alice"},
+            {"doc_sha": "b", "arm": "P", "author": "bob"},
+            {"doc_sha": "d", "arm": "PC", "author": "copilot-swe-agent"}]
+    ids = share.pseudonyms(rows)
+    assert ids == {"alice": "h0001", "bob": "h0002"}
+    assert "copilot-swe-agent" not in ids
+
+
+def test_share_normalization_measures_what_the_endpoint_scored():
+    sent = "def f():\n    return 1\n"
+    assert share.normalization(sent, sent) == {
+        "received_bytes": len(sent), "received_identical": True,
+        "leading_ws_retained": 1.0}
+    got = share.normalization(sent, "def f():\n return 1\n")
+    assert got["received_identical"] is False
+    assert got["leading_ws_retained"] == 0.25
+
+
+def test_share_check_secret_refuses_key_and_credential_files(tmp_path):
+    """The package must never carry the API key or a credential file,
+    whatever else goes wrong upstream."""
+    (tmp_path / "ok.txt").write_text("harmless")
+    share.check_secret(tmp_path, "sk-SECRET")          # clean: passes
+    (tmp_path / "leak.json").write_text('{"x": "sk-SECRET"}')
+    with pytest.raises(SystemExit, match="API key"):
+        share.check_secret(tmp_path, "sk-SECRET")
+    (tmp_path / "leak.json").unlink()
+    (tmp_path / ".env").write_text("nothing")
+    with pytest.raises(SystemExit, match="forbidden"):
+        share.check_secret(tmp_path, None)
+
+
+def test_agent_matrix_paces_network_calls(tmp_path, monkeypatch):
+    """Live finding 2026-09-11: --agent-matrix fired its API calls back
+    to back and GPTZero's edge answered with a Cloudflare 403 after six
+    of them. Every call that reaches the network must be followed by
+    the SCORE_PACE pause before the next one; cache hits need none."""
+    import gz
+    frozen, docs = tmp_path / "frozen", tmp_path / "docs"
+    frozen.mkdir()
+    docs.mkdir()
+    monkeypatch.setattr(gz, "FROZEN", frozen)
+    monkeypatch.setattr(gz, "DOC_CACHE", docs)
+    monkeypatch.setattr(gz, "RESERVATIONS", tmp_path / "resv.jsonl")
+    monkeypatch.setattr(share, "CASE_STUDIES",
+                        (("devin-ai-integration", "o/a", 1),
+                         ("cursor", "o/b", 2)))
+    rows = []
+    for agent, repo, num in share.CASE_STUDIES:
+        (docs / f"s{num}.txt").write_text("x y z")
+        rows.append({"arm": "PC", "author": agent, "repo": repo,
+                     "num": num, "doc_sha": f"s{num}"})
+    share.write_jsonl(frozen / gz.RESULTS.name, rows)
+    fake = {"version": "v", "documents": [{"predicted_class": "human"}]}
+    events = []
+
+    def fake_batch(items, cache, resv):
+        billed = 0 if items[0][0] == "s1" else 3   # s1 files: cache hit
+        events.append("net" if billed else "hit")
+        return [(fake, billed)]
+
+    def fake_score(sha, text, cache, resv):
+        events.append("net")
+        return fake, 3
+
+    monkeypatch.setattr(gptzero_client, "score_batch", fake_batch)
+    monkeypatch.setattr(gptzero_client, "score", fake_score)
+    monkeypatch.setattr(gz.time, "sleep",
+                        lambda s: events.append(f"sleep{s}"))
+    gz.cmd_agent_matrix()
+    net = [e for e in events if e != "hit"]
+    for a, b in zip(net, net[1:]):
+        assert not (a == "net" and b == "net"), events
+    assert f"sleep{gz.SCORE_PACE}" in events
+
+
+def test_package_share_end_to_end_leaks_no_login(tmp_path, monkeypatch):
+    """Built from a frozen set with every input present, the package
+    contains the documents, tables, raw responses, README and manifest,
+    and no GitHub login appears anywhere in it; a missing raw response
+    refuses the build."""
+    import gz
+    frozen = tmp_path / "frozen"
+    frozen.mkdir()
+    docs, rf, rt = (tmp_path / "docs", tmp_path / "resp",
+                    tmp_path / "resp_text")
+    monkeypatch.setattr(gz, "FROZEN", frozen)
+    monkeypatch.setattr(gz, "DOC_CACHE", docs)
+    monkeypatch.setattr(gz, "RESP_CACHE", rf)
+    monkeypatch.setattr(gz, "RESP_CACHE_TEXT", rt)
+    monkeypatch.setattr(gz, "SHARE_ROOT", tmp_path / "share")
+    monkeypatch.setattr(gptzero_client, "_api_key", lambda: "sk-SECRET")
+    monkeypatch.setattr(share, "CASE_STUDIES",
+                        (("devin-ai-integration", "o/agent", 7),))
+    docs.mkdir()
+    v_old, v_new = share.CASE_VERSIONS
+
+    def resp(version, text, p):
+        return {"version": version, "documents": [{
+            "inputText": text, "predicted_class": "human",
+            "class_probabilities": {"ai": p, "human": 1 - p, "mixed": 0},
+            "completely_generated_prob": p}]}
+
+    corpus = []
+    for sha, arm, author, repo in (
+            ("d1", "P", "secretlogin", "o/r"),
+            ("d2", "B3", "otherlogin", "o/old"),
+            ("d3", "PC", "devin-ai-integration", "o/agent")):
+        text = f"// file: a.py\ndef {sha}():\n    return 1\n"
+        (docs / f"{sha}.txt").write_text(text)
+        for base, ver in ((rf, v_old), (rf, v_new), (rt, v_old),
+                          (rt, v_new)):
+            (base / ver).mkdir(parents=True, exist_ok=True)
+            (base / ver / f"{sha}.json").write_text(
+                json.dumps(resp(ver, text, 0.1)))
+        corpus.append({
+            "slot": f"X:{author}", "doc_sha": sha, "arm": arm,
+            "author": author, "period": "Q2-2026", "ai": arm != "B3",
+            "repo": repo, "num": 7, "words": 5, "truncated": False,
+            "model_version": v_old, "predicted_class": "human",
+            "class_probabilities": {"ai": 0.1, "human": 0.9,
+                                    "mixed": 0},
+            "completely_generated_prob": 0.1})
+    share.write_jsonl(frozen / gz.RESULTS.name, corpus)
+    share.write_jsonl(frozen / gz.RESULTS_EP.name, [
+        {**corpus[0], "stratum": "Q2-2026-AI"}])
+    for name in (gz.RESULTS_ABL.name, gz.RESULTS_RETEST.name):
+        share.write_jsonl(frozen / name, [])
+    gz.cmd_package_share()
+    pkg = next(p for p in (tmp_path / "share").glob(
+        "gptzero-code-calibration-*") if p.is_dir())
+    for part in ("README.md", "MANIFEST.sha256", "corpus.jsonl",
+                 "corpus.csv", "endpoint_comparison.jsonl",
+                 "agent_case_studies.jsonl", "documents/d1.txt",
+                 f"responses/text/{v_new}/d3.json"):
+        assert (pkg / part).is_file(), part
+    blob = b"".join(p.read_bytes() for p in pkg.rglob("*") if p.is_file())
+    assert b"secretlogin" not in blob and b"otherlogin" not in blob
+    assert b"sk-SECRET" not in blob
+    rows = [json.loads(ln) for ln in
+            (pkg / "corpus.jsonl").read_text().splitlines()]
+    assert {r["author_id"] for r in rows} == {
+        "h0001", "h0002", "devin-ai-integration"}
+    assert len(json.loads((pkg / "agent_case_studies.jsonl")
+                          .read_text().splitlines()[0])) > 0
+    assert (tmp_path / "share" / f"{pkg.name}.zip").is_file()
+    assert (pkg / "normalization_analysis.md").is_file()
+    cells = len((pkg / "agent_case_studies.jsonl").read_text().split("\n"))
+    # a case-study cell with no captured response is skipped, not fatal
+    (rt / v_new / "d3.json").unlink()
+    gz.cmd_package_share()
+    assert len((pkg / "agent_case_studies.jsonl").read_text()
+               .split("\n")) < cells
+    # a missing CORPUS response still refuses the build
+    (rf / v_old / "d1.json").unlink()
+    with pytest.raises(SystemExit, match="no files@"):
+        gz.cmd_package_share()
+
+
+def _ep_score(slot, arm, period, ai, sha, words=300):
+    return {"slot": slot, "arm": arm, "author": slot, "period": period,
+            "ai": ai, "repo": "o/r", "num": 1, "doc_sha": sha,
+            "words": words, "predicted_class": "human",
+            "class_probabilities": {"ai": 0.1}}
+
+
+def test_endpoint_selection_is_stratified_and_prefix_stable():
+    """The sample takes N per reporting arm from a seeded shuffle, so
+    deepening extends it rather than redrawing; documents outside the
+    reporting arms never enter."""
+    rows = ([_ep_score(f"b{i}", "B3", "Q3-2022", False, f"b{i}")
+             for i in range(6)]
+            + [_ep_score(f"p{i}", "P", "Q2-2026", i % 2 == 0, f"p{i}")
+               for i in range(8)]
+            + [_ep_score(f"a{i}", "PC", "Q2-2026", True, f"a{i}")
+               for i in range(4)]
+            + [_ep_score("x", "OTHER", "Q2-2026", False, "x")])
+    small = endpoint.select(rows, n_per_stratum=2)
+    assert small == endpoint.select(rows, n_per_stratum=2)
+    strata = {r["stratum"] for r in small}
+    assert strata == {"baseline", "Q2-2026-AI", "Q2-2026-nonAI",
+                      "known-AI"}
+    assert "x" not in {r["slot"] for r in small}
+    big = endpoint.select(rows, n_per_stratum=3)
+    for s in strata:
+        a = [r["slot"] for r in small if r["stratum"] == s]
+        b = [r["slot"] for r in big if r["stratum"] == s]
+        assert b[:len(a)] == a          # prefix-stable deepening
+
+
+def test_endpoint_pairs_bind_on_slot_and_doc_sha():
+    """Pairs form only where the SAME document was scored on both
+    endpoints — a text row against a redrawn document never pairs."""
+    files = [{"slot": "s1", "doc_sha": "d1", "predicted_class": "human",
+              "class_probabilities": {"ai": 0.02}},
+             {"slot": "s2", "doc_sha": "d2", "predicted_class": "human",
+              "class_probabilities": {"ai": 0.10}}]
+    text = [{"slot": "s1", "doc_sha": "d1", "stratum": "known-AI",
+             "predicted_class": "ai",
+             "class_probabilities": {"ai": 0.60}},
+            {"slot": "s2", "doc_sha": "STALE", "stratum": "baseline",
+             "predicted_class": "ai",
+             "class_probabilities": {"ai": 0.99}}]
+    got = analyze.endpoint_pairs(files, text)
+    assert len(got) == 1
+    assert got[0]["files_p"] == 0.02 and got[0]["text_p"] == 0.60
+    assert got[0]["files_class"] != got[0]["text_class"]
+
+
+def test_ablation_split_separates_streams_and_drops_headers():
+    """Variants are code-only and comments-only; the `// file:`
+    headers belong to the document format and enter neither stream."""
+    code, comment = ablation.split_document(ABL_DOC)
+    assert "// file:" not in code and "// file:" not in comment
+    assert "def f(x):" in code and "const y = 2;" in code
+    assert "a real comment" in comment and "another comment" in comment
+    assert "def f(x):" not in comment and "a real comment" not in code
+
+
+def test_ablation_rows_are_paired_floored_and_deterministic(
+        tmp_path, monkeypatch):
+    """Two variants per selected document, each carrying its parent
+    doc_sha for within-document pairing; documents whose variants fall
+    under the floor are skipped; selection is seeded and stable."""
+    monkeypatch.setattr(ablation, "WORD_FLOOR", 3)
+    monkeypatch.setattr(ablation, "N_PER_GROUP", 1)
+    cache = tmp_path / "docs"
+    cache.mkdir()
+    rich = ABL_DOC
+    thin = "// file: t.py\nx = 1\n"          # no comments -> ineligible
+    scores = []
+    for i, (sha, text, arm, period) in enumerate((
+            ("sha1", rich, "B3", "Q3-2022"),
+            ("sha2", rich, "P", "Q2-2026"),
+            ("sha3", thin, "P", "Q2-2026"))):
+        (cache / f"{sha}.txt").write_text(text)
+        scores.append({"slot": f"s{i}", "arm": arm, "author": "a",
+                       "period": period, "ai": True, "repo": "o/r",
+                       "num": i, "doc_sha": sha})
+    rows = ablation.build_rows(scores, cache)
+    assert rows == ablation.build_rows(scores, cache)   # deterministic
+    assert {r["slot"] for r in rows} == {"s0", "s1"}    # thin excluded
+    assert sorted(r["variant"] for r in rows) == [
+        "code", "code", "comment", "comment"]
+    assert {r["group"] for r in rows} == {"baseline", "Q2-2026"}
+    for r in rows:
+        assert r["parent_doc_sha"] in {"sha1", "sha2"}
+        assert (cache / f"{r['doc_sha']}.txt").is_file()
+
+
+def test_ablation_stats_pair_within_document():
+    """Variants bind to the parent's CURRENT doc_sha; a variant whose
+    parent was redrawn never pairs, and both variants are required."""
+    rows = [{"slot": "s1", "doc_sha": "d1",
+             "class_probabilities": {"ai": 0.8}},
+            {"slot": "s2", "doc_sha": "d2",
+             "class_probabilities": {"ai": 0.6}}]
+
+    def v(slot, parent, variant, p, group="Q2-2026"):
+        return {"slot": slot, "parent_doc_sha": parent,
+                "variant": variant, "group": group,
+                "class_probabilities": {"ai": p}}
+    abl = [v("s1", "d1", "code", 0.2), v("s1", "d1", "comment", 0.9),
+           v("s2", "STALE", "code", 0.1),
+           v("s2", "STALE", "comment", 0.1)]
+    got = ablation_groups = analyze.ablation_stats(rows, abl)
+    assert set(got) == {"Q2-2026"}
+    assert len(ablation_groups["Q2-2026"]) == 1
+    e = got["Q2-2026"][0]
+    assert (e["orig"], e["code"], e["comment"]) == (0.8, 0.2, 0.9)
+
+
+def test_sem13c_inference_version_invalidates_cached_rows(tmp_path):
+    """PR #29 round-2 review P1: inference preprocessing changed (pad
+    to 4096 before chunking, matching the authors' published path), but
+    the resume key was (slot, doc_sha, model_revision) — every stale
+    row would have been treated as valid. Rows scored under a different
+    (or absent) inference version must be rescored, and sem_bound must
+    exclude them."""
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
+    (docs_dir / "s1.txt").write_text("code()")
+    rows = [{"slot": "P:a:ai", "arm": "P", "author": "a",
+             "period": "Q2-2026", "ai": True, "doc_sha": "s1",
+             "words": 100, "truncated": False}]
+    out = tmp_path / "sem.jsonl"
+    stale = {"slot": "P:a:ai", "arm": "P", "author": "a",
+             "period": "Q2-2026", "ai": True, "doc_sha": "s1",
+             "sem_probs": {"human": 1.0, "ai": 0.0, "hybrid": 0.0,
+                           "adversarial": 0.0}, "sem_pred": "human",
+             "model_revision": sem13c.HF_REVISION}   # no inference key
+    out.write_text(json.dumps(stale) + "\n")
+    calls = []
+
+    def stub(text):
+        calls.append(text)
+        return {"human": 0.0, "ai": 1.0, "hybrid": 0.0,
+                "adversarial": 0.0}
+
+    assert sem13c.score_rows(rows, docs_dir, out, predictor=stub) == 1
+    assert len(calls) == 1                    # stale row NOT trusted
+    scored = [json.loads(ln) for ln in out.read_text().splitlines()]
+    assert scored[-1]["inference"] == sem13c.INFERENCE
+    current = [{"slot": "P:a:ai", "doc_sha": "s1"}]
+    bound = analyze.sem_bound(current, scored,
+                              inference=sem13c.INFERENCE)
+    assert len(bound) == 1 and bound[0]["sem_pred"] == "ai"
+
+
+def test_sem13c_scores_resume_and_bind(tmp_path):
+    """The sem13c scorer appends one row per (slot, doc_sha) under the
+    pinned revision, skips already-scored docs on re-run, and
+    sem_bound keeps only rows matching each slot's CURRENT document —
+    redrawn docs age out instead of double-counting."""
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
+    rows = []
+    for sha, slot in (("s1", "P:a:ai"), ("s2", "P:a:nonai")):
+        (docs_dir / f"{sha}.txt").write_text("code()")
+        rows.append({"slot": slot, "arm": "P", "author": "a",
+                     "period": "Q2-2026", "ai": slot.endswith(":ai"),
+                     "doc_sha": sha, "words": 100, "truncated": False})
+    calls = []
+
+    def stub(text):
+        calls.append(text)
+        return {"human": 0.1, "ai": 0.6, "hybrid": 0.2,
+                "adversarial": 0.1}
+
+    out = tmp_path / "sem.jsonl"
+    assert sem13c.score_rows(rows, docs_dir, out, predictor=stub) == 2
+    assert sem13c.score_rows(rows, docs_dir, out, predictor=stub) == 0
+    assert len(calls) == 2                      # resume: no rescoring
+    scored = [json.loads(ln) for ln in out.read_text().splitlines()]
+    assert scored[0]["sem_pred"] == "ai"
+    assert scored[0]["model_revision"] == sem13c.HF_REVISION
+    current = [{"slot": "P:a:ai", "doc_sha": "s1"},
+               {"slot": "P:a:nonai", "doc_sha": "REDRAWN"}]
+    bound = analyze.sem_bound(current, scored)
+    assert [r["slot"] for r in bound] == ["P:a:ai"]
+
+
+def test_score_newfile_refuses_unpinned(tmp_path, monkeypatch):
+    """PR #29 round-2 review P2: the created-file billed pass could
+    run the whole arm with PINNED_VERSION = None (no smoke-run limit
+    exists on this path). It must refuse before rewriting results or
+    issuing any API call."""
+    import gz
+    monkeypatch.setattr(gz, "DOCS_NEWFILE",
+                        tmp_path / "docs_newfile.jsonl")
+    monkeypatch.setattr(gz, "RESULTS_NF", tmp_path / "scores_nf.jsonl")
+    gz.DOCS_NEWFILE.write_text(json.dumps(
+        {"slot": "P:a:ai", "arm": "P", "author": "a",
+         "period": "Q2-2026", "ai": True, "doc_sha": "s",
+         "words": 100}) + "\n")
+    monkeypatch.setattr(gptzero_client, "PINNED_VERSION", None)
+    with pytest.raises(SystemExit, match="pin"):
+        gz.cmd_score_newfile()
+    assert not gz.RESULTS_NF.exists()
+
+
+def test_freeze_refuses_stale_design_manifests(tmp_path, monkeypatch):
+    """PR #29 round-2 review P1: source PARAMS and frozen manifests
+    could describe different experiments (code n_q1=60 vs manifest 20)
+    and --freeze validated only internal consistency. A manifest whose
+    recorded params differ from the current module PARAMS must refuse
+    the freeze until resampled."""
+    gz = _freeze_env(tmp_path, monkeypatch)
+    gz.cmd_freeze()                                # matching: passes
+    m = json.loads(gz.MANIFEST.read_text())
+    m["params"] = {**m["params"], "n_q1": 999}
+    gz.MANIFEST.write_text(json.dumps(m))
+    with pytest.raises(SystemExit, match="design"):
+        gz.cmd_freeze()
+
+
+def test_freeze_requires_complete_sem_coverage(tmp_path, monkeypatch):
+    """PR #29 round-2 review P2: sem13c results were optional and
+    unversioned at freeze time while the report's conclusion was
+    unconditional. When a sem results file exists, every frozen score
+    row needs exactly one bound current-inference sem row, else the
+    freeze refuses."""
+    gz = _freeze_env(tmp_path, monkeypatch)
+
+    def sem_row(sha):
+        return {"slot": "B3:o/r", "arm": "B3", "period": "Q3-2022",
+                "ai": False, "author": "dev", "doc_sha": sha,
+                "sem_pred": "human",
+                "sem_probs": {"human": 1.0, "ai": 0.0, "hybrid": 0.0,
+                              "adversarial": 0.0},
+                "model_revision": sem13c.HF_REVISION,
+                "inference": sem13c.INFERENCE}
+
+    gz.RESULTS_SEM.write_text(json.dumps(sem_row("STALE")) + "\n")
+    with pytest.raises(SystemExit, match="sem13c"):
+        gz.cmd_freeze()
+    gz.RESULTS_SEM.write_text(json.dumps(sem_row("s")) + "\n")
+    gz.cmd_freeze()                                # complete: passes
+    assert (gz.FROZEN / "scores_sem13c.jsonl").is_file()
+    assert "sem13c" in (gz.FROZEN / "report.txt").read_text()
+
+
+def test_sem_bound_requires_current_revision():
+    """PR #29 round-3 review P1: binding filtered only the inference
+    version and kept the first matching row, so a row from an older
+    HF_REVISION could pass and mask the current row. Binding requires
+    the exact (revision, inference) pair."""
+    current = [{"slot": "s", "doc_sha": "d"}]
+    stale = {"slot": "s", "doc_sha": "d", "sem_pred": "human",
+             "model_revision": "OLD", "inference": sem13c.INFERENCE}
+    fresh = {**stale, "model_revision": sem13c.HF_REVISION,
+             "sem_pred": "ai"}
+    bound = analyze.sem_bound(current, [stale, fresh],
+                              inference=sem13c.INFERENCE,
+                              revision=sem13c.HF_REVISION)
+    assert [r["sem_pred"] for r in bound] == ["ai"]
+
+
+def test_freeze_refuses_duplicate_and_incomplete_nf_artifacts(
+        tmp_path, monkeypatch):
+    """PR #29 round-3 review P1: duplicate current sem rows passed the
+    coverage check, the created-file billed results were copied without
+    coverage/version validation, and the two created-file sem variants
+    were independently optional. With DOCS_NEWFILE present both sem
+    variants are required; RESULTS_NF, when present, needs exactly one
+    current-document row per created-file doc under PINNED_VERSION."""
+    gz = _freeze_env(tmp_path, monkeypatch)
+
+    def sem_row(slot, sha):
+        return {"slot": slot, "arm": "B3", "period": "Q3-2022",
+                "ai": False, "author": "dev", "doc_sha": sha,
+                "sem_pred": "human",
+                "sem_probs": {"human": 1.0, "ai": 0.0, "hybrid": 0.0,
+                              "adversarial": 0.0},
+                "model_revision": sem13c.HF_REVISION,
+                "inference": sem13c.INFERENCE}
+
+    gz.RESULTS_SEM.write_text(json.dumps(sem_row("B3:o/r", "s")) + "\n"
+                              + json.dumps(sem_row("B3:o/r", "s"))
+                              + "\n")                 # duplicate current
+    with pytest.raises(SystemExit, match="duplicate"):
+        gz.cmd_freeze()
+    gz.RESULTS_SEM.write_text(json.dumps(sem_row("B3:o/r", "s")) + "\n")
+
+    nf = {"slot": "B3:o/r", "arm": "B3", "period": "Q3-2022",
+          "ai": False, "author": "dev", "repo": "o/r", "num": 1,
+          "path": "a.py", "doc_sha": "nfc", "words": 150,
+          "truncated": False, "doc_sha_full": "nff", "words_full": 200}
+    gz.DOCS_NEWFILE.write_text(json.dumps(nf) + "\n")
+    with pytest.raises(SystemExit, match="newfile"):
+        gz.cmd_freeze()                    # sem NF variants required
+    for path, sha in ((gz.RESULTS_SEM_NF, "nfc"),
+                      (gz.RESULTS_SEM_NF_FULL, "nff")):
+        path.write_text(json.dumps(sem_row("B3:o/r", sha)) + "\n")
+    gz.cmd_freeze()                        # complete: passes
+
+    bad_nf = {**nf, "doc_sha": "STALE", "predicted_class": "human",
+              "model_version": "pinver", "billed_words": 150}
+    gz.RESULTS_NF.write_text(json.dumps(bad_nf) + "\n")
+    with pytest.raises(SystemExit, match="created-file"):
+        gz.cmd_freeze()                    # stale doc_sha refused
+    good_nf = {**bad_nf, "doc_sha": "nfc", "model_version": "OTHER"}
+    gz.RESULTS_NF.write_text(json.dumps(good_nf) + "\n")
+    with pytest.raises(SystemExit, match="created-file"):
+        gz.cmd_freeze()                    # wrong pin refused
+    gz.RESULTS_NF.write_text(json.dumps(
+        {**good_nf, "model_version": "pinver"}) + "\n")
+    gz.cmd_freeze()
+    assert (gz.FROZEN / gz.RESULTS_NF.name).is_file()
+
+
+def test_freeze_failure_preserves_previous_snapshot(
+        tmp_path, monkeypatch):
+    """PR #29 round-3 review P2: frozen/ was removed before the sem and
+    created-file validations ran, so a late refusal destroyed the prior
+    audit set. Freeze stages into a temporary directory and replaces
+    the snapshot only after every validation passes."""
+    gz = _freeze_env(tmp_path, monkeypatch)
+    gz.cmd_freeze()
+    marker = (gz.FROZEN / "report.txt").read_text()
+    gz.RESULTS_SEM.write_text(json.dumps(
+        {"slot": "B3:o/r", "doc_sha": "STALE", "sem_pred": "human",
+         "sem_probs": {"human": 1.0, "ai": 0.0, "hybrid": 0.0,
+                       "adversarial": 0.0},
+         "model_revision": sem13c.HF_REVISION,
+         "inference": sem13c.INFERENCE}) + "\n")
+    with pytest.raises(SystemExit):
+        gz.cmd_freeze()
+    assert (gz.FROZEN / "report.txt").read_text() == marker
+
+
+def test_freeze_swap_failure_preserves_previous_snapshot(
+        tmp_path, monkeypatch):
+    """PR #29 round-4 review P2: the final swap deleted the previous
+    snapshot before renaming the staging directory, so a crash or
+    rename failure between the two lost both. The old snapshot must
+    survive a failed swap (kept as backup, rolled back on
+    exception)."""
+    from pathlib import PosixPath
+    gz = _freeze_env(tmp_path, monkeypatch)
+    gz.cmd_freeze()
+    marker = (gz.FROZEN / "report.txt").read_text()
+
+    real_rename = PosixPath.rename
+
+    def flaky(self, target):
+        if self.name.endswith(".tmp"):
+            raise OSError("simulated rename failure")
+        return real_rename(self, target)
+
+    monkeypatch.setattr(PosixPath, "rename", flaky)
+    with pytest.raises(OSError, match="simulated"):
+        gz.cmd_freeze()
+    monkeypatch.setattr(PosixPath, "rename", real_rename)
+    assert (gz.FROZEN / "report.txt").read_text() == marker
 
 
 def test_freeze_writes_the_audit_set(tmp_path, monkeypatch):
@@ -1160,6 +1834,9 @@ def test_freeze_writes_the_audit_set(tmp_path, monkeypatch):
             .splitlines()]
     assert para[0]["slot"] == "B3:o/r"
     assert para[0]["share_paragraphs_gt50"] == pytest.approx(0.5)
+    assert para[0]["author"] == "dev"
+    assert para[0]["ai_prob"] == pytest.approx(0.1)
+    assert para[0]["dominant_ext"] == ".py"      # 2 .py vs 1 .rs
     assert "pinver" in (gz.FROZEN / "PROVENANCE.md").read_text()
 
 
@@ -1244,10 +1921,12 @@ def test_freeze_refuses_retest_and_manifest_incoherence(
     write(gz.DOCS, docs)
 
     gz.MANIFEST.write_text(json.dumps(
-        {"slots": [{"slot": "P:ghost:ai"}]}))         # uncovered manifest
+        {"slots": [{"slot": "P:ghost:ai"}],
+         "params": sampling.PARAMS}))                 # uncovered manifest
     with pytest.raises(SystemExit, match="manifest"):
         gz.cmd_freeze()
-    gz.MANIFEST.write_text(json.dumps({"slots": []}))
+    gz.MANIFEST.write_text(json.dumps({"slots": [],
+                                       "params": sampling.PARAMS}))
 
     # PR #28 review round 4: same slot twice with DIFFERENT long-doc
     # hashes, mirrored in both retest files — full-tuple uniqueness and
@@ -1264,7 +1943,8 @@ def test_freeze_refuses_retest_and_manifest_incoherence(
 
     # duplicate slot definitions across manifests must refuse, not
     # silently collapse into the coverage set
-    gz.MANIFEST.write_text(json.dumps({"slots": [{"slot": "B3:o/r"}]}))
+    gz.MANIFEST.write_text(json.dumps({"slots": [{"slot": "B3:o/r"}],
+                                       "params": sampling.PARAMS}))
     with pytest.raises(SystemExit, match="duplicate"):
         gz.cmd_freeze()
 
@@ -1307,6 +1987,7 @@ def test_eras_deepening_keeps_existing_slots_and_exclusions_hold(
     authors (the v1 Q2-2026 draw) never appear and reduce the quarter's
     target so the pooled quarter still totals n_authors pairs."""
     pool = _eras_pools(q2_26=("carol", "dana", "erin", "fred"))
+    monkeypatch.setitem(eras.PARAMS, "quarter_targets", {})
     monkeypatch.setitem(eras.PARAMS, "n_authors", 2)
     shallow = [s for s in eras.draw(pool) if s["period"] == "Q4-2025"]
     monkeypatch.setitem(eras.PARAMS, "n_authors", 3)
@@ -1323,6 +2004,7 @@ def test_eras_deepening_keeps_existing_slots_and_exclusions_hold(
 
 
 def test_eras_draw_skips_unmixed_authors_and_caps_depth(monkeypatch):
+    monkeypatch.setitem(eras.PARAMS, "quarter_targets", {})
     p = _eras_pools()
     p["Q4-2025"]["aionly"] = {"ai": [("o/r", 9, 100)], "nonai": []}
     assert not [s for s in eras.draw(p) if s["author"] == "aionly"]
@@ -1346,6 +2028,136 @@ def test_eras_manifest_fingerprint_tracks_pools(tmp_path):
     path.write_text(json.dumps(tampered))
     _, rewrote = eras.ensure_manifest(p, path)
     assert rewrote
+
+
+def test_pc_pools_admit_only_canonical_agents(monkeypatch):
+    """PR #29 review P1: the control admitted ANY bot-like author with
+    AI evidence — 9/22 scored rows were Dependabot/Actions/Stainless
+    automation, not coding agents, so the known-AI claim wasn't
+    licensed. Eligibility is the canonical layer-B classification
+    (cls.agent_author / AGENT_PR_AUTHORS): a Dependabot PR carrying an
+    AI marker, human-authored AI PRs, and unmerged agent PRs never
+    enter."""
+    from pipeline import frame
+
+    def agent_pr(num, merged="2026-04-05T00:00:00Z"):
+        p = _pr("2026-04-01T00:00:00Z", merged, num,
+                login="devin-ai-integration[bot]", msg=CLAUDE_MARK)
+        p["author"]["__typename"] = "Bot"
+        if merged is None:
+            p["mergedBy"] = None
+        return p
+
+    cells = {("o/r", "2026-04-01..2026-06-30"): [
+        agent_pr(1),
+        _q2(2, login="alice", msg=CLAUDE_MARK),      # human AI: excluded
+        _q2(3, login="dependabot[bot]"),             # bot, not AI
+        _q2(4, login="dependabot[bot]", msg=CLAUDE_MARK),  # bot + marker:
+        # still NOT a coding agent — the review's misclassification
+        agent_pr(9, merged=None)]}
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    p = pc.pools()
+    assert set(p["Q2-2026"]) == {("devin-ai-integration", "o/r")}
+    assert p["Q2-2026"][("devin-ai-integration", "o/r")] == \
+        [("o/r", 1, 100)]
+    assert p["Q1-2026"] == {}
+
+
+def test_pc_draw_targets_per_agent_with_group_deepening():
+    """pc-v2: each agent aims for n_per_agent_quarter documents per
+    quarter — repo-diverse agents get one slot per group; concentrated
+    agents deepen already-selected groups (up to per_group, disjoint
+    candidate chunks). Slot 0 keeps the pc-v1 id and candidate list so
+    scored documents survive the deepening."""
+    from collections import Counter
+    diverse = {("botA", f"o/r{i}"): [(f"o/r{i}", 1, 100)]
+               for i in range(10)}
+    rich = [("o/z", n, 100) for n in range(1, 21)]     # 20 PRs, 1 repo
+    pools_ = {"Q4-2025": {}, "Q1-2026": {},
+              "Q2-2026": {**diverse, ("botB", "o/z"): rich}}
+    slots = pc.draw(pools_)
+    assert slots == pc.draw(pools_)
+    per = Counter(s["author"] for s in slots)
+    assert per["botA"] == pc.PARAMS["n_per_agent_quarter"]
+    # botB: 1 group -> slot 0 plus per_group-1 deepened slots
+    b = [s for s in slots if s["author"] == "botB"]
+    assert len(b) == pc.PARAMS["per_group"]
+    assert b[0]["slot"] == "PC:Q2-2026:botB:o/z"
+    assert {s["slot"] for s in b[1:]} == {
+        "PC:Q2-2026:botB:o/z:1", "PC:Q2-2026:botB:o/z:2"}
+    chunks = [{tuple(c) for c in s["candidates"]} for s in b]
+    assert len(b[0]["candidates"]) == pc.PARAMS["k_cand"]
+    assert all(len(c) == pc.PARAMS["extra_cand"] for c in chunks[1:])
+    assert not (chunks[0] | chunks[1]) & chunks[2] \
+        and not chunks[0] & chunks[1]                # disjoint
+    # a thin group (few PRs) never yields empty extra slots
+    pools_["Q2-2026"][("botC", "o/t")] = [("o/t", 1, 100),
+                                          ("o/t", 2, 90)]
+    thin = [s for s in pc.draw(pools_) if s["author"] == "botC"]
+    assert len(thin) == 1                            # 2 PRs < k_cand+1
+    fp = pc.fingerprint(pools_)
+    pools_["Q2-2026"][("botD", "o/y")] = [("o/y", 9, 100)]
+    assert pc.fingerprint(pools_) != fp
+
+
+def test_pc_agent_targets_override_default(monkeypatch):
+    """Deep-pool agents take their agent_targets quota while default
+    agents keep n_per_agent_quarter; raising a target only APPENDS
+    slots (existing ids and candidate chunks unchanged)."""
+    from collections import Counter
+    prs = [("o/z", n, 100) for n in range(1, 30)]
+    pools_ = {"Q4-2025": {}, "Q1-2026": {},
+              "Q2-2026": {("deep", f"o/r{i}"): [(f"o/r{i}", 1, 100)]
+                          for i in range(12)}}
+    pools_["Q2-2026"][("shallow", "o/z")] = prs
+    pools_["Q2-2026"][("shallow", "o/y")] = [("o/y", n, 100)
+                                             for n in range(1, 30)]
+    monkeypatch.setitem(pc.PARAMS, "agent_targets", {"deep": 10})
+    slots = pc.draw(pools_)
+    per = Counter(s["author"] for s in slots)
+    assert per["deep"] == 10
+    assert per["shallow"] == pc.PARAMS["n_per_agent_quarter"]
+    monkeypatch.setitem(pc.PARAMS, "agent_targets", {"deep": 4})
+    fewer = [s for s in pc.draw(pools_) if s["author"] == "deep"]
+    more = [s for s in slots if s["author"] == "deep"]
+    assert more[:len(fewer)] == fewer          # deepening appends only
+
+
+def test_eras_quarter_targets_override_and_deepen(monkeypatch):
+    """quarter_targets raises one quarter's author target without
+    touching others, and the deepened draw keeps the shallower draw as
+    a prefix."""
+    pool = _eras_pools(q4=tuple(f"a{i}" for i in range(8)))
+    monkeypatch.setitem(eras.PARAMS, "n_authors", 2)
+    monkeypatch.setitem(eras.PARAMS, "quarter_targets", {})
+    shallow = [s for s in eras.draw(pool) if s["period"] == "Q4-2025"]
+    assert len({s["author"] for s in shallow}) == 2
+    monkeypatch.setitem(eras.PARAMS, "quarter_targets", {"Q4-2025": 5})
+    deep = [s for s in eras.draw(pool) if s["period"] == "Q4-2025"]
+    assert len({s["author"] for s in deep}) == 5
+    assert deep[:len(shallow)] == shallow
+    q1 = [s for s in eras.draw(pool) if s["period"] == "Q1-2026"]
+    assert len({s["author"] for s in q1}) <= 2   # others keep default
+
+
+def test_b2_deepening_keeps_membership_prefix():
+    """B2 draws by whole-pool shuffle then prefix, so raising n_q1
+    extends the arm without redrawing who is already in it (PR #28
+    review noted random.sample redrew membership on every change)."""
+    pools_ = _pools(q1=tuple(f"q{i}" for i in range(30)))
+    old_nq1 = sampling.PARAMS["n_q1"]
+    try:
+        sampling.PARAMS["n_q1"] = 5
+        small = [s["author"] for s in sampling.draw(pools_)
+                 if s["arm"] == "B2"]
+        sampling.PARAMS["n_q1"] = 12
+        big = [s["author"] for s in sampling.draw(pools_)
+               if s["arm"] == "B2"]
+    finally:
+        sampling.PARAMS["n_q1"] = old_nq1
+    assert big[:len(small)] == small
+    assert len(big) > len(small)
 
 
 def test_eras_pools_use_paired_eligibility(monkeypatch):

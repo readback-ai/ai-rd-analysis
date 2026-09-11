@@ -1,0 +1,1469 @@
+{
+ "design": "pc-v2",
+ "fingerprint": "841c620772f25723",
+ "params": {
+  "design": "pc-v2",
+  "quarters": [
+   "Q4-2025",
+   "Q1-2026",
+   "Q2-2026"
+  ],
+  "n_per_agent_quarter": 5,
+  "agent_targets": {
+   "copilot-swe-agent": 10,
+   "devin-ai-integration": 10
+  },
+  "per_group": 3,
+  "k_cand": 8,
+  "extra_cand": 4,
+  "word_cap": 600,
+  "word_floor": 100,
+  "min_loc": 50,
+  "max_loc": 2000
+ },
+ "slots": [
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:NVIDIA/apex",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA/apex",
+     1943,
+     114
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:apache/casbin-gateway",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "apache/casbin-gateway",
+     96,
+     107
+    ],
+    [
+     "apache/casbin-gateway",
+     126,
+     797
+    ],
+    [
+     "apache/casbin-gateway",
+     132,
+     123
+    ],
+    [
+     "apache/casbin-gateway",
+     136,
+     900
+    ],
+    [
+     "apache/casbin-gateway",
+     108,
+     143
+    ],
+    [
+     "apache/casbin-gateway",
+     88,
+     346
+    ],
+    [
+     "apache/casbin-gateway",
+     130,
+     89
+    ],
+    [
+     "apache/casbin-gateway",
+     106,
+     60
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:vespa-engine/pyvespa",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "vespa-engine/pyvespa",
+     1138,
+     228
+    ],
+    [
+     "vespa-engine/pyvespa",
+     1161,
+     78
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:microsoft/generative-ai-for-beginners",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/generative-ai-for-beginners",
+     980,
+     312
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:intel/ScalableVectorSearch",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "intel/ScalableVectorSearch",
+     196,
+     468
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:vllm-project/semantic-router",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "vllm-project/semantic-router",
+     326,
+     698
+    ],
+    [
+     "vllm-project/semantic-router",
+     493,
+     604
+    ],
+    [
+     "vllm-project/semantic-router",
+     508,
+     623
+    ],
+    [
+     "vllm-project/semantic-router",
+     510,
+     483
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:PaddlePaddle/FastDeploy",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "PaddlePaddle/FastDeploy",
+     5769,
+     140
+    ],
+    [
+     "PaddlePaddle/FastDeploy",
+     5709,
+     74
+    ],
+    [
+     "PaddlePaddle/FastDeploy",
+     5713,
+     433
+    ],
+    [
+     "PaddlePaddle/FastDeploy",
+     4510,
+     877
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:microsoft/semantic-kernel",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/semantic-kernel",
+     13397,
+     457
+    ],
+    [
+     "microsoft/semantic-kernel",
+     13404,
+     1464
+    ],
+    [
+     "microsoft/semantic-kernel",
+     13396,
+     130
+    ],
+    [
+     "microsoft/semantic-kernel",
+     13218,
+     171
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:microsoft/agent-lightning",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/agent-lightning",
+     371,
+     210
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:copilot-swe-agent:AIDotNet/OpenDeepWiki",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "AIDotNet/OpenDeepWiki",
+     278,
+     56
+    ],
+    [
+     "AIDotNet/OpenDeepWiki",
+     294,
+     158
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:devin-ai-integration:onyx-dot-app/onyx",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "onyx-dot-app/onyx",
+     7123,
+     297
+    ],
+    [
+     "onyx-dot-app/onyx",
+     7151,
+     94
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:devin-ai-integration:firecrawl/firecrawl",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "firecrawl/firecrawl",
+     2283,
+     53
+    ],
+    [
+     "firecrawl/firecrawl",
+     2357,
+     94
+    ],
+    [
+     "firecrawl/firecrawl",
+     2371,
+     346
+    ],
+    [
+     "firecrawl/firecrawl",
+     2360,
+     571
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:devin-ai-integration:ComposioHQ/composio",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "ComposioHQ/composio",
+     2275,
+     59
+    ],
+    [
+     "ComposioHQ/composio",
+     2206,
+     77
+    ],
+    [
+     "ComposioHQ/composio",
+     2318,
+     88
+    ],
+    [
+     "ComposioHQ/composio",
+     2261,
+     72
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:devin-ai-integration:PrefectHQ/prefect",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     19764,
+     101
+    ],
+    [
+     "PrefectHQ/prefect",
+     19877,
+     199
+    ],
+    [
+     "PrefectHQ/prefect",
+     19849,
+     706
+    ],
+    [
+     "PrefectHQ/prefect",
+     19967,
+     370
+    ],
+    [
+     "PrefectHQ/prefect",
+     20019,
+     1152
+    ],
+    [
+     "PrefectHQ/prefect",
+     20062,
+     51
+    ],
+    [
+     "PrefectHQ/prefect",
+     19751,
+     604
+    ],
+    [
+     "PrefectHQ/prefect",
+     19363,
+     115
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:devin-ai-integration:PrefectHQ/prefect:1",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     20069,
+     112
+    ],
+    [
+     "PrefectHQ/prefect",
+     19681,
+     734
+    ],
+    [
+     "PrefectHQ/prefect",
+     19712,
+     155
+    ],
+    [
+     "PrefectHQ/prefect",
+     19838,
+     581
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q4-2025:devin-ai-integration:PrefectHQ/prefect:2",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q4-2025",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     19733,
+     324
+    ],
+    [
+     "PrefectHQ/prefect",
+     19737,
+     550
+    ],
+    [
+     "PrefectHQ/prefect",
+     19975,
+     117
+    ],
+    [
+     "PrefectHQ/prefect",
+     19675,
+     174
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:copilot-swe-agent:langchain-ai/langchain-litellm",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "langchain-ai/langchain-litellm",
+     70,
+     54
+    ],
+    [
+     "langchain-ai/langchain-litellm",
+     69,
+     209
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:copilot-swe-agent:microsoft/simplechat",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/simplechat",
+     786,
+     309
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:copilot-swe-agent:lemonade-sdk/lemonade",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "lemonade-sdk/lemonade",
+     934,
+     60
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:copilot-swe-agent:dotnet/maui-labs",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "dotnet/maui-labs",
+     48,
+     402
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:copilot-swe-agent:microsoft/vscode-jupyter",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/vscode-jupyter",
+     17274,
+     103
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:copilot-swe-agent:mlflow/mlflow",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "mlflow/mlflow",
+     21088,
+     58
+    ],
+    [
+     "mlflow/mlflow",
+     19899,
+     348
+    ],
+    [
+     "mlflow/mlflow",
+     21414,
+     246
+    ],
+    [
+     "mlflow/mlflow",
+     21196,
+     1108
+    ],
+    [
+     "mlflow/mlflow",
+     20967,
+     171
+    ],
+    [
+     "mlflow/mlflow",
+     21130,
+     61
+    ],
+    [
+     "mlflow/mlflow",
+     20735,
+     58
+    ],
+    [
+     "mlflow/mlflow",
+     20640,
+     70
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:copilot-swe-agent:microsoft/PromptKit",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/PromptKit",
+     14,
+     578
+    ],
+    [
+     "microsoft/PromptKit",
+     157,
+     783
+    ],
+    [
+     "microsoft/PromptKit",
+     105,
+     212
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:copilot-swe-agent:tenstorrent/tt-umd",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "tenstorrent/tt-umd",
+     2043,
+     51
+    ],
+    [
+     "tenstorrent/tt-umd",
+     2015,
+     665
+    ],
+    [
+     "tenstorrent/tt-umd",
+     2080,
+     1141
+    ],
+    [
+     "tenstorrent/tt-umd",
+     2011,
+     875
+    ],
+    [
+     "tenstorrent/tt-umd",
+     2016,
+     290
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:copilot-swe-agent:pytorch/ignite",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "pytorch/ignite",
+     3500,
+     142
+    ],
+    [
+     "pytorch/ignite",
+     3689,
+     78
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:copilot-swe-agent:NVIDIA/numba-cuda",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "NVIDIA/numba-cuda",
+     705,
+     90
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:devin-ai-integration:PrefectHQ/prefect",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     20822,
+     55
+    ],
+    [
+     "PrefectHQ/prefect",
+     20757,
+     132
+    ],
+    [
+     "PrefectHQ/prefect",
+     20453,
+     151
+    ],
+    [
+     "PrefectHQ/prefect",
+     20643,
+     134
+    ],
+    [
+     "PrefectHQ/prefect",
+     20188,
+     51
+    ],
+    [
+     "PrefectHQ/prefect",
+     20370,
+     901
+    ],
+    [
+     "PrefectHQ/prefect",
+     20720,
+     287
+    ],
+    [
+     "PrefectHQ/prefect",
+     20894,
+     567
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:claude:EleutherAI/bergson",
+   "arm": "PC",
+   "author": "claude",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "EleutherAI/bergson",
+     126,
+     922
+    ],
+    [
+     "EleutherAI/bergson",
+     120,
+     115
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:cursor:Giskard-AI/giskard-hub-python",
+   "arm": "PC",
+   "author": "cursor",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "Giskard-AI/giskard-hub-python",
+     20,
+     619
+    ],
+    [
+     "Giskard-AI/giskard-hub-python",
+     27,
+     306
+    ],
+    [
+     "Giskard-AI/giskard-hub-python",
+     23,
+     1531
+    ],
+    [
+     "Giskard-AI/giskard-hub-python",
+     65,
+     164
+    ],
+    [
+     "Giskard-AI/giskard-hub-python",
+     63,
+     365
+    ],
+    [
+     "Giskard-AI/giskard-hub-python",
+     58,
+     255
+    ],
+    [
+     "Giskard-AI/giskard-hub-python",
+     29,
+     1989
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:devin-ai-integration:ComposioHQ/composio",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "ComposioHQ/composio",
+     2903,
+     193
+    ],
+    [
+     "ComposioHQ/composio",
+     2358,
+     204
+    ],
+    [
+     "ComposioHQ/composio",
+     2796,
+     68
+    ],
+    [
+     "ComposioHQ/composio",
+     2623,
+     57
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:devin-ai-integration:firecrawl/firecrawl",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "firecrawl/firecrawl",
+     2635,
+     58
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:devin-ai-integration:PrefectHQ/prefect:1",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     20155,
+     168
+    ],
+    [
+     "PrefectHQ/prefect",
+     20631,
+     360
+    ],
+    [
+     "PrefectHQ/prefect",
+     20988,
+     118
+    ],
+    [
+     "PrefectHQ/prefect",
+     20322,
+     208
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q1-2026:devin-ai-integration:PrefectHQ/prefect:2",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q1-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     20773,
+     80
+    ],
+    [
+     "PrefectHQ/prefect",
+     20572,
+     51
+    ],
+    [
+     "PrefectHQ/prefect",
+     20692,
+     298
+    ],
+    [
+     "PrefectHQ/prefect",
+     20444,
+     456
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:copilot-swe-agent:microsoft/ai-agents-for-beginners",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/ai-agents-for-beginners",
+     510,
+     160
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:copilot-swe-agent:microsoft/mattersim",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/mattersim",
+     148,
+     77
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:copilot-swe-agent:microsoft/Build26-BRK204-what-we-learned-shipping-vs-code-weekly-without-breaking-everything",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/Build26-BRK204-what-we-learned-shipping-vs-code-weekly-without-breaking-everything",
+     4,
+     552
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:devin-ai-integration:firecrawl/firecrawl",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "firecrawl/firecrawl",
+     3463,
+     125
+    ],
+    [
+     "firecrawl/firecrawl",
+     3481,
+     148
+    ],
+    [
+     "firecrawl/firecrawl",
+     3482,
+     106
+    ],
+    [
+     "firecrawl/firecrawl",
+     3462,
+     70
+    ],
+    [
+     "firecrawl/firecrawl",
+     3364,
+     784
+    ],
+    [
+     "firecrawl/firecrawl",
+     3280,
+     925
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:copilot-swe-agent:microsoft/agent-framework",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/agent-framework",
+     5824,
+     546
+    ],
+    [
+     "microsoft/agent-framework",
+     6096,
+     64
+    ],
+    [
+     "microsoft/agent-framework",
+     5823,
+     258
+    ],
+    [
+     "microsoft/agent-framework",
+     5833,
+     1453
+    ],
+    [
+     "microsoft/agent-framework",
+     5851,
+     287
+    ],
+    [
+     "microsoft/agent-framework",
+     5981,
+     155
+    ],
+    [
+     "microsoft/agent-framework",
+     5175,
+     367
+    ],
+    [
+     "microsoft/agent-framework",
+     5750,
+     584
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:copilot-swe-agent:lemonade-sdk/lemonade",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "lemonade-sdk/lemonade",
+     1685,
+     85
+    ],
+    [
+     "lemonade-sdk/lemonade",
+     1815,
+     75
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:copilot-swe-agent:microsoft/FLAML",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/FLAML",
+     1536,
+     82
+    ],
+    [
+     "microsoft/FLAML",
+     1527,
+     74
+    ],
+    [
+     "microsoft/FLAML",
+     1538,
+     329
+    ],
+    [
+     "microsoft/FLAML",
+     1537,
+     60
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:copilot-swe-agent:datawhalechina/hello-claw",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "datawhalechina/hello-claw",
+     60,
+     50
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:copilot-swe-agent:sgl-project/sgl-kernel-xpu",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "sgl-project/sgl-kernel-xpu",
+     220,
+     103
+    ],
+    [
+     "sgl-project/sgl-kernel-xpu",
+     155,
+     66
+    ],
+    [
+     "sgl-project/sgl-kernel-xpu",
+     156,
+     250
+    ],
+    [
+     "sgl-project/sgl-kernel-xpu",
+     171,
+     244
+    ],
+    [
+     "sgl-project/sgl-kernel-xpu",
+     158,
+     800
+    ],
+    [
+     "sgl-project/sgl-kernel-xpu",
+     201,
+     1087
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:devin-ai-integration:PrefectHQ/prefect",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     21763,
+     959
+    ],
+    [
+     "PrefectHQ/prefect",
+     21700,
+     452
+    ],
+    [
+     "PrefectHQ/prefect",
+     22000,
+     88
+    ],
+    [
+     "PrefectHQ/prefect",
+     21468,
+     115
+    ],
+    [
+     "PrefectHQ/prefect",
+     21931,
+     165
+    ],
+    [
+     "PrefectHQ/prefect",
+     21626,
+     71
+    ],
+    [
+     "PrefectHQ/prefect",
+     21651,
+     221
+    ],
+    [
+     "PrefectHQ/prefect",
+     21951,
+     371
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:copilot-swe-agent:dotnet/maui-labs",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "dotnet/maui-labs",
+     193,
+     200
+    ],
+    [
+     "dotnet/maui-labs",
+     71,
+     309
+    ],
+    [
+     "dotnet/maui-labs",
+     308,
+     1794
+    ],
+    [
+     "dotnet/maui-labs",
+     139,
+     419
+    ],
+    [
+     "dotnet/maui-labs",
+     63,
+     62
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:devin-ai-integration:crewAIInc/crewAI",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "crewAIInc/crewAI",
+     6003,
+     145
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:copilot-swe-agent:microsoft/finnts",
+   "arm": "PC",
+   "author": "copilot-swe-agent",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "microsoft/finnts",
+     243,
+     1551
+    ],
+    [
+     "microsoft/finnts",
+     247,
+     268
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:claude:firecrawl/firecrawl",
+   "arm": "PC",
+   "author": "claude",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "firecrawl/firecrawl",
+     3509,
+     71
+    ],
+    [
+     "firecrawl/firecrawl",
+     3589,
+     64
+    ],
+    [
+     "firecrawl/firecrawl",
+     3556,
+     174
+    ],
+    [
+     "firecrawl/firecrawl",
+     3522,
+     190
+    ],
+    [
+     "firecrawl/firecrawl",
+     3515,
+     63
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:cursor:togethercomputer/together-py",
+   "arm": "PC",
+   "author": "cursor",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "togethercomputer/together-py",
+     371,
+     126
+    ],
+    [
+     "togethercomputer/together-py",
+     378,
+     203
+    ],
+    [
+     "togethercomputer/together-py",
+     372,
+     84
+    ],
+    [
+     "togethercomputer/together-py",
+     374,
+     56
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:cursor:Giskard-AI/giskard-hub-python",
+   "arm": "PC",
+   "author": "cursor",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "Giskard-AI/giskard-hub-python",
+     86,
+     1094
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:cursor:elevenlabs/skills",
+   "arm": "PC",
+   "author": "cursor",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "elevenlabs/skills",
+     38,
+     215
+    ],
+    [
+     "elevenlabs/skills",
+     49,
+     64
+    ],
+    [
+     "elevenlabs/skills",
+     82,
+     61
+    ],
+    [
+     "elevenlabs/skills",
+     61,
+     53
+    ],
+    [
+     "elevenlabs/skills",
+     56,
+     79
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:claude:Arize-ai/openinference",
+   "arm": "PC",
+   "author": "claude",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "Arize-ai/openinference",
+     2966,
+     1222
+    ],
+    [
+     "Arize-ai/openinference",
+     3156,
+     354
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:devin-ai-integration:ComposioHQ/composio",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "ComposioHQ/composio",
+     3261,
+     350
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:cursor:firecrawl/firecrawl",
+   "arm": "PC",
+   "author": "cursor",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "firecrawl/firecrawl",
+     3689,
+     54
+    ],
+    [
+     "firecrawl/firecrawl",
+     3542,
+     62
+    ],
+    [
+     "firecrawl/firecrawl",
+     3545,
+     715
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:devin-ai-integration:modal-labs/multinode-training-guide",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "modal-labs/multinode-training-guide",
+     84,
+     1698
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:cursor:togethercomputer/detect_agent",
+   "arm": "PC",
+   "author": "cursor",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "togethercomputer/detect_agent",
+     9,
+     391
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:devin-ai-integration:PrefectHQ/prefect:1",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     21803,
+     280
+    ],
+    [
+     "PrefectHQ/prefect",
+     21509,
+     118
+    ],
+    [
+     "PrefectHQ/prefect",
+     22076,
+     117
+    ],
+    [
+     "PrefectHQ/prefect",
+     21418,
+     69
+    ]
+   ]
+  },
+  {
+   "slot": "PC:Q2-2026:devin-ai-integration:PrefectHQ/prefect:2",
+   "arm": "PC",
+   "author": "devin-ai-integration",
+   "period": "Q2-2026",
+   "ai": true,
+   "candidates": [
+    [
+     "PrefectHQ/prefect",
+     22100,
+     309
+    ],
+    [
+     "PrefectHQ/prefect",
+     22122,
+     185
+    ],
+    [
+     "PrefectHQ/prefect",
+     21669,
+     62
+    ],
+    [
+     "PrefectHQ/prefect",
+     21411,
+     122
+    ]
+   ]
+  }
+ ]
+}

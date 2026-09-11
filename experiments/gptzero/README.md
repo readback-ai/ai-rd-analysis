@@ -20,16 +20,32 @@ experiment calibrates GPTZero against the study's own labels.
     one document per arm per author (within-author contrast).
   - **B1** — those authors' own Q1-2024 PRs where they exist
     (same-author-across-eras anchor).
-  - **B2** — independent Q1-2024 authors, to 20 baseline docs total.
-  - **Eras** (design eras-v1) — the paired contrast at 90 authors per
-    quarter across Q4-2025, Q1-2026 and Q2-2026 (own manifest,
-    quarter-namespaced seeds, prefix-stable deepening). Q2-2026 is an
-    expansion: v1's authors are excluded and keep their v1 slots, so
-    the pooled quarter is 90 distinct authors.
+  - **B2** — independent Q1-2024 authors, to 60 baseline docs total
+    (whole-pool shuffle then prefix: deepening extends membership).
+  - **Eras** (design eras-v1) — the paired contrast across Q4-2025,
+    Q1-2026 and Q2-2026 (own manifest, quarter-namespaced seeds,
+    prefix-stable deepening; per-quarter targets: Q4-2025 at its
+    169-author pool cap, Q1-2026 at 90, Q2-2026 at 180). Q2-2026 is an
+    expansion: v1's authors are excluded and keep their v1 slots.
   - **Length sensitivity** — every document truncated at the 600-word
     cap is also scored at a 1200-word assembly (`--retest`, separate
     results file): the dose-response section bounds what document
     length does to the detector.
+  - **Known-AI positive control** (design pc-v2) — canonical
+    agent-authored (layer-B) PRs, Q4-2025..Q2-2026, through the same
+    pipeline. One slot per (agent, repo) with per-agent quarterly
+    targets (copilot/devin 10, pool-limited cursor/claude 5) and
+    group deepening via disjoint candidate chunks.
+  - **sem13c second detector** — the released linear MIL component of
+    the SemEval-2026 T13c 1st-place system scores the same corpus
+    locally (`--score-sem`; free; pinned HF revision + inference
+    version). Needs the `sem13c` dependency group:
+    `uv run --group sem13c python experiments/gptzero/gz.py --score-sem`.
+  - **Created-file arm** — the largest `new file mode` code file per
+    scored slot, as whole-file documents in capped (600-word) and full
+    variants (`--newfile` assembles + sem13c-scores both, free;
+    `--score-newfile` is the billed GPTZero pass, pin-enforced;
+    `--report-newfile` compares).
 - **Determinism**: study seed 20260630, namespaced streams; manifest
   fingerprints AS_OF/CUTOFF/params/pool and is rebuilt-not-trusted.
   Candidate lists are seeded whole-pool shuffles, so deepening `k_cand`
@@ -64,6 +80,7 @@ python experiments/gptzero/gz.py --sample            # manifest + pool sizes
 python experiments/gptzero/gz.py --sample-eras       # Q4-2025/Q1-2026 arms
 python experiments/gptzero/gz.py --fetch             # diffs -> documents
 python experiments/gptzero/gz.py --sample-b3         # Q3-2022 arm
+python experiments/gptzero/gz.py --sample-pc         # known-AI agents arm
 python experiments/gptzero/gz.py --score --limit 2   # unpinned smoke
 # read the smoke output's model version, then set
 #   gptzero_client.PINNED_VERSION = "<that version>"
@@ -98,6 +115,13 @@ reported numbers.
 - Known selection effect from the fetch stage: AI-marked PRs fail the
   100-word code floor more often than unmarked ones (docs/config-heavy
   agent PRs) — `--fetch` prints the per-arm unfilled counts.
+- **Q2-2026 covers April 1 – June 6 creations** (w8 maturity at AS_OF
+  2026-08-01); June 7–30 is unmeasured until a later AS_OF. Never
+  present Q2-2026 as a complete quarter.
+- The sampling frame tracks the study's canonical census: when AS_OF
+  advances (monthly update), manifests redraw and fingerprints change
+  by design — the 2026-08-04 frozen set under the July frame remains
+  in git history (PR #28) as the prior snapshot.
 
 v2 (the ~2M-word sweep across all quarters) = a new design tag with
 bigger quotas; the response cache carries over, so overlapping
