@@ -279,6 +279,40 @@ prefixes of the population files, repo count, and cell-coverage numbers
 
 ## 6. Auxiliary analyses (not in the generated report)
 
+- **Median insider kLOC/quarter, person-level** (`productivity.
+  insider_medians`; `artifacts/insider_medians_{productive,active,
+  panel}.png`, Figure 3b — one figure per population, the productive
+  panel being the headline). The
+  companion to Figure 3 with no repo weighting and no two-stage
+  aggregation: each insider's submitted (uncensored) and merged (w8)
+  kLOC per quarter, pooled across every repo they author in, then the
+  MEDIAN across people — so "median" means the middle insider. Three
+  populations, fleet operators excluded from all: **period-active**
+  (>=1 PR in the quarter; the only series whose membership varies —
+  minus the panel, it isolates composition), the **balanced panel**
+  (>=1 PR in every study quarter — the same people throughout, hence
+  survivor-selected toward long-tenured maintainers), and the
+  **productive panel** (panel members with >=`PRODUCTIVE_MIN_QUARTER` =
+  5 submitted PRs in EVERY study quarter and a mean of >=`ACTIVE_FLOOR`
+  = 10 per quarter over all four). Membership is decided ONCE and the
+  baseline quarter counts like any other: a per-quarter floor re-selects
+  people each quarter on a quantity correlated with the outcome and
+  churns those near the line — under such a rule 68% of the insiders
+  who ever cleared 10 PRs in a window quarter crossed the line at least
+  once — and a window-only mean admits people who ramped up during the
+  window, overstating growth. The 10/quarter mean is the Figure A5
+  floor that makes never-AI a behavioural claim (>=40 study-quarter PRs
+  with no marker).
+  Slices: all, ever-AI, never-AI (any AI-involved PR in the Q4-2025..
+  Q2-2026 window, as in the decile studies). Bands are seeded percentile
+  bootstraps of the median over persons; `n` per quarter is in the CSV.
+  The growth twins (`productivity.insider_growth`;
+  `artifacts/insider_medians_growth_*.png`) divide every series by its
+  own Q1-2024 median, so each population and slice starts at 1.0 and
+  the panels compare growth rather than levels; their bands resample
+  person indices JOINTLY for the two fixed panels (the same people in
+  both quarters — a panel in which everyone doubles reads exactly 2x)
+  and the two quarters independently for the period-active population.
 - `pipeline.studies.accountability`, `review_modes`, `corpus` — the
   behavioral studies behind the working log (sampled, seeded); re-derive on
   the final population before citing.

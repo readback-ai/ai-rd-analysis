@@ -43,6 +43,7 @@ import plot_fig2_comp_audits_median as comp2a                # noqa: E402
 import plot_productivity_deciles as a3                       # noqa: E402
 import plot_activity_deciles as a4                           # noqa: E402
 import plot_active_insider_deciles as a5                     # noqa: E402
+import plot_insider_medians as im                            # noqa: E402
 import plot_fig3_comp_audits as comp3                        # noqa: E402
 import plot_fig5_fleet as f5                                 # noqa: E402
 import plot_fig5_fleet_median as f5a                          # noqa: E402
@@ -86,6 +87,8 @@ FIGURES = [
     (f"artifacts/{a3.QUARTERLY_NAME}.png", a3.collect_quarterly, a3.render),
     (f"artifacts/{a4.NAME}.png", a4.collect, a4.render),
     (f"artifacts/{a5.NAME}.png", a5.collect, a5.render),
+    # Figure 3b: one medians figure and one growth twin per population
+    *im.figures(),
 ]
 
 # default-set collects that take a window= (the monthly-axis figures);
