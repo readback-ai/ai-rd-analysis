@@ -6,7 +6,12 @@ compute — inputs, rules, estimators, outputs — without prescribing how. A
 reimplementation built solely from this document, given the same external
 inputs, should reproduce the published numbers to the bar defined in §1.2.
 
-Provenance: written 2026-07-26 against commit `7370182`; revised 2026-07-27
+Provenance: revised 2026-10-22 against `main` at `8126f8b` — population
+224 orgs / 2,135 repos (2026-07-30 regeneration), data-collection stamp
+`2026-09-01T21:03:34Z` with every censused quarter final, 22 report
+sections (code churn added), current figure artifact names and the
+median / monthly / insider-median / decile figure families; written
+2026-07-26 against commit `7370182`; revised 2026-07-27
 against `feat/primary-implementation` at `cc37f06`; revised 2026-07-28 at
 `8c89503` after the fix wave — issues #6 (R4 evidence dedup, population
 refresh), #7 (zero-precount confirmation), #3 (GraphQL envelope logging +
@@ -39,12 +44,17 @@ Conventions used here:
 
 An empirical measurement system that, from public GitHub metadata:
 
-1. Constructs a **population of leading AI organizations** (228 orgs after
-   the 2026-07-27 issue-#6 refresh: 182 admitted whole, 46 admitted only
-   for their AI-topic repos; the 2026-07-10 run had 229/47 — sony dropped
-   under the deduplicated R4 evidence) from third-party lists plus
-   measured evidence (§4).
-2. Enumerates their qualifying repositories (2,136 at the refresh) and performs
+1. Constructs a **population of leading AI organizations** (224 orgs since
+   the 2026-07-30 regeneration: 179 admitted whole, 45 admitted only for
+   their AI-topic repos. History: the 2026-07-10 run had 229/47; the
+   2026-07-27 issue-#6 refresh dropped sony under the deduplicated R4
+   evidence (probe-sum double-counting) to 228/46; the 2026-07-30
+   regeneration applied the corrected distinct-evidence arithmetic
+   uniformly and, via the census-evidence recompute under current
+   detection (CI-canary branch exclusion), also dropped
+   physical-intelligence, salesforceairesearch, stability-ai and
+   thu-pacman) from third-party lists plus measured evidence (§4).
+2. Enumerates their qualifying repositories (2,135 at the regeneration) and performs
    a **complete census of pull requests** in four calendar quarters —
    Q1-2024 (baseline/detector-validity control), Q4-2025, Q1-2026, Q2-2026 —
    with a hard study cutoff of **2026-06-30** on PR creation (§5).
@@ -123,8 +133,13 @@ An empirical measurement system that, from public GitHub metadata:
   and never changes.
 - **FR-6 (AS_OF)** A separate **data-collection stamp** records when census
   data was last (re-)pulled. At the initial collection it equals CUTOFF; it
-  is advanced manually at each scheduled re-pull. It governs **maturity
-  only** (FR-8). (Flag F-27: it is hand-maintained with no cross-check.)
+  is advanced at each scheduled re-pull — so far 2026-08-01, 2026-08-27
+  and 2026-09-01; current value `2026-09-01T21:03:34Z`. It governs
+  **maturity only** (FR-8). (Flag F-27: hand-maintained; since the
+  monthly runbook (METHODS §1c) `run_monthly_update.sh --bump-as-of`
+  sets it at the instant collection starts and
+  `test_as_of_never_leads_the_wall_clock` pins that it never leads the
+  pull it records.)
 - **FR-7 (w8 event window)** ALL per-PR events — merges, closes, AND review
   submissions — count iff they occur strictly **within 56 days of the PR's
   creation**: `(event_time − created_time)` truncated to whole days `< 56`.
@@ -135,9 +150,12 @@ An empirical measurement system that, from public GitHub metadata:
 - **FR-8 (maturity)** A PR is **w8-mature** iff `(AS_OF − created_time)` in
   truncated days `≥ 56`. Fate and review metrics are **undefined** (skipped,
   never zeroed) on immature PRs. Consequences: trailing quarters are
-  provisional until a re-pull after their last window closes (for Q2-2026:
-  on/after 2026-09-01); mature PRs are immutable under re-collection — an
-  AS_OF advance only ever adds newly mature PRs.
+  provisional until a re-pull after their last window closes (for Q2-2026
+  that was the 2026-08-27 re-pull — June's last window closed 2026-08-25;
+  at the current stamp every censused quarter is final, and only the
+  registered incremental months 2026-07 and 2026-08 remain provisional);
+  mature PRs are immutable under re-collection — an AS_OF advance only
+  ever adds newly mature PRs.
 - **FR-9 (matched horizons)** Fate comparisons across cohorts MUST use the
   same horizon (w8 primary; w26 = 182 days as sensitivity). "Ever resolved"
   quantities must never be compared across cohorts.
@@ -495,10 +513,10 @@ For each candidate org (lowercased key `lo`):
   population org). Assembly MUST validate: every repo-scoped org has a
   completed-enumeration sentinel; every entry matches `owner/name` with
   `[\w.-]` characters; no repo from an org outside the population; every
-  population org has an org-type row. Current run: 2,136 repos (2,142
-  before the 2026-07-27 population refresh).
+  population org has an org-type row. Current run: 2,135 repos (2,136
+  after the 2026-07-27 refresh; 2,142 before it).
 - **POP-15** The **collectable manifest** = manifest minus the documented
-  inaccessible-repos list (71 repos at the pre-refresh run — deleted,
+  inaccessible-repos list (75 repos at the current manifest; 71 at the pre-refresh run — deleted,
   privatized, or DMCA'd; each is a standing waiver, see COL-10).
   Unsearchable-but-reachable repos are NOT waivers: they are collected
   through the object API (COL-10b).
@@ -892,7 +910,7 @@ Three independent layers, plus review classification. Source: `detect.py`
 
 ---
 
-## 8. The generated report and its 21 sections
+## 8. The generated report and its 22 sections
 
 ### 8.1 Report assembly contract
 
@@ -1058,6 +1076,29 @@ median. Descriptive only — no regression, no CIs. (The 21-month
 observation gap 2024-04..2025-09 means t0 is first *observed* AI month —
 flag F-34.)
 
+**§8.2.22 Code churn** (source: `studies.churn --table report`; added
+after the 2026-07-30 regeneration). Churn = lines deleted relative to
+lines added in merged code, per-side LOC capped at 20,000 per PR. Frame:
+merged PRs created AND merged in the same quarter (identical
+observability per quarter regardless of w8 maturity — an observed merge
+is terminal; cross-quarter merges are dropped and their count reported),
+non-AI dependency/CI bots excluded via `ai_contrast_eligible`. Two
+tables: (a) the **within-org adoption contrast** (headline) — per org
+with ≥ 20 trimmed merged PRs in a quarter, traceable-adoption share and
+capped deleted:added at its highest- vs lowest-adoption quarter among
+Q4-2025..Q2-2026 (Q1-2024 excluded: its zero adoption is by
+construction); orgs with ≥ 2 qualifying quarters and a positive adoption
+spread contribute a churn multiple, reported as the geometric mean with
+a bootstrap CI over orgs, the median, and the share of orgs whose churn
+rose — read against, never replicating, an external broad-industry
+figure of ~x9.6; (b) the **calendar-trend sensitivity** — per quarter x
+arm (all / AI / nonAI), CW mean of per-repo deleted:added with CI,
+pooled and capped variants, repo floor 5 PRs per (quarter, arm). Monthly
+granularity reports w8-finalized months only (floors 2 PRs/repo and
+7 PRs/org-month). The bug-report proxies (counted `--table bugs` and the
+dated per-PR risk-window `--table exposure`) are auxiliary and NOT in
+the report (METRICS §6).
+
 ### 8.3 Figures
 
 Canonical figure table (resolves the historical numbering collisions —
@@ -1065,16 +1106,26 @@ flag F-35; "series" defines the data contract, styling is free):
 
 | file | content |
 |---|---|
-| `fig2_ai_usage.png` | §8.2.2's four CW series with CI bands, broken x-axis (Q1-2024 \| Q4-2025..Q2-2026) |
-| `fig3_core_loc.png` | §8.2.3 submitted + merged series with baseline-multiple annotations; Q2 merged shaded provisional |
-| `fig_a1_adoption_cohorts.png` | §8.2.15: per cohort (fleet, early, medium, late, never), six monthly series (submitted/merged × total/nonAI/AI kLOC per author) |
-| `fig_a2_adoption_event.png` | event-time panels for early/medium cohorts, values net of the contemporaneous never-cohort mean; immature offsets shaded with their immature share |
-| `figure_2_comp_audits.png` | per-adoption-month balanced cohorts (t0 = 2025-12..2026-04): six raw kLOC series in event time −2..+2 |
-| `figure_3_comp_audits.png` | human-review coverage of merged PRs and comments/kLOC for ai/nonai/fleet slices |
-| `fig5_fleet_vs_nonadopters.png` | monthly six-series for the fleet cohort vs totals for never |
-| `fig6_review_mix.png`, `fig6_review_mix_by_ai.png` | §8.2.17 channel shares (PR and LOC panels), ins/ext and ai/nonai variants |
-| `fig7_attention_by_ai.png` | §8.2.18 by-AI: comments/kLOC and first-review h/kLOC |
-| `fig8_responsiveness_by_ai.png` | §9.1: responded% (EQ, n ≥ 20) and post-ask LOC share (PPS/HT, n ≥ 20) for CLEAN+AI vs CLEAN+nonAI |
+| `ai_usage.png` | §8.2.2's four CW series with CI bands, broken x-axis (Q1-2024 \| Q4-2025..Q2-2026) |
+| `core_loc.png` | §8.2.3 submitted + merged series with baseline-multiple annotations; a quarter is shaded provisional only while its w8 windows are open under the data stamp (`shade_q2_partial` returns nothing once `w8_closed(CUTOFF)`) — at the current stamp no quarter is shaded |
+| `adoption_cohorts.png` | §8.2.15: per cohort (fleet, early, medium, late, never), six monthly series (submitted/merged × total/nonAI/AI kLOC per author) |
+| `adoption_event.png` | event-time panels for early/medium cohorts, values net of the contemporaneous never-cohort mean; immature offsets shaded with their immature share |
+| `figure_2_comp_audits.png` | per-adoption-month balanced cohorts (t0 = 2025-12..2026-04 at the current stamp — every offset −2..+2 must be a w8-final month): six raw kLOC series in event time −2..+2 |
+| `figure_3_comp_audits.png` | human-review coverage of merged PRs and comments/kLOC for ai/nonai/fleet slices, monthly over the baseline months and the w8-final window months (2025-10..2026-06 at the current stamp) |
+| `fleet_vs_nonadopters.png` | monthly six-series for the fleet cohort vs totals for never |
+| `review_mix.png`, `review_mix_by_ai.png` | §8.2.17 channel shares (PR and LOC panels), ins/ext and ai/nonai variants |
+| `attention_by_ai.png` | §8.2.18 by-AI: comments/kLOC and first-review h/kLOC |
+| `responsiveness_by_ai.png` | §9.1: responded% (EQ, n ≥ 20) and post-ask LOC share (PPS/HT, n ≥ 20) for CLEAN+AI vs CLEAN+nonAI |
+| `*_median.png` twins: `core_loc_median.png`, `adoption_cohorts_median.png`, `fleet_vs_nonadopters_median.png`, `figure_2a_comp_audits_median.png` | the same panels on the MEDIAN cohort member (`stat="median"`); medians are per series and do not decompose (METRICS §5) |
+| `*_monthly.png` twins: `ai_usage_monthly.png`, `core_loc_monthly.png`, `core_loc_median_monthly.png`, `review_mix_monthly.png`, `review_mix_by_ai_monthly.png`, `attention_by_ai_monthly.png`, `productivity_deciles_monthly.png` | month-keyed variants over the baseline + window months (`plot_all --monthly`); provisional months in and shaded |
+| `insider_medians_{productive,active,panel}.png`, `insider_medians_growth_{…}.png` | the median insider's kLOC per quarter, person-level, over the productive / period-active / balanced-panel populations; growth twins normalize each series to its own Q1-2024 median |
+| `activity_deciles.png`, `activity_deciles_kloc.png`, `active_insider_deciles.png`, `productivity_deciles_quarterly.png` | per-contributor volume by decile (PRs and kLOC), quarterly and monthly |
+
+Every figure is rendered from a committed data table: `collect()` runs
+the study pass and writes `artifacts/data/<figure>.csv`; `render(table)`
+builds the image from that table alone, so `plot_all.py --from-tables`
+re-renders every figure (any format) without the census store. No figure
+bakes in a caption; captions live in the paper text.
 
 Shared figure conventions that carry meaning: Q1-2024 is plotted
 disjointly from the window (broken axis); AI-slice values are suppressed
@@ -1210,7 +1261,7 @@ report does not need them; they are specified for completeness.
 1. **Population** (pure function of committed inputs): rebuild from
    §3.5/§3.6 inputs + §4 rules; compare membership, scope, `why`,
    `top5_ai` line-by-line against the committed population table.
-2. **Manifest**: rebuild §4.6 from the same inputs; compare the 2,136
+2. **Manifest**: rebuild §4.6 from the same inputs; compare the 2,135
    repos and the manifest hashes.
 3. **Classification** (shared census store): run DET-6 over every stored
    PR; compare per-PR facts, then the pooled layered decomposition
@@ -1234,34 +1285,40 @@ F-30).
 ### 10.3 Validation anchors (published values, current artifacts)
 
 Contributor-weighted unless noted; from the regenerated results artifact.
-⚠ TIMING (2026-07-28): these anchors were generated on the pre-refresh
-population (229 orgs / 2,142 repos) with the pre-fix bootstrap and fleet
-cache. The population files now say 228 / 2,136 (issue #6), and the
-botcheck section, per-cell CI streams, computed fleet set, and the bot
-self-review exclusion (issue #9, ≤ 0.04pp on ai_review) land in the
-NEXT full regeneration — re-pin this table from the regenerated artifacts
-then. Point estimates are expected to move imperceptibly (sony's repos
-were a ~0.3% sliver); CIs will shift within their displayed precision.
+Re-pinned 2026-10-22 from `artifacts/report_generated.md` on `main` at
+`8126f8b`: AS_OF `2026-09-01T21:03:34Z`, population 224 orgs / 2,135
+repos, every censused quarter w8-final — so the Q2-2026 column is now
+final, not provisional. This retires the 2026-07-28 timing note (anchors
+then came from the pre-refresh 229 / 2,142 population with the pre-fix
+bootstrap and fleet cache): the 2026-07-30 regeneration and the Q2
+finalization re-pulls (2026-08-01, 2026-08-27, 2026-09-01) have landed,
+and the botcheck section, per-cell CI streams, computed fleet set and
+the bot self-review exclusion (issue #9) are all in the current
+artifact. Against the 2026-07-28 pins the usage and LOC rows moved
+within displayed precision; the Q2-2026 fate, attention and merged-LOC
+rows moved materially because the quarter matured (merged% 54.5 → 52.8
+as late merges were excluded by the closed windows, comments/kLOC
+1.88 → 1.76).
 
 | quantity | Q1-2024 | Q4-2025 | Q1-2026 | Q2-2026 |
 |---|---|---|---|---|
-| ai_involved (CW, % of PRs) | 0.0 | 3.0 [2.4,3.7] | 10.3 [9.0,11.7] | 16.9 [14.9,18.7] |
+| ai_involved (CW, % of PRs) | 0.0 | 3.0 [2.3,3.7] | 10.3 [9.0,11.7] | 16.8 [14.8,18.7] |
 | ai_code (layer A only) | 0.0 | 2.1 | 8.7 | 13.8 |
-| qualifying repos | 465 | 825 | 1008 | 1154 |
-| layered union (pooled, %) | 0.00 (72,290 PRs) | — | — | 17.11 (288,236 PRs): A 13.20 + B 0.43 + C 3.48 |
-| merged kLOC / core author | 6.45 | 10.04 | 10.71 | 19.08 (×2.96) |
-| human comments / merged kLOC | 3.98 | — | — | 1.88 (insiders 3.52 → 1.37) |
-| fates w8: merged% (all) | 75.5 | — | — | 54.5 (ins 77.8, ext 44.7) |
-| responsiveness CLEAN lane responded% | 79.7 | 80.9 | 79.8 | 80.8 |
+| qualifying repos | 465 | 825 | 1009 | 1152 |
+| layered union (pooled, %) | 0.00 (72,290 PRs) | 3.85 (134,088) | 11.84 (197,860) | 17.24 (285,088 PRs): A 13.33 + B 0.44 + C 3.47 |
+| merged kLOC / core author | 6.45 | 10.04 | 10.71 | 19.01 (×2.95); submitted 9.56 → 26.65 (×2.79) |
+| human comments / merged kLOC | 3.86 (insiders 3.41) | — | — | 1.76 (insiders 1.41) |
+| fates w8: merged% (all) | 75.5 (ins 81.6, ext 72.8) | 72.0 | 62.8 | 52.8 (ins 77.7, ext 42.8) |
+| responsiveness CLEAN lane responded% (fleet-operator authors excluded) | 79.7 | 79.1 | 79.8 | 80.9 |
 
-Cross-checks: balanced-panel Q2-2026 15.6 [13.4,17.9]; two-sided bound
-Q2-2026 16.85 vs 16.74 pooled (0.11pp; ≤ 0.05pp CW); AI share of
-submitted LOC 22.4% / merged LOC 17.0%; fleet cohort ~42 logins (now
-computed per run, no file — §8.2.15); layer-C precision per DET-C5
-(final); coverage 8,284/8,568 + 284 waived (pre-refresh manifest;
-the 2026-07-30 regeneration re-derives it — 364 PRs from 8
-unsearchable repos now collected via COL-10b, FunAudioLLM excluded
-per F-51).
+Cross-checks: balanced-panel Q2-2026 15.6 [13.2,18.0] (332 repos
+qualify in all four quarters; cross-section 16.8); two-sided bound
+Q2-2026 16.83 vs 16.72 (0.11pp); AI share of submitted LOC 22.5% /
+merged LOC 20.6%; fleet cohort ~42 logins (computed per run, no file —
+§8.2.15); layer-C precision per DET-C5 (final); coverage 8,240/8,540 +
+300 waived (current manifest, 75 documented-inaccessible repos — the
+2026-07-30 regeneration collected 364 PRs from 8 unsearchable repos via
+COL-10b and excluded FunAudioLLM per F-51).
 
 ---
 
@@ -1529,9 +1586,10 @@ and a reimplementation must copy it to reproduce published numbers.
 | constant | value | where defined (source) |
 |---|---|---|
 | Study cutoff (frame end) | 2026-06-30T23:59:59Z | `detect.CUTOFF` |
-| Data-collection stamp | = CUTOFF until first re-pull | `detect.AS_OF` |
+| Data-collection stamp | `2026-09-01T21:03:34Z` — = CUTOFF at the initial collection, advanced at each re-pull (2026-08-01, 2026-08-27, 2026-09-01); every censused quarter is w8-final at this stamp | `detect.AS_OF` |
 | Event/maturity window | 56 days (w8); sensitivity 26 weeks | `detect.W8_DAYS`, `fates` |
 | Censused quarters | Q1-2024, Q4-2025, Q1-2026, Q2-2026 | `analyze.CENSUSED_QUARTERS` |
+| Registered incremental months | 2026-07, 2026-08 (provisional; monthly runbook, METHODS §1c) | `data/derived/incremental_months.txt` |
 | Quarter date ranges | see FR-2 | `scan_orgs.QUARTER_RANGES` |
 | Per-PR LOC cap | 20,000 | `frame.CAP` |
 | Census page size / field caps | 50 PRs/page; 12 commits, 6 author emails, 15 reviews per PR | `census.PAGE_SIZE`, `census.PR_QUERY` |
@@ -1562,7 +1620,7 @@ and a reimplementation must copy it to reproduce published numbers.
 | Suppression floors | 30 (event study), 20 (fates, responsiveness lanes), 10 (accountability), 2 core authors, > 100 LOC (corpus) | respective modules |
 | Attention size bands | ≤10, 11–100, 101–1k, >1k (capped LOC) | `attention.BANDS` |
 | Aux seeds | accountability 13 (global RNG); corpus 7 | respective modules |
-| Coverage (published run) | 2,142 repos; 8,568 repo-periods = 8,284 covered + 284 waived (71 repos); population refreshed 2026-07-27 to 228 orgs / 2,136 repos — the 2026-07-30 regeneration re-derives the manifest (unsearchable repos collected per COL-10b; FunAudioLLM excluded per F-51) | census manifest |
+| Coverage (current manifest) | 2,135 repos; 8,540 repo-periods = 8,240 covered + 300 waived (75 documented-inaccessible repos). History: the published 2026-07-28 run had 2,142 repos / 8,568 = 8,284 + 284 waived (71); the 2026-07-27 refresh took the population to 228 orgs / 2,136 repos; the 2026-07-30 regeneration re-derived the manifest at 224 / 2,135 (unsearchable repos collected per COL-10b; FunAudioLLM excluded per F-51) | census manifest |
 
 ---
 
