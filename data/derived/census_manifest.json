@@ -1,11 +1,11 @@
 {
- "population_repos": "0c54517044cd14d5",
- "population": "e0df4975e73b1dd0",
- "repos": 2142,
+ "population_repos": "1aecb716278aacbf",
+ "population": "56df7cb60bd1e690",
+ "repos": 2135,
  "coverage": {
-  "repo_periods": 8568,
-  "covered": 8284,
-  "waived": 284,
-  "documented_inaccessible_repos": 71
+  "repo_periods": 8540,
+  "covered": 8240,
+  "waived": 300,
+  "documented_inaccessible_repos": 75
  }
 }

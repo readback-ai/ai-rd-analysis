@@ -1,0 +1,532 @@
+{
+ "design": "v1-50k-b3",
+ "fingerprint": "3abeaf744298f243",
+ "params": {
+  "design": "v1-50k-b3",
+  "n_docs": 20,
+  "k_cand": 8,
+  "spare": 15,
+  "min_repo_prs": 20,
+  "min_loc": 50,
+  "max_loc": 2000,
+  "word_cap": 600,
+  "word_floor": 100
+ },
+ "slots": [
+  {
+   "slot": "B3:apache/airflow",
+   "arm": "B3",
+   "author": "raphaelauv",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "apache/airflow",
+     26791,
+     1366
+    ]
+   ]
+  },
+  {
+   "slot": "B3:NVIDIA/NVFlare",
+   "arm": "B3",
+   "author": "YuanTingHsieh",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/NVFlare",
+     934,
+     636
+    ],
+    [
+     "NVIDIA/NVFlare",
+     964,
+     511
+    ],
+    [
+     "NVIDIA/NVFlare",
+     930,
+     409
+    ],
+    [
+     "NVIDIA/NVFlare",
+     945,
+     1313
+    ],
+    [
+     "NVIDIA/NVFlare",
+     970,
+     52
+    ],
+    [
+     "NVIDIA/NVFlare",
+     939,
+     171
+    ],
+    [
+     "NVIDIA/NVFlare",
+     967,
+     55
+    ]
+   ]
+  },
+  {
+   "slot": "B3:apache/hertzbeat",
+   "arm": "B3",
+   "author": "tomsun28",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "apache/hertzbeat",
+     278,
+     390
+    ],
+    [
+     "apache/hertzbeat",
+     252,
+     89
+    ],
+    [
+     "apache/hertzbeat",
+     260,
+     53
+    ],
+    [
+     "apache/hertzbeat",
+     273,
+     71
+    ],
+    [
+     "apache/hertzbeat",
+     302,
+     255
+    ],
+    [
+     "apache/hertzbeat",
+     264,
+     952
+    ],
+    [
+     "apache/hertzbeat",
+     274,
+     82
+    ],
+    [
+     "apache/hertzbeat",
+     283,
+     305
+    ]
+   ]
+  },
+  {
+   "slot": "B3:microsoft/onnxruntime",
+   "arm": "B3",
+   "author": "skottmckay",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "microsoft/onnxruntime",
+     13174,
+     183
+    ],
+    [
+     "microsoft/onnxruntime",
+     13140,
+     68
+    ]
+   ]
+  },
+  {
+   "slot": "B3:pytorch/vision",
+   "arm": "B3",
+   "author": "vfdev-5",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "pytorch/vision",
+     6617,
+     52
+    ],
+    [
+     "pytorch/vision",
+     6665,
+     85
+    ],
+    [
+     "pytorch/vision",
+     6616,
+     97
+    ],
+    [
+     "pytorch/vision",
+     6621,
+     144
+    ]
+   ]
+  },
+  {
+   "slot": "B3:mlflow/mlflow",
+   "arm": "B3",
+   "author": "alexacole",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "mlflow/mlflow",
+     6952,
+     56
+    ]
+   ]
+  },
+  {
+   "slot": "B3:vespa-engine/vespa",
+   "arm": "B3",
+   "author": "baldersheim",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "vespa-engine/vespa",
+     24268,
+     101
+    ],
+    [
+     "vespa-engine/vespa",
+     24275,
+     71
+    ],
+    [
+     "vespa-engine/vespa",
+     24252,
+     80
+    ],
+    [
+     "vespa-engine/vespa",
+     24243,
+     62
+    ],
+    [
+     "vespa-engine/vespa",
+     24258,
+     471
+    ]
+   ]
+  },
+  {
+   "slot": "B3:apache/doris",
+   "arm": "B3",
+   "author": "deardeng",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "apache/doris",
+     13096,
+     680
+    ]
+   ]
+  },
+  {
+   "slot": "B3:PaddlePaddle/Paddle",
+   "arm": "B3",
+   "author": "FeixLiu",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "PaddlePaddle/Paddle",
+     46656,
+     122
+    ]
+   ]
+  },
+  {
+   "slot": "B3:huggingface/diffusers",
+   "arm": "B3",
+   "author": "patrickvonplaten",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "huggingface/diffusers",
+     659,
+     426
+    ]
+   ]
+  },
+  {
+   "slot": "B3:mozilla/fxa",
+   "arm": "B3",
+   "author": "julianpoy",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "mozilla/fxa",
+     14167,
+     353
+    ],
+    [
+     "mozilla/fxa",
+     14172,
+     107
+    ]
+   ]
+  },
+  {
+   "slot": "B3:NVIDIA/DALI",
+   "arm": "B3",
+   "author": "awolant",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "NVIDIA/DALI",
+     4278,
+     100
+    ],
+    [
+     "NVIDIA/DALI",
+     4302,
+     253
+    ]
+   ]
+  },
+  {
+   "slot": "B3:mozilla/bigquery-etl",
+   "arm": "B3",
+   "author": "rebecca-burwei",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "mozilla/bigquery-etl",
+     3196,
+     393
+    ],
+    [
+     "mozilla/bigquery-etl",
+     3198,
+     312
+    ],
+    [
+     "mozilla/bigquery-etl",
+     3216,
+     96
+    ]
+   ]
+  },
+  {
+   "slot": "B3:mozilla/sccache",
+   "arm": "B3",
+   "author": "flxo",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "mozilla/sccache",
+     1291,
+     181
+    ]
+   ]
+  },
+  {
+   "slot": "B3:ray-project/ray",
+   "arm": "B3",
+   "author": "stephanie-wang",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "ray-project/ray",
+     28865,
+     419
+    ],
+    [
+     "ray-project/ray",
+     28864,
+     345
+    ]
+   ]
+  },
+  {
+   "slot": "B3:PrefectHQ/prefect-ui-library",
+   "arm": "B3",
+   "author": "marichka-offen",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "PrefectHQ/prefect-ui-library",
+     577,
+     80
+    ],
+    [
+     "PrefectHQ/prefect-ui-library",
+     623,
+     104
+    ]
+   ]
+  },
+  {
+   "slot": "B3:weaviate/weaviate",
+   "arm": "B3",
+   "author": "parkerduckworth",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "weaviate/weaviate",
+     2252,
+     1406
+    ],
+    [
+     "weaviate/weaviate",
+     2243,
+     60
+    ],
+    [
+     "weaviate/weaviate",
+     2248,
+     1082
+    ],
+    [
+     "weaviate/weaviate",
+     2244,
+     62
+    ],
+    [
+     "weaviate/weaviate",
+     2241,
+     55
+    ],
+    [
+     "weaviate/weaviate",
+     2232,
+     543
+    ],
+    [
+     "weaviate/weaviate",
+     2189,
+     175
+    ],
+    [
+     "weaviate/weaviate",
+     2183,
+     637
+    ]
+   ]
+  },
+  {
+   "slot": "B3:mozilla/bedrock",
+   "arm": "B3",
+   "author": "craigcook",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "mozilla/bedrock",
+     12167,
+     372
+    ],
+    [
+     "mozilla/bedrock",
+     12131,
+     102
+    ],
+    [
+     "mozilla/bedrock",
+     12142,
+     254
+    ],
+    [
+     "mozilla/bedrock",
+     12138,
+     148
+    ]
+   ]
+  },
+  {
+   "slot": "B3:milvus-io/milvus.io",
+   "arm": "B3",
+   "author": "ThyeeZz",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "milvus-io/milvus.io",
+     1082,
+     130
+    ],
+    [
+     "milvus-io/milvus.io",
+     1085,
+     64
+    ],
+    [
+     "milvus-io/milvus.io",
+     1090,
+     1584
+    ],
+    [
+     "milvus-io/milvus.io",
+     1087,
+     96
+    ],
+    [
+     "milvus-io/milvus.io",
+     1089,
+     849
+    ],
+    [
+     "milvus-io/milvus.io",
+     1077,
+     122
+    ],
+    [
+     "milvus-io/milvus.io",
+     1091,
+     51
+    ],
+    [
+     "milvus-io/milvus.io",
+     1092,
+     1681
+    ]
+   ]
+  },
+  {
+   "slot": "B3:PaddlePaddle/PaddleOCR",
+   "arm": "B3",
+   "author": "LDOUBLEV",
+   "period": "Q3-2022",
+   "ai": false,
+   "candidates": [
+    [
+     "PaddlePaddle/PaddleOCR",
+     7620,
+     182
+    ],
+    [
+     "PaddlePaddle/PaddleOCR",
+     7692,
+     1033
+    ],
+    [
+     "PaddlePaddle/PaddleOCR",
+     7691,
+     1036
+    ],
+    [
+     "PaddlePaddle/PaddleOCR",
+     7621,
+     181
+    ]
+   ]
+  }
+ ]
+}

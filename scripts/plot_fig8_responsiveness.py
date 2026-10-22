@@ -11,18 +11,23 @@ below n < 20 in ITS OWN sample (2026-07-25 review: the draws are
 independent, so the AI lane can begin in a different quarter per panel).
 Q2 partial (w8 windows open at the AS_OF).
 
-Output: artifacts/fig8_responsiveness_by_ai.png
+Data:   artifacts/data/responsiveness_by_ai.csv
+Output: artifacts/responsiveness_by_ai.png
 Usage:  PYTHONPATH=src python scripts/plot_fig8_responsiveness.py
 """
 import sys
 
 sys.path.insert(0, "src")
+from pipeline.figdata import Table, figure_main
 from pipeline.figstyle import (PAIR_BLUE, broken_pair, plt, quarter_series,
-                               save, shade_q2_partial)
+                               shade_q2_partial)
 from pipeline.studies.review_action import PERIODS, lane_rows
 
 SLICES = [("CLEAN+AI", PAIR_BLUE[0], "AI-involved PRs"),
           ("CLEAN+nonAI", PAIR_BLUE[1], "non-AI PRs")]
+
+PANELS = [("responded", "% of asked PRs with author edits after the ask"),
+          ("locshare", "% of LOC edited after the ask")]
 
 
 def val(lanes, per, lane, kind):
@@ -40,29 +45,32 @@ def val(lanes, per, lane, kind):
             if a.get("n_loc", 0) >= 20 and a["total"] else None)
 
 
-def main() -> None:
+def collect() -> Table:
     _, lanes, _ = lane_rows()   # fleet-excluded domain
+    t = Table("responsiveness_by_ai")
+    for kind, title in PANELS:
+        for lane, _color, label in SLICES:
+            t.add_series(kind, lane,
+                         [val(lanes, p, lane, kind) for p in PERIODS],
+                         x_labels=PERIODS, panel_label=title,
+                         series_label=label)
+    return t
 
+
+def render(t: Table):
     fig = plt.figure(figsize=(11, 4.4))
-    fig.suptitle("Figure 8: responsiveness to human review requests — AI vs "
-                 "non-AI PRs (CLEAN lane; (a) equal-probability sample, "
-                 "unweighted / (b) PPS-by-LOC, HT; fleet authors excluded)",
-                 fontsize=11, y=-0.08)
     subfigs = fig.subfigures(1, 2, wspace=0.05)
-    for sf, kind, title in (
-            (subfigs.flat[0], "responded", "% of asked PRs with author "
-             "edits after the ask"),
-            (subfigs.flat[1], "locshare", "% of LOC edited after the ask")):
+    for sf, (kind, _title) in zip(subfigs.flat, PANELS):
+        title = t.label_of(kind)
         axl, axr = broken_pair(sf, title)
         for lane, color, label in SLICES:
-            y = [val(lanes, p, lane, kind) for p in PERIODS]
-            quarter_series(axl, axr, y, color, label)
+            quarter_series(axl, axr, t.values(kind, lane), color, label)
         shade_q2_partial(axr)
         axl.set_ylim(0, 100)
         axl.set_ylabel(title)
         axr.legend(fontsize=8, loc="lower left")
-    save(fig, "artifacts/fig8_responsiveness_by_ai.png")
+    return fig
 
 
 if __name__ == "__main__":
-    main()
+    figure_main(collect, render, "artifacts/responsiveness_by_ai.png")

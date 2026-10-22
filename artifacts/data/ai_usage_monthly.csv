@@ -1,0 +1,57 @@
+panel,panel_label,series,series_label,x,x_label,value,lo,hi
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,0.0,2024-01,0.0,0.0,0.0
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,1.0,2024-02,0.011337868480725623,0.0,0.03838494942760152
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,2.0,2024-03,0.0,0.0,0.0
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,3.0,2025-10,2.541975153585472,1.7257577053622037,3.567188247072548
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,4.0,2025-11,2.7320540155668547,2.1444628729951036,3.4844491795528247
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,5.0,2025-12,3.7750740531655826,2.959711171591718,4.682720508983458
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,6.0,2026-01,5.523846897106348,4.438378798383633,6.758303115184516
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,7.0,2026-02,10.479012120894318,8.995160805590997,12.106922955804304
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,8.0,2026-03,12.356882917528077,10.73589391795645,14.0882306918349
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,9.0,2026-04,14.077857437108854,12.185361918331498,15.806695639467664
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,10.0,2026-05,16.65402218893557,15.009420944226273,18.110980041880996
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,11.0,2026-06,19.732995449802107,18.03009050178547,21.529061087516332
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,12.0,2026-07,19.600217614979414,17.613162301397313,21.66075010323847
+usage,share with traceable AI usage (%),sub_pr,AI% of submitted PRs,13.0,2026-08,18.47922952459953,16.50188058850921,20.48672023358018
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,0.0,2024-01,0.0,0.0,0.0
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,1.0,2024-02,0.0,0.0,0.0
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,2.0,2024-03,0.0,0.0,0.0
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,3.0,2025-10,1.723715143256135,1.164388130289311,2.3888390526838394
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,4.0,2025-11,1.9647092612079957,1.4181206863602576,2.6439974289327406
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,5.0,2025-12,2.8524232913165015,2.1303806183791614,3.700834737009595
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,6.0,2026-01,4.436807037100237,3.3807004445348037,5.784534012057707
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,7.0,2026-02,9.45240750313827,7.914983502663942,11.152739473840414
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,8.0,2026-03,11.018521685858246,9.404940421406106,12.891108773391128
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,9.0,2026-04,13.484275237507928,11.538434234172616,15.434952085908327
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,10.0,2026-05,16.312046112646104,14.568973784771563,18.185971321668717
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,11.0,2026-06,19.51694829071976,17.611310301124846,21.512029537823874
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,12.0,2026-07,19.34746616815928,16.861317438988255,21.832928604688263
+usage,share with traceable AI usage (%),mrg_pr,AI% of merged PRs,13.0,2026-08,nan,nan,nan
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,0.0,2024-01,0.0,0.0,0.0
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,1.0,2024-02,0.00013634088745751932,0.0,0.00046805667419173315
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,2.0,2024-03,0.0,0.0,0.0
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,3.0,2025-10,3.2670231267853787,2.291372838496401,4.4640790922083475
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,4.0,2025-11,4.311907262999591,3.248239894269541,5.5948299886544035
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,5.0,2025-12,4.8964177594751135,3.6865773033205698,6.277142202625248
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,6.0,2026-01,8.85666806755169,7.019408840843244,10.939462099204917
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,7.0,2026-02,12.020346445684787,10.322440914183947,13.960319022712442
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,8.0,2026-03,15.757397777126778,13.592581945332974,18.102479372379506
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,9.0,2026-04,18.58046108455071,16.22439387968974,20.918688863146567
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,10.0,2026-05,23.518873923985684,21.029833729105054,26.2930907576165
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,11.0,2026-06,25.282255283030203,22.755486472677507,27.841659214730726
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,12.0,2026-07,25.42497830621761,22.854696194057052,27.930248074680424
+usage,share with traceable AI usage (%),sub_loc,AI-PR share of submitted LOC,13.0,2026-08,23.36851658059384,20.863724940349034,26.042237376608217
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,0.0,2024-01,0.0,0.0,0.0
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,1.0,2024-02,0.0,0.0,0.0
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,2.0,2024-03,0.0,0.0,0.0
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,3.0,2025-10,2.066047037541491,1.2911399662148046,3.021373458688785
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,4.0,2025-11,2.2567388047148174,1.540914049481426,3.1271279472654157
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,5.0,2025-12,3.3175272194206706,2.3755987088062938,4.5020130801351455
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,6.0,2026-01,6.304010801457288,4.774258710905429,8.201727516152863
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,7.0,2026-02,10.923669622204763,8.835060895772479,13.003966186698582
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,8.0,2026-03,13.457524549086447,11.30818643127606,15.666790301287179
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,9.0,2026-04,16.59202330373138,14.009258712543929,19.188787451653347
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,10.0,2026-05,20.60575115700011,18.090586273318323,23.290962157118084
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,11.0,2026-06,24.038638798463303,21.250068027642577,26.82923279494263
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,12.0,2026-07,21.118338437162098,17.77632607980774,24.581830586494423
+usage,share with traceable AI usage (%),mrg_loc,AI-PR share of merged LOC,13.0,2026-08,nan,nan,nan

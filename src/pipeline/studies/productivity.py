@@ -33,11 +33,14 @@ from pipeline.frame import PERIODS, ai_contrast_eligible, study_frame
 # differs from rate metrics, which are None-gated on maturity.
 
 
-def per_author() -> dict:
+def per_author(granularity: str = "quarter",
+               window: list[str] | None = None) -> dict:
     """(repo, period) -> login -> [prs, merged, merged_lines, ai_prs,
-    submitted_lines]."""
+    submitted_lines]. granularity="month": periods are the baseline +
+    window months (the monthly paper figures; see month_frame_kw)."""
+    frame_kw = {} if granularity == "quarter" else month_frame_kw(window)
     out: dict = defaultdict(lambda: defaultdict(lambda: [0, 0, 0, 0, 0]))
-    for f in study_frame("author"):
+    for f in study_frame("author", **frame_kw):
         row = out[(f.repo, f.period)][f.author]
         row[0] += 1
         row[4] += f.loc                          # submitted: no censoring
@@ -305,12 +308,17 @@ def adoption_rows() -> dict:
     return out
 
 
-def _author_months_and_cohorts():
+def _author_months_and_cohorts(window: list[str] | None = None):
     """Shared builder: per-author monthly activity, the fleet-operator
     set (computed once; the 'fleet' cohort is membership in it), cohort
     assignment, and the month->quarter map. Used by adoption_rows
     (quarterly table), adoption_monthly (Figure 4 series), and
-    fleet_logins."""
+    fleet_logins.
+
+    `window` months beyond the frozen WINDOW_MONTHS extend the observed
+    SERIES only, never the cohort or fleet definitions — membership and
+    first-AI-month assignment are frozen with the quarters, so extending
+    a figure cannot reshuffle who counts as fleet/early/late."""
     q_of = {}
     for m in range(1, 4):
         q_of[f"2024-{m:02d}"] = "Q1-2024"
@@ -323,8 +331,13 @@ def _author_months_and_cohorts():
     acc: dict = defaultdict(
         lambda: defaultdict(lambda: [0.0, 0.0, 0, 0, 0, 0.0, 0.0]))
     insiders = set()
-    for f in study_frame("author", periods=q_of, granularity="month"):
-        if f.insider:
+    extra = [m for m in (window or []) if m not in q_of]
+    frame_kw = {"periods": [*q_of, *extra], "granularity": "month",
+                **({"ranges": _extended_ranges()} if extra else {})}
+    for f in study_frame("author", **frame_kw):
+        # insider status is frozen with the quarters, like cohort and
+        # fleet membership: an extension month never admits a new insider
+        if f.insider and f.period in q_of:
             insiders.add(f.author)
         row = acc[f.author][f.period]
         row[3] += 1
@@ -349,8 +362,9 @@ def _author_months_and_cohorts():
     def cohort_of(login: str, months: dict) -> str:
         if login in fleet_all:      # fleet first, by membership — the
             return "fleet"          # FLEET_MIN predicate lives above only
-        first = min((m for m, v in months.items() if v[2] > 0),
-                    default=None)
+        # frozen months only: an extension month never assigns a cohort
+        first = min((m for m, v in months.items()
+                     if m in q_of and v[2] > 0), default=None)
         if first is None:
             return "never"
         if first <= "2026-02":
@@ -362,14 +376,71 @@ def _author_months_and_cohorts():
     return acc, per_author_cohort, q_of, fleet_all
 
 
-def adoption_monthly() -> dict:
+def adoption_quarterly(stat: str = "mean") -> dict:
+    """(quarter, cohort) -> {n, submitted, sub_ai, sub_nonai, merged,
+    mrg_ai, mrg_nonai} — kLOC per QUARTER-ACTIVE cohort member per
+    QUARTER (the fleet_vs_nonadopters series: monthly points are noisy,
+    a quarter pools three months per member). A member's quarter value is
+    their TOTAL over its months; membership needs >=1 PR in the quarter.
+
+    stat as in `adoption_monthly`: "mean" is cohort total per member,
+    "median" the typical member — and medians are per FIELD, never a
+    decomposition."""
+    if stat not in ("mean", "median"):
+        raise ValueError(f"unknown stat: {stat!r} (mean|median)")
+    mid = statistics.median if stat == "median" else \
+        (lambda xs: sum(xs) / len(xs))
+    acc, cohort_of_login, _q_of, _fleet = _author_months_and_cohorts()
+    zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
+    quarters = {"Q1-2024": BASELINE_MONTHS, "Q4-2025": WINDOW_MONTHS[:3],
+                "Q1-2026": WINDOW_MONTHS[3:6], "Q2-2026": WINDOW_MONTHS[6:9]}
+    out = {}
+    for quarter, months in quarters.items():
+        for coh, _d in ADOPTION_COHORTS:
+            rows = []
+            for login, coh_ in cohort_of_login.items():
+                if coh_ != coh:
+                    continue
+                mrows = [acc[login].get(m) or zero for m in months]
+                if not any(r[3] > 0 for r in mrows):
+                    continue                     # not quarter-active
+                rows.append([sum(r[i] for r in mrows) for i in range(7)])
+            if not rows:
+                continue
+            out[(quarter, coh)] = {
+                "n": len(rows),
+                "submitted": mid([r[5] for r in rows]),
+                "sub_ai": mid([r[6] for r in rows]),
+                "sub_nonai": mid([r[5] - r[6] for r in rows]),
+                "merged": mid([r[0] + r[1] for r in rows]),
+                "mrg_ai": mid([r[0] for r in rows]),
+                "mrg_nonai": mid([r[1] for r in rows])}
+    return out
+
+
+def adoption_monthly(stat: str = "mean",
+                     window: list[str] | None = None) -> dict:
     """(month, cohort) -> {n, submitted, sub_ai, sub_nonai, merged,
-    mrg_ai, mrg_nonai} — mean kLOC per
+    mrg_ai, mrg_nonai} — kLOC per
     quarter-ACTIVE cohort member per MONTH (the Figure 4 series: submitted
     has no censoring; merged follows the w8 rule and is provisional on
-    months not yet mature — see mature-month cap in the caption)."""
-    acc, cohort_of_login, q_of, _fleet = _author_months_and_cohorts()
-    months = sorted(q_of)
+    months not yet mature — see mature-month cap in the caption).
+
+    stat="mean" is the cohort total per member. stat="median" is the
+    TYPICAL member: cohort output is heavy-tailed (a single fleet operator
+    can supply half a cohort-month), so the mean describes the tail and the
+    median describes membership. `n` is a member count under both.
+
+    Medians are per FIELD and are not additive — median(submitted) is not
+    median(sub_ai) + median(sub_nonai), because different members sit at
+    the middle of each. Read a median panel series-by-series, never as a
+    decomposition."""
+    if stat not in ("mean", "median"):
+        raise ValueError(f"unknown stat: {stat!r} (mean|median)")
+    mid = statistics.median if stat == "median" else \
+        (lambda xs: sum(xs) / len(xs))
+    acc, cohort_of_login, q_of, _fleet = _author_months_and_cohorts(window)
+    months = sorted({*q_of, *(window or [])})
     out = {}
     for mon in months:
         for coh, _d in ADOPTION_COHORTS:
@@ -379,31 +450,59 @@ def adoption_monthly() -> dict:
                     and acc[login][mon][3]]
             if not rows:
                 continue
-            n = len(rows)
             out[(mon, coh)] = {
-                "n": n,
-                "submitted": sum(r[5] for r in rows) / n,
-                "sub_ai": sum(r[6] for r in rows) / n,
-                "sub_nonai": sum(r[5] - r[6] for r in rows) / n,
-                "merged": sum(r[0] + r[1] for r in rows) / n,
-                "mrg_ai": sum(r[0] for r in rows) / n,
-                "mrg_nonai": sum(r[1] for r in rows) / n}
+                "n": len(rows),
+                "submitted": mid([r[5] for r in rows]),
+                "sub_ai": mid([r[6] for r in rows]),
+                "sub_nonai": mid([r[5] - r[6] for r in rows]),
+                "merged": mid([r[0] + r[1] for r in rows]),
+                "mrg_ai": mid([r[0] for r in rows]),
+                "mrg_nonai": mid([r[1] for r in rows])}
     return out
 
 
+BASELINE_MONTHS = ["2024-01", "2024-02", "2024-03"]
 WINDOW_MONTHS = ["2025-10", "2025-11", "2025-12", "2026-01", "2026-02",
                  "2026-03", "2026-04", "2026-05", "2026-06"]
+
+
+def _extended_ranges() -> dict:
+    """Period map covering the incremental-registry months (analyze
+    owns it); a separate seam so tests can observe when it's used."""
+    from pipeline.analyze import extended_quarters
+    return extended_quarters()
+
+
+def month_frame_kw(window: list[str] | None = None) -> dict:
+    """study_frame kwargs for a monthly pass over the baseline + window
+    months. Only a window reaching past the frozen WINDOW_MONTHS gets
+    the extended period map: on the frozen path the default
+    QUARTER_RANGES keeps group iteration order — and with it every
+    seeded bootstrap draw — untouched."""
+    months = BASELINE_MONTHS + (window or WINDOW_MONTHS)
+    kw = {"periods": months, "granularity": "month"}
+    if set(months) - {*BASELINE_MONTHS, *WINDOW_MONTHS}:
+        kw["ranges"] = _extended_ranges()
+    return kw
+
+
+def q2_provisionality_note() -> str:
+    """The Q2 w8-deflation caveat as a report caption prefix, empty once
+    Q2's windows have closed under the data stamp. Published captions are
+    derived, not hard-coded, so finalization clears them everywhere."""
+    from pipeline import detect
+    if detect.w8_closed(detect.CUTOFF):
+        return ""
+    return "Q2-2026 w8-deflated for May/June PRs; "
 
 
 def month_w8_mature(mon: str) -> bool:
     """Every PR created in `mon` closed its 56-day window by the AS_OF."""
     from calendar import monthrange
-    from datetime import datetime, timedelta
     from pipeline import detect
-    as_of = datetime.fromisoformat(detect.AS_OF.replace("Z", "+00:00"))
     y, m = int(mon[:4]), int(mon[5:7])
-    end = datetime(y, m, monthrange(y, m)[1], 23, 59, tzinfo=as_of.tzinfo)
-    return end + timedelta(days=56) <= as_of
+    last = f"{mon}-{monthrange(y, m)[1]:02d}T23:59:59Z"
+    return detect.w8_closed(last)
 
 
 def adoption_event(max_off: int = 2, balanced: bool = True) -> dict:
@@ -476,16 +575,417 @@ def adoption_event(max_off: int = 2, balanced: bool = True) -> dict:
     return out
 
 
-def event_by_adoption_month(max_off: int = 2) -> dict:
+ACTIVITY_PERIODS = [("Q1-2024", "baseline"), ("Q4-2025", "window start"),
+                    ("Q2-2026", "window end")]
+
+
+def activity_deciles(balanced: bool = True) -> dict:
+    """(period, group, metric, series) -> deciles p10..p90, plus an "n" row.
+
+    How ACTIVE each group is, which is what makes the AI/non-AI split
+    interpretable at all: detection needs a marker inside a PR, so a
+    contributor's chance of ever being detected scales with how many PRs
+    they submit. Each period's row covers PERIOD-ACTIVE insiders (>=1 PR
+    in that period), so the columns are different subsets — the never-AI
+    median of ~1.67 PRs/month describes the displayed subset, while over
+    the FIXED set of never-AI insiders the median is only ~6 window PRs
+    (~8 among the window-active): modest detection opportunity for the
+    group as a whole. The balanced panel's never-AI insiders sit near 7
+    PRs/month — ~63 window PRs without a marker, evidence of non-use.
+    Report both so the difference is visible rather than assumed.
+    (Outsiders, excluded here, median ~0.33 PRs/month — one PR per
+    quarter — which is why they cannot carry an AI/non-AI label at all.)
+
+    metric: "prs" (mean PRs/month) and "kloc" (mean submitted kLOC/month).
+    """
+    acc, cohort_of_login, _q, fleet = _author_months_and_cohorts()
+    zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
+    periods = {"Q1-2024": BASELINE_MONTHS, "Q4-2025": WINDOW_MONTHS[:3],
+               "Q2-2026": WINDOW_MONTHS[-3:]}
+    # INSIDERS only, the Figure 3 "core author" population: the shared
+    # builder already keys its cohort map on them, and outsiders are
+    # drive-by by nature, which would swamp the low deciles.
+    insiders = set(cohort_of_login)
+    ever = {w for w in insiders
+            if any((acc[w].get(m) or zero)[2] > 0 for m in WINDOW_MONTHS)}
+    pop = ([w for w in insiders
+            if all((acc[w].get(m) or zero)[3] > 0 for m in WINDOW_MONTHS)]
+           if balanced else list(insiders))
+    pop = [w for w in pop if w not in fleet]
+
+    def amount(who, months, metric):
+        rows = [acc[who].get(m) or zero for m in months]
+        idx = 3 if metric == "prs" else 5
+        return sum(r[idx] for r in rows) / len(rows)
+
+    def deciles(xs):
+        xs = sorted(xs)
+        if not xs:
+            return [float("nan")] * 9
+        return [xs[min(int(len(xs) * q / 100), len(xs) - 1)]
+                for q in range(10, 100, 10)]
+
+    out = {}
+    for pname, months in periods.items():
+        for gname, want in (("ever_ai", True), ("never_ai", False)):
+            members = [w for w in pop if (w in ever) == want
+                       and any((acc[w].get(m) or zero)[3] > 0 for m in months)]
+            for metric in ("prs", "kloc"):
+                vals = [amount(w, months, metric) for w in members]
+                out[(pname, gname, metric, "deciles")] = deciles(vals)
+                out[(pname, gname, metric, "n")] = [float(len(members))] * 9
+    return out
+
+
+ACTIVE_FLOOR = 10   # SUBMITTED PRs per quarter, in BOTH endpoint quarters
+
+
+def active_insider_deciles(pre: str = "Q4-2025") -> dict:
+    """(group, metric, series) -> deciles p10..p90 over ACTIVE INSIDERS:
+    insider authors with >= ACTIVE_FLOOR PRs in BOTH `pre` (Q4-2025 or
+    Q1-2024) and Q2-2026, fleet excluded.
+
+    The floor is what makes "never used AI" a BEHAVIOURAL claim: these
+    contributors had dozens of PRs in which a marker could have appeared
+    and none did — unlike low-activity authors, whose non-detection is
+    mostly lack of opportunity (detection needs a marker inside a PR).
+
+    metric: "submitted"/"merged" (kLOC per QUARTER) and "prs" (SUBMITTED
+    PRs per quarter — authored, regardless of outcome; the floor counts
+    the same quantity). series: "pre", "post", "ratio" — the ratio is each person's
+    own post/pre, decile'd per contributor, never a ratio of deciles."""
+    if pre not in ("Q4-2025", "Q1-2024"):
+        raise ValueError(f"unknown pre quarter: {pre!r}")
+    acc, cohort_of_login, _q, fleet = _author_months_and_cohorts()
+    zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
+    months_of = {"Q1-2024": BASELINE_MONTHS, "Q4-2025": WINDOW_MONTHS[:3],
+                 "Q2-2026": WINDOW_MONTHS[-3:]}
+
+    def q_amount(who, quarter, metric):
+        rows = [acc[who].get(m) or zero for m in months_of[quarter]]
+        if metric == "prs":
+            return float(sum(r[3] for r in rows))
+        return sum(r[5] if metric == "submitted" else r[0] + r[1]
+                   for r in rows)
+
+    insiders = set(cohort_of_login)
+    ever = {w for w in insiders
+            if any((acc[w].get(m) or zero)[2] > 0 for m in WINDOW_MONTHS)}
+    panel = [w for w in insiders if w not in fleet
+             and q_amount(w, pre, "prs") >= ACTIVE_FLOOR
+             and q_amount(w, "Q2-2026", "prs") >= ACTIVE_FLOOR]
+
+    def deciles(xs):
+        xs = sorted(xs)
+        if not xs:
+            return [float("nan")] * 9
+        return [xs[min(int(len(xs) * q / 100), len(xs) - 1)]
+                for q in range(10, 100, 10)]
+
+    out = {}
+    for group, members in (("ever_ai", [w for w in panel if w in ever]),
+                           ("never_ai", [w for w in panel if w not in ever])):
+        for metric in ("submitted", "merged", "prs"):
+            a = [q_amount(w, pre, metric) for w in members]
+            b = [q_amount(w, "Q2-2026", metric) for w in members]
+            out[(group, metric, "pre")] = deciles(a)
+            out[(group, metric, "post")] = deciles(b)
+            ratios = [y / x for x, y in zip(a, b) if x > 0]
+            out[(group, metric, "ratio")] = deciles(ratios)
+            out[(group, metric, "n")] = [float(len(members))] * 9
+            # pre == 0 members have no change ratio; plots of the ratio
+            # series must quote THIS sample, not the membership
+            out[(group, metric, "n_ratio")] = [float(len(ratios))] * 9
+    return out
+
+
+QUARTER_MONTHS = {"Q1-2024": BASELINE_MONTHS, "Q4-2025": WINDOW_MONTHS[:3],
+                  "Q1-2026": WINDOW_MONTHS[3:6], "Q2-2026": WINDOW_MONTHS[6:9]}
+
+PRODUCTIVE_MIN_QUARTER = 5   # submitted PRs in EVERY study quarter, and
+#                              a mean of >=ACTIVE_FLOOR over all four
+INSIDER_POPULATIONS = [
+    ("any", "period-active insiders (>=1 PR in the quarter)"),
+    ("productive",
+     f"productive panel (>={PRODUCTIVE_MIN_QUARTER} submitted PRs in every "
+     f"quarter and a mean of >={ACTIVE_FLOOR}/quarter over all four)"),
+    ("panel", "balanced panel (>=1 PR in all four quarters)"),
+]
+INSIDER_SLICES = [("all", "all"),
+                  ("ever_ai", "ever used AI (detected)"),
+                  ("never_ai", "never used AI (detected)")]
+INSIDER_METRICS = [("submitted", "submitted kLOC / insider / quarter"),
+                   ("merged", "merged (w8) kLOC / insider / quarter")]
+
+
+def _median_ci(vals: list[float], draws: int, key: str) -> dict:
+    """{n, median, lo, hi}: the median of `vals` with a seeded percentile
+    bootstrap over persons (one stream per cell, like analyze.bootstrap_ci);
+    CIs are NaN below two members."""
+    import numpy as np
+    from pipeline.analyze import _stream
+    nan = float("nan")
+    n = len(vals)
+    if n == 0:
+        return {"n": 0, "median": nan, "lo": nan, "hi": nan}
+    arr = np.asarray(vals, dtype=float)
+    med = float(np.median(arr))
+    if n < 2:
+        return {"n": n, "median": med, "lo": nan, "hi": nan}
+    rng = np.random.default_rng(_stream(key).getrandbits(63))
+    meds = np.empty(draws)
+    for i in range(0, draws, 250):          # chunked: draws x n indices
+        k = min(250, draws - i)
+        meds[i:i + k] = np.median(arr[rng.integers(0, n, size=(k, n))],
+                                  axis=1)
+    lo, hi = np.percentile(meds, [2.5, 97.5])
+    return {"n": n, "median": med, "lo": float(lo), "hi": float(hi)}
+
+
+def _ratio_ci(vals: list[float], base: list[float], draws: int,
+              key: str, paired: bool) -> dict:
+    """{n, n_base, mult, lo, hi}: median(vals) / median(base) with a
+    seeded percentile bootstrap. `paired`: `vals[i]` and `base[i]` are the
+    same person (a fixed panel), so each draw resamples person indices
+    ONCE and applies them to both quarters — a panel in which everyone
+    doubles yields exactly 2x. Unpaired (membership differs between the
+    quarters) resamples the two quarters independently. NaN where either
+    median is undefined or the base is zero; CIs NaN below two members on
+    either side."""
+    import numpy as np
+    from pipeline.analyze import _stream
+    nan = float("nan")
+    n, nb = len(vals), len(base)
+    if paired and n != nb:
+        raise ValueError(f"paired ratio needs aligned members: {n} vs {nb}")
+    if n == 0 or nb == 0 or float(np.median(base)) == 0.0:
+        return {"n": n, "n_base": nb, "mult": nan, "lo": nan, "hi": nan}
+    v, b = np.asarray(vals, dtype=float), np.asarray(base, dtype=float)
+    mult = float(np.median(v) / np.median(b))
+    if n < 2 or nb < 2:
+        return {"n": n, "n_base": nb, "mult": mult, "lo": nan, "hi": nan}
+    rng = np.random.default_rng(_stream(key).getrandbits(63))
+    ratios = np.empty(draws)
+    for i in range(0, draws, 250):
+        k = min(250, draws - i)
+        iv = rng.integers(0, n, size=(k, n))
+        ib = iv if paired else rng.integers(0, nb, size=(k, nb))
+        ratios[i:i + k] = np.median(v[iv], axis=1) / np.median(b[ib], axis=1)
+    lo, hi = np.percentile(ratios, [2.5, 97.5])
+    return {"n": n, "n_base": nb, "mult": mult, "lo": float(lo),
+            "hi": float(hi)}
+
+
+def _insider_cells() -> dict[tuple, list[float]]:
+    """(population, slice, metric, quarter) -> each member's kLOC that
+    quarter — the per-PERSON values both insider figures summarize.
+
+    Populations (fleet operators excluded from all three):
+      any        — insiders with >=1 PR in the quarter (membership varies
+                   by quarter: the typical active insider that quarter;
+                   the only composition-inclusive series)
+      panel      — insiders with >=1 PR in EVERY study quarter (a fixed
+                   set: the same people throughout, hence survivor-
+                   selected toward long-tenured maintainers)
+      productive — panel members with >=PRODUCTIVE_MIN_QUARTER submitted
+                   PRs in EVERY study quarter and a mean of >=ACTIVE_FLOOR
+                   per quarter over ALL FOUR. Membership is decided once
+                   and the baseline quarter counts like any other: a
+                   per-quarter floor would re-select people on a quantity
+                   correlated with the outcome each quarter and churn
+                   those near the line (8, 12, 9 PRs), and a window-only
+                   mean would admit people who ramped up during the
+                   window and so overstate growth. The floor is what makes
+                   never-AI a behavioural claim — dozens of PRs in which
+                   a marker could have appeared, none did.
+    Slices: all; ever_ai / never_ai by whether any AI-involved PR appeared
+    in the window (Q4-2025..Q2-2026 — the baseline has no detectable
+    channel), the split the decile studies use.
+    Metrics: submitted kLOC (no censoring) and merged kLOC (w8 rule),
+    pooled across every repo the person authors in.
+    Insider = the Figure 3 core-author population (an insider-association
+    PR in the frozen months)."""
+    acc, cohort_of_login, _q, fleet = _author_months_and_cohorts()
+    zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
+    insiders = [w for w in cohort_of_login if w not in fleet]
+    ever = {w for w in insiders
+            if any((acc[w].get(m) or zero)[2] > 0 for m in WINDOW_MONTHS)}
+
+    def rows(who, quarter):
+        return [acc[who].get(m) or zero for m in QUARTER_MONTHS[quarter]]
+
+    def prs(who, quarter):
+        return sum(r[3] for r in rows(who, quarter))
+
+    def kloc(who, quarter, metric):
+        return sum(r[5] if metric == "submitted" else r[0] + r[1]
+                   for r in rows(who, quarter))
+
+    panel = [w for w in insiders if all(prs(w, q) > 0 for q in QUARTER_MONTHS)]
+    productive = [w for w in panel
+                  if all(prs(w, q) >= PRODUCTIVE_MIN_QUARTER
+                         for q in QUARTER_MONTHS)
+                  and sum(prs(w, q) for q in QUARTER_MONTHS)
+                  / len(QUARTER_MONTHS) >= ACTIVE_FLOOR]
+
+    def members(pop, quarter):
+        if pop == "any":
+            return [w for w in insiders if prs(w, quarter) > 0]
+        return productive if pop == "productive" else panel
+
+    out = {}
+    for pop, _plabel in INSIDER_POPULATIONS:
+        for quarter in QUARTER_MONTHS:
+            base = members(pop, quarter)
+            for sl, _slabel in INSIDER_SLICES:
+                who = [w for w in base
+                       if sl == "all" or (w in ever) == (sl == "ever_ai")]
+                for metric, _mlabel in INSIDER_METRICS:
+                    out[(pop, sl, metric, quarter)] = [
+                        kloc(w, quarter, metric) for w in who]
+    return out
+
+
+def insider_medians(draws: int = 2000, cells: dict | None = None) -> dict:
+    """(population, slice, metric, quarter) -> {n, median, lo, hi}: the
+    MEDIAN insider author's kLOC per quarter over the _insider_cells
+    populations — one number per person, no repo weighting and no
+    two-stage aggregation, so "median" means the middle insider. `cells`
+    lets a caller rendering several figures share one _insider_cells
+    pass."""
+    cells = _insider_cells() if cells is None else cells
+    return {k: _median_ci(v, draws, key="insider_medians|" + "|".join(k))
+            for k, v in cells.items()}
+
+
+def insider_growth(draws: int = 2000, cells: dict | None = None) -> dict:
+    """(population, slice, metric, quarter) -> {n, n_base, mult, lo, hi}:
+    each series' median divided by ITS OWN Q1-2024 median, so every
+    population and slice starts at 1.0 and the chart compares growth
+    rather than levels. The baseline cell is 1.0 by construction (no
+    interval); other cells carry the _ratio_ci bootstrap — PAIRED for the
+    fixed panels (productive, panel: the same people in every quarter,
+    in the same order in every cell) and independent for the
+    period-active population, whose membership differs by quarter."""
+    cells = _insider_cells() if cells is None else cells
+    out = {}
+    for (pop, sl, metric, quarter), vals in cells.items():
+        base = cells[(pop, sl, metric, "Q1-2024")]
+        if quarter == "Q1-2024":
+            out[(pop, sl, metric, quarter)] = {
+                "n": len(vals), "n_base": len(base),
+                "mult": 1.0 if vals else float("nan"), "lo": 1.0, "hi": 1.0}
+            continue
+        out[(pop, sl, metric, quarter)] = _ratio_ci(
+            vals, base, draws,
+            key="insider_growth|" + "|".join((pop, sl, metric, quarter)),
+            paired=pop != "any")
+    return out
+
+
+DECILE_GROUPS = [("all", "all contributors (non-fleet)"),
+                 ("ever_ai", "ever used AI (detected)"),
+                 ("never_ai", "never used AI (detected)"),
+                 ("fleet", "fleet operators")]
+
+
+def productivity_deciles(basis: str = "month") -> dict:
+    """(group, metric, series) -> the 9 deciles p10..p90, over the
+    BALANCED PANEL of contributors with >=1 PR in EVERY window month.
+
+    Nobody enters or leaves mid-window, so a shift in these curves is the
+    same people changing rather than the population changing. Groups are
+    split by whether any AI evidence appeared in the window — "never used
+    AI" means never DETECTABLY, and detection is a floor, so that group
+    certainly contains undetected use, which biases against finding a gap.
+
+    basis="month" compares the endpoint months (2025-10 vs 2026-06);
+    basis="quarter" averages Oct-Dec against Apr-Jun per contributor
+    first. Single months are dominated by volatility — the endpoint
+    ratio spans p10 0.08x to p90 19.9x — so the quarterly basis is the
+    one to read for trend.
+
+    series: "pre", "post" (kLOC levels) and "ratio" (post/pre, computed
+    PER CONTRIBUTOR then decile'd, never as a ratio of deciles)."""
+    if basis not in ("month", "quarter"):
+        raise ValueError(f"unknown basis: {basis!r} (month|quarter)")
+    acc, cohort_of_login, _q, fleet = _author_months_and_cohorts()
+    zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
+    insiders = set(cohort_of_login)          # Figure 3 "core author" population
+    pre_months = [WINDOW_MONTHS[0]] if basis == "month" else WINDOW_MONTHS[:3]
+    post_months = [WINDOW_MONTHS[-1]] if basis == "month" else WINDOW_MONTHS[-3:]
+
+    def amount(login, months, metric):
+        rows = [acc[login].get(m) or zero for m in months]
+        vals = [r[5] if metric == "submitted" else r[0] + r[1] for r in rows]
+        return sum(vals) / len(vals)
+
+    panel = [who for who in insiders
+             if all((acc[who].get(m) or zero)[3] > 0 for m in WINDOW_MONTHS)]
+    ever = {who for who in panel
+            if any((acc[who].get(m) or zero)[2] > 0 for m in WINDOW_MONTHS)}
+    members = {
+        "all": [w for w in panel if w not in fleet],
+        "ever_ai": [w for w in panel if w not in fleet and w in ever],
+        "never_ai": [w for w in panel if w not in fleet and w not in ever],
+        "fleet": [w for w in panel if w in fleet]}
+
+    def deciles(xs):
+        xs = sorted(xs)
+        if not xs:
+            return [float("nan")] * 9
+        return [xs[min(int(len(xs) * q / 100), len(xs) - 1)]
+                for q in range(10, 100, 10)]
+
+    out = {}
+    for group, logins in members.items():
+        for metric in ("submitted", "merged"):
+            pre = [amount(w, pre_months, metric) for w in logins]
+            post = [amount(w, post_months, metric) for w in logins]
+            ratio = [b / a for a, b in zip(pre, post) if a > 0]
+            out[(group, metric, "pre")] = deciles(pre)
+            out[(group, metric, "post")] = deciles(post)
+            out[(group, metric, "ratio")] = deciles(ratio)
+            out[(group, metric, "n")] = [float(len(logins))] * 9
+            # pre == 0 members have no change ratio; plots of the ratio
+            # series must quote THIS sample, not the membership
+            out[(group, metric, "n_ratio")] = [float(len(ratio))] * 9
+    return out
+
+
+def event_by_adoption_month(max_off: int = 2, stat: str = "mean",
+                            require_active: bool = True) -> dict:
     """Figure 4: per-author kLOC (six metrics: submitted/merged x
     total/AI/non-AI) at offsets [-2..+2] around first observed AI use,
-    one BALANCED cohort per ADOPTION MONTH (2025-12..2026-04 — exactly
-    the months whose full window fits the data). Non-fleet adopters only;
+    one BALANCED cohort per ADOPTION MONTH — exactly the months whose
+    full window fits the data AND has passed w8 finalization at the
+    AS_OF, so every plotted offset is a finalized calendar month (merged
+    series final, nothing provisional). Non-fleet adopters only;
     inactive months count as zero volume. Within a cohort each offset
-    maps to ONE calendar month, so w8 maturity per offset is exact.
+    maps to ONE calendar month.
+
+    `require_active` (default) keeps only members who submitted >=1 PR in
+    EVERY offset month, so each has a real pre-adoption baseline to move
+    from. Without it the cohort is defined by first AI evidence alone,
+    and 30-48% of members had no activity at t-2/t-1 while 0% can be
+    inactive at t0 (AI evidence requires a PR) — zero-filled inactive
+    months then make the step at adoption partly composition (authors
+    appearing in the data) rather than the treatment being measured. Pass
+    False only to quantify that difference.
+
+    `stat` selects the per-offset statistic over cohort members, as for
+    `adoption_monthly`: "mean" is the cohort total per member, "median"
+    the TYPICAL adopter. Per-author volume is heavy-tailed, so the mean
+    follows whoever the tail happens to be (METHODS §1d.4b). Medians are
+    per METRIC and do not decompose — AI and non-AI will not sum to their
+    total, because a different member sits at the middle of each.
 
     Returns {t0_month: {"n": int, "offsets": {e: {six metrics,
-    "month": str, "mature": bool}}}}."""
+    "month": str}}}}."""
+    if stat not in ("mean", "median"):
+        raise ValueError(f"unknown stat: {stat!r} (mean|median)")
+    mid = statistics.median if stat == "median" else \
+        (lambda xs: sum(xs) / len(xs))
     acc, cohort_of_login, _q_of, _fleet = _author_months_and_cohorts()
     zero = [0.0, 0.0, 0, 0, 0, 0.0, 0.0]
 
@@ -501,8 +1001,14 @@ def event_by_adoption_month(max_off: int = 2) -> dict:
             continue
         t0 = next((i for i, m in enumerate(WINDOW_MONTHS)
                    if acc[login].get(m, zero)[2] > 0), None)
-        if t0 is not None and max_off <= t0 < len(WINDOW_MONTHS) - max_off:
-            by_t0[t0].append(login)
+        if t0 is None or not (max_off <= t0 < len(WINDOW_MONTHS) - max_off) \
+                or not month_w8_mature(WINDOW_MONTHS[t0 + max_off]):
+            continue
+        if require_active and not all(
+                (acc[login].get(WINDOW_MONTHS[t0 + e]) or zero)[3] > 0
+                for e in range(-max_off, max_off + 1)):
+            continue                     # no baseline to move from
+        by_t0[t0].append(login)
     out = {}
     for t0, members in sorted(by_t0.items()):
         offsets = {}
@@ -510,8 +1016,8 @@ def event_by_adoption_month(max_off: int = 2) -> dict:
             mon = WINDOW_MONTHS[t0 + e]
             vals = [metrics(acc[login].get(mon) or zero)
                     for login in members]
-            offsets[e] = {"month": mon, "mature": month_w8_mature(mon),
-                          **{k: sum(v[k] for v in vals) / len(vals)
+            offsets[e] = {"month": mon,
+                          **{k: mid([v[k] for v in vals])
                              for k in vals[0]}}
         out[WINDOW_MONTHS[t0]] = {"n": len(members), "offsets": offsets}
     return out
@@ -524,8 +1030,8 @@ def adoption() -> None:
           "bootstrap 95% CI on total)")
     for coh, desc in ADOPTION_COHORTS:
         print(f"  {coh}: {desc}")
-    print("Q2-2026 w8-deflated for May/June PRs; undetected AI counts "
-          "as nonAI (floors)")
+    print(f"{q2_provisionality_note()}undetected AI counts as nonAI "
+          f"(floors)")
     print(f"\n{'period':9}{'cohort':8}{'authors':>8}{'AI kLOC':>9}"
           f"{'nonAI kLOC':>11}{'total kLOC':>11}{'95% CI':>16}"
           f"{'median':>8}")
@@ -556,7 +1062,9 @@ def fleet_logins() -> set[str]:
 
 
 def review_mix(by: str = "role", exclude_fleet: bool = True,
-               fleet_slice: bool = False) -> dict:
+               fleet_slice: bool = False,
+               granularity: str = "quarter",
+               window: list[str] | None = None) -> dict:
     """Figure 6: review mix of MERGED PRs, insider vs external, per
     quarter — the substitution hypothesis (human review declining, AI/bot
     review rising). For each (period, slice in {ins, ext}): share of
@@ -578,11 +1086,16 @@ def review_mix(by: str = "role", exclude_fleet: bool = True,
     exclude_fleet (default): PRs authored by fleet operators are dropped.
     fleet_slice=True: fleet-authored PRs become their OWN slice ("fleet")
     instead of being dropped (Figure 3 companion).
+    granularity="month": rows are keyed by calendar month over the
+    baseline + window months instead of by quarter (the Figure 3
+    companion; display-side callers gate to w8-final months). `window`
+    overrides the frozen WINDOW_MONTHS (month_frame_kw).
 
     Returns {(period, slice): {n, loc, <ch>_pr, <ch>_loc ...}}."""
     fleet = fleet_logins() if (exclude_fleet or fleet_slice) else set()
+    frame_kw = {} if granularity == "quarter" else month_frame_kw(window)
     agg: dict = defaultdict(lambda: defaultdict(float))
-    for f in study_frame("all" if by == "ai" else "author"):
+    for f in study_frame("all" if by == "ai" else "author", **frame_kw):
         if by == "ai" and not ai_contrast_eligible(f):
             continue          # bots/ghosts would swell the nonai arm
         is_fleet = f.author in fleet

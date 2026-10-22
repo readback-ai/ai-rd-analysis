@@ -137,8 +137,12 @@ a bot list, or a review rule.
   (suffix-anchored so "talbot" is human).
 - **`classify_pr()` → `PRClass`** — one frozen dataclass per PR;
   `ai_involved` = A ∪ B ∪ C. `merged` is the **w8 rule** (merged within
-  56 days of creation, ≤ cutoff); `merged_ever` is the secondary; fate
-  fields are None when the PR is not `w8_mature`.
+  56 days of creation — no cutoff or as-of bound on the event itself);
+  `merged_ever` is the secondary. Fate fields are plain booleans on
+  every PR, including immature ones; `w8_mature` (creation + 56 days ≤
+  `AS_OF`) is a separate flag, and it is the DOWNSTREAM metrics that
+  skip immature PRs — an immature PR's `merged=True` is a real observed
+  merge, just not yet reportable.
 
 Review invariant worth checking: an unlisted AI review product falls into
 "other bot", never "human" — the human-attention numerator cannot be
@@ -175,8 +179,10 @@ Studies contain only their accumulation logic; the guards live here once.
   attributable human authors (adds `is_bot_login` hygiene — author-level
   studies, Figure 6 role cut, channels); `all` = no author filter
   (population tables; AND the AI-contrast review-behavior outputs —
-  Figures 6-by-AI/7/8 and fates' AI cohorts, with fleet exclusion —
-  issue #2 resolution: agent-authored PRs count in the AI series).
+  Figures 6-by-AI/7/8 and fates' AI cohorts — issue #2 resolution:
+  agent-authored PRs count in the AI series. Fleet-operator PRs are
+  excluded from the ai/nonai arms; Figures 6-by-AI and 7 plot them as
+  their own third slice, Figure 8 and fates drop them entirely).
 - `ai_contrast_eligible(fact)` — MANDATORY on top of `all` at every
   AI-contrast site (2026-07-25 review): AI-involved PRs bypass author
   hygiene, everything else must clear `author`, so non-AI bots and
@@ -234,9 +240,22 @@ history; the report section title names the module. Highlights:
   runs tag inherently-quarterly sections `[quarterly]`.
 - `monthly_update.py` — incremental month: wipes+re-collects provisional
   month, collectable-population filter, appends to the month registry.
+  `--revise-only` runs the revision window alone, leaving the target month
+  uncollected, unregistered, and holding its own wipe-log cycle. `check_finalizable`
+  is the fail-loud gate: it runs before any wipe and refuses a stamp that
+  does not cover the N-2 month, or that leads the run's clock.
+- `run_monthly_update.sh` — waits for a finalization instant (`--at`), then
+  runs the update with a durable log; correctness lives in the Python gate.
 - `plot_*.py` — one script per figure (`plot_paper_tables.py` renders
   Figures 2 AND 3; `plot_fig6_review.py` renders both fig6 variants —
-  core/external and AI/non-AI, formerly twin files). All house style
+  core/external and AI/non-AI, formerly twin files). Each script splits
+  into `collect()` — the study pass, returning a
+  **`src/pipeline/figdata.py`** Table written to
+  `artifacts/data/<figure>.csv` — and `render(table)`, which builds the
+  figure from that table alone. `--from-table` re-renders (a second image
+  format, a restyled axis) without reading the census store, and
+  `scripts/plot_all.py` collects every table in ONE census pass. All
+  house style
   lives in **`src/pipeline/figstyle.py`** (2026-07-26 architecture
   review, candidate 2): the broken x-axis panel pair (Q1-2024 sits ~7
   quarters before the continuous Q4-2025..Q2-2026 window), the
@@ -250,7 +269,7 @@ history; the report section title names the module. Highlights:
 
 1. All per-PR events — fates AND review submissions — at **8 weeks from
    creation** (w8), bounded by the as-of; mature PRs immutable under
-   as-of advances. Q2-2026 provisional until the Sept 1, 2026 re-pull.
+   as-of advances. Q2-2026 provisional until the 2026-08-26 re-pull.
 2. Fate comparisons only at **matched horizons**.
 3. Primary attention = **human** comments/kLOC (bot comments can never
    share a numerator with human comments).
@@ -327,4 +346,6 @@ module invocation, printed in its section header by `scripts/report.py`.
 To reproduce one number: run that module with `PYTHONPATH=src` (the
 section title contains the exact `--table`/`--cut` argument); to
 reproduce everything: `scripts/regenerate.py`. Figures map 1:1 to
-`scripts/plot_*.py`.
+`scripts/plot_*.py`, and every plotted point is published alongside the
+image in `artifacts/data/<figure>.csv` — the table the figure was
+rendered from.

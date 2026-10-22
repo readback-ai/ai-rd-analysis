@@ -5,8 +5,20 @@ number obeys the frozen rule'."""
 import json
 import re
 
+import pytest
+
 from pipeline import detect
 from pipeline.detect import MARKERS, classify_pr
+
+# The data stamp advances with every re-pull (METHODS §1c), so a fixture's
+# maturity must never ride on the module constant's current value. Pin it
+# for the whole module; tests observing a different stamp re-pin their own.
+PINNED_AS_OF = "2026-08-01T00:00:00Z"
+
+
+@pytest.fixture(autouse=True)
+def pin_as_of(monkeypatch):
+    monkeypatch.setattr(detect, "AS_OF", PINNED_AS_OF)
 
 
 def _pr(created, merged=None, num=1, reviews=(), merged_by="bob"):
@@ -58,8 +70,74 @@ def test_attention_counts_w8_windowed_comments_past_cutoff(monkeypatch):
     assert attention.human_comment_count(pr) == 4
 
 
+def _rev(login, n, at="2026-06-25T00:00:00Z"):
+    return {"author": {"login": login, "__typename": "User"},
+            "state": "COMMENTED", "comments": {"totalCount": n},
+            "submittedAt": at}
+
+
+def test_comments_capped_per_reviewer_per_pr():
+    """One reviewer's exhaustive pass over a single PR is one act of
+    review, not N units of attention: a documentation copy-edit left 355
+    inline comments on one PR (the maximum of 112k reviewer-PR pairs,
+    against a median of 2) and carried a whole month's fleet series.
+    Cap per (reviewer, PR), mirroring the per-PR LOC cap."""
+    from pipeline.studies import attention
+    pr = _pr("2026-06-01T00:00:00Z", merged="2026-06-10T00:00:00Z",
+             reviews=[_rev("writer", 355)])
+    assert attention.human_comment_count(pr) == attention.COMMENT_CAP
+
+
+def test_comment_cap_is_per_reviewer_not_per_pr():
+    """The cap must not punish BROADLY reviewed PRs: several reviewers
+    under the cap each count in full, so genuine multi-reviewer scrutiny
+    survives while one exhaustive annotator does not."""
+    from pipeline.studies import attention
+    pr = _pr("2026-06-01T00:00:00Z", merged="2026-06-10T00:00:00Z",
+             reviews=[_rev("a", 15), _rev("b", 15), _rev("c", 15)])
+    assert attention.human_comment_count(pr) == 45
+
+
+def test_comment_cap_applies_to_a_reviewers_total_across_reviews():
+    """A reviewer who splits the same pass over several review objects
+    must not evade the cap."""
+    from pipeline.studies import attention
+    pr = _pr("2026-06-01T00:00:00Z", merged="2026-06-10T00:00:00Z",
+             reviews=[_rev("writer", 18), _rev("writer", 18),
+                      _rev("other", 3)])
+    assert attention.human_comment_count(pr) == attention.COMMENT_CAP + 3
+
+
+def test_q2_provisionality_note_clears_on_finalization(monkeypatch):
+    """Codex review P1: report captions asserted Q2 was 'w8-deflated for
+    May/June PRs' unconditionally, so a finalized quarter would keep
+    publishing the caveat. Derive it from the data stamp."""
+    from pipeline.studies import productivity
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-25T00:00:00Z")
+    assert "w8-deflated" in productivity.q2_provisionality_note()
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-26T00:00:00Z")
+    assert productivity.q2_provisionality_note() == ""
+
+
+def test_figure3_caption_drops_the_q2_caveat_on_finalization(monkeypatch):
+    """Codex review P2: paper_tables.core() hard-coded '(Q2 provisional)',
+    so both the quarterly and monthly regenerated reports would keep
+    labelling Q2 provisional after the finalization re-pull."""
+    from pipeline.studies import paper_tables
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-25T00:00:00Z")
+    assert "(Q2 provisional)" in paper_tables.core_caption()
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-26T00:00:00Z")
+    caption = paper_tables.core_caption()
+    assert "provisional" not in caption
+    assert "merged = w8 rule" in caption      # the rest of it survives
+
+
 def test_event_study_mature_max_follows_as_of(monkeypatch):
     from pipeline.studies import event_study
+    # Pin BOTH observation points: the contract is that maturity follows
+    # AS_OF, so neither assertion may depend on the module constant's
+    # current value (it advances with every re-pull, METHODS §1c).
+    monkeypatch.setattr(detect, "AS_OF", "2026-06-30T23:59:59Z")
     assert event_study.mature_max() == event_study.WINDOW.index("2026-04")
     monkeypatch.setattr(detect, "AS_OF", "2026-09-05T00:00:00Z")
     assert event_study.mature_max() == event_study.WINDOW.index("2026-06")
@@ -1184,3 +1262,412 @@ def test_fleet_cohort_is_membership_in_fleet_all(monkeypatch):
     assert cohorts["below"] != "fleet"
     assert {a for a, c in cohorts.items() if c == "fleet"} == fleet_all
     assert productivity.fleet_logins() == fleet_all
+
+
+# --- monthly-finalized figures: Figure 2 / Figure 3 companions use only
+# w8-final months (no provisional data on either figure) ---
+
+
+def test_event_cohorts_require_w8_final_window(monkeypatch):
+    """Figure 2 (monthly finalized update): an adoption-month cohort
+    enters only when its full [-2..+2] window has passed w8 finalization
+    at the AS_OF — a cohort whose t+2 month is still open is excluded,
+    so no plotted offset is ever provisional."""
+    from pipeline.studies import productivity
+
+    def row(ai_prs):
+        return [0.0, 0.0, ai_prs, 1, 0, 1.0, 0.0]
+
+    acc = {"a": {"2026-04": row(1)}, "b": {"2026-03": row(1)}}
+    cohorts = {"a": "medium", "b": "medium"}
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: (acc, cohorts, {}, set()))
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-01T00:00:00Z")
+    # require_active=False isolates the WINDOW gate: these fixtures are
+    # active only at t0, which the membership rule would drop
+    out = productivity.event_by_adoption_month(require_active=False)
+    assert "2026-03" in out        # t+2 = 2026-05, w8-final by the AS_OF
+    assert "2026-04" not in out    # t+2 = 2026-06, window still open
+
+
+def test_review_mix_monthly_granularity(monkeypatch):
+    """Figure 3 companion (monthly finalized update): review_mix groups
+    by calendar month when granularity='month', keying rows by month."""
+    from pipeline import frame
+    from pipeline.studies import productivity
+    monkeypatch.setattr(detect, "AS_OF", "2026-09-01T00:00:00Z")
+    apr = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z",
+              num=2, reviews=[dict(_REV)])
+    may = _pr("2026-05-02T00:00:00Z", merged="2026-05-06T00:00:00Z", num=3)
+    cells = {("o/r", "2026-04-01..2026-06-30"): [apr, may]}
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(productivity, "fleet_logins", lambda: set())
+    rows = productivity.review_mix(by="ai", granularity="month")
+    assert rows[("2026-04", "nonai")]["n"] == 1
+    assert rows[("2026-05", "nonai")]["n"] == 1
+    assert ("Q2-2026", "nonai") not in rows
+
+
+def test_attention_by_ai_monthly_granularity(monkeypatch):
+    """Figure 3 companion (monthly finalized update): attention_by_ai
+    keys rows by calendar month when granularity='month'."""
+    from pipeline import frame
+    from pipeline.studies import attention, productivity
+    monkeypatch.setattr(detect, "AS_OF", "2026-09-01T00:00:00Z")
+    apr = _pr("2026-04-01T00:00:00Z", merged="2026-04-05T00:00:00Z",
+              num=2, reviews=[dict(_REV)])
+    cells = {("o/r", "2026-04-01..2026-06-30"): [apr]}
+    monkeypatch.setattr(frame, "load_cells", lambda: cells)
+    monkeypatch.setattr(frame, "population_repos", lambda: {"o/r"})
+    monkeypatch.setattr(productivity, "fleet_logins", lambda: set())
+    rows = attention.attention_by_ai(granularity="month")
+    assert ("2026-04", "nonai") in rows
+    assert ("Q2-2026", "nonai") not in rows
+
+
+def _fake_authors(monkeypatch, rows_by_login):
+    """Pin _author_months_and_cohorts to a hand-built author table:
+    login -> month -> [ai_mrg, nonai_mrg, ai_prs, prs, mrg_prs,
+    submitted, sub_ai]."""
+    from pipeline.studies import productivity
+    acc = {login: {m: list(v) for m, v in months.items()}
+           for login, (months, _c) in rows_by_login.items()}
+    cohorts = {login: c for login, (_m, c) in rows_by_login.items()}
+    monkeypatch.setattr(
+        productivity, "_author_months_and_cohorts",
+        lambda window=None: (acc, cohorts, {"2026-06": "Q2-2026"}, set()))
+    return productivity
+
+
+def test_adoption_monthly_median_is_not_dragged_by_one_operator():
+    """The fleet cohort mean tripled Mar->Jun 2026 while its median stayed
+    flat: one operator supplied 54.7% of June's merged LOC. The median
+    variant must describe the typical member, not the sum."""
+    import pytest
+    from pipeline.studies import productivity
+    mp = pytest.MonkeyPatch()
+    try:
+        _fake_authors(mp, {
+            "big":   ({"2026-06": [0.0, 900.0, 0, 10, 10, 900.0, 0.0]}, "fleet"),
+            "small1": ({"2026-06": [0.0, 10.0, 0, 5, 5, 10.0, 0.0]}, "fleet"),
+            "small2": ({"2026-06": [0.0, 20.0, 0, 5, 5, 20.0, 0.0]}, "fleet"),
+        })
+        mean = productivity.adoption_monthly()[("2026-06", "fleet")]
+        med = productivity.adoption_monthly(stat="median")[("2026-06", "fleet")]
+    finally:
+        mp.undo()
+    assert mean["merged"] == pytest.approx(310.0)   # (900+10+20)/3
+    assert med["merged"] == pytest.approx(20.0)     # the middle operator
+    assert med["n"] == 3                            # n is a count either way
+
+
+def test_adoption_monthly_rejects_an_unknown_stat():
+    from pipeline.studies import productivity
+    import pytest
+    with pytest.raises(ValueError):
+        productivity.adoption_monthly(stat="mode")
+
+
+def test_core_rows_median_is_the_typical_core_author(monkeypatch):
+    """METHODS 1d.4b: per-contributor LEVELS are quoted from the median,
+    so the Figure 3 estimator must offer one. Stage 1 is the statistic
+    over a repo's core authors; the CW stage across repos is unchanged."""
+    from pipeline.studies import paper_tables
+
+    # one repo-period, three core authors: 1, 2 and 97 kLOC merged
+    authors = {"a": [0, 0, 1_000, 0, 1_000],
+               "b": [0, 0, 2_000, 0, 2_000],
+               "c": [0, 0, 97_000, 0, 97_000]}
+    monkeypatch.setattr(paper_tables, "per_author",
+                        lambda *a: {("o/r", "Q1-2024"): authors})
+    monkeypatch.setattr(paper_tables, "weights", lambda: {"o/r": 1.0})
+
+    class F:
+        repo, period, author, insider = "o/r", "Q1-2024", None, True
+    def frames():
+        for login in authors:
+            f = F()
+            f.author = login
+            yield f
+    monkeypatch.setattr(paper_tables, "study_frame",
+                        lambda _p, **_kw: frames())
+    monkeypatch.setattr(paper_tables, "PERIODS", ["Q1-2024"])
+
+    mean = paper_tables.core_rows()[0]["kloc"][0]
+    med = paper_tables.core_rows(stat="median")[0]["kloc"][0]
+    assert mean == pytest.approx((1 + 2 + 97) / 3)     # 33.33, the tail
+    assert med == pytest.approx(2.0)                   # the middle author
+
+
+def test_core_rows_rejects_an_unknown_stat():
+    from pipeline.studies import paper_tables
+    with pytest.raises(ValueError):
+        paper_tables.core_rows(stat="mode")
+
+
+def test_event_by_adoption_month_median_is_the_typical_adopter(monkeypatch):
+    """Figure 2's event panels average per-author kLOC the same way the
+    cohort series do, so they carry the same heavy tail. The median
+    variant must describe the typical adopter."""
+    from pipeline.studies import productivity
+    # first AI evidence at WINDOW_MONTHS[2] so the [-2..+2] window fits
+    t0_mon = productivity.WINDOW_MONTHS[2]
+    # [ai_mrg, nonai_mrg, ai_prs, prs, mrg_prs, submitted, sub_ai]
+    def rows(merged):
+        # active in every offset month so the membership rule keeps them
+        r = {m: [0.0, 0.0, 0, 1, 1, 0.0, 0.0]
+             for m in productivity.WINDOW_MONTHS[0:5]}
+        r[t0_mon] = [0.0, merged, 1, 1, 1, merged, 0.0]
+        return r
+    acc = {"a": rows(1.0), "b": rows(2.0), "c": rows(97.0)}
+    cohorts = {"a": "early", "b": "early", "c": "early"}
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: (acc, cohorts, {}, set()))
+    monkeypatch.setattr(productivity, "month_w8_mature", lambda _m: True)
+
+    mean = productivity.event_by_adoption_month()[t0_mon]
+    med = productivity.event_by_adoption_month(stat="median")[t0_mon]
+    assert mean["n"] == med["n"] == 3
+    assert mean["offsets"][0]["merged"] == pytest.approx((1 + 2 + 97) / 3)
+    assert med["offsets"][0]["merged"] == pytest.approx(2.0)
+    # offsets with no activity stay zero under either statistic
+    assert med["offsets"][-2]["merged"] == pytest.approx(0.0)
+
+
+def test_event_by_adoption_month_rejects_an_unknown_stat():
+    from pipeline.studies import productivity
+    with pytest.raises(ValueError):
+        productivity.event_by_adoption_month(stat="mode")
+
+
+def test_event_panels_require_activity_in_every_offset_month(monkeypatch):
+    """30-48% of each Figure 2 cohort had NO activity at t-2/t-1 while 0%
+    can be inactive at t0 (AI evidence requires a PR), so zero-filled
+    inactive months made the step at adoption partly composition — people
+    appearing in the data, not people producing more. Members must have
+    submitted >=1 PR in EVERY offset month, so each has a real non-AI
+    baseline to move from."""
+    from pipeline.studies import productivity
+    W = productivity.WINDOW_MONTHS
+    t0_mon = W[2]
+
+    def row(prs, ai_prs, merged):
+        return [0.0, merged, ai_prs, prs, prs, merged, 0.0]
+
+    steady = {W[i]: row(1, 0, 4.0) for i in (0, 1, 3, 4)}
+    steady[t0_mon] = row(1, 1, 4.0)
+    newcomer = {t0_mon: row(1, 1, 40.0), W[3]: row(1, 0, 40.0),
+                W[4]: row(1, 0, 40.0)}          # nothing at t-2 / t-1
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({"steady": steady, "newcomer": newcomer},
+                                 {"steady": "early", "newcomer": "early"},
+                                 {}, set()))
+    monkeypatch.setattr(productivity, "month_w8_mature", lambda _m: True)
+
+    kept = productivity.event_by_adoption_month()[t0_mon]
+    assert kept["n"] == 1                        # newcomer dropped
+    assert kept["offsets"][-2]["merged"] == pytest.approx(4.0)
+
+    both = productivity.event_by_adoption_month(require_active=False)[t0_mon]
+    assert both["n"] == 2
+    # the newcomer's zero-filled baseline halves the t-2 mean
+    assert both["offsets"][-2]["merged"] == pytest.approx(2.0)
+
+
+def test_zero_comment_share_does_not_condition_on_being_reviewed():
+    """Issue #34: the write-up's '85-90% of fleet PRs had no commentary'
+    came from an ad-hoc drill-down. The reproducible statistic must count
+    ALL mature merged PRs in the slice — conditioning on human_reviewed
+    (as the attention panels do) would define the answer away."""
+    from pipeline.studies import attention
+    silent = _pr("2026-01-05T00:00:00Z", merged="2026-01-09T00:00:00Z", num=1)
+    talked = _pr("2026-01-06T00:00:00Z", merged="2026-01-10T00:00:00Z", num=2,
+                 reviews=[{"author": {"login": "bob", "__typename": "User"},
+                           "state": "COMMENTED",
+                           "comments": {"totalCount": 3},
+                           "submittedAt": "2026-01-07T00:00:00Z"}])
+    assert attention.human_comment_count(silent) == 0
+    assert attention.human_comment_count(talked) == 3
+    # an unreviewed PR must still land in the denominator
+    assert attention.has_no_human_commentary(silent) is True
+    assert attention.has_no_human_commentary(talked) is False
+
+
+def test_productivity_deciles_quarterly_basis_averages_three_months():
+    """The single-month endpoints are dominated by month-to-month
+    volatility (p10 0.08x to p90 19.9x on the full panel), so the
+    quarterly basis averages Oct-Dec and Apr-Jun per contributor before
+    taking deciles."""
+    from pipeline.studies import productivity
+    W = productivity.WINDOW_MONTHS
+
+    def row(sub):
+        return [0.0, sub, 0, 1, 1, sub, 0.0]
+
+    # one contributor active every month; submitted 3/6/9 in Oct-Dec
+    # (mean 6) and 10/20/30 in Apr-Jun (mean 20)
+    vals = {W[0]: 3.0, W[1]: 6.0, W[2]: 9.0,
+            W[3]: 1.0, W[4]: 1.0, W[5]: 1.0,
+            W[6]: 10.0, W[7]: 20.0, W[8]: 30.0}
+    acc = {"solo": {m: row(v) for m, v in vals.items()}}
+    mp = pytest.MonkeyPatch()
+    try:
+        mp.setattr(productivity, "_author_months_and_cohorts",
+                   lambda: (acc, {"solo": "early"}, {}, set()))
+        q = productivity.productivity_deciles(basis="quarter")
+        m = productivity.productivity_deciles(basis="month")
+    finally:
+        mp.undo()
+    # quarterly: means of the two 3-month windows
+    assert q[("all", "submitted", "pre")][4] == pytest.approx(6.0)
+    assert q[("all", "submitted", "post")][4] == pytest.approx(20.0)
+    assert q[("all", "submitted", "ratio")][4] == pytest.approx(20.0 / 6.0)
+    # monthly: the single endpoint months, which are noisier by design
+    assert m[("all", "submitted", "pre")][4] == pytest.approx(3.0)
+    assert m[("all", "submitted", "post")][4] == pytest.approx(30.0)
+
+
+def test_activity_deciles_split_by_population_and_group():
+    """The detection-based split is confounded by volume: detection needs
+    a marker in a PR, so contributors submitting ~1 PR/quarter can barely
+    be detected at all. The activity deciles expose that — in the loose
+    population never-AI sits at 0.33 PRs/month, in the balanced panel at
+    ~7 — so the two populations must be reported side by side."""
+    from pipeline.studies import productivity
+
+    W, B = productivity.WINDOW_MONTHS, productivity.BASELINE_MONTHS
+
+    def row(prs, ai, kloc):
+        return [0.0, 0.0, ai, prs, prs, kloc, 0.0]
+
+    # "heavy" trips detection; "light" never does and is absent one month
+    heavy = {m: row(9, 1 if m == W[3] else 0, 5.0) for m in W + B}
+    light = {m: row(1, 0, 0.5) for m in W + B}
+    light[W[4]] = row(0, 0, 0.0)                 # gap -> out of the panel
+    mp = pytest.MonkeyPatch()
+    try:
+        mp.setattr(productivity, "_author_months_and_cohorts",
+                   lambda: ({"heavy": heavy, "light": light},
+                            {"heavy": "early", "light": "never"}, {}, set()))
+        loose = productivity.activity_deciles(balanced=False)
+        panel = productivity.activity_deciles(balanced=True)
+    finally:
+        mp.undo()
+    assert loose[("Q4-2025", "never_ai", "prs", "n")][0] == 1.0
+    assert panel.get(("Q4-2025", "never_ai", "prs", "n"), [0])[0] == 0.0
+    assert panel[("Q4-2025", "ever_ai", "prs", "n")][0] == 1.0
+
+
+def test_decile_studies_are_insider_only(monkeypatch):
+    """Figure 3's "core author" population is INSIDERS
+    (authorAssociation MEMBER/OWNER/COLLABORATOR). Outsiders are
+    drive-by by nature, and _author_months_and_cohorts already keys its
+    cohort map on insiders only — the decile studies must use the same
+    population or they describe a different set of people."""
+    from pipeline.studies import productivity
+    W = productivity.WINDOW_MONTHS
+
+    def row(prs):
+        return [0.0, 0.0, 0, prs, prs, float(prs), 0.0]
+
+    inside = {m: row(9) for m in W + productivity.BASELINE_MONTHS}
+    outside = {m: row(1) for m in W + productivity.BASELINE_MONTHS}
+    # cohort map carries INSIDERS ONLY, exactly as the shared builder does
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({"ins": inside, "out": outside},
+                                 {"ins": "never"}, {}, set()))
+    act = productivity.activity_deciles(balanced=False)
+    dec = productivity.productivity_deciles(basis="quarter")
+    assert act[("Q4-2025", "never_ai", "prs", "n")][0] == 1.0   # not 2
+    assert dec[("all", "submitted", "n")][0] == 1.0             # not 2
+
+
+def test_active_insider_deciles_require_the_floor_in_both_quarters():
+    """The active-insiders panel (>=10 PRs in BOTH endpoint quarters)
+    is what makes "never used AI" a behavioural claim: dozens of chances
+    to trip a marker, none did. A contributor under the floor in either
+    quarter must be excluded, and fleet operators always are."""
+    import pytest as _pt
+    from pipeline.studies import productivity
+    W, B = productivity.WINDOW_MONTHS, productivity.BASELINE_MONTHS
+
+    def row(prs, ai=0, kloc=0.0):
+        return [0.0, kloc, ai, prs, prs, kloc, 0.0]
+
+    active = {m: row(4, 0, 2.0) for m in W + B}      # 12/quarter, never AI
+    active[W[3]] = row(4, 1, 2.0)                    # ...actually ever-AI
+    quiet = {m: row(2, 0, 1.0) for m in W + B}       # 6/quarter: under floor
+    fleeter = {m: row(200, 0, 50.0) for m in W + B}
+    mp = _pt.MonkeyPatch()
+    try:
+        mp.setattr(productivity, "_author_months_and_cohorts",
+                   lambda: ({"a": active, "q": quiet, "f": fleeter},
+                            {"a": "early", "q": "never", "f": "fleet"},
+                            {}, {"f"}))
+        out = productivity.active_insider_deciles(pre="Q4-2025")
+    finally:
+        mp.undo()
+    assert out[("ever_ai", "submitted", "n")][0] == 1.0   # only "a"
+    assert ("never_ai", "submitted", "n") not in out or \
+        out[("never_ai", "submitted", "n")][0] == 0.0
+    # per-quarter ratio: 6 kLOC both quarters -> 1.0x at every decile
+    assert out[("ever_ai", "submitted", "ratio")][4] == _pt.approx(1.0)
+    assert out[("ever_ai", "prs", "ratio")][4] == _pt.approx(1.0)
+
+
+def test_change_deciles_report_the_ratio_sample_size(monkeypatch):
+    """Codex review P1: members with pre == 0 cannot have a change ratio
+    and are dropped from the ratio deciles, while the figures quoted the
+    FULL membership n — 453/475 on one A3 curve. Both decile studies must
+    expose the metric-specific ratio sample so plots can label what they
+    actually draw."""
+    from pipeline.studies import productivity
+    W = productivity.WINDOW_MONTHS
+
+    def row(prs, merged):
+        return [0.0, merged, 0, prs, prs, merged, 0.0]
+
+    grew = {m: row(4, 2.0) for m in W + productivity.BASELINE_MONTHS}
+    fresh = {m: row(4, 0.0) for m in W + productivity.BASELINE_MONTHS}
+    for m in W[-3:]:
+        fresh[m] = row(4, 3.0)         # active always, merges only at the end
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({"g": grew, "z": fresh},
+                                 {"g": "never", "z": "never"}, {}, set()))
+    dec = productivity.productivity_deciles(basis="quarter")
+    act = productivity.active_insider_deciles(pre="Q4-2025")
+    for out in (dec[("never_ai", "merged", "n_ratio")],
+                act[("never_ai", "merged", "n_ratio")]):
+        assert out[0] == 1.0           # only "g" has a pre > 0
+    assert dec[("never_ai", "merged", "n")][0] == 2.0
+    assert act[("never_ai", "prs", "n_ratio")][0] == 2.0   # prs pre > 0 both
+
+
+def test_adoption_quarterly_pools_a_members_quarter(monkeypatch):
+    """fleet_vs_nonadopters moves from months to quarters (monthly points
+    are noisy). A member's quarter value is their TOTAL over its months,
+    and membership is quarter-active (>=1 PR in the quarter), so one
+    active month is enough to enter with their full quarter output."""
+    from pipeline.studies import productivity
+    W = productivity.WINDOW_MONTHS
+
+    def row(prs, merged):
+        return [0.0, merged, 0, prs, prs, merged, 0.0]
+
+    steady = {m: row(1, 2.0) for m in W}          # 6 kLOC every quarter
+    spiky = {W[0]: row(1, 9.0)}                   # Q4-2025 only, one month
+    monkeypatch.setattr(productivity, "_author_months_and_cohorts",
+                        lambda: ({"s": steady, "k": spiky},
+                                 {"s": "never", "k": "never"},
+                                 {}, set()))
+    mean = productivity.adoption_quarterly()
+    med = productivity.adoption_quarterly(stat="median")
+    assert mean[("Q4-2025", "never")]["n"] == 2
+    assert mean[("Q4-2025", "never")]["merged"] == pytest.approx((6 + 9) / 2)
+    assert med[("Q4-2025", "never")]["merged"] == pytest.approx(7.5)
+    # spiky is NOT quarter-active in Q1-2026: only steady remains
+    assert mean[("Q1-2026", "never")]["n"] == 1
+    assert mean[("Q1-2026", "never")]["merged"] == pytest.approx(6.0)
+    with pytest.raises(ValueError):
+        productivity.adoption_quarterly(stat="mode")

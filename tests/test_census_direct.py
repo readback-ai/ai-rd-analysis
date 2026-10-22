@@ -238,6 +238,39 @@ def test_direct_history_leaves_an_agreeing_cell_untouched(monkeypatch):
     assert cell.stat().st_mtime_ns == before
 
 
+def test_census_repo_direct_buckets_month_periods_too(monkeypatch):
+    """Monthly updates collect month tokens (METHODS §1c), and the direct
+    route holds the repo's FULL history — so it must bucket into any
+    requested period, not only the study quarters, or the Aug-1 update
+    fails every unsearchable repo's month cells."""
+    hist = [_pr(1, "2026-05-10T00:00:00Z"),
+            _pr(2, "2026-06-20T00:00:00Z")]
+    monkeypatch.setattr(census_direct, "pull_repo_prs",
+                        lambda repo: hist)
+    written = census_direct.census_repo_direct(
+        "o/r", extra_periods=["2026-05", "2026-06"])
+    assert written["2026-05"] == 1
+    assert written["2026-06"] == 1
+    assert written["Q2-2026"] == 2          # quarters still written
+    cell = ghx.cell_path("census-v2", "o/r", "2026-05-01..2026-05-31")
+    assert [p["number"] for p in json.loads(cell.read_text())] == [1]
+
+
+def test_direct_collect_passes_the_requested_month(monkeypatch, tmp_path):
+    """Integration: census_repo_period('o/r', '2026-05') on an
+    unsearchable repo must return the month's count, not None."""
+    import os
+    os.environ["AIRD_DATA_DIR"] = str(tmp_path)
+    from pipeline import census, precount
+    monkeypatch.setattr(precount.time, "sleep", lambda s: None)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: None)
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "unsearchable")
+    monkeypatch.setattr(census_direct, "pull_repo_prs",
+                        lambda repo: [_pr(1, "2026-05-10T00:00:00Z")])
+    assert census.census_repo_period("o/r", "2026-05", k=10) == 1
+
+
 def test_census_repo_direct_writes_nothing_on_failure(monkeypatch):
     monkeypatch.setattr(census_direct, "pull_repo_prs", lambda repo: None)
     assert census_direct.census_repo_direct("o/r") is None

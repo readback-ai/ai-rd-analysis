@@ -37,12 +37,13 @@ from dataclasses import dataclass
 CUTOFF = "2026-06-30T23:59:59Z"
 # AS_OF: the data-collection stamp — when the census cells were last
 # (re-)pulled. Governs w8 MATURITY only (a PR's fate is reportable once
-# its 56-day window closed before we last looked). Kept conservatively at
-# the frame end while the initial 2026-07-01..09 collection stands; BUMP
-# at each re-pull (monthly updates, the 2026-09-01 Q2 finalization) to
-# the run's start date — mature PRs are immutable, so bumping only ever
-# ADDS newly-mature PRs (METHODS §1c).
-AS_OF = CUTOFF
+# its 56-day window closed before we last looked). BUMP at each re-pull
+# (monthly updates, the Q2 finalization) to the run's start date — mature
+# PRs are immutable, so bumping only ever ADDS newly-mature PRs. The stamp
+# must clear the last creation date of the month being finalized, and it
+# records a collection that HAPPENED: never set it ahead of the re-pull it
+# stands for, or every reader treats stale cells as final (METHODS §1c).
+AS_OF = "2026-09-01T21:03:34Z"
 
 # FROZEN CENSORING RULE (METHODS conventions): all per-PR outcomes are
 # measured at 8 WEEKS after PR creation. The maturity curves show merges
@@ -59,13 +60,25 @@ def _iso(ts: str):
     return datetime.fromisoformat(ts.replace("Z", "+00:00"))
 
 
+def w8_closed(last_created: str) -> bool:
+    """Has every PR created at or before `last_created` reached the w8
+    horizon under the data stamp — i.e. does that span carry final fates?
+
+    The single home of the question. Periods answer it with their last
+    creation instant: a calendar month's month-end 23:59:59, and Q2-2026's
+    is CUTOFF. Reported state must be DERIVED from this rather than
+    hard-coded, so a finalized period stops being labelled provisional the
+    moment the stamp advances."""
+    return (_iso(AS_OF) - _iso(last_created)).days >= W8_DAYS
+
+
 def _within_w8(created: str, event: str | None) -> bool:
     """Event inside the PR's 56-day window. CUTOFF bounds PR CREATION
     (the frame), not events: an event within the window counts even when
     it lands after CUTOFF — implicitly capped at CUTOFF + 56d since every
-    in-frame PR has created <= CUTOFF. This is what lets the Sept 2026
-    re-pull finalize Q2 — only the AS_OF data stamp advances; the frame
-    and every rule stay fixed."""
+    in-frame PR has created <= CUTOFF. This is what lets the Q2
+    finalization re-pull work — only the AS_OF data stamp advances; the
+    frame and every rule stay fixed."""
     if not event:
         return False
     return (_iso(event) - _iso(created)).days < W8_DAYS

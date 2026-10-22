@@ -132,16 +132,23 @@ def pull_repo_prs(repo: str) -> list[dict] | None:
     return nodes
 
 
-def census_repo_direct(repo: str) -> dict[str, int] | None:
-    """Collect the repo and write one cell per study quarter (keyed by the
-    full quarter range, so coverage sees gap-free coverage). Returns
-    {period: pr_count} written, or None when the history was incomplete.
+def census_repo_direct(repo: str,
+                       extra_periods: list[str] | None = None) \
+        -> dict[str, int] | None:
+    """Collect the repo and write one cell per study quarter — plus any
+    extra_periods (month tokens from the incremental updates, METHODS
+    §1c) — each keyed by its full resolved range, so coverage sees
+    gap-free coverage. Returns {period: pr_count} written, or None when
+    the history was incomplete.
 
     The verified history is AUTHORITATIVE: a cell that disagrees with it
     is replaced (a failed search run can leave an empty cell behind, and
     preserving it would silently drop recovered PRs). A cell that already
     agrees is left untouched."""
     periods = [p for p in QUARTER_RANGES if p != "Q3-2025"]
+    for p in extra_periods or []:
+        if p not in periods:
+            periods.append(p)
     prs = pull_repo_prs(repo)
     if prs is None:
         return None
@@ -152,7 +159,9 @@ def census_repo_direct(repo: str) -> dict[str, int] | None:
             a, b = resolve_period(per).split("..")
             if a <= created <= b:
                 buckets[per].append(pr)
-                break
+                # NO break: month tokens overlap their quarter, and a PR
+                # belongs in both cells (load-order dedup handles the
+                # overlap at read time, as with search-collected cells)
     out: dict[str, int] = {}
     for per, cell_prs in buckets.items():
         p = cell_path(STAGE, repo, resolve_period(per))

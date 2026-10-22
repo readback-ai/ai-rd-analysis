@@ -1,5 +1,6 @@
 agentscope-ai/agentscope-bricks
 agentscope-ai/agentscope-java
+agno-agi/agent-platform-railway
 agno-agi/pal
 alibaba/sec-code-bench
 anysphere/relay
@@ -19,6 +20,8 @@ apache/dolphinscheduler-mlflow
 apache/doris-mcp-server
 apache/flink-agents
 apache/flink-agents-demos
+dataelement/shougang-group-knowledge-portal
+huggingface/transformers-test-ci
 langchain-ai/langchain-google
 langchain-ai/langchain-ibm
 langchain-ai/langchain-litellm
@@ -48,6 +51,7 @@ onyx-dot-app/agent-wiki
 onyx-dot-app/documentation
 OpenBMB/VoxCPM
 plastic-labs/honcho
+RunanywhereAI/RunAnywhereAgent
 stanfordnlp/pyvene
 stepfun-ai/Step-3.5-Flash
 stepfun-ai/Step-Realtime-CLI

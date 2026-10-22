@@ -1,11 +1,13 @@
 # AI-Assisted Development Practices at Leading AI Organizations
 
 An empirical study of how the organizations building AI use AI to build
-software — measured from public GitHub metadata over 228 leading AI
-organizations (182 full-org + 46 repo-scoped; 2,136 repositories) across
-four quarters: Q1-2024 baseline, Q4-2025, Q1-2026, Q2-2026. **Study cutoff: 2026-06-30** — all activity data is windowed to the
-cutoff; classification metadata is pinned as close to it as the API allows
-(see METHODS §0).
+software — measured from public GitHub metadata over 224 leading AI
+organizations (179 full-org + 45 repo-scoped; 2,135 repositories) across
+four quarters: Q1-2024 baseline, Q4-2025, Q1-2026, Q2-2026. **Study cutoff: 2026-06-30** — the frozen quarterly frame's last
+PR-creation date. Outcome events inside a PR's 8-week window count even
+when they fall after the cutoff, and the monthly extensions (METHODS
+§1c) collect PRs created in later months; classification metadata is
+pinned as close to the cutoff as the API allows (see METHODS §0).
 
 ## Abstract
 
@@ -34,12 +36,13 @@ authors — non-adopters stayed flat — with event-time analysis showing a
 discontinuity at each author's first AI evidence on a flat pre-trend,
 in both their AI-marked AND unmarked output (the undetected-usage
 signature). A new production mode emerged: ~43 "fleet operator" accounts
-merging 300–4,400 PRs/quarter (~531 kLOC/author-month cohort mean by
+merging 300–4,400 PRs/quarter (~531 kLOC/author-quarter cohort mean by
 Q2-2026), roughly half unmarked, isolated as their own cohort. Review:
 human attention per merged line fell ~53% (insiders −61%) while
 human-review coverage of merged PRs held (~69–75%) and responsiveness to
-explicit human review asks stayed roughly stable (81.5% → 74.5%
-provisional, HT-weighted) with post-ask LOC share rising 46% → 63%.
+explicit human review asks stayed flat (79.7% → 80.9%; the unweighted
+share of an equal-probability sample, fleet-excluded, clean lane) with
+post-ask LOC share rising 44% → 51% (HT-weighted, PPS-by-LOC sample).
 All rates are floors: squash-merge strips markers, and default local CLI
 usage is structurally undetectable.
 
@@ -47,10 +50,15 @@ usage is structurally undetectable.
 Methodology: [`docs/METHODS.md`](docs/METHODS.md) · functional spec: [`docs/functional-specification.md`](docs/functional-specification.md) · **code review guide: [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md)****
 
 Generated report: [`artifacts/report_generated.md`](artifacts/report_generated.md)
-(21 sections, quarterly; monthly twin `report_monthly.md`). Figures:
-`artifacts/fig2_ai_usage.png` (traceable AI usage), `fig3_core_loc.png`
-(merged LOC per core contributor), `fig_a1_adoption_cohorts.png` (adoption
-cohorts incl. fleet).
+(22 sections, quarterly; monthly twin `report_monthly.md`). Figures:
+`artifacts/ai_usage.png` (traceable AI usage), `artifacts/core_loc.png`
+(merged LOC per insider contributor),
+`artifacts/insider_medians_productive.png` (the median insider's kLOC per
+quarter, person-level, over the productive panel; `_active` and `_panel`
+siblings for the period-active and balanced-panel populations, and
+`insider_medians_growth_*` twins normalizing each series to its own
+Q1-2024 median), `artifacts/adoption_cohorts.png` (adoption cohorts incl.
+fleet).
 
 ## How to verify the three claims that matter
 
@@ -75,9 +83,10 @@ cohorts incl. fleet).
 | — | `pipeline.pull_prs` | targeted hydration (mergedBy, comment authors, commit dates) + branch-PR sampling |
 | 4 | `pipeline.analyze` | per-repo rates → contributor-weighted means + bootstrap CIs |
 | 5 | `pipeline.studies.layers` | exact per-PR layered decomposition (B > A > C disjoint; union = ai_involved) |
-| studies | `pipeline.studies.*` | one analysis = one module: paper figures, productivity/adoption cohorts, attention, fates, event study, responsiveness (HT-weighted), slices, layer-C precision |
-| figures | `scripts/plot_paper_tables.py`, `scripts/plot_adoption_cohorts.py` | Figures 2–4 (broken x-axis) |
-| monthly | `scripts/monthly_update.py` | incremental month ingestion (provisional-month revision + persistent month registry) |
+| studies | `pipeline.studies.*` | one analysis = one module: paper figures, productivity/adoption cohorts, attention, fates, event study, responsiveness (equal-probability sample for rates, HT-weighted PPS sample for LOC share), slices, layer-C precision |
+| figures | `scripts/plot_all.py` (all), `scripts/plot_*.py` (one each) | each figure's plotted points -> `artifacts/data/<figure>.csv`, then the image is rendered from that table |
+| monthly | `scripts/monthly_update.py` | incremental month ingestion (provisional-month revision + persistent month registry; `--revise-only` finalizes the revision window without collecting a partial target month) |
+| monthly (scheduled) | `scripts/run_monthly_update.sh` | waits for a w8 finalization instant (`--at`), runs the update, logs to `data/derived/` |
 
 ## Reproduction
 
@@ -90,8 +99,10 @@ uv run python -m pipeline.org_set --verify   # population reconciliation
 # without it rather than printing empty reports. With the store present:
 uv run python scripts/regenerate.py          # full pipeline -> artifacts/report_generated.md
 PYTHONPATH=src uv run python scripts/report.py --granularity month   # monthly twin
-PYTHONPATH=src uv run python scripts/plot_paper_tables.py            # figs 2-3
-PYTHONPATH=src uv run python scripts/plot_adoption_cohorts.py        # fig A1
+PYTHONPATH=src uv run python scripts/plot_all.py                     # every figure
+                                                                     # + artifacts/data/*.csv
+# re-render from the committed tables (no census store needed):
+PYTHONPATH=src uv run python scripts/plot_all.py --from-tables --format png,svg
 ```
 
 To review the code, start with [`docs/CODE_GUIDE.md`](docs/CODE_GUIDE.md) —

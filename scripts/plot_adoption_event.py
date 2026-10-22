@@ -12,48 +12,68 @@ line IS the non-adopter counterfactual). Same encoding as Figure 4:
 blue = submitted, green = merged (w8), solid/dashed/dotted =
 total/non-AI/AI-involved.
 
-Output: artifacts/fig_a2_adoption_event.png
+Data:   artifacts/data/adoption_event.csv
+Output: artifacts/adoption_event.png
 Usage:  PYTHONPATH=src python scripts/plot_adoption_event.py
 """
 import sys
 
 sys.path.insert(0, "src")
-from pipeline.figstyle import LOC_SERIES, plt, save, shade_span
+from pipeline.figdata import Table, figure_main
+from pipeline.figstyle import LOC_SERIES, plt, shade_span
 from pipeline.studies.productivity import adoption_event
 
 PANELS = [("early", "early adopters"), ("medium", "middle adopters")]
+OFFSETS = list(range(-2, 3))
+# offsets whose observations partly land in w8-open calendar months:
+# merged is deflated there, so the renderer shades them and prints the
+# affected share
+IMMATURE = "immature_share"
 
 
-def main() -> None:
+def collect() -> Table:
     rows = adoption_event()
-    offs = list(range(-2, 3))
-    fig, axes = plt.subplots(1, 3, figsize=(12, 4.2))
-    fig.suptitle("Figure A2: LOC per contributor around first AI adoption "
-                 "(balanced panel, event time), net of the non-adopter "
-                 "mean", fontsize=12, y=-0.05)
-    for ax, (coh, title) in zip(axes.flat, PANELS):
-        for key, color, ls, label in LOC_SERIES:
-            y = [rows.get((coh, e), {}).get(key) for e in offs]
-            ax.plot(offs, y, marker="o", ms=3, ls=ls, color=color,
-                    label=label)
+    t = Table("adoption_event")
+    for coh, title in PANELS:
         n = rows.get((coh, 0), {}).get("n", 0)   # constant (balanced)
-        # offsets whose observations partly land in w8-open calendar
-        # months: merged deflated there — shade, with the affected share
+        label = f"{title} (n={n})"
+        for key, _color, _ls, series_label in LOC_SERIES:
+            for e in OFFSETS:
+                t.add(coh, key, e, rows.get((coh, e), {}).get(key),
+                      panel_label=label, series_label=series_label,
+                      x_label=f"t{e:+d}" if e else "t0")
+        for e in OFFSETS:
+            t.add(coh, IMMATURE, e,
+                  rows.get((coh, e), {}).get(IMMATURE, 0),
+                  panel_label=label,
+                  series_label="share of offset in w8-open months",
+                  x_label=f"t{e:+d}" if e else "t0")
+    return t
+
+
+def render(t: Table):
+    fig, axes = plt.subplots(1, 3, figsize=(12, 4.2))
+    for ax, coh in zip(axes.flat, t.panels()):
+        for key, color, ls, label in LOC_SERIES:
+            pts = t.points(coh, key)
+            ax.plot([p["x"] for p in pts], [p["value"] for p in pts],
+                    marker="o", ms=3, ls=ls, color=color, label=label)
         shaded = False
-        for e in offs:
-            sh = rows.get((coh, e), {}).get("immature_share", 0)
-            if sh > 0:
-                shade_span(ax, e - 0.5, e + 0.5, label=None if shaded else
+        for p in t.points(coh, IMMATURE):
+            if p["value"]:
+                shade_span(ax, p["x"] - 0.5, p["x"] + 0.5,
+                           label=None if shaded else
                            "offset contains w8-open months\n"
                            "(merged provisional)")
-                ax.annotate(f"{sh:.0%}", (e, 0), xycoords=("data",
-                            "axes fraction"), xytext=(0, 2),
-                            textcoords="offset points", ha="center",
-                            fontsize=7, color="0.4")
+                ax.annotate(f"{p['value']:.0%}", (p["x"], 0),
+                            xycoords=("data", "axes fraction"),
+                            xytext=(0, 2), textcoords="offset points",
+                            ha="center", fontsize=7, color="0.4")
                 shaded = True
         ax.axhline(0, color="k", lw=0.8)
-        ax.set_title(f"{title} (n={n})", fontsize=10, loc="left")
-        ax.set_xticks(offs, [f"t{e:+d}" if e else "t0" for e in offs])
+        ax.set_title(t.label_of(coh), fontsize=10, loc="left")
+        pts = t.points(coh, LOC_SERIES[0][0])
+        ax.set_xticks([p["x"] for p in pts], [p["x_label"] for p in pts])
         ax.set_xlabel("months from first observed AI use")
         ax.set_ylabel("kLOC/month, net of non-adopters")
     handles, labels = axes.flat[1].get_legend_handles_labels()
@@ -61,8 +81,8 @@ def main() -> None:
     ax3.axis("off")
     ax3.legend(handles, labels, loc="center", fontsize=9, frameon=False)
     fig.tight_layout()
-    save(fig, "artifacts/fig_a2_adoption_event.png")
+    return fig
 
 
 if __name__ == "__main__":
-    main()
+    figure_main(collect, render, "artifacts/adoption_event.png")
