@@ -324,10 +324,12 @@ prefixes of the population files, repo count, and cell-coverage numbers
   repo-quarter (bug-report PROXY pilot, label:bug only, windows
   truncated at the maturity frontier). Both files always hold exactly
   the current seeded selection (atomic rewrite; stale draws dropped).
-- `data/derived/churn_bug_dates_v2.jsonl` — the same pilot's bug-labeled
-  issues with their numbers and creation days (windows extended 28d past
-  each quarter; overlapping cells dedupe by issue number), so any bug
-  window is a local computation rather than a re-pull. Feeds
+- `data/derived/churn_bug_dates_v2.jsonl` — bug-labeled issues with
+  their numbers and creation days for EVERY repo with an eligible merged
+  PR (a survey of the population, not the pilot — the PR side is a
+  census, so the bug side is too; windows extended 28d past each
+  quarter; overlapping cells dedupe by issue number), so any bug window
+  is a local computation rather than a re-pull. Feeds
   `churn --table exposure`: every merged PR opens a 28-day risk window at
   its merge day, and a quarter's rate is the issues filed on its days over
   the PR-risk-windows and kLOC-risk-windows carried on those days (two

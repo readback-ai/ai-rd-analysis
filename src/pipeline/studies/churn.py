@@ -122,7 +122,13 @@ SEARCH_CAP = 1000            # GitHub search cannot page past this
 # issues are fetched (completeness, ordering, retries) must reach every
 # frozen cell, and reuse by key alone would keep the old payloads
 # forever. Bump when the fetch changes in a way that can alter a cell.
+# Following a rename does not: a cell that froze under its census name
+# would issue the identical query today, so only failed cells can change.
 COLLECTOR = 2
+# Which repos the dated pull selects. Part of the artifact's fingerprint:
+# the frame alone cannot tell a pilot-scoped freeze from a population one
+# built on the same pools, and the drift line must say MOVED between them.
+DATED_SELECTION = "population-v1"   # every repo with an eligible merged PR
 
 # Generated-content path patterns (the METHODS 5b hygiene classes:
 # lockfiles, vendored trees, minified/compiled outputs, protobuf,
@@ -733,10 +739,24 @@ def search_issue_days(repo: str, rng: str, pace: float = 2.0,
     in `rng`. Search cannot page past SEARCH_CAP results, so an
     over-full range is bisected until each part fits. None = a query gave
     up; the caller must not record that as an empty cell."""
-    q = f"repo:{repo} is:issue label:{BUG_LABEL} created:{rng}"
+    def query(name: str) -> str:
+        return f"repo:{name} is:issue label:{BUG_LABEL} created:{rng}"
+
+    q = query(repo)
     total = _search_count(q)
-    if total is None:          # no count, or a count search that timed out
-        return None
+    if total is None:
+        # search refuses a repo's former name while the census still
+        # uses it; the API redirects the old name, and a renamed repo
+        # keeps its issues, so retry once under the canonical name (the
+        # cell stays keyed by the census name). A deleted repo resolves
+        # to nothing and the cell stays missing.
+        resolved = _resolve_repo(repo)
+        if not resolved or resolved == repo:
+            return None
+        q = query(resolved)
+        total = _search_count(q)
+        if total is None:
+            return None
     if total > SEARCH_CAP:
         parts = _split_range(rng)
         if len(parts) == 1:                  # single day over the cap
@@ -764,6 +784,18 @@ def search_issue_days(repo: str, rng: str, pace: float = 2.0,
     # moved) would freeze an understated cell that reconcile then reuses
     # forever — refuse it, so the cell stays missing and is re-pulled
     return rows if len(rows) == total else None
+
+
+_RESOLVED: dict[str, str | None] = {}
+
+
+def _resolve_repo(repo: str) -> str | None:
+    """The repo's current full name (the API follows renames), or None
+    when it no longer resolves. Memoized per process."""
+    if repo not in _RESOLVED:
+        out = _gh(["api", f"repos/{repo}", "--jq", ".full_name"])
+        _RESOLVED[repo] = out.strip() if out and out.strip() else None
+    return _RESOLVED[repo]
 
 
 def _search_json(args: list[str], retries: int, backoff: float):
@@ -840,12 +872,24 @@ def bug_cells(pool: dict[str, list], periods: list[str] | None = None,
             if bug_window(per) is not None]
 
 
+def dated_fingerprint(trimmed: dict[str, list], created: dict[str, list],
+                      ) -> str:
+    """The dated artifact's frame stamp: the pools plus the selection
+    policy that chose the repos, so a change of policy on an unchanged
+    frame reads as a moved selection."""
+    return frame_fingerprint(trimmed, created,
+                             extra=f"selection={DATED_SELECTION}")
+
+
 def bug_date_cells(pool: dict[str, list], periods: list[str] | None = None,
-                   repos: list[str] | None = None) -> list[dict]:
-    """The dated pull's (repo, per, rng) selection — same repo universe as
-    the counted cells, over the risk-extended windows."""
-    if repos is None:
-        repos = sorted({d["repo"] for d in draw(pool)})
+                   ) -> list[dict]:
+    """The dated pull's (repo, per, rng) selection: EVERY repo with an
+    eligible merged PR in any period, over the risk-extended windows. The
+    PR side of the rate is a census, so the bug side surveys the
+    population too — the counted pilot's PR-level draw would enter repos
+    probability-proportional-to-size and describe the largest ones.
+    (Quarterly: ~1.5k repos x 4 periods; monthly is ~11x that.)"""
+    repos = sorted({item[0] for items in pool.values() for item in items})
     return [{"repo": r, "per": per, "rng": bug_date_window(per)}
             for r in repos for per in (periods or PERIODS)
             if bug_date_window(per) is not None]
@@ -859,16 +903,9 @@ def pull_bug_dates(trimmed: dict[str, list], created: dict[str, list],
     failures stay missing rather than being recorded as empty."""
     monthly = periods is not None and bool(periods) \
         and not periods[0].startswith("Q")
-    sample_digest = None
-    if monthly:
-        data, mani = BUG_DATES_MONTHLY, BUG_DATES_MONTHLY_MANIFEST
-        sample_rows, sm = _verify(SAMPLE, SAMPLE_MANIFEST)
-        sample_digest = sm["digest"]
-        repos = sorted({d["repo"] for d in sample_rows})
-        cells = bug_date_cells(trimmed, periods, repos)
-    else:
-        data, mani = BUG_DATES, BUG_DATES_MANIFEST
-        cells = bug_date_cells(trimmed, periods)
+    data, mani = ((BUG_DATES_MONTHLY, BUG_DATES_MONTHLY_MANIFEST) if monthly
+                  else (BUG_DATES, BUG_DATES_MANIFEST))
+    cells = bug_date_cells(trimmed, periods)
     existing = _load_jsonl(data)
     current = [d for d in existing if d.get("collector") == COLLECTOR]
     kept, todo, stale = reconcile(cells, current,
@@ -878,7 +915,7 @@ def pull_bug_dates(trimmed: dict[str, list], created: dict[str, list],
           f"{len(existing) - len(current)} from an older collector "
           "re-pulled)", flush=True)
     gp = tuple(group_periods(periods or list(PERIODS)))
-    fp = bugs_fingerprint(trimmed, created, sample_digest)
+    fp = dated_fingerprint(trimmed, created)
 
     def flush() -> None:
         # grouping inputs travel with the dated cells, so the low/high-AI
@@ -1108,11 +1145,13 @@ def print_exposure(granularity: str = "quarter",
                   f"{median([r['per_pr'] for r in rs]):>9.3f}"
                   + (f"{b / kw:>13.3f}{median(per_kloc):>10.3f}" if kw > 0
                      else f"{'n/a':>13}{'n/a':>10}"))
-    print(f"balanced = rated in every {unit}; low/high-AI = halves of the "
-          "label-using repos by the counted table's grouping-window "
-          "AI-involvement share; pooled rates can be dominated by single "
-          "large repos — the pilot is a PR-level draw, so repos enter "
-          "probability-proportional-to-size")
+    print(f"selection {DATED_SELECTION}: every repo with an eligible merged "
+          f"PR in any {unit} (a census on both sides of the rate, no "
+          f"design weights). balanced = rated in every {unit}; low/high-AI "
+          "= halves of the label-using repos by the grouping-window "
+          "AI-involvement share stamped in the freeze; pooled rates can "
+          "still be dominated by single large repos — read the medians "
+          "beside them")
 
 
 def group_periods(periods: list[str]) -> list[str]:
@@ -1342,13 +1381,8 @@ def main() -> None:
     elif a.table == "bugs":
         print_bugs(trimmed, created, periods)
     elif a.table == "exposure":
-        sample_digest = None
-        if month:
-            _srows, sm = _verify(SAMPLE, SAMPLE_MANIFEST)
-            sample_digest = sm["digest"]
         print_exposure(a.granularity,
-                       live_fp=bugs_fingerprint(trimmed, created,
-                                                sample_digest))
+                       live_fp=dated_fingerprint(trimmed, created))
 
 
 if __name__ == "__main__":

@@ -11,6 +11,50 @@ from pipeline.studies.churn import (RISK_DAYS, _days, _split_range,
                                     bug_date_window, bug_days_by_repo)
 
 
+def test_dated_cells_cover_every_repo_with_eligible_prs(monkeypatch):
+    """The dated pull surveys the population, not the pilot: every repo
+    with an eligible merged PR in any period gets its cells, whether or
+    not the seeded PR draw happened to land on it. The PR side is a
+    census, so the bug side must be one too for the rate to describe the
+    study rather than the largest repos."""
+    monkeypatch.setattr(churn, "draw", lambda _pool: [
+        {"repo": "o/big", "per": "Q1-2024", "num": 1}])
+    pool = {"Q1-2024": [("o/big", 1, False, 1, 0),
+                        ("o/small", 2, False, 1, 0)],
+            "Q4-2025": [("o/other", 3, True, 1, 0)]}
+    cells = churn.bug_date_cells(pool, ["Q1-2024", "Q4-2025"])
+    assert {c["repo"] for c in cells} == {"o/big", "o/small", "o/other"}
+    assert len(cells) == 6
+
+
+def test_dated_fingerprint_names_the_selection_policy(monkeypatch):
+    """PR #43 review: the dated artifact's fingerprint hashed only the
+    frame, so a pilot-scoped freeze and a population-scoped one on the
+    same frame were indistinguishable — the drift line said MATCHES
+    before the population pull had run. The selection policy is part of
+    the fingerprint; the frame alone is not enough."""
+    pools = ({"Q1-2024": [("o/r", 1, False, 1, 0)]},
+             {"Q1-2024": [("o/r", 1, False, 1, 0)]})
+    dated = churn.dated_fingerprint(*pools)
+    assert dated != churn.bugs_fingerprint(*pools)
+    monkeypatch.setattr(churn, "DATED_SELECTION", "pilot-draw")
+    assert churn.dated_fingerprint(*pools) != dated
+
+
+def test_dated_freeze_is_stamped_with_the_selection_fingerprint(
+        monkeypatch):
+    seen = {}
+    monkeypatch.setattr(churn, "bug_date_cells", lambda *_a, **_k: [
+        {"repo": "o/r", "per": "Q1-2024", "rng": "r"}])
+    monkeypatch.setattr(churn, "_load_jsonl", lambda _p: [])
+    monkeypatch.setattr(churn, "_freeze",
+                        lambda _p, _m, _r, fp, *_a: seen.update(fp=fp))
+    monkeypatch.setattr(churn, "search_issue_days", lambda *_a: [])
+    monkeypatch.setattr(churn.time, "sleep", lambda _s: None)
+    churn.pull_bug_dates({}, {}, None)
+    assert seen["fp"] == churn.dated_fingerprint({}, {})
+
+
 def test_bug_date_window_extends_by_the_risk_window():
     """A period's dated pull must cover every risk window a PR merged on
     its last day opens, or that PR's exposure is unobservable."""
@@ -239,6 +283,45 @@ def test_incomplete_page_is_refused(monkeypatch):
     assert churn._gh_search_page("q", 1) is None
 
 
+def test_search_follows_a_renamed_repo(monkeypatch):
+    """Population survey: 23 repos were unpullable because search refuses
+    a repo's former name, while the census still knows them by it. A
+    renamed repo keeps its issues and the API redirects the old name, so
+    a refused count is retried under the resolved name — the cell stays
+    keyed by the census name."""
+    queries = []
+
+    def count(q, *_a):
+        queries.append(q)
+        return None if "repo:old/name" in q else 1
+    monkeypatch.setattr(churn, "_search_count", count)
+    monkeypatch.setattr(churn, "_resolve_repo", lambda _r: "new/name")
+    monkeypatch.setattr(churn, "_gh_search_page",
+                        lambda _q, _p: [[1, "2024-01-01"]])
+    monkeypatch.setattr(churn.time, "sleep", lambda _s: None)
+    assert churn.search_issue_days("old/name", "2024-01-01..2024-01-31") \
+        == [[1, "2024-01-01"]]
+    assert any("repo:new/name" in q for q in queries)
+
+
+def test_unresolvable_repo_stays_missing(monkeypatch):
+    """A deleted repo resolves to nothing; the cell stays missing rather
+    than being recorded as empty."""
+    monkeypatch.setattr(churn, "_search_count", lambda *_a: None)
+    monkeypatch.setattr(churn, "_resolve_repo", lambda _r: None)
+    monkeypatch.setattr(churn.time, "sleep", lambda _s: None)
+    assert churn.search_issue_days("gone/repo", "2024-01-01..2024-01-31") \
+        is None
+
+
+def test_resolve_repo_reads_the_canonical_name(monkeypatch):
+    monkeypatch.setattr(churn, "_gh", lambda *_a, **_k: "hydra-ecosystem/hydra\n")
+    assert churn._resolve_repo("facebookresearch/hydra") == \
+        "hydra-ecosystem/hydra"
+    monkeypatch.setattr(churn, "_gh", lambda *_a, **_k: None)
+    assert churn._resolve_repo("gone/repo") is None
+
+
 def test_incomplete_count_is_not_trusted(monkeypatch):
     """Second review, finding 1: if the count query itself was
     incomplete, `len(rows) == total` is false assurance — the count is
@@ -326,6 +409,18 @@ def test_print_exposure_cuts_balanced_and_ai_halves(monkeypatch, capsys):
     assert [ln.split()[1] for ln in q4] == ["all", "balanced", "low-AI",
                                            "high-AI"]
     assert q4[0].split()[2] == "2" and q4[1].split()[2] == "1"
+
+
+def test_footer_states_the_population_selection(monkeypatch, capsys):
+    """PR #43 review: the footer still described the pilot's PR-level
+    draw (repos entering probability-proportional-to-size) after the
+    selection became every repo with an eligible PR."""
+    monkeypatch.setattr(churn, "exposure_rows", lambda g="quarter": (
+        _ONE, (["Q1-2024"], _meta())))
+    churn.print_exposure("quarter")
+    out = capsys.readouterr().out
+    assert "probability-proportional" not in out
+    assert "every repo with an eligible merged PR" in out
 
 
 def test_print_exposure_reports_frame_drift(monkeypatch, capsys):
