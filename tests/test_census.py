@@ -1,0 +1,548 @@
+"""Window math (the banker's-rounding bug), census checkpointing, and the
+undercount/caching behavior from the 2026-07-03 review fixes."""
+import json
+from datetime import date, timedelta
+
+import pytest
+
+from pipeline import census, precount, ghx
+from pipeline import census_direct as _cd
+from pipeline.census import PAGE_SIZE, census_repo_period, pull_cell, subwindows
+from pipeline.scan_orgs import QUARTER_RANGES
+
+# The real classifier, captured before any fixture patches the module
+# attribute — tests that exercise classification itself restore it.
+_REAL_CLASSIFY = _cd.classify_searchability
+
+
+@pytest.fixture(autouse=True)
+def tmp_store(tmp_path, monkeypatch):
+    monkeypatch.setenv("AIRD_DATA_DIR", str(tmp_path))
+    monkeypatch.setattr(census.time, "sleep", lambda s: None)
+    # Census failure paths classify the repo before giving up. Default to
+    # SEARCHABLE — the case every test here means unless it says otherwise
+    # — so the classification costs no gh call; direct-route tests patch
+    # this same attribute to True.
+    from pipeline import census_direct
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "searchable")
+    return tmp_path
+
+
+def _days_covered(windows):
+    days = []
+    for w in windows:
+        a, b = (date.fromisoformat(x) for x in w.split(".."))
+        assert a <= b, f"inverted range {w}"
+        d = a
+        while d <= b:
+            days.append(d)
+            d += timedelta(days=1)
+    return days
+
+
+@pytest.mark.parametrize("rng,k", [
+    ("2026-01-01..2026-03-31", 10),   # standard quarter
+    ("2026-04-01..2026-06-30", 10),   # Q2
+    ("2024-01-01..2024-03-31", 10),   # leap-year quarter
+    ("2026-01-01..2026-01-05", 10),   # k > days (the bug case)
+    ("2026-01-01..2026-01-01", 10),   # single day
+    ("2026-01-01..2026-12-31", 7),    # uneven split
+])
+def test_subwindows_cover_exactly_once(rng, k):
+    s, e = (date.fromisoformat(x) for x in rng.split(".."))
+    expected = [s + timedelta(days=i) for i in range((e - s).days + 1)]
+    covered = _days_covered(subwindows(rng, k))
+    assert covered == expected            # complete, ordered, no gap/overlap
+    assert len(subwindows(rng, k)) <= k
+
+
+def test_quarter_ranges_use_full_quarters():
+    assert QUARTER_RANGES["Q2-2026"].endswith("2026-06-30")   # review gap P2.9
+
+
+def test_page_size_is_interpolated_into_query():
+    """Review finding: the fetch size was hardcoded separately from the cap."""
+    assert f"first:{PAGE_SIZE}" in census.PR_QUERY
+    assert "committer{" in census.PR_QUERY.replace(" ", "")   # codex-cloud field
+
+
+def test_pull_cell_checkpoints_and_skips_refetch(monkeypatch):
+    calls = []
+    monkeypatch.setattr(census, "graphql_nodes",
+                        lambda *a, **k: calls.append(1) or
+                        {"nodes": [{"number": 1}], "pageInfo": {"hasNextPage": False}})
+    assert pull_cell("o/r", "2026-01-01..2026-01-31") == ([{"number": 1}], False)
+    assert pull_cell("o/r", "2026-01-01..2026-01-31") == ([{"number": 1}], True)
+    assert len(calls) == 1                # second call served from cell
+
+
+def test_pull_cell_repulls_corrupt_cell(monkeypatch):
+    p = ghx.cell_path(census.STAGE, "o/r", "2026-01-01..2026-01-31")
+    p.write_text(json.dumps({"errors": [{"type": "RATE_LIMIT"}]}))
+    monkeypatch.setattr(census, "graphql_nodes",
+                        lambda *a, **k: {"nodes": [{"number": 2}],
+                                         "pageInfo": {"hasNextPage": False}})
+    nodes, cached = pull_cell("o/r", "2026-01-01..2026-01-31")
+    assert nodes == [{"number": 2}] and not cached
+    assert json.loads(p.read_text()) == [{"number": 2}]
+
+
+def test_pull_cell_paginates_within_window(monkeypatch):
+    pages = [{"nodes": [{"number": i}], "pageInfo": {"hasNextPage": i < 2,
+                                                     "endCursor": f"c{i}"}}
+             for i in (1, 2)]
+    monkeypatch.setattr(census.time, "sleep", lambda s: None)
+    monkeypatch.setattr(census, "graphql_nodes", lambda *a, **k: pages.pop(0))
+    nodes, cached = pull_cell("o/r", "2026-03-01..2026-03-01")
+    assert [n["number"] for n in nodes] == [1, 2] and not cached
+
+
+def test_pull_cell_rejects_a_page_with_no_pageinfo(monkeypatch):
+    """Issue #3 item 3: the same null-is-not-a-fact confusion as
+    the review_action tombstone bug, in the census. `pageInfo` absent or null
+    — which is what a partial/errored GraphQL response looks like — was read
+    by `not pi.get("hasNextPage")` as 'no more pages', so a TRUNCATED page
+    returned as a complete window and `pull_cell` cached it atomically as a
+    finished cell. Terminate only on hasNextPage explicitly False; anything
+    else is a failed page (the review_action `_conn_commits` rule)."""
+    monkeypatch.setattr(census.time, "sleep", lambda s: None)
+    monkeypatch.setattr(census, "graphql_nodes",
+                        lambda *a, **k: {"nodes": [{"number": 1}]})   # no pageInfo
+    assert pull_cell("o/r", "2026-04-01..2026-04-30") == (None, False)
+    assert not ghx.cell_path(census.STAGE, "o/r",
+                             "2026-04-01..2026-04-30").exists()
+
+
+def test_pull_cell_failure_writes_nothing(monkeypatch):
+    monkeypatch.setattr(census, "graphql_nodes", lambda *a, **k: None)
+    assert pull_cell("o/r", "2026-02-01..2026-02-28") == (None, False)
+    assert not ghx.cell_path(census.STAGE, "o/r", "2026-02-01..2026-02-28").exists()
+
+
+def test_census_small_repo_single_cell(monkeypatch):
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: 30)
+    pulled = []
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, rng: (pulled.append(rng) or [{}] * 30, False))
+    n = census_repo_period("o/r", "Q1-2026", k=10)
+    assert n == 30 and pulled == [QUARTER_RANGES["Q1-2026"]]
+
+
+def test_census_big_repo_subwindowed(monkeypatch):
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: 500)
+    pulled = []
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, rng: (pulled.append(rng) or [{}] * 42, False))
+    n = census_repo_period("o/r", "Q1-2026", k=10)
+    # adaptive: 500 PRs need ceil(500*1.1/45)=13 windows, not the k=10 floor
+    assert len(pulled) == 13 and n == 13 * 42
+
+
+def test_census_cached_full_cell_skips_denominator_call(monkeypatch):
+    """Resume runs must not pay a search call per cached repo-period — but
+    ONLY when the cached PRECOUNT corroborates the cell (external review
+    P1: an unchecked fast path let brownout-poisoned empties through)."""
+    rng = QUARTER_RANGES["Q1-2026"]
+    ghx.cell_path(census.STAGE, "o/r", rng).write_text(json.dumps([{"number": 1}] * 3))
+    ghx.cell_path("precount", "o/r", "Q1-2026").write_text(json.dumps({"total": 3}))
+    def boom(*a, **k):
+        raise AssertionError("rest_count must not be called on cached cells")
+    monkeypatch.setattr(precount, "rest_count", boom)
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 3
+
+
+def test_census_poisoned_empty_cache_self_heals(monkeypatch):
+    """External review P1: a cached-but-empty full-range cell contradicting
+    the precount must fall through to the heal/re-pull path, not return 0."""
+    rng = QUARTER_RANGES["Q1-2026"]
+    ghx.cell_path(census.STAGE, "o/r", rng).write_text(json.dumps([]))
+    ghx.cell_path("precount", "o/r", "Q1-2026").write_text(json.dumps({"total": 30}))
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: 30)
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, r: ([{"number": i} for i in range(30)], False))
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 30
+
+
+def test_census_heal_backs_off_before_repull(monkeypatch):
+    """Repro RED first: an immediate heal re-pull likely hits the SAME
+    search brownout; the heal branch must back off (sleep >=30s) before
+    re-pulling."""
+    ghx.cell_path("precount", "o/r", "Q1-2026").write_text(json.dumps({"total": 30}))
+    sleeps = []
+    monkeypatch.setattr(census.time, "sleep", lambda s: sleeps.append(s))
+    calls = iter([[], [{"number": i} for i in range(30)]])   # brownout, then ok
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, r: (next(calls), False))
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 30
+    assert any(s >= 30 for s in sleeps), sleeps
+
+
+def test_census_fails_hard_on_saturation(monkeypatch, capsys):
+    """External review finding 4: saturation must FAIL, not warn-succeed.
+    Even adaptive windows can saturate on sub-day PR bursts."""
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: 6000)
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, rng: ([{}] * PAGE_SIZE, False))
+    # windows are capped at one per day (90), so 6000 PRs cannot fit
+    n = census_repo_period("o/r", "Q1-2026", k=10)
+    assert n is None
+    assert "FAIL" in capsys.readouterr().err
+
+
+def test_census_adaptive_windows_scale_with_volume(monkeypatch):
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: 3000)
+    pulled = []
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, rng: (pulled.append(rng) or [{}] * 40, False))
+    census_repo_period("o/r", "Q1-2026", k=10)
+    assert len(pulled) >= 70          # ceil(3300/45)=74 windows, not 10
+
+
+def test_census_denominator_failure_propagates(monkeypatch):
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: None)
+    assert census_repo_period("o/r", "Q1-2026", 10) is None
+
+
+def test_census_uses_precount_cache_over_rest(monkeypatch):
+    """Denominators come from the batch precount when available — no REST
+    search call, no pacing sleep."""
+    import json as _json
+    from pipeline.precount import precount_path
+    precount_path("o/r", "Q1-2026").write_text(_json.dumps({"total": 30}))
+    def boom(*a, **k):
+        raise AssertionError("REST denominator must not be called when precounted")
+    monkeypatch.setattr(precount, "rest_count", boom)
+    monkeypatch.setattr(census, "pull_cell", lambda repo, rng: ([{}] * 30, False))
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 30
+
+
+def test_deficit_triggers_self_heal_repull(monkeypatch, capsys):
+    """Silently-incomplete cached cells (brownout empties) must be
+    invalidated and re-pulled once before failing."""
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: 100)
+    calls = {"n": 0}
+    def pull(repo, rng):
+        calls["n"] += 1
+        # first sweep: cached shorts; second sweep: complete
+        first_sweep = calls["n"] <= 3
+        return ([{}] * (10 if first_sweep else 34), first_sweep)
+    monkeypatch.setattr(census, "pull_cell", pull)
+    n = census_repo_period("o/r", "Q1-2026", k=3)
+    assert n == 102 and "HEAL" in capsys.readouterr().err
+
+
+def test_small_absolute_deficit_tolerated_as_precount_drift(monkeypatch):
+    """PRs deleted after the precount snapshot leave permanent 1-3 PR gaps;
+    those must not fail a 54-PR quarter forever."""
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: 54)
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, rng: ([{}] * 26, False) if "01-01" in rng
+                        else ([{}] * 26, False))
+    n = census_repo_period("o/r", "Q1-2026", k=2)
+    assert n == 52          # 52/54: within max(2%, 3) allowance -> success
+
+
+def test_pull_cell_falls_back_to_small_pages_on_502(monkeypatch):
+    """Persistent 502s on 50-PR pages (pathological payloads) must retry the
+    window with small pages instead of failing the repo-period."""
+    calls = []
+    def fake_nodes(query, variables, jq, expect):
+        calls.append("small" if "first:5" in query else "big")
+        if "first:5" in query:
+            return {"nodes": [{"number": 9}], "pageInfo": {"hasNextPage": False}}
+        return None                      # big pages always 502
+    monkeypatch.setattr(census, "graphql_nodes", fake_nodes)
+    monkeypatch.setattr(census.time, "sleep", lambda s: None)
+    nodes, cached = pull_cell("o/r", "2025-12-21..2025-12-21")
+    assert nodes == [{"number": 9}] and "small" in calls
+
+
+def test_census_rest_fallback_backfills_precount_cache(monkeypatch):
+    """Repro RED first: when no precount exists, the rest_count fallback
+    result must be cache-written as the precount so later invocations
+    (resume runs, the cached-cell fast path) stop re-querying."""
+    from pipeline.precount import get_precount
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: 30)
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, r: ([{"number": i} for i in range(30)], False))
+    monkeypatch.setattr(census.time, "sleep", lambda s: None)
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 30
+    assert get_precount("o/r", "Q1-2026") == 30
+
+
+def test_zero_precount_needs_independent_confirmation(monkeypatch):
+    """Issue #7: a browned-out search returns 200 with
+    issueCount 0, indistinguishable from a real empty — so a 0 precount
+    must be re-observed before the repo-period can census as a complete
+    empty. Here the recount says 7 while the pulls are browned-out empty:
+    the cell must FAIL (7 expected, 0 collected), not record a complete
+    empty census."""
+    monkeypatch.setattr(precount.time, "sleep", lambda s: None)
+    counts = iter([0, 7])
+    monkeypatch.setattr(precount, "rest_count",
+                        lambda *a, **k: next(counts))
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, rng: ([], False))
+    assert census_repo_period("o/r", "Q1-2026", k=10) is None
+
+
+def test_unconfirmable_zero_precount_fails_not_empty(monkeypatch):
+    """Issue #7: if the confirming recount itself fails, the
+    repo-period must FAIL (None) — never census as a complete empty."""
+    monkeypatch.setattr(precount.time, "sleep", lambda s: None)
+    counts = iter([0, None])
+    monkeypatch.setattr(precount, "rest_count",
+                        lambda *a, **k: next(counts))
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, rng: ([], False))
+    assert census_repo_period("o/r", "Q1-2026", k=10) is None
+
+
+def test_fresh_zero_confirm_waits_out_the_brownout(monkeypatch):
+    """PR #13 follow-up: a zero observed moments ago must
+    not be 'confirmed' by an immediate re-query — both samples would sit
+    inside the same minutes-scale brownout. The confirming count waits
+    out the brownout horizon first (the pacing sleeps after each call
+    are rate-limit spacing, not independence)."""
+    events = []
+    monkeypatch.setattr(precount.time, "sleep",
+                        lambda s: events.append(("sleep", s)))
+    monkeypatch.setattr(precount, "rest_count",
+                        lambda *a, **k: events.append(("query",)) or 0)
+    precount.ensure_precount("o/r", "Q1-2026")     # fresh browned-out 0
+    assert precount.confirm_zero_precount("o/r", "Q1-2026") == 0
+    second_query = [i for i, e in enumerate(events)
+                    if e[0] == "query"][1]
+    waited = sum(e[1] for e in events[:second_query]
+                 if e[0] == "sleep" and e[1] >= 30)
+    assert waited >= precount.BROWNOUT_WAIT - 2
+
+
+def test_stale_cached_zero_confirms_immediately(monkeypatch):
+    """Companion to the brownout-wait test (feature, not a repro): a
+    cached zero older than the brownout horizon is already temporally
+    independent — the confirming count runs without an extra wait."""
+    import os
+    import time as _time
+    events = []
+    monkeypatch.setattr(precount.time, "sleep",
+                        lambda s: events.append(("sleep", s)))
+    monkeypatch.setattr(precount, "rest_count",
+                        lambda *a, **k: events.append(("query",)) or 0)
+    precount.write_precount("o/r", "Q1-2026", 0)
+    p = precount.precount_path("o/r", "Q1-2026")
+    old = _time.time() - 3600
+    os.utime(p, (old, old))
+    assert precount.confirm_zero_precount("o/r", "Q1-2026") == 0
+    first_query = [i for i, e in enumerate(events)
+                   if e[0] == "query"][0]
+    assert all(s < 30 for kind, s in events[:first_query]
+               if kind == "sleep")
+
+
+def test_unsearchable_repo_falls_back_to_the_direct_route(monkeypatch):
+    """A repo GitHub's search index refuses (422) has no precount and can
+    never be censused by search; census delegates to the object-API route
+    instead of failing the repo-period forever."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount.time, "sleep", lambda s: None)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: None)
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "unsearchable")
+    called = []
+    monkeypatch.setattr(
+        census_direct, "census_repo_direct",
+        lambda repo, extra_periods=None:
+            called.append(repo) or {"Q1-2024": 0, "Q4-2025": 0,
+                                    "Q1-2026": 7, "Q2-2026": 1})
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 7
+    assert called == ["o/r"]
+
+
+def test_cached_positive_precount_still_reaches_the_direct_route(
+        monkeypatch):
+    """PR #20 review, P1: unsearchability is a property of the REPO, not
+    of whether a precount happens to be cached. A cached positive count
+    kept the repo on the failing search route forever."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount, "get_precount", lambda r, p: 16)
+    monkeypatch.setattr(census, "pull_cell", lambda repo, rng: (None, False))
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "unsearchable")
+    monkeypatch.setattr(census_direct, "census_repo_direct",
+                        lambda repo, extra_periods=None: {"Q1-2026": 16})
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 16
+
+
+def test_small_cached_deficit_does_not_bypass_the_direct_route(
+        monkeypatch, tmp_store):
+    """PR #20 re-review, P1: the drift-allowance fast path accepted a
+    cached cell that DISAGREES with the precount (deficit <= 3) before
+    ever asking whether the repo is unsearchable — the exact former
+    ComposioHQ/skills Q2 state (precount 1, cell []), which returned 0
+    and left the empty cell stored."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount, "get_precount", lambda r, p: 1)
+    cell = census.cell_path(census.STAGE, "o/r", "2026-04-01..2026-06-30")
+    cell.parent.mkdir(parents=True, exist_ok=True)
+    cell.write_text("[]")
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "unsearchable")
+    called = []
+
+    def fake_direct(repo, extra_periods=None):
+        called.append(repo)
+        cell.write_text(json.dumps([{"number": 7}]))
+        return {"Q2-2026": 1}
+    monkeypatch.setattr(census_direct, "census_repo_direct", fake_direct)
+    assert census_repo_period("o/r", "Q2-2026", k=10) == 1
+    assert called == ["o/r"]
+    assert json.loads(cell.read_text()) == [{"number": 7}]
+
+
+def test_transient_classification_fails_the_period_not_blesses_drift(
+        monkeypatch, tmp_store):
+    """PR #20 re-review, P1: with precount=1, cached [], and the
+    classification probe answering 502, the period must FAIL — 'we could
+    not determine searchability' must not fall through to the drift
+    allowance and report the poisoned cell as fine."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount, "get_precount", lambda r, p: 1)
+    cell = census.cell_path(census.STAGE, "o/r", "2026-04-01..2026-06-30")
+    cell.parent.mkdir(parents=True, exist_ok=True)
+    cell.write_text("[]")
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        _REAL_CLASSIFY)
+    monkeypatch.setattr(census_direct, "search_error",
+                        lambda q: "502 Bad Gateway")
+    monkeypatch.setattr(census_direct, "census_repo_direct",
+                        lambda repo, extra_periods=None: pytest.fail("must not collect"))
+    assert census_repo_period("o/r", "Q2-2026", k=10) is None
+    assert json.loads(cell.read_text()) == []
+
+
+def test_post_self_heal_deficit_reaches_the_direct_route(
+        monkeypatch, tmp_store):
+    """Self-review: the fourth failure path — a positive precount whose
+    window pulls come up short even after self-heal — must also consult
+    the direct route (a repo can become unsearchable mid-study with a
+    live precount cached from before)."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount, "get_precount", lambda r, p: 5)
+    monkeypatch.setattr(census, "pull_cell",
+                        lambda repo, rng: ([], False))     # persistent 0/5
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "unsearchable")
+    monkeypatch.setattr(census_direct, "census_repo_direct",
+                        lambda repo, extra_periods=None: {"Q1-2026": 5})
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 5
+
+
+def test_failed_direct_collection_fails_the_period(monkeypatch, tmp_store):
+    """PR #20 re-review, P1: once unsearchability is CONFIRMED, a failed
+    direct collection is a definitive failure — it must not fall through
+    to the drift allowance and report the poisoned cell as fine."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount, "get_precount", lambda r, p: 1)
+    cell = census.cell_path(census.STAGE, "o/r", "2026-04-01..2026-06-30")
+    cell.parent.mkdir(parents=True, exist_ok=True)
+    cell.write_text("[]")
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "unsearchable")
+    monkeypatch.setattr(census_direct, "census_repo_direct",
+                        lambda repo, extra_periods=None: None)          # collection failed
+    assert census_repo_period("o/r", "Q2-2026", k=10) is None
+    assert json.loads(cell.read_text()) == []       # untouched
+
+
+def test_direct_zeros_are_recorded_confirmed(monkeypatch, tmp_store):
+    """PR #20 re-review, P2: a verified full direct history PROVES an
+    empty quarter, so its zero precount is confirmed — otherwise the next
+    run treats it as an unconfirmed search zero, retries the refused
+    search, and re-collects the whole history. A second call must do
+    neither."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount.time, "sleep", lambda s: None)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: None)
+    probes, collects = [], []
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: probes.append(repo)
+                        or "unsearchable")
+
+    def fake_direct(repo, extra_periods=None):
+        collects.append(repo)
+        for rng in ("2024-01-01..2024-03-31", "2026-04-01..2026-06-30"):
+            p = census.cell_path(census.STAGE, repo, rng)
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text("[]")
+        return {"Q1-2024": 0, "Q2-2026": 0}
+    monkeypatch.setattr(census_direct, "census_repo_direct", fake_direct)
+    assert census_repo_period("o/r", "Q1-2024", k=10) == 0
+    assert precount.get_precount("o/r", "Q1-2024") == 0
+    val = json.loads(precount.precount_path("o/r", "Q1-2024").read_text())
+    assert val.get("confirmed") is True
+    n_probes, n_collects = len(probes), len(collects)
+    assert census_repo_period("o/r", "Q1-2024", k=10) == 0
+    assert (len(probes), len(collects)) == (n_probes, n_collects)
+
+
+def test_searchable_repo_keeps_the_drift_allowance(monkeypatch, tmp_store):
+    """The allowance still holds for searchable repos: a small deficit is
+    legitimate drift (PRs deleted after the precount) and must not cost a
+    probe-and-recollect on every run."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount, "get_precount", lambda r, p: 3)
+    cell = census.cell_path(census.STAGE, "o/r", "2026-04-01..2026-06-30")
+    cell.parent.mkdir(parents=True, exist_ok=True)
+    cell.write_text(json.dumps([{"number": 1}]))
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "searchable")
+    monkeypatch.setattr(census_direct, "census_repo_direct",
+                        lambda repo, extra_periods=None: pytest.fail("must not collect"))
+    assert census_repo_period("o/r", "Q2-2026", k=10) == 1
+
+
+def test_cached_zero_precount_still_reaches_the_direct_route(monkeypatch):
+    """PR #20 review, P1: a cached ZERO whose confirmation can never
+    succeed (the recount uses the same refused search) must also route to
+    direct collection instead of failing the period."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount.time, "sleep", lambda s: None)
+    monkeypatch.setattr(precount, "get_precount", lambda r, p: 0)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: None)
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "unsearchable")
+    monkeypatch.setattr(census_direct, "census_repo_direct",
+                        lambda repo, extra_periods=None: {"Q1-2026": 7})
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 7
+
+
+def test_transient_precount_failure_does_not_use_the_direct_route(
+        monkeypatch):
+    """Only the definitive 422 justifies the fallback: a rate-limited or
+    browned-out precount must still fail the period, not silently switch
+    collection routes."""
+    from pipeline import census_direct
+    monkeypatch.setattr(precount.time, "sleep", lambda s: None)
+    monkeypatch.setattr(precount, "rest_count", lambda *a, **k: None)
+    monkeypatch.setattr(census_direct, "classify_searchability",
+                        lambda repo: "searchable")
+    called = []
+    monkeypatch.setattr(census_direct, "census_repo_direct",
+                        lambda repo, extra_periods=None: called.append(repo) or {})
+    assert census_repo_period("o/r", "Q1-2026", k=10) is None
+    assert called == []
+
+
+def test_confirmed_zero_is_cached_and_not_recounted(monkeypatch):
+    """Issue #7: a twice-observed 0 is marked confirmed, so later runs
+    trust it without re-querying (empty repo-quarters are common)."""
+    monkeypatch.setattr(precount.time, "sleep", lambda s: None)
+    calls = []
+    monkeypatch.setattr(precount, "rest_count",
+                        lambda *a, **k: calls.append(1) or 0)
+    monkeypatch.setattr(census, "pull_cell", lambda repo, rng: ([], False))
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 0
+    assert census_repo_period("o/r", "Q1-2026", k=10) == 0
+    assert len(calls) == 2      # first pass: precount + one confirm; no more

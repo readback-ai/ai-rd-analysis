@@ -1,0 +1,220 @@
+"""Direct (non-search) census route for UNSEARCHABLE repos.
+
+GitHub's search index refuses some public repos outright — `repo:X` search
+answers HTTP 422 "the listed users and repositories cannot be searched"
+— while the same repos serve their PRs happily through the object APIs.
+Every search-based route (precount, census cells, branch counts) is blind
+to them, so they can never be collected and their real PRs would either
+fail the run forever or be waived as "inaccessible", which biases the
+population against exactly these repos (new, small, AI-tooling-heavy).
+
+This module collects such a repo through `repository.pullRequests`, which
+does not touch the search index, and writes normal census cells so the
+frame cannot tell the difference.
+
+Completeness rule: no precount exists for an unsearchable repo, so the
+connection's own `totalCount` is the denominator — the full history must
+arrive, verified page by page, or NOTHING is written. Quarters with no
+PRs get a cell that is a VERIFIED empty (stronger evidence than a search
+zero, which cannot distinguish empty from browned-out).
+
+Usage:
+  python -m pipeline.census_direct --repos <file>   # collect all listed
+  python -m pipeline.census_direct --probe <file>   # only report which
+                                                    # repos are unsearchable
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import time
+from pathlib import Path
+
+from pipeline.census import PAGE_SIZE, STAGE
+from pipeline.ghx import cell_path, graphql_nodes, read_cell, search_error
+from pipeline.scan_orgs import QUARTER_RANGES, resolve_period
+
+MAX_PRS = 2_000        # the fallback is for SMALL unsearchable repos; a
+                       # huge history must fail loudly, not page for hours
+UNSEARCHABLE = "cannot be searched"
+
+# Same per-PR field set as census.PR_QUERY — a direct cell must be
+# indistinguishable to the frame from a search-collected one.
+PR_FIELDS = """
+number createdAt mergedAt closedAt authorAssociation
+additions deletions changedFiles headRefName
+author{login __typename} mergedBy{login __typename}
+commits(first:12){ nodes{ commit{ message
+  authors(first:6){ nodes{ email } }
+  committer{ email user{ login } } } } }
+reviews(first:15){ nodes{ author{login __typename} submittedAt state
+                          comments{totalCount} } }
+"""
+
+PRS_QUERY = """
+query($owner:String!, $name:String!, $cur:String){
+  repository(owner:$owner, name:$name){
+    pullRequests(first:%d, after:$cur, orderBy:{field:CREATED_AT,
+                                                direction:ASC}){
+      totalCount
+      pageInfo{ hasNextPage endCursor }
+      nodes{ %s } } } }
+""" % (PAGE_SIZE, PR_FIELDS)
+
+
+
+_SEARCHABILITY: dict[str, str] = {}
+
+
+def classify_searchability(repo: str) -> str:
+    """'searchable' | 'unsearchable' | 'unknown' — three states, because
+    a probe that times out, 502s, or rate-limits says nothing about the
+    repo: only 'searchable' may permit cached drift, and treating a
+    transient failure as searchable blessed a poisoned cell.
+
+    Definitive answers are memoized per process (the census probes every
+    cached cell that disagrees with its precount, and drift is the
+    designed-for common case); 'unknown' is never memoized, so the next
+    caller re-probes."""
+    hit = _SEARCHABILITY.get(repo)
+    if hit is not None:
+        return hit
+    err = search_error(f"repo:{repo} is:pr")
+    if err is None:
+        verdict = "searchable"
+    elif UNSEARCHABLE in err:
+        verdict = "unsearchable"
+    else:
+        return "unknown"
+    _SEARCHABILITY[repo] = verdict
+    return verdict
+
+
+def pull_repo_prs(repo: str) -> list[dict] | None:
+    """The repo's FULL PR history via the object API. None = incomplete
+    (partial page, totalCount disagreement, oversized history, or a
+    failed request) — callers must write nothing."""
+    owner, name = repo.split("/", 1)
+    nodes: list[dict] = []
+    cur = None
+    total = None
+    # BOUNDED: enough pages for MAX_PRS and no more. An unbounded loop
+    # never terminates when the API keeps answering hasNextPage:true with
+    # a repeating cursor.
+    for _ in range(-(-MAX_PRS // PAGE_SIZE) + 1):
+        variables = {"owner": owner, "name": name,
+                     **({"cur": cur} if cur else {})}
+        conn = graphql_nodes(PRS_QUERY, variables,
+                            ".data.repository.pullRequests", expect=dict)
+        if conn is None:
+            return None
+        total = conn.get("totalCount")
+        if not isinstance(total, int) or total > MAX_PRS:
+            return None
+        page = conn.get("nodes") or []
+        if any(not isinstance(n, dict) for n in page):
+            return None            # a null node IS a missing PR: the
+                                   # history is incomplete, fail it
+        nodes.extend(page)
+        pi = conn.get("pageInfo") or {}
+        if pi.get("hasNextPage") is False:
+            break
+        if pi.get("hasNextPage") is not True:
+            return None            # partial response: never "last page"
+        cur = pi.get("endCursor")
+        if not cur:
+            return None            # would loop on the first page
+        time.sleep(1)
+    else:
+        return None                # page budget exhausted: incomplete
+    if len(nodes) != total:
+        return None                # the API's own count is the denominator
+    return nodes
+
+
+def census_repo_direct(repo: str,
+                       extra_periods: list[str] | None = None) \
+        -> dict[str, int] | None:
+    """Collect the repo and write one cell per study quarter — plus any
+    extra_periods (month tokens from the incremental updates, METHODS
+    §1c) — each keyed by its full resolved range, so coverage sees
+    gap-free coverage. Returns {period: pr_count} written, or None when
+    the history was incomplete.
+
+    The verified history is AUTHORITATIVE: a cell that disagrees with it
+    is replaced (a failed search run can leave an empty cell behind, and
+    preserving it would silently drop recovered PRs). A cell that already
+    agrees is left untouched."""
+    periods = [p for p in QUARTER_RANGES if p != "Q3-2025"]
+    for p in extra_periods or []:
+        if p not in periods:
+            periods.append(p)
+    prs = pull_repo_prs(repo)
+    if prs is None:
+        return None
+    buckets: dict[str, list[dict]] = {p: [] for p in periods}
+    for pr in prs:
+        created = (pr.get("createdAt") or "")[:10]
+        for per in periods:
+            a, b = resolve_period(per).split("..")
+            if a <= created <= b:
+                buckets[per].append(pr)
+                # NO break: month tokens overlap their quarter, and a PR
+                # belongs in both cells (load-order dedup handles the
+                # overlap at read time, as with search-collected cells)
+    out: dict[str, int] = {}
+    for per, cell_prs in buckets.items():
+        p = cell_path(STAGE, repo, resolve_period(per))
+        existing = read_cell(p, list)
+        fresh_nums = [pr.get("number") for pr in cell_prs]
+        if existing is None or [pr.get("number") for pr in existing
+                               if isinstance(pr, dict)] != fresh_nums:
+            tmp = p.with_suffix(".tmp")
+            tmp.write_text(json.dumps(cell_prs))
+            tmp.replace(p)
+        out[per] = len(cell_prs)
+    return out
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--repos", help="file of owner/repo lines to collect")
+    ap.add_argument("--probe", help="file of owner/repo lines to classify")
+    a = ap.parse_args()
+    path = Path(a.repos or a.probe)
+    repos = [ln.strip() for ln in path.read_text().splitlines()
+             if ln.strip()]
+    unsearchable, unknown = [], []
+    for repo in repos:
+        verdict = classify_searchability(repo)
+        if verdict == "unsearchable":
+            unsearchable.append(repo)
+        elif verdict == "unknown":
+            unknown.append(repo)
+        if verdict != "searchable":
+            print(f"{verdict.upper()} {repo}", flush=True)
+    print(f"{len(unsearchable)}/{len(repos)} unsearchable"
+          + (f", {len(unknown)} unclassifiable (transient — rerun)"
+             if unknown else ""), flush=True)
+    if a.probe:
+        return
+    failed = []
+    for repo in unsearchable:
+        written = census_repo_direct(repo)
+        if written is None:
+            failed.append(repo)
+            print(f"FAIL {repo} (incomplete history; nothing written)",
+                  flush=True)
+        else:
+            print(f"ok   {repo}: {written}", flush=True)
+    if failed or unknown:
+        # "collect all listed" must not report success while skipping
+        # work: an unclassifiable repo was neither collected nor shown
+        # to be searchable.
+        raise SystemExit(
+            f"{len(failed)} incomplete {failed[:5]}; "
+            f"{len(unknown)} unclassifiable {unknown[:5]} — rerun")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,370 @@
+# Metrics & generated reports — reference
+
+What every number in the generated report means, exactly as the current code
+computes it. Companion to `docs/METHODS.md` (population/detection/collection);
+this document covers classification → rates → aggregation → report layout.
+Source of truth for each definition is cited as `module.function`.
+
+## 0. Reading the Q1-2024 column
+
+Q1-2024 rows exist as a DETECTOR-VALIDITY CHECK and review-practice
+baseline, not an AI-usage estimate: none of the three detectable channels
+(trailers, agent bot accounts, agent branch conventions) existed yet, so the
+column is 0% BY CONSTRUCTION even though autocomplete-era assistance
+(Copilot suggestions) was already widespread and is invisible to every
+detection layer. Every generated table carries this caption.
+
+## 1. Unit of observation and eligibility
+
+The unit is the PULL REQUEST, censused per (repo, quarter):
+- **Window**: PRs are selected by CREATION date inside the quarter
+  (`census.pull_cell` query `created:<range>`); quarters are Q1-2024,
+  Q4-2025, Q1-2026, Q2-2026.
+- **Frame, as-of, and the w8 rule**: `detect.CUTOFF = 2026-06-30` is the
+  FRAME end — the last PR-creation date in the study; it never changes.
+  `detect.AS_OF` is the DATA-COLLECTION stamp — the instant the census
+  was last pulled, bumped at each re-pull (currently
+  `2026-09-01T21:03:34Z`, the 2026-08 monthly update) — and governs w8
+  maturity only. Per-PR outcomes are measured at **8 weeks from PR
+  creation** (`PRClass.merged/rejected`, frozen convention §1d): a merge
+  counts iff it happened within 56 days of creation. `classify_pr` puts
+  no as-of bound on the event itself — the fate flags are booleans on
+  every PR — and `w8_mature` (creation + 56 days ≤ `AS_OF`) is what the
+  metrics gate on: fate metrics skip w8-immature PRs. Review events follow
+  the SAME w8 rule (adopted 2026-07-20): a review counts iff submitted
+  within 56 days of PR creation; CUTOFF bounds PR creation, not events
+  (an in-window event past the frame end counts) — so mature PRs are
+  immutable and re-pulls only fill in immature ones. History: the
+  initial collection was stamped at CUTOFF (`AS_OF` 2026-06-30), so PRs
+  created after ~2026-05-05 had open windows and Q2-2026 fate cells were
+  provisional; the 2026-08-01 monthly update (May's finalization) moved
+  the maturity frontier to 2026-06-06; June's last window closed
+  2026-08-25T23:59:59Z and the finalization re-pull ran on 2026-08-27
+  (`AS_OF` 2026-08-27T17:40:17Z; `monthly_update 2026-08 --revise-only`,
+  §1c), closing every Q2 window. Under the current stamp all
+  frozen-quarter PRs are mature; only the registered incremental months
+  carry provisional cells.
+  Residual: per-commit
+  timestamps are not collected, so a marker-bearing commit pushed after the
+  as-of to a still-open in-window PR is not filterable (layer A only;
+  exposure grows with re-collection lag).
+- **Dedup & freshness** (`analyze.group_by_period`): PRs are deduplicated
+  by number within (repo, period) across overlapping cells (full-quarter +
+  sub-window, or quarter + re-collected month); the richer record (carrying
+  `headRefName`) wins, and at equal richness the fresher cell (later file
+  mtime) wins. Single cell store since 2026-07-20 (`raw/census-v2/`); the
+  legacy `census` store was retired after its 187 remaining repo-quarters
+  were re-collected.
+- **Bot-authored PRs are included** in denominators and classified via layer
+  B. (Studies that need human-authored subsets filter explicitly and say so.)
+
+## 2. Per-PR classification (`detect.classify_pr` → PRClass)
+
+| field | definition | notes / caveats |
+|---|---|---|
+| `marker_tools` (layer A) | any commit in the PR carries a tool marker: Claude (`noreply@anthropic.com` co-author / "Generated with [Claude Code]" footer), Cursor (`cursoragent@cursor.com`), aider trailer, Codex (`codex@openai.com` author or `chatgpt-codex-connector` committer) | commit-forensic, strongest evidence; floors — squash strips trailers; only first 12 commits fetched |
+| `agent_author` (layer B) | PR author is a Bot-typed account in `AGENT_PR_AUTHORS` (copilot-swe-agent, devin-ai-integration, cursor, google-labs-jules, codegen-sh, amazon-q-developer, factory-droid, claude) | the author IS the tool; no trailer needed |
+| `branch_tool` (layer C) | head branch matches an agent prefix: `codex/`, `copilot/`, `cursor/`, `claude/`, `droid/` (weak, added 2026-07-17) | PR-level attribution only; measured precision per prefix in METHODS §2 (codex/copilot ~95%+; cursor/claude/droid indeterminates are the study's only potential overcount, bounded at 0.05pp CW / 0.11pp pooled on the Q2-2026 headline — report section 9); all-github-actions-committed branches excluded as measured FPs; requires census-v2 cells |
+| **`ai_involved`** | **A ∪ B ∪ C — the PRIMARY metric** | an explicit lower bound on true AI involvement |
+| `merged` | merged WITHIN 8 WEEKS of creation (frozen censoring rule; METHODS §1d); events past the frame-end CUTOFF count if inside the window | `merged_ever` = merged at ANY observed time (no window, no cap) — differs from `merged` exactly on >56-day merges; fate metrics are None on w8-immature PRs |
+| `rejected` | closed unmerged within 8 weeks | limbo = w8-mature, neither |
+| `self_merged` | merged and `mergedBy.login == author.login` | None (excluded from rates) when the cell lacks `mergedBy` |
+| `insider` | `authorAssociation ∈ {MEMBER, OWNER, COLLABORATOR}` | misses staff with private org membership |
+| `human_reviewed` | ≥1 formal review by a User **other than the PR author** (bot-logins excluded), submitted within w8 of creation | conversation comments never count; like all review columns, reported as None (skipped) until the PR is w8-mature — an open review window is a provisional undercount |
+| `substantive_review` | a reviewer≠author review with inline comments or state COMMENTED/CHANGES_REQUESTED | "more than a rubber-stamp APPROVED"; only first 15 reviews fetched |
+| `ai_reviewed` | ≥1 review by a Bot **other than the PR author** in `AI_REVIEWERS` (gemini-code-assist, copilot-pull-request-reviewer, coderabbitai, greptile-apps, qodo-merge-pro, cursor, chatgpt-codex-connector, copilot-swe-agent, claude) | decomposed from CI bots; reviewer≠author applies to bots as to humans (issue #9, 2026-07-28) — an agent's self-summary review on its own PR is not review activity; logins compared with `[bot]` normalized |
+| `other_bot_reviewed` | ≥1 Bot review not in `AI_REVIEWERS`, reviewer≠author | CI/automation noise kept separate |
+
+Disjoint layer decomposition (for the layered table only): B wins over A wins
+over C, so each PR counts once (`studies.layers.layered_table`).
+
+### 2b. Merged-conditioned review metrics
+Unmerged PRs are implicitly reviewed-and-rejected (merge triage), so reviewer
+coverage OF WHAT SHIPS is reported separately: `m_hum_rev`, `m_ai_rev`,
+`m_no_rev` (analyze columns, None-skip conditioning on merged) and the
+2x2 reviewer profile (`slices --table reviewers`: human-only / AI-only /
+both / neither, per slice). Key property: conditioned on merging, any-human
+review coverage ROSE vs the 2024 baseline while all-PRs coverage fell —
+both framings are reported.
+
+## 3. From PRs to rates (per repo-quarter)
+
+- **`analyze.pr_metrics`**: per-repo-quarter rate = share of that repo's
+  censused PRs with the property. Metrics whose field is unavailable on a PR
+  (e.g. `self_merged` on a legacy cell) are skipped, not zeroed.
+- **Repo qualification floor**: **≥5 PRs/quarter, ≥2 PRs/month** —
+  comparable thresholds per unit time (`analyze --min-prs` defaults by
+  `--granularity`; `studies.slices` likewise). Slice CONDITIONAL metrics
+  additionally require the same floor in the conditioning denominator.
+- **Granularity**: quarters are the headline unit (precision); months are
+  the trend unit (`--granularity month` in analyze/slices). Month buckets
+  re-partition the sampled quarters exactly (bucketing is by each PR's
+  createdAt, which always lies inside its cell's range) — no separate
+  collection. The newest month in an incremental update is PROVISIONAL
+  (reviews/merges lag; see METHODS runbook).
+- Census sampling: repo-quarters are collected completely (adaptive windows
+  + pagination + fail-hard saturation); rates are over ALL of a repo's PRs
+  in the window, coverage-gated at report time.
+
+## 4. Aggregation
+
+- **Contributor weighting (primary)**: weighted mean of per-repo rates,
+  weight = repo's core human contributors ACTIVE IN THE STUDY WINDOW —
+  ≥5 commits authored during Q4-2025..Q2-2026, bots excluded, from GitHub's
+  weekly contributor statistics (`pipeline.contributors` →
+  `data/derived/repo_contributors_window.csv`). Answers "the typical
+  currently-active AI-org developer's PR flow"; a dormant project's
+  historical committers no longer inflate its weight. The all-time variant
+  (≥10 commits ever, `repo_contributors_v2.csv`) is retained as a
+  sensitivity file.
+- **Pooled (secondary)**: share over all PRs (repo-size-dominated; the
+  layered decomposition table is pooled and labeled as such).
+- **Uncertainty**: bootstrap 95% CIs over repos, 2,000 resamples, per-cell
+  seeded streams (`analyze.bootstrap_ci(..., key=...)`, study seed 20260630)
+  — each interval reproduces on its own, independent of the other intervals
+  a run computes.
+- **Marker set**: one canonical set (`detect.MARKERS`: Claude, Cursor,
+  aider, Codex, OpenHands, and the vetted self-identified-agent
+  identities from the 2026-07-20 committer audit — METHODS §2); the
+  v1/v2 versioning was removed 2026-07-20; historical scan/enum cache
+  files keep their "v2" filename tag.
+
+## 5. The generated report (`artifacts/report_generated.md`)
+
+Produced by `scripts/report.py` (canonically invoked by
+`scripts/regenerate.py` stage F, which refuses to run until: stages exit
+zero, every repo-scoped org has a DONE strata sentinel, and every manifest
+repo-quarter has gap-free valid-cell coverage or a documented
+inaccessibility waiver). The monthly twin (`report_monthly.md`,
+`--granularity month`) runs the same sections; sections whose module is
+inherently quarterly carry an explicit `[quarterly]` tag there.
+
+The 22 sections, in order (each title names its producing module and
+argument — one section = one module invocation):
+
+1. **Contributor-weighted metrics** (`pipeline.analyze`) — per period ×
+   {equal-weight, contrib-weight}; columns = `ai_code` (layer A),
+   **`ai_involved`**, w8 fates (`merged`, `rejected_w8`, `limbo_w8`),
+   `human_review` (reviewer≠author, bot-clean), `ai_review`,
+   `other_bot_review`, `no_review`, `insider`, `self_merged`,
+   merged-conditioned `m_*`; each as `mean [95% CI]`.
+2. **Figure 2: Traceable AI usage** (`paper_tables --table usage`) — AI%
+   of submitted/merged PRs and AI-PR share of submitted/merged LOC (CW,
+   CIs). Rendered as `artifacts/ai_usage.png`.
+3. **Figure 3: Merged LOC per core contributor** (`paper_tables --table
+   core`) — CW merged (w8) kLOC per insider author + baseline multiple
+   (×2.96 by Q2-2026). Rendered as `core_loc.png`.
+4. **Layered decomposition** (`pipeline.studies.layers`) — pooled
+   disjoint shares: B-agent > A-marker > C-branch-only, plus union
+   (exact per-PR; replaced `pipeline.integrate`'s sampled blending,
+   removed 2026-07-20).
+5. **Slices: involvement** (`slices --table involvement`) — six slices
+   (adoption groups + org types) × {ai_involved, hum_rev, ai_rev, merged}.
+6. **Slices: self-merge** (`--table selfmerge`).
+7. **Balanced-panel sensitivity** (`--table panel`) — adoption vs cohort
+   composition.
+8. **Reviewer profile of merged PRs** (`--table reviewers`) — human-only /
+   AI-only / both / neither, per slice.
+9. **Two-sided bound** (`--table bounds`) — headline with/without
+   weak-prefix (cursor/, claude/, droid/) indeterminates; 0.05pp at the
+   Q2-2026 headline.
+10. **Involvement sensitivity to bot-authored PRs** (`--table botcheck`,
+    added 2026-07-28) — three `ai_involved` variants on one shared repo
+    set: published (profile `all`), no-dilution (non-AI bot PRs dropped,
+    layer-B agents kept), no-bots (profile `pr`); CW, 1,000-draw CIs,
+    plus non-AI-bot and all-bot authorship shares.
+11. **Productivity decomposition** (`productivity --cut decomposition`) —
+    PRs = authors × PRs/author on the balanced repo panel.
+12. **Persistent-author productivity** (`--cut persistent`) — same person,
+    same repo, 2024↔2026, AI-split.
+13. **Core-contributor merged LOC** (`--cut core`) — the Figure 3 series.
+14. **Core-contributor LOC split by AI involvement** (`--cut aisplit`) —
+    noAI-author kLOC (flat) vs AI users' AI-PR + nonAI-PR kLOC.
+15. **Figure A1: adoption cohorts** (`--cut adoption`) — fixed cohorts
+    early/medium/late/never/**fleet** (≥300 merged PRs/quarter, assigned
+    first); AI/nonAI/total kLOC per author with CI + median. Rendered as
+    `adoption_cohorts.png`; companions: `figure_2_comp_audits.png`
+    (balanced event panels per adoption month), `fleet_vs_nonadopters.png`,
+    `adoption_event.png` (event time net of non-adopters).
+    **Figure 2 membership** (`event_by_adoption_month`): members must have
+    submitted >=1 PR in EVERY offset month t-2..t+2 (`require_active`), so
+    each has a real pre-adoption baseline. Without it 30-48% of a cohort
+    had no activity at t-2/t-1 while 0% can be inactive at t0 (AI evidence
+    requires a PR), and zero-filled inactive months made the step at
+    adoption partly composition — authors appearing in the data rather
+    than producing more. The rule roughly halves cohort sizes and cuts the
+    median step from 2.3-11.5x to 1.3-2.5x.
+    **Read t-1 -> t+1, not t0.** t0 is inflated BY CONSTRUCTION: a month
+    in which an author submits more PRs has more chances to contain their
+    first AI-marked one, so unusually productive months are
+    disproportionately selected as the adoption month. t0 exceeds t+1 in
+    4 of 5 cohorts on merged. Quote the t-1 -> t+1 change (+25% to +185%
+    across cohorts and both series); the adoption month itself carries a
+    selection effect, not only a treatment effect.
+    **Median twins** `adoption_cohorts_median.png`,
+    `fleet_vs_nonadopters_median.png`
+    (`adoption_monthly(stat="median")`) and
+    `figure_2a_comp_audits_median.png`
+    (`event_by_adoption_month(stat="median")`) plot the same panels on the
+    MEDIAN cohort member. Cite the
+    median: per-contributor volume is heavy-tailed, and in 2026-06 a
+    single fleet operator supplied 54.7% of the cohort's merged LOC, so
+    the mean tracks that operator while the median tracks membership. The
+    mean twins are retained because the GAP between them is the evidence
+    of that concentration (fleet 2026-05→06: mean +50%, median −10%).
+    Medians are per series and do NOT decompose — the AI and non-AI
+    lines will not sum to their total, because a different member sits at
+    the middle of each; in the early-adopter panel the components sum to
+    ~1.8 against a total of 4.4. Figures bake in no captions (they are
+    supplied in the paper text); the images identify the statistic via
+    the LEGEND TITLE "median:", and the non-additivity warning lives HERE
+    and in the paper text, which must repeat it wherever a median panel
+    is reproduced. Figure 3's median twin
+    is `core_loc_median.png` (`core_rows(stat="median")`); it is
+    the source for per-contributor LEVELS.
+16. **Merged LOC by approval channel** (`--cut channels`) — humanRev /
+    botOnly / selfUnrev / otherUnrev shares of merged LOC.
+17. **Figure 6: review mix of merged PRs/LOC** (`productivity --cut
+    reviewmix`) — per quarter × {core, external}: PR and LOC shares of
+    humanRev / botOnly / selfUnrev / otherUnrev over mature merged PRs
+    (the substitution hypothesis). Rendered as `review_mix.png`.
+18. **Attention per line** (`studies.attention`) — HUMAN comments/kLOC
+    (bot-clean) + window h/kLOC, all/ins/ext + size bands.
+19. **PR fates at matched horizons** (`studies.fates`) — w8 primary, w26
+    sensitivity, per cohort; immature PRs excluded per horizon.
+20. **Responsiveness to human asks** (`studies.review_action`) — CLEAN
+    lane identified; two designs over one frame: responded% is the
+    equal-probability sample share (unweighted), post-ask LOC share is
+    Horvitz–Thompson over the PPS-by-LOC sample; commit lists paginated
+    with completeness metadata.
+21. **Adoption event-study** (`studies.event_study`) — merged (w8,
+    mature-months-only) and submitted kLOC in event time around each
+    author's first AI-marker month.
+22. **Code churn** (`studies.churn --table report`, added 2026-08-02) —
+    deleted:added over merged code in SAME-QUARTER-TRIMMED windows (a PR
+    counts iff created AND merged in the quarter, regardless of w8
+    maturity — an observed merge is terminal, and the trim gives every
+    quarter identical observability; cross-quarter merges dropped and
+    reported), arms all/AI/nonAI (profile `all` + `ai_contrast_eligible`,
+    so all = AI + nonAI). Headline = within-org contrast on TRACEABLE
+    adoption (an evidence floor, not literal adoption): per org (≥20
+    PRs/quarter, ≥2 qualifying quarters among Q4-2025..Q2-2026 —
+    Q1-2024 is excluded as an endpoint since its zero is by
+    construction — and nonzero adoption spread), churn at the
+    highest-adoption quarter over the lowest: geometric-mean multiple
+    with bootstrap CI over orgs, median, share of orgs rising. Faros's
+    +861% figure is quoted as an external reference for a DIFFERENT
+    population, not a replication target. Companion: calendar-trend
+    sensitivity (CW mean of per-repo ratios, capped sides, ≥5 PRs/repo,
+    per-cell CIs; pooled ratio; per-PR medians over nonzero-addition
+    PRs). **Monthly granularity** (`--granularity month`, added
+    2026-08-03) uses w8-FINALIZED months only — a month reports once
+    month_end + 56d ≤ AS_OF (June 2026 reported from the 2026-08-27
+    re-pull; at the current stamp the series runs through June) — with
+    per-unit-time floors (≥2 PRs/repo, ≥7 PRs/org-month)
+    and the last three finalized era months as the grouping window;
+    quarters remain the precision unit, months the trend unit. The 0.1%
+    balanced file-level sample (quarterly-only) and the bug-report proxy
+    (creation-bucketed mature-merged denominator, bug windows truncated
+    at the maturity frontier; monthly twin in
+    `churn_incidents_monthly_v1.jsonl`) stay auxiliary
+    (`churn --pull/--table sample/--pull-bugs/--table bugs`; §6), as
+    does the per-PR risk-window variant of the proxy
+    (`--pull-bug-dates/--table exposure`; §6).
+
+Alongside the report, `data/derived/census_manifest.json` records SHA-256
+prefixes of the population files, repo count, and cell-coverage numbers
+(covered / waived / total repo-periods). Incremental months live in
+`data/derived/incremental_months.txt` (see METHODS §1c).
+
+## 6. Auxiliary analyses (not in the generated report)
+
+- **Median insider kLOC/quarter, person-level** (`productivity.
+  insider_medians`; `artifacts/insider_medians_{productive,active,
+  panel}.png`, Figure 3b — one figure per population, the productive
+  panel being the headline). The
+  companion to Figure 3 with no repo weighting and no two-stage
+  aggregation: each insider's submitted (uncensored) and merged (w8)
+  kLOC per quarter, pooled across every repo they author in, then the
+  MEDIAN across people — so "median" means the middle insider. Three
+  populations, fleet operators excluded from all: **period-active**
+  (>=1 PR in the quarter; the only series whose membership varies —
+  minus the panel, it isolates composition), the **balanced panel**
+  (>=1 PR in every study quarter — the same people throughout, hence
+  survivor-selected toward long-tenured maintainers), and the
+  **productive panel** (panel members with >=`PRODUCTIVE_MIN_QUARTER` =
+  5 submitted PRs in EVERY study quarter and a mean of >=`ACTIVE_FLOOR`
+  = 10 per quarter over all four). Membership is decided ONCE and the
+  baseline quarter counts like any other: a per-quarter floor re-selects
+  people each quarter on a quantity correlated with the outcome and
+  churns those near the line — under such a rule 68% of the insiders
+  who ever cleared 10 PRs in a window quarter crossed the line at least
+  once — and a window-only mean admits people who ramped up during the
+  window, overstating growth. The 10/quarter mean is the Figure A5
+  floor that makes never-AI a behavioural claim (>=40 study-quarter PRs
+  with no marker).
+  Slices: all, ever-AI, never-AI (any AI-involved PR in the Q4-2025..
+  Q2-2026 window, as in the decile studies). Bands are seeded percentile
+  bootstraps of the median over persons; `n` per quarter is in the CSV.
+  The growth twins (`productivity.insider_growth`;
+  `artifacts/insider_medians_growth_*.png`) divide every series by its
+  own Q1-2024 median, so each population and slice starts at 1.0 and
+  the panels compare growth rather than levels; their bands resample
+  person indices JOINTLY for the two fixed panels (the same people in
+  both quarters — a panel in which everyone doubles reads exactly 2x)
+  and the two quarters independently for the period-active population.
+- `pipeline.studies.accountability`, `review_modes`, `corpus` — the
+  behavioral studies behind the working log (sampled, seeded); re-derive on
+  the final population before citing.
+- `data/derived/branch_sample_classifications.tsv` — minimized (identity-free)
+  per-PR classifications of the branch-prefix samples.
+- `data/derived/churn_sample_v1.jsonl` — the churn pilot's balanced 0.1%
+  per-file sample (generated-content sensitivity);
+  `churn_incidents_v1.jsonl` — bug-labeled issue counts per sampled
+  repo-quarter (bug-report PROXY pilot, label:bug only, windows
+  truncated at the maturity frontier). Both files always hold exactly
+  the current seeded selection (atomic rewrite; stale draws dropped).
+- `data/derived/churn_bug_dates_v2.jsonl` — the same pilot's bug-labeled
+  issues with their numbers and creation days (windows extended 28d past
+  each quarter; overlapping cells dedupe by issue number), so any bug
+  window is a local computation rather than a re-pull. Feeds
+  `churn --table exposure`: every merged PR opens a 28-day risk window at
+  its merge day, and a quarter's rate is the issues filed on its days over
+  the PR-risk-windows and kLOC-risk-windows carried on those days (two
+  denominators, one numerator; incidence over overlapping risk sets, not
+  attribution). Exposure looks back across contiguous quarters; the first
+  27 days of each censused block are burn-in. Frozen at as_of with the
+  frame fingerprint and each repo's grouping-window AI share; the table
+  reports the frozen numerator and flags a moved live frame. Every cell
+  carries the version of the collector that fetched it and is reused
+  only under that version, so a fix to the fetch re-pulls the artifact.
+
+## 6b. Complete census vs. sampled studies
+
+The PR census is a COMPLETE ENUMERATION, not a sample: every population
+repo-quarter is collected in full (adaptive sub-windows + pagination sized
+from the precount; high-volume repos like pytorch get up to one sub-window
+per day), gated by count-vs-precount reconciliation with a
+max(2%, 3 PRs) drift allowance, one self-heal re-pull, and FAIL-HARD on
+saturation — a repo-quarter is either fully collected or explicitly
+failed/waived, never silently truncated. All report tables run on this
+complete census.
+
+Sampling exists only in three clearly-labeled auxiliary studies, each with
+its own inference machinery: `review_action` (two designs over one frame:
+PPS-by-LOC with Horvitz–Thompson weights for LOC-share estimands, plus an
+equal-probability sample for per-PR rates),
+the LOC-hygiene sensitivity (~3.7k PRs with file lists), and the layer-C
+precision samples (org-stratified branch-PR pages). Per-PR field
+truncation (first 12 commits / 15 reviews in census cells) is a separate,
+documented downward bias — see §7.
+
+## 7. Metric-level limitations (beyond METHODS §6)
+
+- Per-PR truncation: first 12 commits / 15 reviews per PR (downward bias on
+  layer A and review detection for very long PRs).
+- `self_merged` availability tracks census-v2 coverage; rates skip unknown.
+- `no_review` means no formal review object of any kind; informal comment
+  engagement is not part of the generated report.
+- Slice membership is as-of the classification snapshot (topics observed
+  2026-07-07..10); ownership as-of cutoff.

@@ -1,0 +1,391 @@
+"""Metric classification (esp. AI-vs-CI reviewer decomposition), weighting, CIs."""
+import json
+import math
+import random
+
+import pytest
+
+from pipeline import ghx
+from pipeline.analyze import (bootstrap_ci, load_cells, period_of, pr_metrics,
+                              weighted_mean)
+from pipeline.detect import MARKERS
+from pipeline.scan_orgs import QUARTER_RANGES
+
+
+@pytest.fixture(autouse=True)
+def tmp_store(tmp_path, monkeypatch):
+    monkeypatch.setenv("AIRD_DATA_DIR", str(tmp_path))
+    return tmp_path
+
+
+def _review(login, typename="Bot", state="COMMENTED"):
+    return {"author": {"login": login, "__typename": typename},
+            "submittedAt": "2026-05-01T00:00:00Z", "state": state,
+            "comments": {"totalCount": 0}}
+
+
+def _pr(reviews=(), assoc="NONE", merged=False, msg="normal"):
+    return {
+        "createdAt": "2026-04-20T00:00:00Z",   # w8-mature at the as-of
+        "mergedAt": "2026-05-02T00:00:00Z" if merged else None,
+        "authorAssociation": assoc,
+        "additions": 10, "deletions": 5,
+        "commits": {"nodes": [{"commit": {"message": msg,
+                                          "authors": {"nodes": []}}}]},
+        "reviews": {"nodes": list(reviews)},
+    }
+
+
+# ------------------------------------------------- reviewer decomposition (R3)
+
+def test_ai_reviewer_counts_as_ai_review_not_other():
+    m = pr_metrics(_pr(reviews=[_review("gemini-code-assist")]), MARKERS)
+    assert m["ai_review"] and not m["other_bot_review"] and not m["human_review"]
+
+
+def test_ci_bot_is_not_ai_review():
+    """The P1.4 conflation: github-actions must NOT count as AI review."""
+    m = pr_metrics(_pr(reviews=[_review("github-actions[bot]")]), MARKERS)
+    assert m["other_bot_review"] and not m["ai_review"]
+
+
+def test_bot_suffix_normalized():
+    m = pr_metrics(_pr(reviews=[_review("coderabbitai[bot]")]), MARKERS)
+    assert m["ai_review"]
+
+
+def test_mixed_reviewers_all_flags():
+    m = pr_metrics(_pr(reviews=[_review("alice", "User"),
+                                _review("gemini-code-assist"),
+                                _review("github-actions[bot]")]), MARKERS)
+    assert m["human_review"] and m["ai_review"] and m["other_bot_review"]
+    assert not m["no_review"]
+
+
+def test_no_reviews_and_insider_and_ai_code():
+    m = pr_metrics(_pr(assoc="MEMBER",
+                       msg="x\n\nCo-Authored-By: Claude <noreply@anthropic.com>"),
+                   MARKERS)
+    assert m["no_review"] and m["insider"] and m["ai_code"]
+
+
+# ------------------------------------------------- weighting & CIs
+
+def test_weighted_mean_weights_dominate():
+    assert weighted_mean([(1.0, 99.0), (0.0, 1.0)]) == pytest.approx(0.99)
+    assert math.isnan(weighted_mean([]))
+
+
+def test_bootstrap_ci_brackets_mean_and_handles_tiny_n():
+    random.seed(7)
+    pairs = [(v, 1.0) for v in (0.1, 0.2, 0.3, 0.4, 0.5)]
+    lo, hi = bootstrap_ci(pairs, n=500, key="brackets-mean")
+    assert lo <= weighted_mean(pairs) <= hi
+    assert 0.1 <= lo < hi <= 0.5
+    assert all(math.isnan(x) for x in
+               bootstrap_ci([(0.5, 1.0)], n=50, key="tiny-n"))
+
+
+# ------------------------------------------------- cell loading / periods
+
+def test_period_of_maps_subwindows_to_quarter():
+    assert period_of("2026-02-01..2026-02-09", QUARTER_RANGES) == "Q1-2026"
+    assert period_of("2026-01-01..2026-03-31", QUARTER_RANGES) == "Q1-2026"
+    assert period_of("2025-05-01..2025-05-09", QUARTER_RANGES) is None
+
+
+def test_load_cells_roundtrips_and_skips_corrupt(tmp_store):
+    good = ghx.cell_path("census-v2", "fw-ai/flashinfer", "2026-01-01..2026-03-31")
+    good.write_text(json.dumps([{"number": 1}, None]))       # None PRs dropped
+    bad = ghx.cell_path("census-v2", "o/bad", "2026-01-01..2026-03-31")
+    bad.write_text('{"errors":[]}')                          # wrong shape
+    ugly = ghx.cell_path("census-v2", "o/ugly", "2026-01-01..2026-03-31")
+    ugly.write_text("{corrupt")
+    cells = load_cells()
+    assert cells[("fw-ai/flashinfer", "2026-01-01..2026-03-31")] == [{"number": 1}]
+    assert not any(k[0] in ("o/bad", "o/ugly") for k in cells)
+
+
+def test_group_by_period_dedups_overlapping_cell_generations(tmp_store):
+    """Review finding: full-quarter + sub-window cells (or old/new quarter
+    definitions) for the same repo-period double-counted PRs."""
+    import json as _json
+    from pipeline.analyze import group_by_period
+    full = ghx.cell_path("census-v2", "o/r", "2026-01-01..2026-03-31")
+    full.write_text(_json.dumps([{"number": 1}, {"number": 2}]))
+    sub = ghx.cell_path("census-v2", "o/r", "2026-01-01..2026-01-09")
+    sub.write_text(_json.dumps([{"number": 2}, {"number": 3}]))
+    grouped = group_by_period(load_cells(), QUARTER_RANGES)
+    nums = sorted(pr["number"] for pr in grouped[("o/r", "Q1-2026")])
+    assert nums == [1, 2, 3]              # PR 2 counted once, not twice
+
+
+def test_insider_is_a_reported_metric():
+    """Review finding: insider was computed but never reported."""
+    from pipeline.analyze import METRICS
+    assert "insider" in METRICS
+
+
+def test_ai_reviewer_list_covers_observed_reviewers():
+    """Reviewers actually seen in the Phase-0 data must be classified as AI."""
+    from pipeline.detect import AI_REVIEWERS
+    for login in ("gemini-code-assist", "copilot-pull-request-reviewer",
+                  "coderabbitai", "greptile-apps"):
+        assert login in AI_REVIEWERS
+
+
+def test_richer_v2_record_wins_over_legacy_on_overlap():
+    """External review P1: a legacy full-quarter cell must not strip
+    headRefName/mergedBy from the same PR delivered by a v2 sub-window,
+    regardless of dict iteration order."""
+    legacy = {"number": 7, "reviews": {"nodes": []}}
+    rich = {"number": 7, "headRefName": "codex/x", "mergedBy": None,
+            "reviews": {"nodes": []}}
+    for first, second in ((legacy, rich), (rich, legacy)):
+        cells = {("o/r", "2026-04-01..2026-06-30"): [first],
+                 ("o/r", "2026-04-01..2026-04-09"): [second]}
+        from pipeline.analyze import group_by_period
+        grouped = group_by_period(cells, QUARTER_RANGES)
+        prs = grouped[("o/r", "Q2-2026")]
+        assert len(prs) == 1 and "headRefName" in prs[0]
+
+
+def test_weights_reader_accepts_window_column(tmp_path):
+    """The window weights file's header differs; silently dropping every
+    weight made contrib-weight identical to equal-weight in a generated
+    report."""
+    f = tmp_path / "w.csv"
+    f.write_text("repo,core_contributors_window\no/r,7\n")
+    # exercise the same parsing path
+    import csv as _csv
+    weights = {}
+    for row in _csv.DictReader(open(f)):
+        val = row.get("core_contributors_window", row.get("core_contributors"))
+        weights[row["repo"]] = max(float(val), 1.0)
+    assert weights == {"o/r": 7.0}
+
+
+def test_month_granularity_buckets_by_created_at():
+    from pipeline.analyze import group_by_period
+    cells = {("o/r", "2026-04-01..2026-06-30"): [
+        {"number": 1, "createdAt": "2026-04-15T00:00:00Z"},
+        {"number": 2, "createdAt": "2026-05-02T00:00:00Z"},
+        {"number": 3, "createdAt": "2026-05-30T00:00:00Z"}]}
+    g = group_by_period(cells, QUARTER_RANGES, "month")
+    assert len(g[("o/r", "2026-04")]) == 1 and len(g[("o/r", "2026-05")]) == 2
+    # quarter mode unchanged
+    q = group_by_period(cells, QUARTER_RANGES)
+    assert len(q[("o/r", "Q2-2026")]) == 3
+
+
+def test_partial_quarter_months_excluded_from_month_grouping():
+    """Stray cells from the never-fully-censused Q3-2025 must not surface
+    as reportable months."""
+    from pipeline.analyze import group_by_period
+    cells = {("o/r", "2025-08-01..2025-08-31"): [
+        {"number": 1, "createdAt": "2025-08-10T00:00:00Z"}]}
+    g = group_by_period(cells, QUARTER_RANGES, "month")
+    assert ("o/r", "2025-08") not in g
+
+
+def test_merged_conditioned_metrics_none_on_unmerged():
+    from pipeline.analyze import pr_metrics
+    from pipeline.detect import MARKERS
+    unmerged = {"reviews": {"nodes": []}, "commits": {"nodes": []},
+                "createdAt": "2026-04-10T00:00:00Z"}
+    m = pr_metrics(unmerged, MARKERS)
+    assert m["m_hum_rev"] is None and m["m_no_rev"] is None
+    merged = dict(unmerged, mergedAt="2026-05-01T00:00:00Z")
+    m = pr_metrics(merged, MARKERS)
+    assert m["m_hum_rev"] is False and m["m_no_rev"] is True
+
+
+def test_incremental_month_registry_is_cumulative(tmp_path, monkeypatch):
+    """External review P1 round 2: a September update must not drop July —
+    extended_quarters reads ALL registered months, not the invocation's."""
+    from pipeline import analyze
+    reg = tmp_path / "incremental_months.txt"
+    reg.write_text("2026-07\n2026-08\n2026-09\n")
+    monkeypatch.setattr(analyze, "INCREMENTAL_REGISTRY", reg)
+    q = analyze.extended_quarters()
+    assert {"2026-07", "2026-08", "2026-09"} <= set(q)
+    # quarters precede month tokens: period_of priority at range overlap
+    keys = list(q)
+    assert keys.index("Q2-2026") < keys.index("2026-07")
+    assert {"2026-07", "2026-08", "2026-09"} <= analyze.censused_months(q)
+
+
+def test_censused_months_never_emits_a_month_past_december():
+    """PR #1 review finding 6 (RED first): censused_months assumed a quarter
+    spans months m, m+1, m+2 within one year, so any censused quarter whose
+    range starts in Nov/Dec emitted tokens like '2025-13' — which match no
+    PR's createdAt month, silently dropping that month from every monthly
+    table. Derive the months from the range itself instead."""
+    from pipeline import analyze
+    got = analyze.censused_months({"Q4-2025": "2025-11-01..2026-01-31"})
+    assert got == {"2025-11", "2025-12", "2026-01"}
+
+
+def test_overlapping_cells_fresher_record_wins_at_equal_richness():
+    """External review P1 round 2: a re-collected monthly cell must
+    supersede a stale quarter cell for the same PR (later-loaded wins when
+    both carry headRefName)."""
+    from pipeline.analyze import group_by_period
+    from pipeline.scan_orgs import QUARTER_RANGES
+    stale = {"number": 7, "createdAt": "2026-06-10T00:00:00Z",
+             "headRefName": "old/value"}
+    fresh = {"number": 7, "createdAt": "2026-06-10T00:00:00Z",
+             "headRefName": "new/value"}
+    cells = {("o/r", QUARTER_RANGES["Q2-2026"]): [stale],
+             ("o/r", "2026-06-01..2026-06-30"): [fresh]}  # loaded later
+    out = group_by_period(cells, dict(QUARTER_RANGES))
+    (prs,) = [v for k, v in out.items() if k == ("o/r", "Q2-2026")]
+    assert [p["headRefName"] for p in prs] == ["new/value"]
+    # and the richer record still wins regardless of order
+    poor = {"number": 7, "createdAt": "2026-06-10T00:00:00Z"}
+    cells = {("o/r", "2026-06-01..2026-06-30"): [fresh],
+             ("o/r", QUARTER_RANGES["Q2-2026"]): [poor]}  # poorer, later
+    out = group_by_period(cells, dict(QUARTER_RANGES))
+    (prs,) = [v for k, v in out.items() if k == ("o/r", "Q2-2026")]
+    assert [p.get("headRefName") for p in prs] == ["new/value"]
+
+
+def test_layered_decomposition_is_disjoint_with_b_over_a_over_c():
+    """One PR counts in exactly one layer; precedence B > A > C."""
+    from pipeline.detect import MARKERS, classify_pr
+    both = {"number": 1, "createdAt": "2026-04-01T00:00:00Z",
+            "author": {"login": "copilot-swe-agent[bot]", "__typename": "Bot"},
+            "headRefName": "codex/x",
+            "commits": {"nodes": [{"commit": {
+                "message": "x", "authors": {"nodes": [
+                    {"email": "noreply@anthropic.com"}]}}}]},
+            "reviews": {"nodes": []}}
+    c = classify_pr(both, MARKERS)
+    assert c.agent_author and c.marker_tools and c.branch_tool
+    # precedence as encoded in studies.layers.layered_table
+    assert c.agent_author is not None            # -> counted as B only
+
+
+def _monthly_update_module():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "monthly_update", "scripts/monthly_update.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_monthly_update_revises_two_trailing_months():
+    """METHODS-audit repro (RED first): with the w8 rule a month's fates
+    stay open ~8 weeks past month end, so each update must re-collect the
+    previous TWO months — N-1 (creation recency) and N-2 (whose w8 windows
+    closed during month N). Revising only N-1 finalizes nothing."""
+    mu = _monthly_update_module()
+    assert mu.months_to_revise("2026-09") == ["2026-07", "2026-08"]
+    assert mu.months_to_revise("2027-01") == ["2026-11", "2026-12"]
+
+
+def test_review_metrics_none_until_w8_mature(monkeypatch):
+    """Repro RED first: an immature PR's review window is still open, so
+    its review columns are provisional undercounts — they must be None
+    (skipped), same as fates, until w8 maturity."""
+    from pipeline import detect
+    from pipeline.analyze import pr_metrics
+    from pipeline.detect import MARKERS
+    # Pin the data stamp: it advances with every re-pull (METHODS §1c),
+    # so which fixture is immature must not ride on its current value.
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-01T00:00:00Z")
+    immature = {"number": 1, "createdAt": "2026-06-20T00:00:00Z",
+                "author": {"login": "alice", "__typename": "User"},
+                "commits": {"nodes": []}, "reviews": {"nodes": []}}
+    m = pr_metrics(immature, MARKERS)
+    for col in ("human_review", "ai_review", "other_bot_review",
+                "no_review", "m_hum_rev", "m_ai_rev", "m_no_rev"):
+        assert m[col] is None, col
+    mature = dict(immature, createdAt="2026-04-01T00:00:00Z")
+    m = pr_metrics(mature, MARKERS)
+    assert m["human_review"] is False and m["no_review"] is True
+
+
+def test_self_merged_none_until_w8_mature(monkeypatch):
+    """Repro RED first: an immature PR can still get merged (and thus gain
+    a mergedBy) later, so self_merged is a provisional quantity — None
+    until w8 maturity, same gate as fates and review columns."""
+    from pipeline import detect
+    from pipeline.analyze import pr_metrics
+    from pipeline.detect import MARKERS
+    # Pin the data stamp: it advances with every re-pull (METHODS §1c),
+    # so which fixture is immature must not ride on its current value.
+    monkeypatch.setattr(detect, "AS_OF", "2026-08-01T00:00:00Z")
+    immature = {"number": 1, "createdAt": "2026-06-20T00:00:00Z",
+                "mergedAt": "2026-06-25T00:00:00Z",
+                "mergedBy": {"login": "alice", "__typename": "User"},
+                "author": {"login": "alice", "__typename": "User"},
+                "commits": {"nodes": []}, "reviews": {"nodes": []}}
+    assert pr_metrics(immature, MARKERS)["self_merged"] is None
+    mature = dict(immature, createdAt="2026-04-01T00:00:00Z",
+                  mergedAt="2026-04-05T00:00:00Z")
+    assert pr_metrics(mature, MARKERS)["self_merged"] is True
+
+
+def test_keyed_bootstrap_is_independent_of_call_order():
+    """PR #1 review item 2 (RED first): every CI in a run shared one global
+    RNG, so a CI reproduced only for an IDENTICAL SEQUENCE of calls — adding
+    a metric or a period silently shifted every CI after it, and the same
+    fragility produced the 4cf61f9 hash-seed drift. A keyed CI must be
+    identical however many other CIs were drawn first."""
+    from pipeline import analyze
+    pairs = [(i / 20, 1.0) for i in range(20)]
+    alone = analyze.bootstrap_ci(pairs, 200, key="Q1-2026|ai_involved")
+    for i in range(5):                     # unrelated CIs drawn in between
+        analyze.bootstrap_ci([(i / 7, 1.0) for i in range(7)], 200,
+                             key=f"noise-{i}")
+    again = analyze.bootstrap_ci(pairs, 200, key="Q1-2026|ai_involved")
+    assert alone == again
+    # distinct keys must NOT collapse to the same stream
+    other = analyze.bootstrap_ci(pairs, 200, key="Q2-2026|ai_involved")
+    assert other != alone
+
+
+def test_keyed_bootstrap_is_hash_seed_independent():
+    """Same finding: the derived stream must not go through hash(), which is
+    PYTHONHASHSEED-dependent for tuples."""
+    import os
+    import subprocess
+    import sys
+    script = ("import sys; sys.path.insert(0, 'src');"
+              "from pipeline.analyze import bootstrap_ci;"
+              "print(bootstrap_ci([(i/20, 1.0) for i in range(20)], 200,"
+              " key='Q1-2026|ai_involved'))")
+
+    def run(seed):
+        r = subprocess.run([sys.executable, "-c", script], capture_output=True,
+                           text=True, env={**os.environ,
+                                           "PYTHONHASHSEED": str(seed)})
+        assert r.returncode == 0, r.stderr
+        return r.stdout
+    assert run(1) == run(2)
+
+
+def test_bootstrap_percentiles_are_interpolated_not_indexed():
+    """PR #1 review item 5 (RED first): stats[int(0.025*n)] takes the
+    (0.025n+1)-th order statistic of n draws — at n=2000 the 51st value, not
+    the 2.5th percentile. On a known ascending sample the 2.5/97.5
+    percentiles are exact."""
+    from pipeline.analyze import _percentile
+    vals = [float(i) for i in range(101)]        # 0..100
+    assert _percentile(vals, 0.025) == 2.5
+    assert _percentile(vals, 0.975) == 97.5
+    assert _percentile(vals, 0.0) == 0.0 and _percentile(vals, 1.0) == 100.0
+
+
+def test_one_stream_per_cell_not_per_draw():
+    """A keyed CI must build its n draws from ONE stream. Constructing the
+    stream inside the draw loop reseeds it identically every iteration, so
+    every 'resample' is the same one and the interval collapses to a point
+    that need not even contain the sample mean."""
+    from pipeline.analyze import bootstrap_ci, weighted_mean
+    pairs = [(v, 1.0) for v in (0.1, 0.2, 0.3, 0.4, 0.5)]
+    lo, hi = bootstrap_ci(pairs, 500, key="one-stream")
+    assert hi > lo                                   # not degenerate
+    assert lo <= weighted_mean(pairs) <= hi

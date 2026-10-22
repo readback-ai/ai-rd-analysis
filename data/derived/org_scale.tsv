@@ -1,0 +1,483 @@
+org	repos	flagship_stars	top5_stars	sources	in_v1
+NVIDIA	756	21487	87880	gh-topic|hf-hub|lfai	0
+huggingface	445	162010	290638	gh-topic|hf-hub|lfai	1
+microsoft	8147	187037	705722	gh-topic|hf-hub|lfai	0
+h2oai	263	11979	30949	gh-topic|hf-hub|lfai	0
+PaddlePaddle	108	84206	148432	gh-topic|hf-hub|lfai	0
+bentoml	113	12378	22601	gh-topic|lfai	0
+langchain-ai	248	140481	231477	gh-topic|lfai	1
+unslothai	9	67570	75938	gh-topic|hf-hub	1
+ray-project	126	43051	53051	gh-topic|lfai	0
+openvinotoolkit	48	10451	20100	gh-topic|lfai	0
+kserve	16	5629	6249	gh-topic|lfai	0
+milvus-io	67	45008	49785	gh-topic|lfai	1
+qdrant	131	32766	39254	gh-topic|hf-hub	1
+Lightricks	152	10599	25265	gh-topic|hf-hub	0
+google	2881	53514	229180	gh-topic|lfai	0
+deepset-ai	74	25774	28797	gh-topic|lfai	0
+QwenLM	47	27341	110492	gh-topic|hf-hub	1
+zai-org	51	41034	108747	gh-topic|hf-hub	1
+ggml-org	22	118562	188085	gh-topic|hf-hub	1
+nomic-ai	54	77382	82687	gh-topic|hf-hub	0
+mistralai	24	10825	21706	gh-topic|hf-hub	1
+alibaba	542	37406	164735	gh-topic|lfai	0
+vespa-engine	22	6979	7685	gh-topic|lfai	0
+mlflow	20	26770	27487	gh-topic|lfai	0
+jina-ai	266	21863	55131	gh-topic|hf-hub	1
+Netflix	234	24466	80981	gh-topic|lfai	0
+deepseek-ai	35	103833	281109	gh-topic|hf-hub	0
+OpenBMB	80	33609	109493	gh-topic|hf-hub	1
+rhasspy	142	11161	16359	gh-topic|hf-hub	0
+mozilla	2555	53508	114989	gh-topic|lfai	0
+Tencent	274	27385	110443	gh-topic|lfai	0
+FlagOpen	32	11881	14775	gh-topic|hf-hub	0
+tensorflow	107	196114	325107	gh-topic|lfai	0
+ludwig-ai	6	11727	11754	gh-topic|lfai	0
+flyteorg	47	7122	7707	gh-topic|lfai	0
+facebookresearch	1414	54428	188217	hf-hub|lfai	0
+google-research	349	40049	147280	hf-hub|lfai	0
+awslabs	1013	13335	44501	hf-hub|lfai	0
+apple	432	44574	101668	hf-hub|lfai	0
+salesforce	418	11242	30281	hf-hub|lfai	0
+openai	261	103836	343767	hf-hub|lfai	1
+docling-project	25	62337	65219	hf-hub|lfai	0
+allenai	587	17607	42225	hf-hub|lfai	1
+HKUDS	89	44853	172980	gh-topic	0
+vllm-project	43	84779	103122	gh-topic	1
+Mintplex-Labs	38	62278	65684	gh-topic	0
+pathwaycom	5	62809	125964	gh-topic	0
+bytedance	411	75399	145126	gh-topic	0
+datawhalechina	215	62619	175563	gh-topic	0
+mem0ai	8	59683	61622	gh-topic	0
+predibase	19	3800	4464	gh-topic	0
+run-llama	132	50493	75998	gh-topic	1
+FlowiseAI	15	54105	54945	gh-topic	0
+langfuse	25	30027	31108	gh-topic	0
+GoogleCloudPlatform	1491	20505	68885	gh-topic	0
+Lightning-AI	26	31211	57092	gh-topic	0
+NousResearch	85	205423	214208	gh-topic	1
+langgenius	39	146965	150390	gh-topic	0
+open-webui	25	143416	155075	gh-topic	0
+firecrawl	100	141188	179506	gh-topic	0
+browser-use	48	101312	148600	gh-topic	0
+algorithmicsuperintelligence	3	6618	10786	gh-topic	0
+katanemo	4	6604	6639	gh-topic	0
+VectifyAI	8	33504	36866	gh-topic	0
+neuml	31	12684	16138	gh-topic	0
+langchain4j	20	12461	14992	gh-topic	0
+zilliztech	71	11996	33148	gh-topic	1
+postgresml	44	6807	12290	gh-topic	0
+plastic-labs	44	5630	6806	gh-topic	0
+infiniflow	12	83848	88540	gh-topic	0
+Tencent-Hunyuan	68	14054	38736	gh-topic	0
+open-mmlab	54	32775	67677	gh-topic	0
+myshell-ai	6	36811	46766	gh-topic	0
+FunAudioLLM	16	21883	34647	gh-topic	0
+langflow-ai	11	150190	154872	gh-topic	0
+stanford-oval	116	29591	32077	gh-topic	0
+agentscope-ai	20	27294	59807	gh-topic	0
+HandsOnLLM	2	27273	27286	gh-topic	0
+AI4Finance-Foundation	43	20749	51430	gh-topic	0
+camel-ai	40	19900	42992	gh-topic	0
+Significant-Gravitas	28	185202	190260	gh-topic	0
+ollama	3	175118	189636	gh-topic	0
+TauricResearch	3	89645	90111	gh-topic	0
+OpenHands	43	78665	80274	gh-topic	0
+FoundationAgents	23	69108	129083	gh-topic	0
+shareAI-lab	38	68952	77863	gh-topic	0
+rtk-ai	6	66921	67655	gh-topic	0
+upstash	134	58290	65510	gh-topic	0
+gitleaks	6	27925	28546	gh-topic	0
+Tiiny-AI	1	9599	9599	gh-topic	0
+InternLM	52	7928	30123	gh-topic	1
+flashinfer-ai	19	5874	6434	gh-topic	0
+cactus-compute	18	5369	8330	gh-topic	0
+superduper-io	4	5298	5300	gh-topic	0
+gpustack	17	5240	6098	gh-topic	0
+FellouAI	8	4936	5039	gh-topic	0
+lemonade-sdk	48	4691	5444	gh-topic	0
+neuralmagic	99	3159	6283	gh-topic	0
+spiceai	114	3001	3082	gh-topic	0
+meilisearch	129	58337	61528	gh-topic	0
+topoteretes	12	25328	26426	gh-topic	0
+weaviate	140	16461	27368	gh-topic	1
+memvid	15	15698	16397	gh-topic	0
+StarTrail-org	4	12609	18294	gh-topic	0
+lancedb	51	10758	12024	gh-topic	0
+oramasearch	58	10455	11789	gh-topic	0
+oceanbase	123	10168	18640	gh-topic	0
+databendlabs	45	9359	11565	gh-topic	0
+activeloopai	49	9192	10691	gh-topic	0
+reorproject	1	8560	8560	gh-topic	0
+MariaDB	35	7787	8988	gh-topic	0
+RediSearch	18	6162	7005	gh-topic	0
+genkit-ai	16	6157	6508	gh-topic	0
+HelixDB	24	5520	5615	gh-topic	0
+BerriAI	55	51981	52442	gh-topic	0
+ComposioHQ	74	66279	112586	gh-topic	0
+promptfoo	20	22719	22901	gh-topic	0
+comet-ml	70	19998	22093	gh-topic	0
+TransformerOptimus	11	17595	19102	gh-topic	0
+raga-ai-hub	4	16149	16303	gh-topic	0
+vibrantlabsai	17	14569	14712	gh-topic	0
+Portkey-AI	29	12235	12557	gh-topic	0
+tensorzero	9	11673	11757	gh-topic	0
+dataelement	16	11478	15648	gh-topic	0
+Arize-ai	68	10319	11862	gh-topic	0
+0xPlaygrounds	64	7782	8047	gh-topic	0
+evidentlyai	10	7645	7828	gh-topic	0
+traceloop	24	7245	8317	gh-topic	0
+clearml	32	6751	7778	gh-topic	0
+maximhq	35	6116	6162	gh-topic	0
+Helicone	21	5875	6512	gh-topic	0
+coze-dev	22	21066	27618	gh-topic	0
+Giskard-AI	33	5475	5772	gh-topic	0
+google-gemini	45	105647	148160	gh-topic	0
+nexu-io	18	72715	87240	gh-topic	0
+daytonaio	43	72363	73223	gh-topic	0
+crewAIInc	32	54549	62614	gh-topic	0
+aaif-goose	5	50401	50719	gh-topic	0
+agno-agi	66	40894	45743	gh-topic	0
+headroomlabs-ai	1	53514	53514	gh-topic	0
+jeecgboot	21	46910	59920	gh-topic	0
+mindsdb	57	39350	40675	gh-topic	0
+QuivrHQ	10	39183	46672	gh-topic	0
+chatchat-space	3	38231	38463	gh-topic	0
+khoj-ai	12	35391	36121	gh-topic	0
+onyx-dot-app	12	30599	31384	gh-topic	0
+RunanywhereAI	30	10310	12343	gh-topic	0
+FoundationVision	21	8704	19924	gh-topic	0
+transformerlab	17	5107	5295	gh-topic	0
+nunchaku-ai	4	3897	7592	gh-topic	0
+hao-ai-lab	31	3782	5914	gh-topic	0
+SandAI-org	9	3721	4979	gh-topic	0
+thu-ml	93	10821	21763	gh-topic	0
+ali-vilab	61	4231	15093	gh-topic	0
+coqui-ai	23	45645	50735	gh-topic	0
+2noise	3	39526	39562	gh-topic	0
+nari-labs	2	19325	20476	gh-topic	0
+leon-ai	15	17344	17634	gh-topic	0
+k2-fsa	31	13254	25629	gh-topic	0
+supertone-inc	27	12797	13115	gh-topic	0
+espnet	21	9870	10564	gh-topic	0
+espeak-ng	8	6611	6760	gh-topic	0
+argmaxinc	18	6242	7491	gh-topic	0
+supabase	156	104996	123193	gh-topic	0
+InsForge	27	12007	12124	gh-topic	0
+apache	3141	73582	271284	gh-topic	0
+lance-format	17	6734	7140	gh-topic	0
+Eventual-Inc	33	5588	5635	gh-topic	0
+MinishLab	11	5432	9051	gh-topic	0
+Marker-Inc-Korea	49	4846	5489	gh-topic	0
+CaviraOSS	9	4281	6015	gh-topic	0
+lightly-ai	32	3770	6348	gh-topic	0
+towhee-io	9	3450	3990	gh-topic	0
+embeddings-benchmark	9	3326	3458	gh-topic	0
+axolotl-ai-cloud	22	12110	12253	gh-topic	0
+oumi-ai	8	9331	9394	gh-topic	0
+Kiln-AI	6	4939	4996	gh-topic	0
+truefoundry	125	4408	4549	gh-topic	0
+nucleuscloud	16	4148	4163	gh-topic	0
+smallcloudai	27	3549	3942	gh-topic	0
+sentient-agi	17	5080	13483	gh-topic	0
+aiming-lab	36	13634	22729	gh-topic	0
+AIDotNet	40	3367	5419	gh-topic	0
+dbiir	37	3111	3283	gh-topic	0
+beclab	88	5000	5062	gh-topic	0
+ModelTC	80	4145	9526	gh-topic	0
+FedML-AI	20	4050	4574	gh-topic	0
+thu-pacman	40	3124	3825	gh-topic	0
+pytorch	70	101211	157617	lfai	0
+Trusted-AI	4	6069	10685	lfai	0
+IntelLabs	77	2934	6554	lfai	0
+deepmind	0	0	0	lfai	0
+whylabs	40	2825	4111	lfai	0
+VKCOM	134	1515	4791	lfai	0
+VertaAI	12	1746	1750	lfai	0
+uTensor	14	1926	2020	lfai	0
+tzutalin				lfai	0
+truera	18	3405	3435	lfai	0
+triton-inference-server	36	10783	14105	lfai	0
+Substra	16	278	468	lfai	0
+spotify	284	18748	49434	lfai	0
+slundberg				lfai	0
+SeldonIO	75	4757	12288	lfai	0
+sapientml	9	450	468	lfai	0
+rstudio	373	6369	24143	lfai	0
+robinhood	10	6821	13178	lfai	0
+quic	68	734	1786	lfai	0
+PyTorchLightning	0	0	0	lfai	0
+pymetrics	22	321	321	lfai	0
+project-ryoma	2	406	406	lfai	0
+pravega	44	2001	2575	lfai	0
+plotly	229	24277	69595	lfai	0
+neo-ai	5	496	600	lfai	0
+mars-project	4	2741	2757	lfai	0
+lutzroeder				lfai	0
+kundajelab	190	875	1740	lfai	0
+interpretml	15	6882	9407	lfai	0
+intelligent-machine-learning	7	1666	1750	lfai	0
+intel-analytics	1	1	1	lfai	0
+inferenceengine	4	229	234	lfai	0
+homenc	3	3241	3241	lfai	0
+Hitachi-Automotive-And-Industry-Lab	1	1962	1962	lfai	0
+gnes-ai	5	1265	1301	lfai	0
+flashlight	4	6442	11977	lfai	0
+flairNLP	12	14379	15147	lfai	0
+dotnet	278	38161	121953	lfai	0
+dmlc	51	28509	53768	lfai	0
+datashim-io	2	530	530	lfai	0
+datahub-project	7	12154	12218	lfai	0
+couler-proj	1	943	943	lfai	0
+chainer	24	5918	9508	lfai	0
+catalyst-team	23	3373	3847	lfai	0
+cas-bigdatalab	27	540	618	lfai	0
+caicloud	83	2920	7548	lfai	0
+BrikerMan				lfai	0
+Beyond-ML-Labs	5	33	38	lfai	0
+BAAI-Open				lfai	0
+autonomio	22	1637	1718	lfai	0
+andosa				lfai	0
+allegroai				lfai	0
+advboxes	2	1406	1472	lfai	0
+zenml-io	83	5463	6936	lfai	0
+vwxyzjn				lfai	0
+visgl	19	14285	27934	lfai	0
+vearch	10	2316	2487	lfai	0
+v6d-io	2	959	961	lfai	0
+unitycatalog	4	3440	3586	lfai	0
+ucbrise	53	1435	3727	lfai	0
+twosigma	71	2885	4794	lfai	0
+trinodb	47	12975	14104	lfai	0
+tikv	65	16752	24771	lfai	0
+tf-encrypted	16	1242	1448	lfai	0
+tensorchord	85	5866	10811	lfai	0
+tektoncd	23	8996	11808	lfai	0
+TeamHG-Memex	75	2775	4809	lfai	0
+studioml	4	383	386	lfai	0
+streamlit	109	45097	48276	lfai	0
+stencila	58	890	1218	lfai	0
+StarRocks	52	11832	12549	lfai	0
+stanfordnlp	55	35608	62348	lfai	1
+stanford-futuredata	70	3891	6149	lfai	0
+stan-dev	52	2756	6384	lfai	0
+sql-machine-learning	12	5184	6068	lfai	0
+sparklyr	3	970	971	lfai	0
+sony	143	4388	12779	lfai	0
+SoftwareAG	36	191	252	lfai	0
+soajs	40	55	113	lfai	0
+snorkel-team	5	5982	6447	lfai	0
+skiplang	1	2018	2018	lfai	0
+shogun-toolbox	20	3067	3142	lfai	0
+scipy	35	14787	15495	lfai	0
+scikit-learn	17	66627	66849	lfai	0
+RWKV	16	1573	1859	lfai	0
+RasaHQ	202	21225	25346	lfai	0
+quiltdata	83	1367	1521	lfai	0
+python	92	73609	106240	lfai	0
+pyro-ppl	13	9015	12136	lfai	0
+pymc-devs	42	9654	13960	lfai	0
+pyg-team	5	23854	24884	lfai	0
+pycaret	59	9817	10048	lfai	0
+prometheus	58	64838	98669	lfai	0
+Project-OpenBytes	7	13	29	lfai	0
+prestodb	75	16712	17493	lfai	0
+PrefectHQ	41	25858	55451	lfai	0
+postgres	5	21304	21439	lfai	0
+polynote	3	4594	4700	lfai	0
+polyaxon	45	3709	4855	lfai	0
+plaidml	19	4572	4677	lfai	0
+pixiedust	12	1040	1277	lfai	0
+PipelineAI	0	0	0	lfai	0
+pilosa	1	0	0	lfai	0
+pandas-dev	16	49232	49625	lfai	0
+PAIR-code	44	7340	13521	lfai	0
+orgs				lfai	0
+orchest	12	4136	4188	lfai	0
+oracle	313	21616	39083	lfai	0
+openshift	840	8664	16898	lfai	0
+OpenMined	174	9915	12570	lfai	0
+OpenLineage	12	2519	2545	lfai	0
+OpenDataology	16	34	59	lfai	0
+opencv	18	89444	106818	lfai	0
+Open-Voice-Trustmark	4	0	0	lfai	0
+open-voice-network				lfai	0
+Open-Model-Initiative	15	36	81	lfai	0
+opea-project	26	736	1132	lfai	0
+onnx	31	21066	40185	lfai	0
+onepanelio	44	730	757	lfai	0
+numpy	33	32404	34831	lfai	0
+numba	51	11059	14050	lfai	0
+nnstreamer	29	790	1039	lfai	0
+nilearn	11	1408	1514	lfai	0
+mysql	24	12316	16213	lfai	0
+mwaskom				lfai	0
+monocle2ai	6	263	287	lfai	0
+mlpack	18	5669	6771	lfai	0
+mlcommons	128	1766	5328	lfai	0
+mindspore-ai	45	4691	5581	lfai	0
+metabase	100	47973	49537	lfai	0
+meta-soul	20	545	579	lfai	0
+MarquezProject	10	2228	2298	lfai	0
+marcotcr				lfai	0
+machine-learning-exchange				lfai	0
+lfai	17	385	541	lfai	0
+Labelbox	34	152	180	lfai	0
+kubernetes	80	123507	204451	lfai	0
+KomputeProject	3	2528	2531	lfai	0
+KomputeFoundation				lfai	0
+kestra-io	211	27155	27399	lfai	0
+keras-team	21	64103	81333	lfai	0
+kedro-org	21	10904	12050	lfai	0
+jupyter	135	15327	42099	lfai	0
+JuliaLang	64	48888	55264	lfai	0
+jolibrain	44	2548	3290	lfai	0
+JohnSnowLabs	22	4138	6399	lfai	0
+jmschrei				lfai	0
+JanusGraph	14	5804	6030	lfai	0
+jalammar				lfai	0
+iterative	127	4182	6024	lfai	0
+iree-org	33	3829	4115	lfai	0
+ipython	28	16730	22298	lfai	0
+IntelAI	1	0	0	lfai	0
+intel	1341	9906	30782	lfai	0
+influxdata	223	31596	54895	lfai	0
+IBM	3911	12497	32162	lfai	0
+i-am-bee	27	3308	5724	lfai	0
+hyperopt	9	7586	9377	lfai	0
+horovod	4	14691	14777	lfai	0
+hill-a				lfai	0
+heartexlabs	0	0	0	lfai	0
+great-expectations	0	0	0	lfai	0
+grafana	585	75175	151396	lfai	0
+googlecolab	14	2564	4456	lfai	0
+getredash	16	28666	29429	lfai	0
+G-Research	113	368	1298	lfai	0
+ForestFlow	2	75	75	lfai	0
+fluent	100	13550	24069	lfai	0
+FederatedAI	23	6078	7927	lfai	0
+feast-dev	28	7109	7331	lfai	0
+fastai	123	28048	74678	lfai	0
+fairlearn	6	2255	2289	lfai	0
+facebook	168	65437	178570	lfai	0
+explosion	79	33702	42572	lfai	0
+EpistasisLab	81	10050	12274	lfai	0
+elyra-ai	16	1993	2192	lfai	0
+elasticdeeplearning	3	176	181	lfai	0
+elastic	928	77193	132211	lfai	0
+eclipse	2	2	3	lfai	0
+dssg	150	1049	2246	lfai	0
+dragonflyoss	30	5937	10875	lfai	0
+dotmesh-io	57	536	563	lfai	0
+doccano	9	10689	11165	lfai	0
+docarray	6	3122	3126	lfai	0
+determined-ai	70	3223	3429	lfai	0
+Delta-ML	2	1607	1607	lfai	0
+delta-io	9	8884	13865	lfai	0
+deepcausality-rs	3	267	267	lfai	0
+data-prep-kit	1	946	946	lfai	0
+dask	52	13857	19236	lfai	0
+dagster-io	68	15765	16865	lfai	0
+d6t	11	947	1496	lfai	0
+d3	54	113145	121067	lfai	0
+cortexlabs	7	8010	8033	lfai	0
+combust	20	1539	1596	lfai	0
+cleverhans-lab	39	6444	6777	lfai	0
+claimed-framework	5	2305	2562	lfai	0
+clab	35	3434	5185	lfai	0
+ckan	80	5064	5758	lfai	0
+cisco	84	7305	16860	lfai	0
+ceph	203	16762	22101	lfai	0
+centerofci				lfai	0
+catboost	5	9005	10423	lfai	0
+carbon-design-system	120	9243	15348	lfai	0
+BorealisAI	67	1364	1896	lfai	0
+bokeh	29	20408	21852	lfai	0
+blue-yonder	32	9257	10128	lfai	0
+bethgelab	53	2966	4348	lfai	0
+azkaban	7	4505	4654	lfai	0
+att	102	604	1332	lfai	0
+artigraph	2	36	36	lfai	0
+Artelnics	2	1194	1194	lfai	0
+armadaproject	13	602	626	lfai	0
+argoproj	37	23268	48560	lfai	0
+apptainer	12	2615	4588	lfai	0
+Angel-ML	12	6784	7170	lfai	0
+amundsen-io	11	4776	5394	lfai	0
+alteryx	142	7659	9947	lfai	0
+alluxio	12	7202	7306	lfai	0
+aksnzhy				lfai	0
+Adlik	16	805	975	lfai	0
+acumos	64	18	54	lfai	0
+accord-net	4	4540	4619	lfai	0
+4paradigm	36	1691	3002	lfai	0
+1chipML	2	43	43	lfai	0
+UKPLab	290	1257	3470	hf-hub	0
+meta-llama	12	59478	131103	hf-hub	0
+autogluon	16	10505	11261	hf-hub	1
+LAION-AI	128	37393	41867	hf-hub	1
+comfyanonymous				hf-hub	0
+RedHatAI				hf-hub	0
+AnswerDotAI	203	6957	22658	hf-hub	0
+ProsusAI	19	2167	2263	hf-hub	0
+mixedbread-ai	44	4284	4779	hf-hub	0
+moonshotai	38	10879	31431	hf-hub	1
+dima806				hf-hub	0
+antirez				hf-hub	0
+Systran	7	23917	24000	hf-hub	0
+cardiffnlp	13	399	1090	hf-hub	0
+EleutherAI	182	13109	33325	hf-hub	1
+Helsinki-NLP	134	853	2448	hf-hub	0
+HuggingFaceTB				hf-hub	0
+Alibaba-NLP	43	19570	22931	hf-hub	0
+NeoQuasar				hf-hub	0
+hmellor				hf-hub	0
+lpiccinelli				hf-hub	0
+emilyalsentzer				hf-hub	0
+llava-hf				hf-hub	0
+HauhauCS				hf-hub	0
+Xenova				hf-hub	0
+QuantTrio				hf-hub	0
+ibm-granite	26	1250	2754	hf-hub	1
+Kijai				hf-hub	0
+mlx-community	4	17	30	hf-hub	0
+stabilityai	0	0	0	hf-hub	0
+Harveenchadha				hf-hub	0
+IDEA-Research	49	17652	37172	hf-hub	0
+MiniMaxAI				hf-hub	0
+kingabzpro				hf-hub	0
+NbAiLab	33	121	208	hf-hub	0
+optimum-intel-internal-testing				hf-hub	0
+comodoro				hf-hub	0
+fixie-ai	68	4464	6021	hf-hub	0
+depth-anything				hf-hub	0
+biohub	3	2799	2804	hf-hub	0
+OpenGVLab	94	10079	27494	hf-hub	0
+Snowflake				hf-hub	0
+gagan3012				hf-hub	0
+hustvl	124	3886	12918	hf-hub	0
+cambridgeltl	78	394	1130	hf-hub	0
+datalab-to	12	36596	70295	hf-hub	0
+rinna				hf-hub	0
+sshleifer				hf-hub	0
+classla	1	0	0	hf-hub	0
+anton-l				hf-hub	0
+Rostlab	57	123	398	hf-hub	0
+black-forest-labs	8	25685	28829	hf-hub	0
+litert-community				hf-hub	0
+infinitejoy	0	0	0	hf-hub	0
+circulus				hf-hub	0
+peft-internal-testing				hf-hub	0
+audeering	50	830	1848	hf-hub	0
+thenlper				hf-hub	0
+boboliu				hf-hub	0
+hugging-quants				hf-hub	0
+CompVis	62	73145	95239	hf-hub	0
+speakleash	46	191	364	hf-hub	0
+alvanlii				hf-hub	0
+DavidAU				hf-hub	0
+ncbi	151	1347	3071	hf-hub	0
+bigscience	4	7	8	hf-hub	0
+jhu-clsp	53	143	284	hf-hub	0
+fastino				hf-hub	0
+casperhansen				hf-hub	0

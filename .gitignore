@@ -1,0 +1,50 @@
+# --- Secrets / credentials ---
+.env
+.env.*
+*.pat
+*token*
+secrets.*
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# --- Data store (DuckDB + Parquet + raw API cache) ---
+# Tracked: code, docs, small curated/derived tables, resume-state manifests.
+# Ignored: bulk collected data and caches (regenerable / large / license-sensitive).
+data/**
+# inputs (third-party snapshots + transcriptions + declarations) and
+# machine-derived tables ARE tracked:
+!data/sources/
+!data/sources/**
+!data/derived/
+!data/derived/**
+data/derived/*.log
+data/derived/branch_samples/
+raw/
+*.duckdb
+*.duckdb.wal
+*.parquet
+
+# Worktrees live OUTSIDE this repo, under ~/devel/<repo>-worktrees/, so no
+# in-repo ignore is needed for them.
+
+# --- OS / editor ---
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# uv / Phase 0 env
+.venv/

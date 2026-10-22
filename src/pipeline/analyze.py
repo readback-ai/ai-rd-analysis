@@ -1,0 +1,382 @@
+"""Stage 4 — HOW METRICS ARE CREATED from census cells (bootstrap CIs).
+
+Reads raw/census-v2/ cells, classifies each PR once via detect.classify_pr,
+turns the classifications into per-repo-period rates, then reports
+equal-weight and contributor-weighted averages per period with bootstrap 95%
+CIs over repos. Detection semantics (markers, reviewer taxonomy, the w8
+event window) all live in pipeline.detect — nothing here re-defines them.
+
+human_review is the reviewer!=author, bot-clean rate (v2_results §11c).
+self_merged is only available in cells carrying mergedBy and is skipped
+(None) elsewhere.
+
+PRs are DEDUPED by number within each (repo, period): the durable store can
+hold overlapping cell generations (full-quarter + sub-window cells, or cells
+pulled under an older quarter definition), and summing them double-counted.
+
+Usage:
+  python -m pipeline.analyze --contributors data/repo_contributors.csv \
+      --bootstrap 2000
+"""
+from __future__ import annotations
+
+import argparse
+import csv
+import re
+import random
+from collections import defaultdict
+from pathlib import Path
+
+from pipeline.detect import MARKERS, classify_pr
+from pipeline.ghx import decode_cell_stem, raw_dir, read_cell
+
+
+def load_cells() -> dict[tuple[str, str], list[dict]]:
+    """(repo, date-range) -> PR nodes from the census-v2 store.
+    Files are visited OLDEST-mtime-first so fresher cells land
+    later in the dict — group_by_period's dedup lets the fresher record
+    win at equal richness (monthly re-collection vs a stale overlapping
+    quarter cell)."""
+    cells: dict[tuple[str, str], list[dict]] = {}
+    for f in sorted(raw_dir("census-v2").glob("*.json"),
+                    key=lambda p: p.stat().st_mtime):
+        nodes = read_cell(f, list)
+        if nodes is None:
+            continue
+        parts = decode_cell_stem(f.stem)
+        if len(parts) != 2:
+            continue
+        cells[(parts[0], parts[1])] = [n for n in nodes if n]
+    return cells
+
+
+def period_of(rng: str, quarters: dict[str, str]) -> str | None:
+    start = rng.split("..")[0]
+    for q, qr in quarters.items():
+        if qr.split("..")[0] <= start <= qr.split("..")[1]:
+            return q
+    return None
+
+
+CENSUSED_QUARTERS = ["Q1-2024", "Q4-2025", "Q1-2026", "Q2-2026"]
+INCREMENTAL_REGISTRY = Path("data/derived/incremental_months.txt")
+
+
+def incremental_months() -> list[str]:
+    """Month tokens collected by monthly_update AFTER the frozen quarters —
+    persisted in a registry so every later analysis (not just the updating
+    invocation) keeps them (external review P1: a September update must not
+    silently drop July)."""
+    if not INCREMENTAL_REGISTRY.is_file():
+        return []
+    return sorted({ln.strip() for ln in
+                   INCREMENTAL_REGISTRY.read_text().splitlines()
+                   if re.fullmatch(r"\d{4}-\d{2}", ln.strip())})
+
+
+def extended_quarters(extra: list[str] | None = None) -> dict[str, str]:
+    """Frozen quarters + registered incremental months (+ any explicit
+    extras). Frozen quarters stay first, so they keep period_of priority."""
+    from pipeline.scan_orgs import QUARTER_RANGES, resolve_period
+    quarters = dict(QUARTER_RANGES)
+    for tok in [*incremental_months(), *(extra or [])]:
+        quarters.setdefault(tok, resolve_period(tok))
+    return quarters
+
+
+def censused_months(quarters: dict[str, str]) -> set[str]:
+    """Months lying inside FULLY censused quarters, plus any explicit
+    YYYY-MM keys (incremental months from monthly_update, passed via
+    analyze --periods). Stray cells from partially-pulled windows
+    (Q3-2025) must not surface as reportable months — ~60-repo coverage
+    is not the population."""
+    out = set()
+    for q in CENSUSED_QUARTERS:
+        if q not in quarters:
+            continue
+        # walk the RANGE rather than assuming m, m+1, m+2 in one year: a
+        # quarter starting in Nov/Dec crosses the year boundary, and a token
+        # like "2025-13" matches no PR's createdAt month
+        start, end = quarters[q].split("..")
+        y, m = int(start[:4]), int(start[5:7])
+        while f"{y}-{m:02d}" <= end[:7]:
+            out.add(f"{y}-{m:02d}")
+            y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    out.update(k for k in quarters if re.fullmatch(r"\d{4}-\d{2}", k))
+    return out
+
+
+# the monthly figures' continuous right-panel domain: it starts with the
+# frozen Q4-2025..Q2-2026 window and extends month by month as the
+# incremental registry grows (figstyle.WINDOW is the frozen default)
+FIGURE_WINDOW_START = "2025-10"
+FIGURE_WINDOW_END = "2026-06"
+
+
+def month_window(through: str | None = None) -> list[str]:
+    """Contiguous FIGURE_WINDOW_START..`through` month tokens for the
+    monthly figures, restricted to censused months (frozen quarters +
+    the incremental registry). `through` defaults to FIGURE_WINDOW_END —
+    the last month of the frozen quarters — so the default window equals
+    the frozen figstyle.WINDOW list. Raises ValueError on a malformed or
+    un-censused `through` (collect the month with monthly_update first)
+    and on a registry gap: the figures place months positionally, so a
+    hole in the window would silently misalign the x axis."""
+    through = through or FIGURE_WINDOW_END
+    if not re.fullmatch(r"\d{4}-\d{2}", through):
+        raise ValueError(f"malformed month token {through!r} (want YYYY-MM)")
+    if through < FIGURE_WINDOW_START:
+        raise ValueError(f"{through} predates the figure window start "
+                         f"{FIGURE_WINDOW_START}")
+    avail = sorted(m for m in censused_months(extended_quarters())
+                   if m >= FIGURE_WINDOW_START)
+    if through not in avail:
+        raise ValueError(
+            f"{through} is not censused (last censused month: {avail[-1]}); "
+            f"collect it with scripts/monthly_update.py first")
+    window = [m for m in avail if m <= through]
+    for a, b in zip(window, window[1:]):
+        y, m = int(a[:4]), int(a[5:7])
+        if b != (f"{y + 1}-01" if m == 12 else f"{y}-{m + 1:02d}"):
+            raise ValueError(f"censused months have a gap between {a} and "
+                             f"{b}; the month axis needs a contiguous window")
+    return window
+
+
+def month_of(pr: dict) -> str | None:
+    m = (pr.get("createdAt") or "")[:7]
+    return m or None
+
+
+def group_by_period(cells: dict[tuple[str, str], list[dict]],
+                    quarters: dict[str, str],
+                    granularity: str = "quarter") -> dict[tuple[str, str], list[dict]]:
+    """(repo, period) -> PRs, deduped by PR number across cell generations.
+    granularity='month' buckets PRs by createdAt month (every PR's createdAt
+    lies inside its cell's range, so month buckets are exact re-partitions of
+    the sampled quarters — no recollection needed).
+    When the same PR appears in overlapping cells (legacy full-quarter +
+    census-v2 sub-window), the RICHER record wins: a node carrying
+    headRefName (the v2 query marker field) replaces one that lacks it,
+    regardless of iteration order — otherwise a stale legacy record silently
+    strips branch attribution and mergedBy. At EQUAL
+    richness the LATER-loaded record wins; load_cells feeds cells in mtime
+    order, so a monthly re-collection supersedes a stale overlapping
+    quarter cell for the same PR."""
+    grouped: dict[tuple[str, str], list[dict]] = defaultdict(list)
+    # num -> POSITION in grouped[key], not the record itself. Duplicates are
+    # the designed-for case (full-quarter + sub-window + re-collected month
+    # cells all carry the same PRs), so locating a superseded record by
+    # scanning the list would make dedup O(n^2) in them. Positions stay
+    # valid because entries are only ever appended or overwritten in place.
+    pos: dict[tuple[str, str], dict[int, int]] = defaultdict(dict)
+    for (repo, rng), nodes in cells.items():
+        quarter = period_of(rng, quarters)
+        if not quarter:
+            continue
+        ok_months = censused_months(quarters) if granularity == "month" else None
+        for pr in nodes:
+            per = quarter if granularity == "quarter" else month_of(pr)
+            if per is None or (ok_months is not None and per not in ok_months):
+                continue
+            key = (repo, per)
+            num = pr.get("number")
+            if num is None:
+                grouped[key].append(pr)
+                continue
+            at = pos[key].get(num)
+            if at is None:
+                pos[key][num] = len(grouped[key])
+                grouped[key].append(pr)
+            elif ("headRefName" in pr) >= ("headRefName" in grouped[key][at]):
+                # richer wins; at equal richness, fresher (later-loaded) wins
+                grouped[key][at] = pr
+    return grouped
+
+
+def pr_metrics(pr: dict, markers: dict) -> dict:
+    c = classify_pr(pr, markers)
+    return {
+        "ai_code": bool(c.marker_tools),
+        "ai_involved": c.ai_involved,          # all 3 layers (needs headRefName)
+        # FROZEN CENSORING RULE: outcomes at 8 weeks post-creation, defined
+        # only on w8-mature PRs (immature -> None -> skipped)
+        "merged": c.merged if c.w8_mature else None,
+        "rejected_w8": c.rejected if c.w8_mature else None,
+        "limbo_w8": (not c.merged and not c.rejected) if c.w8_mature else None,
+        # review columns follow the SAME maturity gate as fates: an
+        # immature PR's review window is still open, so its flags are
+        # provisional undercounts until w8 (None -> skipped)
+        "human_review": c.human_reviewed if c.w8_mature else None,
+        "ai_review": c.ai_reviewed if c.w8_mature else None,
+        "other_bot_review": c.other_bot_reviewed if c.w8_mature else None,
+        "no_review": (not (c.human_reviewed or c.ai_reviewed
+                           or c.other_bot_reviewed))
+                     if c.w8_mature else None,
+        "insider": c.insider,
+        # None when mergedBy is absent on the record OR the PR is still
+        # w8-immature (an open PR can still merge) -> skipped by rate calc
+        "self_merged": c.self_merged if c.w8_mature else None,
+        # merged-conditioned rates (None on unmerged PRs -> conditioning by
+        # skip): unmerged PRs are implicitly reviewed-and-rejected, so
+        # reviewer coverage OF WHAT SHIPS is its own question (METRICS §2b)
+        "m_hum_rev": c.human_reviewed if (c.merged and c.w8_mature) else None,
+        "m_ai_rev": c.ai_reviewed if (c.merged and c.w8_mature) else None,
+        "m_no_rev": (not c.human_reviewed and not c.ai_reviewed
+                     and not c.other_bot_reviewed)
+                    if (c.merged and c.w8_mature) else None,
+    }
+
+
+METRICS = ["ai_code", "ai_involved", "merged", "rejected_w8", "limbo_w8",
+           "human_review", "ai_review", "other_bot_review",
+           "no_review", "insider", "self_merged",
+           "m_hum_rev", "m_ai_rev", "m_no_rev"]
+
+
+def weighted_mean(pairs: list[tuple[float, float]]) -> float:
+    tot = sum(w for _, w in pairs)
+    return sum(v * w for v, w in pairs) / tot if tot else float("nan")
+
+
+SEED = 20260630
+
+
+def _stream(key: str) -> random.Random:
+    """The draw stream for ONE CI cell, derived from SEED and the cell's key.
+
+    The key is hashed to an integer seed explicitly rather than passed to
+    Random() as a string. String seeding works and is stable across runs, but
+    the string -> internal state mapping is a CPython implementation detail;
+    deriving the seed here makes the key -> stream relation part of this
+    module's contract instead."""
+    import hashlib
+    digest = hashlib.sha256(f"{SEED}|{key}".encode()).digest()[:8]
+    return random.Random(int.from_bytes(digest, "big"))
+
+
+def _percentile(sorted_vals: list[float], p: float) -> float:
+    """Linear-interpolated percentile of an ASCENDING list (the method numpy
+    and R type-7 use)."""
+    if not sorted_vals:
+        return float("nan")
+    k = p * (len(sorted_vals) - 1)
+    lo, frac = int(k), k - int(k)
+    if lo + 1 >= len(sorted_vals):
+        return sorted_vals[-1]
+    return sorted_vals[lo] + (sorted_vals[lo + 1] - sorted_vals[lo]) * frac
+
+
+def bootstrap_ci(pairs: list[tuple[float, float]], n: int = 2000, *,
+                 key: str) -> tuple[float, float]:
+    """Percentile bootstrap 95% CI over the resampled units in `pairs`.
+
+    `key` identifies the CI cell (table / period / metric) and is REQUIRED:
+    each cell draws from its own stream, so a CI is reproducible in isolation
+    and independent of how many other CIs the run computed first. Keys must be
+    unique per reported number — reusing one makes two cells share draws."""
+    if len(pairs) < 2:
+        return (float("nan"), float("nan"))
+    rng = _stream(key)          # ONE stream for all n draws of this cell
+    stats = sorted(weighted_mean(rng.choices(pairs, k=len(pairs)))
+                   for _ in range(n))
+    return _percentile(stats, 0.025), _percentile(stats, 0.975)
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--contributors", default="data/repo_contributors.csv")
+    ap.add_argument("--repos", default=None,
+                    help="optional repo-list file: restrict metrics to this "
+                         "population (e.g. v2.1 rebaseline)")
+    ap.add_argument("--granularity", choices=["quarter", "month"],
+                    default="quarter")
+    ap.add_argument("--min-prs", type=int, default=None,
+                    help="repo floor per period; default 5/quarter, 2/month "
+                         "(comparable thresholds — METRICS §3)")
+    ap.add_argument("--bootstrap", type=int, default=2000)
+    ap.add_argument("--periods", nargs="*", default=[],
+                    help="extra YYYY-MM tokens beyond the frozen quarters "
+                         "(incremental months from monthly_update)")
+    a = ap.parse_args()
+    markers = MARKERS
+    # Repo weights for the contributor-weighted rows: core committers
+    # active in the study window (repo_contributors_window.csv). Missing
+    # repos default to 1.0 and are WARNed per period below.
+    weights: dict[str, float] = {}
+    if Path(a.contributors).is_file():
+        with open(a.contributors) as fh:
+            for row in csv.DictReader(fh):
+                val = row.get("core_contributors_window",
+                              row.get("core_contributors"))
+                try:
+                    weights[row["repo"]] = max(float(val), 1.0)
+                except (TypeError, ValueError):
+                    pass
+
+    if a.min_prs is None:
+        a.min_prs = 5 if a.granularity == "quarter" else 2
+    quarters = extended_quarters(a.periods)
+    grouped = group_by_period(load_cells(), quarters, a.granularity)
+    if not grouped:
+        raise SystemExit("no census cells found in $AIRD_DATA_DIR — the "
+                         "external store is required (docs/METHODS.md §5); "
+                         "refusing to print an empty report")
+    if a.repos:
+        keep = {ln.split("\t")[0].strip() for ln in Path(a.repos).read_text().splitlines()
+                if ln.strip() and not ln.startswith("#")}
+        grouped = {k: v for k, v in grouped.items() if k[0] in keep}
+
+    extra = sorted(set(incremental_months()) | set(a.periods))
+    periods = (CENSUSED_QUARTERS + extra) \
+        if a.granularity == "quarter" else sorted({p for (_, p) in grouped})
+    print(f"{'period':9}{'weighting':16}{'repos':>6}" +
+          "".join(f"{m:>18}" for m in METRICS))
+    for per in periods:
+        # Per-repo rates: classify each PR once, then each metric is the
+        # share of PRs with the property among the PRs where it is
+        # DEFINED — None values (w8-immature fates/reviews, absent
+        # mergedBy, unmet m_* conditioning) shrink that metric's
+        # denominator instead of biasing it toward 0.
+        rows = []
+        unweighted = set()
+        for (repo, p), prs in grouped.items():
+            if p != per or len(prs) < a.min_prs:
+                continue
+            if repo not in weights:
+                unweighted.add(repo)
+            ms = [pr_metrics(pr, markers) for pr in prs]
+            rates = {}
+            for m in METRICS:
+                vals = [x[m] for x in ms if x[m] is not None]
+                rates[m] = sum(vals) / len(vals) if vals else None
+            rows.append((repo, rates))
+        if not rows:
+            continue
+        if unweighted:
+            print(f"WARN {per}: {len(unweighted)} qualifying repos lack "
+                  f"contributor weights (default 1.0) — e.g. "
+                  f"{sorted(unweighted)[:3]}", flush=True)
+        # Two aggregation rows per period: the weighted mean of per-repo
+        # rates (repo = unit, so a mega-repo cannot dominate) under equal
+        # weights, then under contributor weights; the bootstrap CI
+        # resamples REPOS (superpopulation dispersion — METHODS §4).
+        for label, wfn in (("equal-weight", lambda r: 1.0),
+                           ("contrib-weight", lambda r: weights.get(r, 1.0))):
+            line = f"{per:9}{label:16}{len(rows):>6}"
+            for m in METRICS:
+                pairs = [(rates[m], wfn(repo)) for repo, rates in rows
+                         if rates[m] is not None]
+                if not pairs:
+                    line += f"  {'n/a':>17}"
+                    continue
+                mean = weighted_mean(pairs)
+                lo, hi = bootstrap_ci(
+                    pairs, a.bootstrap,
+                    key=f"analyze|{a.granularity}|{per}|{label}|{m}")
+                line += f"  {100*mean:5.1f} [{100*lo:4.1f},{100*hi:4.1f}]"
+            print(line)
+
+
+if __name__ == "__main__":
+    main()
